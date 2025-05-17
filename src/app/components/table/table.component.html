@@ -65,11 +65,27 @@
     <tr>
       @for (col of columns; track $index) {
         <td>
-          <ng-container *ngIf="col.type !== 'custom'; else customBlock">
-            {{ getValue(rowData, col.field!) }}
-          </ng-container>
+          @if (col.type !== 'custom') {
+            @switch (col.pipe) {
+              @case ('date') {
+                {{ getValue(rowData, col.field!) | date: col.pipeArgs || [] }}
+              }
+              @case ('currency') {
+                {{
+                  getValue(rowData, col.field!)
+                    | currency: col.pipeArgs[0] : col.pipeArgs[1]
+                }}
+              }
 
-          <ng-template #customBlock>
+              @case ('number') {
+                {{ getValue(rowData, col.field!) | number: col.pipeArgs || [] }}
+              }
+
+              @default {
+                {{ getValue(rowData, col.field!) }}
+              }
+            }
+          } @else {
             <ng-container
               *ngTemplateOutlet="
                 col.customTemplate === 'actions'
@@ -78,7 +94,7 @@
                 context: { $implicit: rowData }
               ">
             </ng-container>
-          </ng-template>
+          }
         </td>
       }
     </tr>

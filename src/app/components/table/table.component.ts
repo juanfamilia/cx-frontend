@@ -99,4 +99,8 @@ export class TableComponent {
   getValue(obj: any, path: string): any {
     return path.split('.').reduce((acc, part) => acc?.[part], obj);
   }
+
+  getPipeArg(col: TableColumn, index: number): string | boolean | undefined {
+    return col.pipeArgs?.[index];
+  }
 }

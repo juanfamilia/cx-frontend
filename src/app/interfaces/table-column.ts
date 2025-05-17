@@ -2,9 +2,10 @@
 export interface TableColumn {
   field?: string;
   header: string;
-  type?: 'text' | 'date' | 'number' | 'select' | 'custom';
-  filter?: boolean;
   sortable?: boolean;
+  type?: 'text' | 'select' | 'custom';
   options?: any[];
   customTemplate?: string;
+  pipe?: string;
+  pipeArgs?: any[];
 }
