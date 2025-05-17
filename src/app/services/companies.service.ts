@@ -13,4 +13,8 @@ export class CompaniesService {
   getAll(): Observable<Company[]> {
     return this.http.get<Company[]>(environment.apiUrl + 'company/');
   }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(environment.apiUrl + 'company/' + id);
+  }
 }
