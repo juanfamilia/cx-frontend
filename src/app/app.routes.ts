@@ -23,6 +23,18 @@ export const routes: Routes = [
     data: { title: 'Usuarios' },
   },
   {
+    path: 'companies',
+    loadChildren: () =>
+      import('./pages/companies/companies.routes').then(r => r.companiesRoutes),
+    data: { title: 'Empresas' },
+  },
+  {
+    path: 'payments',
+    loadChildren: () =>
+      import('./pages/payments/payments.routes').then(r => r.paymentsRoutes),
+    data: { title: 'Pagos' },
+  },
+  {
     path: 'configuration',
     loadChildren: () =>
       import('./pages/configuration/configuration.routes').then(

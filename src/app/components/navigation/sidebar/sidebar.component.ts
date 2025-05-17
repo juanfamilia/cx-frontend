@@ -13,7 +13,11 @@ import {
   heroCog6Tooth,
   heroUsers,
 } from '@ng-icons/heroicons/outline';
-import { lucideHouse } from '@ng-icons/lucide';
+import {
+  lucideBanknote,
+  lucideBriefcaseBusiness,
+  lucideHouse,
+} from '@ng-icons/lucide';
 import { AuthService } from '@services/auth.service';
 import { SidebarService } from '@services/sidebar.service';
 import { RouteData } from 'src/app/types/routeData';
@@ -31,6 +35,8 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       heroUsers,
       heroCog6Tooth,
       heroArrowRightOnRectangle,
+      lucideBriefcaseBusiness,
+      lucideBanknote,
     }),
   ],
 })
@@ -53,6 +59,18 @@ export class SidebarComponent {
       route: '/users',
       icon: 'heroUsers',
       roles: [0, 1],
+    },
+    {
+      title: 'Empresas',
+      route: '/companies',
+      icon: 'lucideBriefcaseBusiness',
+      roles: [0],
+    },
+    {
+      title: 'Pagos',
+      route: '/payments',
+      icon: 'lucideBanknote',
+      roles: [0],
     },
     {
       title: 'Configuración',
