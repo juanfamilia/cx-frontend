@@ -13,4 +13,8 @@ export class PaymentsService {
   getAll(): Observable<Payment[]> {
     return this.http.get<Payment[]>(environment.apiUrl + 'payment/');
   }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(environment.apiUrl + 'payment/' + id);
+  }
 }
