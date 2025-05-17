@@ -22,6 +22,7 @@ import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { Table, TableModule, TablePageEvent } from 'primeng/table';
+import { StateNamePipe } from '../../pipes/state-name.pipe';
 
 @Component({
   selector: 'app-table',
@@ -37,6 +38,7 @@ import { Table, TableModule, TablePageEvent } from 'primeng/table';
     InputGroup,
     InputGroupAddon,
     FloatLabel,
+    StateNamePipe,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css',

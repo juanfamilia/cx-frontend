@@ -81,6 +81,10 @@
                 {{ getValue(rowData, col.field!) | number: col.pipeArgs || [] }}
               }
 
+              @case ('state') {
+                {{ getValue(rowData, col.field!) | stateName }}
+              }
+
               @default {
                 {{ getValue(rowData, col.field!) }}
               }
@@ -88,9 +92,7 @@
           } @else {
             <ng-container
               *ngTemplateOutlet="
-                col.customTemplate === 'actions'
-                  ? (actionTemplate ?? null)
-                  : null;
+                actionTemplate ?? null;
                 context: { $implicit: rowData }
               ">
             </ng-container>
