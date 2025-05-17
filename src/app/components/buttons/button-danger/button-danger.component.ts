@@ -10,10 +10,11 @@ import { heroExclamationCircle } from '@ng-icons/heroicons/outline';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialog } from 'primeng/confirmdialog';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-button-danger',
-  imports: [NgIcon, ButtonModule, ConfirmDialog],
+  imports: [NgIcon, ButtonModule, ConfirmDialog, TooltipModule],
   templateUrl: './button-danger.component.html',
   styleUrl: './button-danger.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,13 +22,14 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
   viewProviders: [provideIcons({ heroExclamationCircle })],
 })
 export class ButtonDangerComponent {
-  title = input.required<string>();
+  title = input<string>();
   header = input<string>('¡Cuidado!');
   message = input.required<string>();
   icon = input<string>('');
   buttonType = input<string>('button');
   disabled = input<boolean>(false);
   event = output<boolean>();
+  tooltip = input<string>('');
 
   private confirmationService = inject(ConfirmationService);
 
