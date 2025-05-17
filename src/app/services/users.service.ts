@@ -11,6 +11,6 @@ export class UsersService {
   private http = inject(HttpClient);
 
   getAll(): Observable<User[]> {
-    return this.http.get<User[]>(environment.apiUrl + 'user');
+    return this.http.get<User[]>(environment.apiUrl + 'user/');
   }
 }

@@ -5,13 +5,14 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { PageHeaderComponent } from '@components/page-header/page-header.component';
 import { TableComponent } from '@components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
 import { UsersService } from '@services/users.service';
 
 @Component({
   selector: 'app-user-dashboard',
-  imports: [TableComponent],
+  imports: [TableComponent, PageHeaderComponent],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
