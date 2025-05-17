@@ -10,6 +10,13 @@ export class StateNamePipe implements PipeTransform {
     const state = State.getStatesOfCountry(countryCode).find(
       s => s.isoCode === isoCode
     );
-    return state?.name || isoCode;
+
+    return this.limpiarNombreEstado(state?.name || isoCode);
+  }
+
+  limpiarNombreEstado(nombre: string): string {
+    return nombre
+      .replace(/\b(Province|State|Department|Region)\b/gi, '')
+      .trim();
   }
 }
