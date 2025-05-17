@@ -1,0 +1,24 @@
+<div class="grid grid-cols-1 gap-5 md:grid-cols-2" [formGroup]="formGroup()">
+  <app-input-select
+    id="state"
+    label="Estado"
+    icon="lucideMapPin"
+    [options]="states()"
+    [clear]="false"
+    [filter]="true"
+    [errorMessage]="false"
+    (selectChange)="onStateChange($event)"
+    [formControlName]="controlNameState()" />
+
+  @if (selectedState()) {
+    <app-input-select
+      id="city"
+      label="Ciudad"
+      icon="lucideMapPin"
+      [options]="cities()"
+      [clear]="false"
+      [filter]="true"
+      [errorMessage]="false"
+      [formControlName]="controlNameCity()" />
+  }
+</div>

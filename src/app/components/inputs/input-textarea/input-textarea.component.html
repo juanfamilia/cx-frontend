@@ -1,0 +1,36 @@
+<div>
+  <p-inputgroup>
+    @if (icon()) {
+      <p-inputgroup-addon>
+        <ng-icon [name]="icon()" size="20" class="size-5 text-gray-500" />
+      </p-inputgroup-addon>
+    }
+    <p-floatlabel variant="on">
+      <textarea
+        pTextarea
+        [id]="id()"
+        [(ngModel)]="value"
+        (input)="onInput($event)"
+        (blur)="onTouched()"
+        [rows]="rows()"
+        [disabled]="disabled"
+        [autoResize]="autoResize()"
+        [ngClass]="{
+          'ng-dirty ng-invalid':
+            ngControl.touched && ngControl.invalid && ngControl.dirty,
+        }"
+        class="w-full"></textarea>
+      <label class="font-normal" for="{{ id() }}">{{ label() }}</label>
+    </p-floatlabel>
+  </p-inputgroup>
+
+  @if (ErrorMessage()) {
+    @if (ngControl.touched && ngControl.invalid && ngControl.dirty) {
+      <p-message styleClass="mt-2" severity="error">
+        @if (ngControl.errors?.['required']) {
+          <span>Este campo es obligatorio.</span>
+        }
+      </p-message>
+    }
+  }
+</div>

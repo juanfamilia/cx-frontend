@@ -1,0 +1,22 @@
+<p-breadcrumb
+  styleClass="bg-gray-50 dark:bg-bunker-950 max-w-full mb-4"
+  [model]="items()">
+  <ng-template #item let-item>
+    @if (item.route) {
+      <ng-container>
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="font-semibold text-gray-200"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="p-breadcrumb-item-link text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          @if (item.icon) {
+            <ng-icon [name]="item.icon" size="16" />
+          }
+          @if (item.label) {
+            <span class="">{{ item.label }}</span>
+          }
+        </a>
+      </ng-container>
+    }
+  </ng-template>
+</p-breadcrumb>

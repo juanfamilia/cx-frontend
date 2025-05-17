@@ -1,0 +1,14 @@
+<section>
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <app-page-header
+      title="Inicio"
+      [description]="
+        (currentUser().gender === 'male' ? 'Bienvenido, ' : 'Bienvenida, ') +
+        currentUser().first_name +
+        ' ' +
+        currentUser().last_name
+      " />
+  </div>
+  <!-- Cards -->
+</section>

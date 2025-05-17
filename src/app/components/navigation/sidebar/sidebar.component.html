@@ -1,0 +1,43 @@
+<aside
+  class="dark:bg-bunker-900/50 dark:border-bunker-800/30 sticky top-0 hidden h-screen flex-col justify-between border-r border-gray-200 bg-white py-4 sm:flex">
+  <div
+    [ngClass]="isCollapsed() ? 'w-20 items-start' : 'w-58 items-start'"
+    class="flex flex-col overflow-hidden px-4 transition-all duration-200 ease-in-out">
+    <!-- Logo -->
+    <div class="mx-1 mt-1 mb-3 flex w-fit items-center gap-3">
+      <h2
+        class="bg-primary-400 rounded-lg px-3 py-2 text-center font-semibold text-white">
+        <!-- TODO: Logo -->
+        CX
+      </h2>
+      @if (!isCollapsed()) {
+        <h2 class="w-20 text-xl font-semibold text-gray-700 dark:text-gray-300">
+          Siete CX
+        </h2>
+      }
+    </div>
+    <!-- Navigation -->
+    <nav class="my-2 min-w-full">
+      <ul class="flex flex-col space-y-2">
+        @for (route of routes; track $index) {
+          @if (route.roles.includes(currentUser().role)) {
+            <app-nav-link [navLinkData]="route" [showTitle]="!isCollapsed()" />
+          }
+        }
+      </ul>
+    </nav>
+  </div>
+  <!-- Logout -->
+  <div
+    [ngClass]="isCollapsed() ? 'justify-center' : 'ml-7 justify-start'"
+    class="dark:text-bunker-400 flex items-start text-gray-700">
+    <button
+      (click)="logout()"
+      class="flex items-start space-x-3 transition-all duration-200 ease-in-out hover:cursor-pointer hover:text-red-600 dark:hover:text-red-500">
+      <ng-icon name="heroArrowRightOnRectangle" size="20" strokeWidth="2" />
+      @if (!isCollapsed) {
+        <span>Logout</span>
+      }
+    </button>
+  </div>
+</aside>

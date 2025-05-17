@@ -1,0 +1,92 @@
+<p-table
+  #dt
+  [value]="data()"
+  [columns]="columnsInput()"
+  [rows]="10"
+  [rowHover]="true"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  [loading]="loading()"
+  [paginator]="true"
+  (onFilter)="onFilter($event)"
+  (onPage)="onPageChange($event)"
+  [globalFilterFields]="globalFilterFields">
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <p-button label="Limpiar" [outlined]="true" (click)="clear()">
+        <ng-icon name="lucideFilterX" size="1.2em" />
+      </p-button>
+
+      <div class="flex items-center gap-2">
+        <p-inputgroup class="w-fit">
+          <p-inputgroup-addon>
+            <ng-icon
+              name="lucideSearch"
+              size="20"
+              class="size-5 text-gray-500" />
+          </p-inputgroup-addon>
+          <p-floatlabel variant="on">
+            <input
+              id="search"
+              [(ngModel)]="searchValue"
+              pInputText
+              type="text"
+              (input)="onSearch($event)"
+              class="py-2" />
+            <label class="font-normal" for="search">Buscar</label>
+          </p-floatlabel>
+        </p-inputgroup>
+        <p-button
+          label="Export"
+          severity="secondary"
+          [outlined]="true"
+          (click)="exportCSV()">
+          <ng-icon name="lucideDownload" size="1.2em" />
+        </p-button>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #header let-columns>
+    <tr>
+      @for (col of columns; track $index) {
+        <th [pSortableColumn]="col.sortable ? col.field : undefined">
+          <div class="flex items-center justify-between">
+            {{ col.header }}
+            @if (col.sortable) {
+              <p-sortIcon [field]="col.field" />
+            }
+          </div>
+        </th>
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-rowData let-columns="columns">
+    <tr>
+      @for (col of columns; track $index) {
+        <td>
+          <ng-container *ngIf="col.type !== 'custom'; else customBlock">
+            {{ getValue(rowData, col.field!) }}
+          </ng-container>
+
+          <ng-template #customBlock>
+            <ng-container
+              *ngTemplateOutlet="
+                col.customTemplate === 'actions'
+                  ? (actionTemplate ?? null)
+                  : null;
+                context: { $implicit: rowData }
+              ">
+            </ng-container>
+          </ng-template>
+        </td>
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template #emptymessage>
+    <tr>
+      <td [attr.colspan]="columnsInput().length">No data found.</td>
+    </tr>
+  </ng-template>
+</p-table>

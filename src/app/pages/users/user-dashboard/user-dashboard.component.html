@@ -1,0 +1,8 @@
+<app-table
+  [data]="usersResource.value() || []"
+  [columnsInput]="columns()"
+  [loading]="usersResource.isLoading()">
+  <ng-template #tableActionTemplate let-user>
+    <button>Editar</button>
+  </ng-template>
+</app-table>

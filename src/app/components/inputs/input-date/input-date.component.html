@@ -1,0 +1,42 @@
+<div>
+  <p-inputgroup>
+    @if (icon()) {
+      <p-inputgroup-addon>
+        <ng-icon [name]="icon()" size="20" class="size-5 text-gray-500" />
+      </p-inputgroup-addon>
+    }
+    <p-floatlabel variant="on">
+      <p-date-picker
+        appendTo="body"
+        [inputId]="id()"
+        [(ngModel)]="value"
+        (onSelect)="onSelect(value)"
+        (onInput)="onSelect(value)"
+        (onBlur)="onTouched()"
+        dateFormat="dd/mm/yy"
+        [hourFormat]="'24'"
+        [showTime]="showTime()"
+        [showButtonBar]="true"
+        (onClearClick)="onSelect(value)"
+        [disabled]="disabled"
+        [ngClass]="{
+          'ng-dirty ng-invalid':
+            ngControl.touched && ngControl.invalid && ngControl.dirty,
+        }"
+        class="w-full" />
+      <label class="p-datepicker-label font-normal" for="{{ id() }}">
+        {{ label() }}
+      </label>
+    </p-floatlabel>
+  </p-inputgroup>
+
+  @if (ErrorMessage()) {
+    @if (ngControl.touched && ngControl.invalid && ngControl.dirty) {
+      <p-message styleClass="mt-2" severity="error">
+        @if (ngControl.errors?.['required']) {
+          <span>Este campo es obligatorio.</span>
+        }
+      </p-message>
+    }
+  }
+</div>

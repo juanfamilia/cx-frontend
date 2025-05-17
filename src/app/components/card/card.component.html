@@ -1,0 +1,20 @@
+<div
+  class="dark:bg-bunker-900 dark:border-bright-gray-950 rounded-lg border border-gray-200 bg-white p-6 shadow-xs">
+  <div class="flex w-full flex-col space-y-3">
+    <!-- Header -->
+    <div
+      class="flex items-center gap-2"
+      [ngClass]="iconColor() ? iconColor() : 'text-gray-500'">
+      @if (icon()) {
+        <ng-icon [name]="icon()" class="mt-1 text-xl" />
+      }
+      <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300">
+        {{ title() }}
+      </h2>
+    </div>
+    <!-- Body -->
+    <div class="flex w-full flex-col justify-between gap-3 lg:flex-row">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

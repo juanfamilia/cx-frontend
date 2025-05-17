@@ -1,0 +1,43 @@
+<p-confirmdialog #cd>
+  <ng-template
+    #headless
+    let-message
+    let-onAccept="onAccept"
+    let-onReject="onReject">
+    <div
+      class="bg-surface-0 dark:bg-surface-900 flex flex-col items-center rounded p-8">
+      <div
+        class="text-primary-contrast -mt-20 inline-flex h-24 w-24 items-center justify-center rounded-full bg-red-500">
+        <ng-icon name="heroExclamationCircle" size="4rem" />
+      </div>
+      <span class="mt-6 mb-2 block text-2xl font-bold">{{
+        message.header
+      }}</span>
+      <p class="mb-0">{{ message.message }}</p>
+      <div class="mt-6 flex items-center gap-2">
+        <p-button
+          label="Cancelar"
+          [outlined]="true"
+          severity="secondary"
+          (onClick)="onReject()"
+          styleClass="w-32"></p-button>
+        <p-button
+          label="Eliminar"
+          severity="danger"
+          (onClick)="onAccept()"
+          styleClass="w-32"></p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmdialog>
+
+<button
+  [type]="buttonType()"
+  (click)="confirmEvent()"
+  class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-red-500 bg-white px-4 py-2.5 text-sm font-medium text-red-600 transition-all duration-200 ease-in-out hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:bg-gray-300/90 dark:bg-transparent dark:text-red-500"
+  [disabled]="disabled()">
+  @if (icon()) {
+    <ng-icon [name]="icon()" size="20" />
+  }
+  {{ title() }}
+</button>

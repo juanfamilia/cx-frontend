@@ -1,0 +1,7 @@
+<p-paginator
+  styleClass="bg-transparent"
+  (onPageChange)="onPageChange($event)"
+  [first]="pagination()?.first || 1"
+  [rows]="pagination()?.rows || 10"
+  [totalRecords]="pagination()?.total || 0"
+  [rowsPerPageOptions]="[10, 15, 20]" />

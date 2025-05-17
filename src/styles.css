@@ -1,0 +1,119 @@
+@import 'tailwindcss';
+@import 'tailwindcss-primeui';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-bunker-50: #f6f7f9;
+  --color-bunker-100: #ebedf3;
+  --color-bunker-200: #d3d8e4;
+  --color-bunker-300: #adb7cc;
+  --color-bunker-400: #8090b0;
+  --color-bunker-500: #607397;
+  --color-bunker-600: #4c5b7d;
+  --color-bunker-700: #3e4a66;
+  --color-bunker-800: #364056;
+  --color-bunker-900: #1f2128;
+  --color-bunker-950: #101218;
+
+  --color-bright-gray-50: #f6f7f9;
+  --color-bright-gray-100: #ededf1;
+  --color-bright-gray-200: #d6d8e1;
+  --color-bright-gray-300: #b2b7c7;
+  --color-bright-gray-400: #8992a7;
+  --color-bright-gray-500: #6a748d;
+  --color-bright-gray-600: #555c74;
+  --color-bright-gray-700: #454b5f;
+  --color-bright-gray-800: #3f4454;
+  --color-bright-gray-900: #353845;
+  --color-bright-gray-950: #23252e;
+}
+
+html {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.p-progressspinner-circle {
+  stroke: var(--color-primary-500);
+  animation: normal 1s linear infinite;
+}
+
+.p-inputgroup .p-inputtext,
+.p-inputgroup .p-inputwrapper {
+  width: 100%;
+}
+
+.p-floatlabel > .p-inputwrapper-focus {
+  z-index: 1 !important;
+}
+
+p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-inputwrapper-filled.ng-touched {
+  z-index: 0 !important;
+}
+
+p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-inputwrapper-filled.ng-touched.p-select-open {
+  z-index: 100 !important;
+}
+
+.p-password-toggle-mask-icon {
+  z-index: 1 !important;
+}
+
+.p-inputtext {
+  border-radius: 0px 6px 6px 0px !important;
+}
+
+.p-select-clear-icon {
+  margin: -0.5rem !important;
+}
+
+.p-breadcrumb {
+  padding: 0 !important;
+}
+
+.p-tablist-active-bar {
+  display: none !important;
+}
+
+.p-tablist-tab-list {
+  position: relative;
+  display: flex;
+  background: none;
+  border-style: solid;
+  border-color: none;
+}
+
+.p-toast-detail {
+  font-weight: 400 !important;
+}
+
+.p-toast-message-text {
+  gap: 0px !important;
+}
+
+.p-datatable-table {
+  border-spacing: 0;
+  border-collapse: separate;
+  width: 100%;
+  overflow: auto;
+}
+
+.p-datatable-table-container {
+  overflow: auto !important;
+}
+
+.p-datatable-header {
+  @apply dark:bg-bunker-900 dark:border-bright-gray-950 my-5 rounded-lg border border-gray-200 bg-white shadow-xs;
+}
+
+.p-datatable-table-container {
+  @apply rounded-t-lg shadow-xs;
+}
+
+.p-datatable-thead > tr > th {
+  @apply dark:bg-bunker-900 dark:hover:bg-bunker-100/10 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:text-gray-300;
+}
+
+.p-paginator {
+  @apply rounded-t-none rounded-b-lg;
+}
