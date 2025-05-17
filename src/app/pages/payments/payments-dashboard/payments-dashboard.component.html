@@ -1,0 +1,11 @@
+<app-page-header
+  title="Pagos"
+  description="Modulo de administración de pagos" />
+<app-table
+  [data]="paymentsResource.value() || []"
+  [columnsInput]="columns()"
+  [loading]="paymentsResource.isLoading()">
+  <ng-template #tableActionTemplate let-company>
+    <button>Editar</button>
+  </ng-template>
+</app-table>
