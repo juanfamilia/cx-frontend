@@ -13,4 +13,8 @@ export class UsersService {
   getAll(): Observable<User[]> {
     return this.http.get<User[]>(environment.apiUrl + 'user/');
   }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(environment.apiUrl + 'user/' + id);
+  }
 }
