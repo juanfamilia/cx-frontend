@@ -68,8 +68,8 @@ export class LoginComponent implements OnInit {
           this.isLoading.set(false);
           this.toastService.showToast(
             'error',
-            error.error.detail,
-            'Error al iniciar sesión'
+            'Error al iniciar sesión',
+            error.error.detail
           );
         },
         complete: () => {
