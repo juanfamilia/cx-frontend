@@ -2,41 +2,56 @@
   #dt
   [value]="data()"
   [columns]="columnsInput()"
-  [rows]="10"
+  [rows]="paginationOptions()?.rows || 10"
+  [totalRecords]="paginationOptions()?.total || 0"
   [rowHover]="true"
-  [rowsPerPageOptions]="[10, 25, 50]"
+  [rowsPerPageOptions]="[10, 15, 20]"
   [loading]="loading()"
   [paginator]="true"
   (onFilter)="onFilter($event)"
   (onPage)="onPageChange($event)"
   [globalFilterFields]="globalFilterFields">
   <ng-template #caption>
-    <div class="flex items-center justify-between">
-      <p-button label="Limpiar" [outlined]="true" (click)="clear()">
-        <ng-icon name="lucideFilterX" size="1.2em" />
-      </p-button>
+    <div class="flex flex-col items-center justify-between gap-4 md:flex-row">
+      <p-inputgroup class="flex-1">
+        <p-inputgroup-addon>
+          <ng-icon name="lucideSearch" size="20" class="size-5 text-gray-500" />
+        </p-inputgroup-addon>
+        <p-floatlabel variant="on">
+          <input
+            id="search"
+            [formControl]="searchInput"
+            pInputText
+            type="text"
+            class="py-2" />
+          <label class="font-normal" for="search">Buscar</label>
+        </p-floatlabel>
+      </p-inputgroup>
 
       <div class="flex items-center gap-2">
-        <p-inputgroup class="w-fit">
-          <p-inputgroup-addon>
-            <ng-icon
-              name="lucideSearch"
-              size="20"
-              class="size-5 text-gray-500" />
-          </p-inputgroup-addon>
-          <p-floatlabel variant="on">
-            <input
-              id="search"
-              [(ngModel)]="searchValue"
-              pInputText
-              type="text"
-              (input)="onSearch($event)"
-              class="py-2" />
-            <label class="font-normal" for="search">Buscar</label>
-          </p-floatlabel>
-        </p-inputgroup>
+        @if (filters()) {
+          <div class="flex w-full justify-center gap-4 lg:w-fit">
+            <p-select
+              [options]="filters()"
+              [(ngModel)]="filterInput"
+              (onChange)="onSearch()"
+              optionLabel="name"
+              optionValue="value"
+              class="w-full lg:w-56" />
+          </div>
+        }
+
         <p-button
-          label="Export"
+          pTooltip="Limpiar"
+          tooltipPosition="bottom"
+          [outlined]="true"
+          (click)="clear()">
+          <ng-icon name="lucideFilterX" size="1.2em" />
+        </p-button>
+
+        <p-button
+          pTooltip="exportar"
+          tooltipPosition="bottom"
           severity="secondary"
           [outlined]="true"
           (click)="exportCSV()">
@@ -50,7 +65,13 @@
     <tr>
       @for (col of columns; track $index) {
         <th [pSortableColumn]="col.sortable ? col.field : undefined">
-          <div class="flex items-center justify-between">
+          <div
+            class="flex items-center"
+            [ngClass]="
+              col.type === 'custom'
+                ? 'justify-around text-center'
+                : 'justify-between'
+            ">
             {{ col.header }}
             @if (col.sortable) {
               <p-sortIcon [field]="col.field" />
@@ -83,6 +104,10 @@
 
               @case ('state') {
                 {{ getValue(rowData, col.field!) | stateName }}
+              }
+
+              @case ('roles') {
+                {{ getValue(rowData, col.field!) | roles }}
               }
 
               @default {
