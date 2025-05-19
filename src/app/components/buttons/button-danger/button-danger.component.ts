@@ -40,9 +40,6 @@ export class ButtonDangerComponent {
       accept: () => {
         this.event.emit(true);
       },
-      reject: () => {
-        this.event.emit(false);
-      },
     });
   }
 }
