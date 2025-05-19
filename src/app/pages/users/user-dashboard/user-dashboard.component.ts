@@ -5,15 +5,19 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { ButtonDangerComponent } from '@components/buttons/button-danger/button-danger.component';
+import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
 import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
 import { TableComponent } from '@components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
 import { provideIcons } from '@ng-icons/core';
-import { lucidePencil, lucideTrash } from '@ng-icons/lucide';
+import { lucidePencil, lucideTrash, lucideUserPlus } from '@ng-icons/lucide';
 import { ShareToasterService } from '@services/toast.service';
 import { UsersService } from '@services/users.service';
+import { PaginatorState } from 'primeng/paginator';
+import { Options } from 'src/app/types/options';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -22,25 +26,42 @@ import { UsersService } from '@services/users.service';
     PageHeaderComponent,
     ButtonDangerComponent,
     ButtonSecondaryComponent,
+    ButtonPrimaryComponent,
   ],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [provideIcons({ lucidePencil, lucideTrash })],
+  viewProviders: [provideIcons({ lucideUserPlus, lucidePencil, lucideTrash })],
 })
 export class UserDashboardComponent {
   private usersService = inject(UsersService);
   private toastService = inject(ShareToasterService);
+  private router = inject(Router);
 
-  usersResource = rxResource({
-    loader: () => this.usersService.getAll(),
+  pagination = signal<PaginatorState>({
+    page: 0,
+    first: 0,
+    rows: 10,
   });
 
-  columns = signal<TableColumn[]>([
+  searchEvent = signal<{ filter: string; search: string } | null>(null);
+
+  filters = signal<Options[]>([
     {
-      field: 'id',
-      header: 'ID',
+      name: 'Nombre y Apellido',
+      value: 'full_name',
     },
+    {
+      name: 'Correo Electrónico',
+      value: 'email',
+    },
+    {
+      name: 'Empresa',
+      value: 'company',
+    },
+  ]);
+
+  columns = signal<TableColumn[]>([
     {
       field: 'first_name',
       header: 'Nombre(s)',
@@ -62,11 +83,39 @@ export class UserDashboardComponent {
       sortable: true,
     },
     {
+      field: 'role',
+      header: 'Rol',
+      sortable: true,
+      pipe: 'roles',
+    },
+    {
       header: 'Acciones',
       type: 'custom',
       customTemplate: 'actions',
     },
   ]);
+
+  usersResource = rxResource({
+    request: () => ({
+      pagination: this.pagination(),
+      search: this.searchEvent(),
+    }),
+    loader: ({ request }) =>
+      this.usersService.getAll(
+        request.pagination.first,
+        request.pagination.rows,
+        request.search?.filter,
+        request.search?.search
+      ),
+  });
+
+  createUser() {
+    this.router.navigate(['/users/create']);
+  }
+
+  updateUser(id: number) {
+    this.router.navigate(['/users/update/' + id]);
+  }
 
   deleteUser(id: number) {
     this.usersService.delete(id).subscribe({

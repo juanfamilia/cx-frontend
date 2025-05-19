@@ -1,0 +1,12 @@
+<app-page-header
+  title="Editar Usuario"
+  description="Modificar un usuario existente en el sistema" />
+
+@if (isLoading()) {
+  <p>Cargando...</p>
+} @else {
+  <app-user-form
+    (OnSubmit)="updateUser($event)"
+    [isEdit]="true"
+    [user]="user()!" />
+}

@@ -1,0 +1,80 @@
+<form
+  [formGroup]="userForm"
+  autocomplete="off"
+  class="mt-5 flex flex-col gap-3">
+  <p-divider align="center" type="solid">
+    <b>Información Básica</b>
+  </p-divider>
+
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <app-input-text
+      label="Nombre(s)"
+      icon="lucideUser"
+      formControlName="first_name" />
+
+    <app-input-text
+      label="Apellido(s)"
+      icon="lucideUser"
+      formControlName="last_name" />
+
+    <app-input-select
+      label="Genero"
+      icon="lucideVenusAndMars"
+      [options]="genders"
+      [clear]="false"
+      formControlName="gender" />
+  </div>
+
+  <p-divider align="center" type="solid">
+    <b>Credenciales de acceso</b>
+  </p-divider>
+
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <app-input-text
+      label="Correo Electrónico"
+      icon="lucideMail"
+      formControlName="email" />
+
+    <app-input-password label="Contraseña" formControlName="password" />
+  </div>
+
+  @if (currentUser.id !== user()!.id) {
+    <p-divider align="center" type="solid">
+      <b>Detalles laborales</b>
+    </p-divider>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <app-input-select
+        label="Rol"
+        icon="lucideBriefcaseBusiness"
+        [options]="roles()"
+        [clear]="false"
+        formControlName="role" />
+
+      @if (currentUser.role === 0) {
+        <p-select
+          [options]="companies()"
+          formControlName="company_id"
+          [virtualScroll]="true"
+          [virtualScrollItemSize]="38"
+          scrollHeight="140px"
+          filter="true"
+          optionLabel="name"
+          optionValue="id"
+          (onLazyLoad)="getCompanies($event)"
+          (onFilter)="searchCompanies($event)"
+          placeholder="Seleccione una empresa"
+          class="h-10">
+        </p-select>
+      }
+    </div>
+  }
+
+  <div class="mt-5">
+    <app-button-primary
+      title="Guardar"
+      icon="lucideUserPlus"
+      [disabled]="userForm.invalid"
+      (event)="onSubmit()" />
+  </div>
+</form>

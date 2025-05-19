@@ -1,13 +1,27 @@
-<app-page-header
-  title="Usuarios"
-  description="Modulo de administración de usuarios" />
+<!-- Header -->
+<div class="flex items-center justify-between">
+  <app-page-header
+    title="Usuarios"
+    description="Modulo de administración de usuarios" />
+  <app-button-primary
+    title="Registrar Usuario"
+    icon="lucideUserPlus"
+    (event)="createUser()" />
+</div>
+<!-- Table -->
 <app-table
-  [data]="usersResource.value() || []"
+  [data]="usersResource.value()?.data || []"
   [columnsInput]="columns()"
-  [loading]="usersResource.isLoading()">
+  [filters]="filters()"
+  [loading]="usersResource.isLoading()"
+  (search)="searchEvent.set($event)"
+  (pagination)="pagination.set($event)">
   <ng-template #tableActionTemplate let-user>
-    <div class="flex gap-5">
-      <app-button-secondary tooltip="Editar" icon="lucidePencil" />
+    <div class="flex items-center justify-center gap-5">
+      <app-button-secondary
+        tooltip="Editar"
+        icon="lucidePencil"
+        (event)="updateUser(user.id)" />
       <app-button-danger
         tooltip="Eliminar"
         icon="lucideTrash"
