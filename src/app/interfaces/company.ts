@@ -1,3 +1,5 @@
+import { Pagination } from '../types/pagination';
+
 export interface Company {
   id: number;
   name: string;
@@ -9,4 +11,9 @@ export interface Company {
   created_at: string;
   updated_at: string;
   deleted_at: string;
+}
+
+export interface CompanyList {
+  data: Company[];
+  pagination: Pagination;
 }
