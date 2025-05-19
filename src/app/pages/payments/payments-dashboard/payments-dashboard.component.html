@@ -6,7 +6,7 @@
   [columnsInput]="columns()"
   [loading]="paymentsResource.isLoading()">
   <ng-template #tableActionTemplate let-payment>
-    <div class="flex gap-5">
+    <div class="flex items-center justify-center gap-5">
       <app-button-secondary tooltip="Editar" icon="lucidePencil" />
       <app-button-danger
         tooltip="Eliminar"
