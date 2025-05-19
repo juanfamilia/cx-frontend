@@ -38,10 +38,6 @@ export class CompaniesDashboardComponent {
 
   columns = signal<TableColumn[]>([
     {
-      field: 'id',
-      header: 'ID',
-    },
-    {
       field: 'name',
       header: 'Nombre',
       sortable: true,

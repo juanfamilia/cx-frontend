@@ -2,11 +2,11 @@
   title="Empresas"
   description="Modulo de administración de empresas" />
 <app-table
-  [data]="companiesResource.value() || []"
+  [data]="companiesResource.value()?.data || []"
   [columnsInput]="columns()"
   [loading]="companiesResource.isLoading()">
   <ng-template #tableActionTemplate let-company>
-    <div class="flex gap-5">
+    <div class="flex items-center justify-center gap-5">
       <app-button-secondary tooltip="Editar" icon="lucidePencil" />
       <app-button-danger
         tooltip="Eliminar"
