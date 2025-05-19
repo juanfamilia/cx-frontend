@@ -38,13 +38,22 @@ export const jwtInterceptor: HttpInterceptorFn = (
 
   return next(addToken(req)).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
-        authService.logout();
-        toastService.showToast(
-          'Warning',
-          'Su sesión ha expirado',
-          'Por favor, inicie sesión nuevamente'
-        );
+      switch (error.status) {
+        case 401:
+          authService.logout();
+          toastService.showToast(
+            'warning',
+            'Su sesión ha expirado',
+            'Por favor, inicie sesión nuevamente'
+          );
+          break;
+        case 402:
+          authService.logout();
+          toastService.showToast(
+            'warning',
+            'Sesion cerrada',
+            'La sesión ha sido cerrada por falta de pago'
+          );
       }
       return throwError(() => error);
     })
