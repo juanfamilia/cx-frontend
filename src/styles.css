@@ -43,10 +43,6 @@ html {
   width: 100%;
 }
 
-.p-floatlabel > .p-inputwrapper-focus {
-  z-index: 1 !important;
-}
-
 p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-inputwrapper-filled.ng-touched {
   z-index: 0 !important;
 }
@@ -116,4 +112,20 @@ p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-input
 
 .p-paginator {
   @apply rounded-t-none rounded-b-lg;
+}
+
+.p-toast-message-success {
+  background: #22c55e !important;
+  color: white !important;
+  overflow: hidden;
+}
+
+.p-toast-message-error {
+  background: #ef4444 !important;
+  color: white !important;
+  overflow: hidden;
+}
+
+.p-divider-content {
+  @apply dark:bg-bunker-950 bg-gray-50;
 }
