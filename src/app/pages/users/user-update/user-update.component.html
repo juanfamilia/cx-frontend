@@ -6,7 +6,7 @@
   <p>Cargando...</p>
 } @else {
   <app-user-form
-    (OnSubmit)="updateUser($event)"
+    (submitEvent)="updateUser($event)"
     [isEdit]="true"
     [user]="user()!" />
 }

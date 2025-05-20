@@ -38,7 +38,7 @@
     <app-input-password label="Contraseña" formControlName="password" />
   </div>
 
-  @if (currentUser.id !== user()!.id) {
+  @if (currentUser.id !== user()?.id) {
     <p-divider align="center" type="solid">
       <b>Detalles laborales</b>
     </p-divider>
@@ -50,7 +50,6 @@
         [options]="roles()"
         [clear]="false"
         formControlName="role" />
-
       @if (currentUser.role === 0) {
         <p-select
           [options]="companies()"

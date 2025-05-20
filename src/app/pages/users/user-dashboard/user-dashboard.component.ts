@@ -46,21 +46,6 @@ export class UserDashboardComponent {
 
   searchEvent = signal<{ filter: string; search: string } | null>(null);
 
-  filters = signal<Options[]>([
-    {
-      name: 'Nombre y Apellido',
-      value: 'full_name',
-    },
-    {
-      name: 'Correo Electrónico',
-      value: 'email',
-    },
-    {
-      name: 'Empresa',
-      value: 'company',
-    },
-  ]);
-
   columns = signal<TableColumn[]>([
     {
       field: 'first_name',
@@ -92,6 +77,21 @@ export class UserDashboardComponent {
       header: 'Acciones',
       type: 'custom',
       customTemplate: 'actions',
+    },
+  ]);
+
+  filters = signal<Options[]>([
+    {
+      name: 'Nombre y Apellido',
+      value: 'full_name',
+    },
+    {
+      name: 'Correo Electrónico',
+      value: 'email',
+    },
+    {
+      name: 'Empresa',
+      value: 'company',
     },
   ]);
 
@@ -131,7 +131,7 @@ export class UserDashboardComponent {
         console.error('Error deleting user:', err);
         this.toastService.showToast(
           'error',
-          'Error al eliminar usuario',
+          'Error al eliminar el usuario',
           err.message
         );
       },

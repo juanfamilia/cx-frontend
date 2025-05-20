@@ -61,7 +61,7 @@ export class UserFormComponent implements OnInit {
   isEdit = input<boolean>(false);
   user = input<User>();
 
-  OnSubmit = output<UserCreate>();
+  submitEvent = output<UserCreate>();
 
   private fb = inject(FormBuilder);
   private AuthService = inject(AuthService);
@@ -173,7 +173,7 @@ export class UserFormComponent implements OnInit {
 
   onSubmit() {
     if (this.userForm.valid) {
-      this.OnSubmit.emit(this.userForm.value as UserCreate);
+      this.submitEvent.emit(this.userForm.value as UserCreate);
     }
   }
 }
