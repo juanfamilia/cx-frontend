@@ -1,7 +1,7 @@
 <p-button
   [type]="buttonType()"
   (click)="onClick()"
-  classList="bg-primary-500 hover:bg-primary-600 flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-white transition-all duration-200 ease-in-out disabled:cursor-not-allowed md:px-4"
+  [fluid]="fluid()"
   [disabled]="disabled()">
   @if (icon()) {
     <ng-icon [name]="icon()" class="text-xl" />

@@ -44,6 +44,8 @@ export class LoginComponent implements OnInit {
   form!: FormGroup;
   isLoading = signal(false);
 
+  currentYear = new Date().getFullYear();
+
   constructor() {
     if (this.authService.isAuth()) {
       this.router.navigate(['/']);

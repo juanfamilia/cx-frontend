@@ -19,6 +19,7 @@ export class ButtonPrimaryComponent {
   icon = input<string>('');
   buttonType = input<string>('button');
   disabled = input<boolean>(false);
+  fluid = input<boolean>(false);
   event = output();
 
   onClick() {
