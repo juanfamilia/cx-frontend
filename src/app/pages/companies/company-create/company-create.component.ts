@@ -31,7 +31,7 @@ export class CompanyCreateComponent {
       error: err => {
         this.toastService.showToast(
           'error',
-          'Error al crear empresa',
+          'Error al crear la empresa',
           err.message
         );
         console.error('Error creating company:', err);

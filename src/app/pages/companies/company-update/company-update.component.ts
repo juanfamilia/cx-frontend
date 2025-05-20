@@ -64,7 +64,7 @@ export class CompanyUpdateComponent implements OnInit {
       error: err => {
         this.toastService.showToast(
           'error',
-          'Error al actualizar empresa',
+          'Error al actualizar la empresa',
           err.message
         );
         console.error('Error updating company:', err);

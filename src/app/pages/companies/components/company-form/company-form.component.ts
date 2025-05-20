@@ -5,7 +5,6 @@ import {
   input,
   OnInit,
   output,
-  signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
@@ -21,8 +20,6 @@ import {
   lucideMapPinned,
   lucideSmartphone,
 } from '@ng-icons/lucide';
-import { AuthService } from '@services/auth.service';
-import { LazyLoadEvent } from 'primeng/api';
 import { DividerModule } from 'primeng/divider';
 
 @Component({
@@ -55,11 +52,6 @@ export class CompanyFormComponent implements OnInit {
   submitEvent = output<CompanyCreate>();
 
   private fb = inject(FormBuilder);
-  private AuthService = inject(AuthService);
-
-  currentUser = this.AuthService.getCurrentUser();
-
-  lazyLoad = signal<LazyLoadEvent>({ first: 0, rows: 10 });
 
   companyForm = this.fb.group({
     name: ['', [Validators.required]],
