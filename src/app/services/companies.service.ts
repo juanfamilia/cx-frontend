@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
-import { CompanyList } from '@interfaces/company';
+import { Company, CompanyCreate, CompanyList } from '@interfaces/company';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -28,6 +28,18 @@ export class CompaniesService {
     return this.http.get<CompanyList>(environment.apiUrl + 'company/', {
       params,
     });
+  }
+
+  create(data: CompanyCreate): Observable<Company> {
+    return this.http.post<Company>(environment.apiUrl + 'company/', data);
+  }
+
+  getOne(id: number): Observable<Company> {
+    return this.http.get<Company>(environment.apiUrl + 'company/' + id);
+  }
+
+  update(data: CompanyCreate, id: number): Observable<Company> {
+    return this.http.put<Company>(environment.apiUrl + 'company/' + id, data);
   }
 
   delete(id: number): Observable<void> {
