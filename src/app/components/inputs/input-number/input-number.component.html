@@ -38,6 +38,12 @@
             {{ ngControl.errors?.['minlength'] }} digitos.
           </span>
         }
+        @if (ngControl.errors?.['min']) {
+          <span>
+            El valor debe ser mayor o igual a
+            {{ ngControl.errors?.['min'].min }}.
+          </span>
+        }
       </p-message>
     }
   }
