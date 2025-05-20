@@ -13,6 +13,15 @@ export interface Company {
   deleted_at: string;
 }
 
+export interface CompanyCreate {
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  state: string;
+  country: string;
+}
+
 export interface CompanyList {
   data: Company[];
   pagination: Pagination;

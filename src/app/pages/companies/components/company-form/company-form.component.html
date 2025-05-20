@@ -1,0 +1,50 @@
+<form
+  [formGroup]="companyForm"
+  autocomplete="off"
+  class="mt-5 flex flex-col gap-3">
+  <p-divider align="center" type="solid">
+    <b>Información Básica</b>
+  </p-divider>
+
+  <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+    <div class="md:col-span-2">
+      <app-input-text
+        label="Nombre"
+        icon="lucideBuilding2"
+        formControlName="name" />
+    </div>
+
+    <app-input-text
+      label="Télefono"
+      icon="lucideSmartphone"
+      formControlName="phone" />
+
+    <app-input-text
+      label="Correo Electrónico"
+      icon="lucideMail"
+      formControlName="email" />
+  </div>
+
+  <p-divider align="center" type="solid">
+    <b>Ubicación</b>
+  </p-divider>
+
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <app-input-location [formGroup]="companyForm" controlNameState="state" />
+
+    <div class="md:col-span-2">
+      <app-input-textarea
+        label="Dirección"
+        formControlName="address"
+        icon="lucideMapPinned" />
+    </div>
+  </div>
+
+  <div class="mt-5">
+    <app-button-primary
+      title="Guardar"
+      icon="lucideBuilding"
+      [disabled]="companyForm.invalid"
+      (event)="onSubmit()" />
+  </div>
+</form>

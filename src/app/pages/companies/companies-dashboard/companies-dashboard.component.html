@@ -1,17 +1,31 @@
-<app-page-header
-  title="Empresas"
-  description="Modulo de administración de empresas" />
+<!-- Header -->
+<div class="flex items-center justify-between">
+  <app-page-header
+    title="Empresas"
+    description="Modulo de administración de empresas" />
+  <app-button-primary
+    title="Registrar Empresa"
+    icon="lucideBuilding2"
+    (event)="createCompany()" />
+</div>
+<!-- Table -->
 <app-table
   [data]="companiesResource.value()?.data || []"
   [columnsInput]="columns()"
-  [loading]="companiesResource.isLoading()">
+  [filters]="filters()"
+  [loading]="companiesResource.isLoading()"
+  (search)="searchEvent.set($event)"
+  (pagination)="pagination.set($event)">
   <ng-template #tableActionTemplate let-company>
     <div class="flex items-center justify-center gap-5">
-      <app-button-secondary tooltip="Editar" icon="lucidePencil" />
+      <app-button-secondary
+        tooltip="Editar"
+        icon="lucidePencil"
+        (event)="updateCompany(company.id)" />
       <app-button-danger
         tooltip="Eliminar"
         icon="lucideTrash"
-        message="¿Estás seguro de eliminar este pago?"
+        message="¿Está seguro de eliminar esta empresas?"
         (event)="deleteCompany(company.id)" />
     </div>
   </ng-template>

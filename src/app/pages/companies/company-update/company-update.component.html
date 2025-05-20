@@ -1,0 +1,12 @@
+<app-page-header
+  title="Editar Empresa"
+  description="Modificar una empresa existente en el sistema" />
+
+@if (isLoading()) {
+  <p>Cargando...</p>
+} @else {
+  <app-company-form
+    (submitEvent)="updateCompany($event)"
+    [isEdit]="true"
+    [company]="company()!" />
+}
