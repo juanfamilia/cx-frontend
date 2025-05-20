@@ -12,8 +12,8 @@ import {
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { lucideMapPin } from '@ng-icons/lucide';
-import { AuthService } from '@services/auth.service';
-import { City, State } from 'country-state-city';
+import { State } from 'country-state-city';
+import { StateNamePipe } from 'src/app/pipes/state-name.pipe';
 import { Options } from 'src/app/types/options';
 import { InputSelectComponent } from '../input-select/input-select.component';
 
@@ -24,15 +24,15 @@ import { InputSelectComponent } from '../input-select/input-select.component';
   styleUrl: './input-location.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [provideIcons({ lucideMapPin })],
+  providers: [StateNamePipe],
 })
 export class InputLocationComponent implements OnInit {
+  private stateNamePipe = inject(StateNamePipe);
+
   formGroup = input.required<FormGroup>();
   controlNameState = input.required<string>();
-  controlNameCity = input.required<string>();
 
-  private authService = inject(AuthService);
-
-  userCountryCode = this.authService.getCurrentUser().country_code || 'VE';
+  userCountryCode = 'DO';
   states = signal<Options[]>([]);
   cities = signal<Options[]>([]);
 
@@ -43,23 +43,16 @@ export class InputLocationComponent implements OnInit {
     this.loadStates();
 
     const initialState = this.formGroup().get(this.controlNameState())?.value;
-    const initialCity = this.formGroup().get(this.controlNameCity())?.value;
 
     if (initialState) {
       this.selectedState.set(initialState);
-      this.loadCities(initialState);
-
-      // Opcional: Establecer la ciudad
-      if (initialCity) {
-        this.selectedCity.set(initialCity);
-      }
     }
   }
 
   loadStates() {
     this.states.set(
       State.getStatesOfCountry(this.userCountryCode).map(state => ({
-        name: state.name,
+        name: this.stateNamePipe.transform(state.isoCode),
         value: state.isoCode,
       }))
     );
@@ -69,15 +62,5 @@ export class InputLocationComponent implements OnInit {
     const stateCode = event.value;
     this.selectedState.set(stateCode);
     this.selectedCity.set(null);
-    this.loadCities(stateCode);
-  }
-
-  loadCities(stateCode: string) {
-    this.cities.set(
-      City.getCitiesOfState(this.userCountryCode, stateCode).map(city => ({
-        name: city.name,
-        value: city.name,
-      }))
-    );
   }
 }

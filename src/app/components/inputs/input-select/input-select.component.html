@@ -7,7 +7,6 @@
     }
     <p-floatlabel class="w-full" variant="on">
       <p-select
-        class="z-10"
         [inputId]="id()"
         [(ngModel)]="value"
         (onChange)="onSelect($event)"
@@ -25,7 +24,7 @@
             ngControl.touched && ngControl.invalid && ngControl.dirty,
         }"
         styleClass="w-full" />
-      <label class="z-2000 font-normal" for="{{ id() }}">
+      <label class="z-100 font-normal" for="{{ id() }}">
         {{ label() }}
       </label>
     </p-floatlabel>
