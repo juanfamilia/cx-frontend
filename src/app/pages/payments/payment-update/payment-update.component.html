@@ -1,0 +1,12 @@
+<app-page-header
+  title="Editar Pago"
+  description="Modificar un pago existente en el sistema" />
+
+@if (isLoading()) {
+  <p>Cargando...</p>
+} @else {
+  <app-payment-form
+    (submitEvent)="updatePayment($event)"
+    [isEdit]="true"
+    [payment]="payment()!" />
+}

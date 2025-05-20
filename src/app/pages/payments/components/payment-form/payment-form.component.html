@@ -1,0 +1,60 @@
+<form
+  [formGroup]="paymentForm"
+  autocomplete="off"
+  class="mt-5 flex flex-col gap-3">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <p-select
+      [options]="companies()"
+      formControlName="company_id"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="38"
+      scrollHeight="140px"
+      filter="true"
+      optionLabel="name"
+      optionValue="id"
+      (onLazyLoad)="getCompanies($event)"
+      (onFilter)="searchCompanies($event)"
+      placeholder="Seleccione una empresa"
+      class="h-10">
+    </p-select>
+
+    <app-input-number
+      id="amount"
+      label="Monto"
+      icon="lucideBanknote"
+      [min]="0"
+      [ErrorMessage]="false"
+      formControlName="amount" />
+
+    <div class="md:col-span-2">
+      <app-input-text
+        id="description"
+        label="Descripción"
+        icon="lucideStickyNote"
+        [ErrorMessage]="false"
+        formControlName="description" />
+    </div>
+
+    <app-input-date
+      id="date"
+      label="Fecha de pago"
+      icon="lucideCalendar"
+      [ErrorMessage]="false"
+      formControlName="date" />
+
+    <app-input-date
+      id="valid_before"
+      label="Fecha de vencimiento"
+      icon="lucideCalendarClock"
+      [ErrorMessage]="false"
+      formControlName="valid_before" />
+  </div>
+
+  <div class="mt-5">
+    <app-button-primary
+      title="Guardar"
+      icon="lucideReceipt"
+      [disabled]="paymentForm.invalid"
+      (event)="onSubmit()" />
+  </div>
+</form>
