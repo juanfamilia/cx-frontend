@@ -51,6 +51,14 @@ p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-input
   z-index: 100 !important;
 }
 
+p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-inputwrapper-filled.p-inputwrapper-focus.p-select-open {
+  @apply z-10000! sm:z-100!;
+}
+
+.p-select-overlay.p-component {
+  z-index: 1000 !important;
+}
+
 .p-password-toggle-mask-icon {
   z-index: 1 !important;
 }
