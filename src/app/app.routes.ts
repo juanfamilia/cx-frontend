@@ -35,6 +35,14 @@ export const routes: Routes = [
     data: { title: 'Pagos' },
   },
   {
+    path: 'work-areas',
+    loadChildren: () =>
+      import('./pages/work-areas/work-areas.routes').then(
+        r => r.workAreasRoutes
+      ),
+    data: { title: 'Areas de Trabajo' },
+  },
+  {
     path: 'configuration',
     loadChildren: () =>
       import('./pages/configuration/configuration.routes').then(

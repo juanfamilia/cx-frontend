@@ -17,6 +17,7 @@ import {
   lucideBanknote,
   lucideBriefcaseBusiness,
   lucideHouse,
+  lucideMapPinned,
 } from '@ng-icons/lucide';
 import { AuthService } from '@services/auth.service';
 import { SidebarService } from '@services/sidebar.service';
@@ -37,6 +38,7 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       heroArrowRightOnRectangle,
       lucideBriefcaseBusiness,
       lucideBanknote,
+      lucideMapPinned,
     }),
   ],
 })
@@ -71,6 +73,12 @@ export class SidebarComponent {
       route: '/payments',
       icon: 'lucideBanknote',
       roles: [0],
+    },
+    {
+      title: 'Areas de Trabajo',
+      route: '/work-areas',
+      icon: 'lucideMapPinned',
+      roles: [1],
     },
     {
       title: 'Configuración',
