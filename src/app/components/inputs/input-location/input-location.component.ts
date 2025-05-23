@@ -34,10 +34,8 @@ export class InputLocationComponent implements OnInit {
 
   userCountryCode = 'DO';
   states = signal<Options[]>([]);
-  cities = signal<Options[]>([]);
 
   selectedState = model<string | null>();
-  selectedCity = model<string | null>();
 
   ngOnInit() {
     this.loadStates();
@@ -61,6 +59,5 @@ export class InputLocationComponent implements OnInit {
   onStateChange(event: any) {
     const stateCode = event.value;
     this.selectedState.set(stateCode);
-    this.selectedCity.set(null);
   }
 }
