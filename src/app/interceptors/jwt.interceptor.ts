@@ -50,7 +50,7 @@ export const jwtInterceptor: HttpInterceptorFn = (
         case 402:
           authService.logout();
           toastService.showToast(
-            'warning',
+            'warn',
             'Sesion cerrada',
             'La sesión ha sido cerrada por falta de pago'
           );

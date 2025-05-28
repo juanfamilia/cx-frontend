@@ -7,13 +7,16 @@ import {
   output,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
 import { InputLocationComponent } from '@components/inputs/input-location/input-location.component';
 import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
 import { InputTextareaComponent } from '@components/inputs/input-textarea/input-textarea.component';
 import { Company, CompanyCreate } from '@interfaces/company';
 import { provideIcons } from '@ng-icons/core';
 import {
+  lucideArrowLeft,
   lucideBuilding,
   lucideBuilding2,
   lucideMail,
@@ -31,6 +34,7 @@ import { DividerModule } from 'primeng/divider';
     InputLocationComponent,
     ButtonPrimaryComponent,
     InputTextareaComponent,
+    ButtonSecondaryComponent,
   ],
   templateUrl: './company-form.component.html',
   styleUrl: './company-form.component.css',
@@ -42,6 +46,7 @@ import { DividerModule } from 'primeng/divider';
       lucideMail,
       lucideMapPinned,
       lucideBuilding,
+      lucideArrowLeft,
     }),
   ],
 })
@@ -52,6 +57,7 @@ export class CompanyFormComponent implements OnInit {
   submitEvent = output<CompanyCreate>();
 
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   companyForm = this.fb.group({
     name: ['', [Validators.required]],
@@ -77,5 +83,9 @@ export class CompanyFormComponent implements OnInit {
     if (this.companyForm.valid) {
       this.submitEvent.emit(this.companyForm.value as CompanyCreate);
     }
+  }
+
+  goBack() {
+    this.router.navigate(['/companies']);
   }
 }

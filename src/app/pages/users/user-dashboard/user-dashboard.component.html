@@ -15,7 +15,8 @@
   [filters]="filters()"
   [loading]="usersResource.isLoading()"
   (search)="searchEvent.set($event)"
-  (pagination)="pagination.set($event)">
+  (pagination)="pagination.set($event)"
+  [checkPermissions]="true">
   <ng-template #tableActionTemplate let-user>
     <div class="flex items-center justify-center gap-5">
       <app-button-secondary

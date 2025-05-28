@@ -14,11 +14,11 @@ export interface UserZone {
 }
 
 export interface UserZoneCreate {
+  user_id: number;
   zone_ids: number[];
 }
 
 export interface UserZoneList {
   data: UserZone[];
-  user: User;
   pagination: Pagination;
 }

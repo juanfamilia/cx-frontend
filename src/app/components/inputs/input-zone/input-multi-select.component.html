@@ -1,0 +1,40 @@
+<div>
+  <p-inputgroup>
+    @if (icon()) {
+      <p-inputgroup-addon>
+        <ng-icon [name]="icon()" size="20" class="size-5 text-gray-500" />
+      </p-inputgroup-addon>
+    }
+    <p-floatlabel variant="on">
+      <p-multiselect
+        [inputId]="id()"
+        [(ngModel)]="value"
+        (onChange)="onSelect($event)"
+        (onBlur)="onTouched()"
+        [options]="options()"
+        optionLabel="name"
+        optionValue="value"
+        [filter]="filter()"
+        [placeholder]="placeholder()"
+        display="chip"
+        [maxSelectedLabels]="maxSelectedLabels()"
+        [loading]="loading()"
+        [ngClass]="{
+          'ng-dirty ng-invalid':
+            ngControl.touched && ngControl.invalid && ngControl.dirty,
+        }"
+        styleClass="w-full" />
+      <label class="font-normal" for="{{ id() }}">{{ label() }}</label>
+    </p-floatlabel>
+  </p-inputgroup>
+
+  @if (errorMessage()) {
+    @if (ngControl.invalid && ngControl.dirty) {
+      <p-message styleClass="mt-2" severity="error">
+        @if (ngControl.errors?.['required']) {
+          <span>Este campo es obligatorio.</span>
+        }
+      </p-message>
+    }
+  }
+</div>

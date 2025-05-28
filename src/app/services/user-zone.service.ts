@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { environment } from '@env/environment';
 import { UserZone, UserZoneCreate, UserZoneList } from '@interfaces/user-zone';
 import { Observable } from 'rxjs';
 
@@ -10,7 +11,6 @@ export class UserZoneService {
   private http = inject(HttpClient);
 
   getAll(
-    user_id: number,
     offset = 0,
     limit = 10,
     filter?: string,
@@ -25,24 +25,27 @@ export class UserZoneService {
       params = params.set('search', search);
     }
 
-    return this.http.get<UserZoneList>('user-zone/all/' + user_id, {
+    return this.http.get<UserZoneList>(environment.apiUrl + 'user-zone/', {
       params,
     });
   }
 
-  create(user_id: number, data: UserZoneCreate): Observable<UserZone> {
-    return this.http.post<UserZone>('user-zone/' + user_id, data);
+  create(data: UserZoneCreate): Observable<UserZone> {
+    return this.http.post<UserZone>(environment.apiUrl + 'user-zone/', data);
   }
 
   getOne(id: number): Observable<UserZone> {
-    return this.http.get<UserZone>('user-zone/' + id);
+    return this.http.get<UserZone>(environment.apiUrl + 'user-zone/' + id);
   }
 
   update(newZoneID: number, id: number): Observable<UserZone> {
-    return this.http.put<UserZone>('user-zone/' + id, newZoneID);
+    return this.http.put<UserZone>(
+      environment.apiUrl + 'user-zone/' + id,
+      newZoneID
+    );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>('user-zone/' + id);
+    return this.http.delete<void>(environment.apiUrl + 'user-zone/' + id);
   }
 }

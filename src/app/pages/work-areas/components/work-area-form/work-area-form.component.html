@@ -1,0 +1,32 @@
+<form [formGroup]="workAreaForm" class="mt-5 flex flex-col gap-3">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <p-select
+      [options]="users()"
+      formControlName="user_id"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="38"
+      scrollHeight="140px"
+      filter="true"
+      optionLabel="fullName"
+      optionValue="id"
+      (onLazyLoad)="getCompanies($event)"
+      (onFilter)="searchCompanies($event)"
+      placeholder="Seleccione un usuario"
+      class="h-10">
+    </p-select>
+    <app-input-multi-select
+      label="Areas de Trabajo"
+      [options]="zonesNameValue()!"
+      [loading]="zonesResource.isLoading()"
+      [filter]="true"
+      formControlName="zone_ids" />
+  </div>
+
+  <div class="mt-5">
+    <app-button-primary
+      title="Guardar"
+      icon="lucideMap"
+      [disabled]="workAreaForm.invalid"
+      (event)="onSubmit()" />
+  </div>
+</form>

@@ -8,7 +8,9 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
 import { InputPasswordComponent } from '@components/inputs/input-password/input-password.component';
 import { InputSelectComponent } from '@components/inputs/input-select/input-select.component';
 import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
@@ -16,6 +18,7 @@ import { Company } from '@interfaces/company';
 import { User, UserCreate } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
 import {
+  lucideArrowLeft,
   lucideBriefcaseBusiness,
   lucideBuilding2,
   lucideMail,
@@ -42,6 +45,7 @@ import { Options } from 'src/app/types/options';
     DividerModule,
     SelectModule,
     ButtonPrimaryComponent,
+    ButtonSecondaryComponent,
   ],
   templateUrl: './user-form.component.html',
   styleUrl: './user-form.component.css',
@@ -54,6 +58,7 @@ import { Options } from 'src/app/types/options';
       lucideMail,
       lucideBuilding2,
       lucideUserPlus,
+      lucideArrowLeft,
     }),
   ],
 })
@@ -64,12 +69,13 @@ export class UserFormComponent implements OnInit {
   submitEvent = output<UserCreate>();
 
   private fb = inject(FormBuilder);
-  private AuthService = inject(AuthService);
+  private authService = inject(AuthService);
   private companiesService = inject(CompaniesService);
+  private router = inject(Router);
 
   private filterSubject = new Subject<string>();
 
-  currentUser = this.AuthService.getCurrentUser();
+  currentUser = this.authService.getCurrentUser();
   genders = GENDERS;
   roles = signal<Options[]>([]);
   companies = signal<Company[]>([]);
@@ -175,5 +181,9 @@ export class UserFormComponent implements OnInit {
     if (this.userForm.valid) {
       this.submitEvent.emit(this.userForm.value as UserCreate);
     }
+  }
+
+  goBack() {
+    this.router.navigate(['/users']);
   }
 }

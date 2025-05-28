@@ -15,6 +15,28 @@ export interface User {
   company?: Company;
 }
 
+export class UserClass implements User {
+  id!: number;
+  role!: number;
+  company_id!: number;
+  first_name!: string;
+  last_name!: string;
+  gender!: string;
+  email!: string;
+  created_at!: string;
+  updated_at!: string;
+  deleted_at!: string;
+  company?: Company;
+
+  constructor(user: User) {
+    Object.assign(this, user);
+  }
+
+  get fullName(): string {
+    return `${this.first_name} ${this.last_name}`;
+  }
+}
+
 export interface UserCreate {
   first_name: string;
   last_name: string;

@@ -69,7 +69,12 @@
     </div>
   }
 
-  <div class="mt-5">
+  <div class="mt-5 flex justify-between gap-5">
+    <app-button-secondary
+      title="Regresar"
+      icon="lucideArrowLeft"
+      (event)="goBack()" />
+
     <app-button-primary
       title="Guardar"
       icon="lucideUserPlus"

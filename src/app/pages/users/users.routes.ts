@@ -9,7 +9,7 @@ export const userRoutes: Routes = [
     path: '',
     component: UserDashboardComponent,
     canActivate: [authGuard],
-    data: { role: [0, 1], title: 'Usuarios' },
+    data: { role: [0, 1, 2], title: 'Usuarios' },
   },
   {
     path: 'create',

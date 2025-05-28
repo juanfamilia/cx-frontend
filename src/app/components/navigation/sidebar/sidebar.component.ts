@@ -60,7 +60,7 @@ export class SidebarComponent {
       title: 'Usuarios',
       route: '/users',
       icon: 'heroUsers',
-      roles: [0, 1],
+      roles: [0, 1, 2],
     },
     {
       title: 'Empresas',
@@ -75,7 +75,7 @@ export class SidebarComponent {
       roles: [0],
     },
     {
-      title: 'Areas de Trabajo',
+      title: 'Areas',
       route: '/work-areas',
       icon: 'lucideMapPinned',
       roles: [1],

@@ -1,1 +1,28 @@
-<p>work-areas-dashboard works!</p>
+<!-- Header -->
+<div class="flex items-center justify-between">
+  <app-page-header
+    title="Areas de Trabajo"
+    description="Modulo de administración de areas de trabajo" />
+  <app-button-primary
+    title="Registrar Area"
+    icon="lucideMap"
+    (event)="createWorkArea()" />
+</div>
+<!-- Table -->
+<app-table
+  [data]="userZonesResource.value()?.data || []"
+  [columnsInput]="columns()"
+  [filters]="filters()"
+  [loading]="userZonesResource.isLoading()"
+  (search)="searchEvent.set($event)"
+  (pagination)="pagination.set($event)">
+  <ng-template #tableActionTemplate let-company>
+    <div class="flex items-center justify-center gap-5">
+      <app-button-danger
+        tooltip="Eliminar"
+        icon="lucideTrash"
+        message="¿Está seguro de eliminar esta zona de trabajo?"
+        (event)="deleteWorkArea(company.id)" />
+    </div>
+  </ng-template>
+</app-table>

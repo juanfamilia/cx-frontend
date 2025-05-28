@@ -64,20 +64,28 @@
   <ng-template #header let-columns>
     <tr>
       @for (col of columns; track $index) {
-        <th [pSortableColumn]="col.sortable ? col.field : undefined">
-          <div
-            class="flex items-center"
-            [ngClass]="
-              col.type === 'custom'
-                ? 'justify-around text-center'
-                : 'justify-between'
-            ">
-            {{ col.header }}
-            @if (col.sortable) {
-              <p-sortIcon [field]="col.field" />
-            }
-          </div>
-        </th>
+        @if (
+          !(
+            col.header === 'Acciones' &&
+            checkPermissions() &&
+            !col.roles?.includes(currentUser().role)
+          )
+        ) {
+          <th [pSortableColumn]="col.sortable ? col.field : undefined">
+            <div
+              class="flex items-center"
+              [ngClass]="
+                col.type === 'custom'
+                  ? 'justify-around text-center'
+                  : 'justify-between'
+              ">
+              {{ col.header }}
+              @if (col.sortable) {
+                <p-sortIcon [field]="col.field" />
+              }
+            </div>
+          </th>
+        }
       }
     </tr>
   </ng-template>
@@ -85,44 +93,54 @@
   <ng-template #body let-rowData let-columns="columns">
     <tr>
       @for (col of columns; track $index) {
-        <td>
-          @if (col.type !== 'custom') {
-            @switch (col.pipe) {
-              @case ('date') {
-                {{ getValue(rowData, col.field!) | date: col.pipeArgs || [] }}
-              }
-              @case ('currency') {
-                {{
-                  getValue(rowData, col.field!)
-                    | currency: col.pipeArgs[0] : col.pipeArgs[1]
-                }}
-              }
+        @if (
+          !(
+            col.header === 'Acciones' &&
+            checkPermissions() &&
+            !col.roles?.includes(currentUser().role)
+          )
+        ) {
+          <td>
+            @if (col.type !== 'custom') {
+              @switch (col.pipe) {
+                @case ('date') {
+                  {{ getValue(rowData, col.field!) | date: col.pipeArgs || [] }}
+                }
+                @case ('currency') {
+                  {{
+                    getValue(rowData, col.field!)
+                      | currency: col.pipeArgs[0] : col.pipeArgs[1]
+                  }}
+                }
 
-              @case ('number') {
-                {{ getValue(rowData, col.field!) | number: col.pipeArgs || [] }}
-              }
+                @case ('number') {
+                  {{
+                    getValue(rowData, col.field!) | number: col.pipeArgs || []
+                  }}
+                }
 
-              @case ('state') {
-                {{ getValue(rowData, col.field!) | stateName }}
-              }
+                @case ('state') {
+                  {{ getValue(rowData, col.field!) | stateName }}
+                }
 
-              @case ('roles') {
-                {{ getValue(rowData, col.field!) | roles }}
-              }
+                @case ('roles') {
+                  {{ getValue(rowData, col.field!) | roles }}
+                }
 
-              @default {
-                {{ getValue(rowData, col.field!) }}
+                @default {
+                  {{ getValue(rowData, col.field!) }}
+                }
               }
+            } @else {
+              <ng-container
+                *ngTemplateOutlet="
+                  actionTemplate ?? null;
+                  context: { $implicit: rowData }
+                ">
+              </ng-container>
             }
-          } @else {
-            <ng-container
-              *ngTemplateOutlet="
-                actionTemplate ?? null;
-                context: { $implicit: rowData }
-              ">
-            </ng-container>
-          }
-        </td>
+          </td>
+        }
       }
     </tr>
   </ng-template>

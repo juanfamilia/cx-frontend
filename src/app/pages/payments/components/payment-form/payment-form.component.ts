@@ -13,7 +13,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
 import { InputDateComponent } from '@components/inputs/input-date/input-date.component';
 import { InputNumberComponent } from '@components/inputs/input-number/input-number.component';
 import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
@@ -21,6 +23,7 @@ import { Company } from '@interfaces/company';
 import { Payment, PaymentCreate } from '@interfaces/payments';
 import { provideIcons } from '@ng-icons/core';
 import {
+  lucideArrowLeft,
   lucideBanknote,
   lucideCalendar,
   lucideCalendarClock,
@@ -41,6 +44,7 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
     InputTextComponent,
     InputDateComponent,
     ButtonPrimaryComponent,
+    ButtonSecondaryComponent,
   ],
   templateUrl: './payment-form.component.html',
   styleUrl: './payment-form.component.css',
@@ -52,6 +56,7 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
       lucideCalendar,
       lucideCalendarClock,
       lucideReceipt,
+      lucideArrowLeft,
     }),
   ],
 })
@@ -62,6 +67,7 @@ export class PaymentFormComponent implements OnInit {
   submitEvent = output<PaymentCreate>();
 
   private fb = inject(FormBuilder);
+  private router = inject(Router);
   private companiesService = inject(CompaniesService);
 
   private filterSubject = new Subject<string>();
@@ -132,5 +138,9 @@ export class PaymentFormComponent implements OnInit {
     if (this.paymentForm.valid) {
       this.submitEvent.emit(this.paymentForm.value);
     }
+  }
+
+  goBack() {
+    this.router.navigate(['/payments']);
   }
 }

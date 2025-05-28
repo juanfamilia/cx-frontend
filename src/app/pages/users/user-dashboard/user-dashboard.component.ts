@@ -77,6 +77,7 @@ export class UserDashboardComponent {
       header: 'Acciones',
       type: 'custom',
       customTemplate: 'actions',
+      roles: [0, 1],
     },
   ]);
 

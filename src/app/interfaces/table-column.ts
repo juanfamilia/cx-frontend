@@ -8,4 +8,5 @@ export interface TableColumn {
   customTemplate?: string;
   pipe?: string;
   pipeArgs?: any[];
+  roles?: number[];
 }

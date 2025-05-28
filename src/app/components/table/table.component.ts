@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ContentChild,
+  inject,
   input,
   model,
   OnInit,
@@ -15,6 +17,7 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TableColumn } from '@interfaces/table-column';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideDownload, lucideFilterX, lucideSearch } from '@ng-icons/lucide';
+import { AuthService } from '@services/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { FloatLabel } from 'primeng/floatlabel';
@@ -66,11 +69,16 @@ export class TableComponent implements OnInit {
   filters = input<Options[]>();
   dafultFilter = input<number>(0);
   paginationOptions = input<Pagination>();
+  checkPermissions = input<boolean>(false);
 
   search = output<{ filter: string; search: string }>();
   clearFilters = output<void>();
   pagination = output<TablePageEvent>();
   filterChange = output<any>();
+
+  private authService = inject(AuthService);
+
+  currentUser = computed(() => this.authService.getCurrentUser());
 
   searchInput = new FormControl();
   filterInput = model<string>('');
