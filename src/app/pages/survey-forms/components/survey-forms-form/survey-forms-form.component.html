@@ -1,0 +1,141 @@
+<form
+  [formGroup]="surveyFormForm"
+  autocomplete="off"
+  class="mt-5 flex flex-col gap-4">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <app-input-text
+      id="title"
+      label="Titulo"
+      icon="lucideType"
+      [ErrorMessage]="false"
+      formControlName="title" />
+  </div>
+  <app-button-primary
+    title="Añadir Sección"
+    icon="lucideLayoutTemplate"
+    (event)="addSection()" />
+
+  <div class="mt-1 flex flex-col gap-3" formArrayName="sections">
+    @for (
+      section of sections.controls;
+      track $index;
+      let sectionIndex = $index
+    ) {
+      <div class="dark:bg-bunker-900/50 space-y-4 rounded-lg bg-white p-5">
+        <!-- Header and Actions -->
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-medium">Sección N.º {{ $index + 1 }}</h2>
+          <button
+            class="cursor-pointer px-2 text-red-500 hover:text-red-700"
+            (click)="removeSection($index)">
+            <ng-icon name="lucideTrash" class="text-xl" />
+          </button>
+        </div>
+        <!-- Form -->
+        <div
+          class="grid grid-cols-1 gap-6 md:grid-cols-2"
+          [formGroupName]="$index">
+          <!-- Name -->
+          <app-input-text
+            id="name"
+            label="Nombre de la Sección"
+            icon="lucideType"
+            [ErrorMessage]="false"
+            formControlName="name" />
+          <!-- Maximum Score -->
+          <p-floatlabel variant="on">
+            <p-inputnumber
+              formControlName="maximum_score"
+              [showButtons]="true"
+              buttonLayout="horizontal"
+              spinnerMode="horizontal"
+              inputId="maximum_score"
+              [min]="0"
+              class="w-full">
+              <ng-template #incrementbuttonicon>
+                <ng-icon name="lucidePlus" />
+              </ng-template>
+              <ng-template #decrementbuttonicon>
+                <ng-icon name="lucideMinus" />
+              </ng-template>
+            </p-inputnumber>
+            <label for="over_label">Máximo Puntaje</label>
+          </p-floatlabel>
+
+          <app-button-primary
+            title="Añadir Aspecto"
+            icon="lucideLayoutTemplate"
+            (event)="addAspect($index)" />
+
+          @if (getAspects(sectionIndex).controls.length > 0) {
+            <div class="md:col-span-2" formArrayName="aspects">
+              <div class="flex flex-col gap-4">
+                @for (
+                  aspect of getAspects(sectionIndex).controls;
+                  track $index;
+                  let aspectIndex = $index
+                ) {
+                  <!-- Header and Actions -->
+                  <div class="flex flex-col gap-4">
+                    <div class="flex items-center justify-between">
+                      <h2 class="text-lg font-medium">
+                        Aspecto N.º {{ $index + 1 }}
+                      </h2>
+                      <button
+                        class="cursor-pointer px-2 text-red-500 hover:text-red-700"
+                        (click)="removeAspect(sectionIndex, aspectIndex)">
+                        <ng-icon name="lucideTrash" class="text-xl" />
+                      </button>
+                    </div>
+                    <div
+                      class="grid grid-cols-1 gap-6 md:grid-cols-2"
+                      [formGroupName]="aspectIndex">
+                      <!-- Description -->
+                      <app-input-text
+                        id="description"
+                        label="Descripción"
+                        icon="lucideText"
+                        [ErrorMessage]="false"
+                        formControlName="description" />
+                      <p-floatlabel variant="on">
+                        <!-- Maximum Score -->
+                        <p-inputnumber
+                          formControlName="maximum_score"
+                          [showButtons]="true"
+                          buttonLayout="horizontal"
+                          spinnerMode="horizontal"
+                          inputId="maximum_score"
+                          [min]="0"
+                          class="w-full">
+                          <ng-template #incrementbuttonicon>
+                            <ng-icon name="lucidePlus" />
+                          </ng-template>
+                          <ng-template #decrementbuttonicon>
+                            <ng-icon name="lucideMinus" />
+                          </ng-template>
+                        </p-inputnumber>
+                        <label for="over_label">Máximo Puntaje</label>
+                      </p-floatlabel>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+  <div class="mt-5 flex justify-between gap-5">
+    <app-button-secondary
+      title="Regresar"
+      icon="lucideArrowLeft"
+      (event)="goBack()" />
+
+    <app-button-primary
+      [title]="isEdit() ? 'Guardar Cambios' : 'Crear Formulario'"
+      icon="lucideSave"
+      [disabled]="surveyFormForm.invalid || sections.controls.length < 1"
+      (event)="onSubmit()" />
+  </div>
+</form>

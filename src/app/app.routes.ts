@@ -51,6 +51,14 @@ export const routes: Routes = [
     data: { title: 'Configuración' },
   },
   {
+    path: 'survey-forms',
+    loadChildren: () =>
+      import('./pages/survey-forms/survey-forms.routes').then(
+        r => r.surveyFormsRoutes
+      ),
+    data: { title: 'Formularios de Encuestas' },
+  },
+  {
     path: '**',
     component: NotFoundComponent,
   },

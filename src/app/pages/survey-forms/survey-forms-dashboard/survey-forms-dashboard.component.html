@@ -1,0 +1,31 @@
+<!-- Header -->
+<div class="flex items-center justify-between">
+  <app-page-header
+    title="Formularios de Encuestas"
+    description="Modulo de administración de formularios de encuestas para campañas" />
+  <app-button-primary
+    title="Crear Formulario"
+    icon="lucideTextCursorInput"
+    (event)="createSurveyForm()" />
+</div>
+<!-- Table -->
+<app-table
+  [data]="surveyFormsResource.value()?.data || []"
+  [columnsInput]="columns()"
+  [filters]="filters()"
+  [loading]="surveyFormsResource.isLoading()"
+  (search)="searchEvent.set($event)"
+  (pagination)="pagination.set($event)">
+  <ng-template #tableActionTemplate let-company>
+    <div class="flex items-center justify-center gap-5">
+      <app-button-secondary
+        icon="lucidePencil"
+        (event)="updateSurveyForm(company.id)" />
+      <app-button-danger
+        tooltip="Eliminar"
+        icon="lucideTrash"
+        message="¿Está seguro de eliminar esta zona de trabajo?"
+        (event)="deleteSurveyForm(company.id)" />
+    </div>
+  </ng-template>
+</app-table>

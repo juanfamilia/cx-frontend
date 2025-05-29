@@ -18,6 +18,7 @@ import {
   lucideBriefcaseBusiness,
   lucideHouse,
   lucideMapPinned,
+  lucideTextCursorInput,
 } from '@ng-icons/lucide';
 import { AuthService } from '@services/auth.service';
 import { SidebarService } from '@services/sidebar.service';
@@ -39,6 +40,7 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       lucideBriefcaseBusiness,
       lucideBanknote,
       lucideMapPinned,
+      lucideTextCursorInput,
     }),
   ],
 })
@@ -78,6 +80,12 @@ export class SidebarComponent {
       title: 'Areas',
       route: '/work-areas',
       icon: 'lucideMapPinned',
+      roles: [1],
+    },
+    {
+      title: 'Formularios',
+      route: '/survey-forms',
+      icon: 'lucideTextCursorInput',
       roles: [1],
     },
     {

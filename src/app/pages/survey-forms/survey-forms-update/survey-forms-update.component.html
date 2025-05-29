@@ -1,0 +1,12 @@
+<app-page-header
+  title="Editar Formulario"
+  description="Editar un formulario de encuesta existente en el sistema" />
+
+@if (isLoading()) {
+  <p>Cargando...</p>
+} @else {
+  <app-survey-forms-form
+    [isEdit]="true"
+    [surveyForm]="surveyForm()!"
+    (submitEvent)="updateSurveyForm($event)" />
+}
