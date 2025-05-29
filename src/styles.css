@@ -63,7 +63,7 @@ p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-input
   z-index: 1 !important;
 }
 
-.p-inputtext {
+.p-password-input {
   border-radius: 0px 6px 6px 0px !important;
 }
 
