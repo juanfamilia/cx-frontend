@@ -8,7 +8,6 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ButtonDangerComponent } from '@components/buttons/button-danger/button-danger.component';
 import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
 import { TableComponent } from '@components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
@@ -25,7 +24,6 @@ import { Options } from 'src/app/types/options';
     PageHeaderComponent,
     ButtonPrimaryComponent,
     TableComponent,
-    ButtonSecondaryComponent,
     ButtonDangerComponent,
   ],
   templateUrl: './work-areas-dashboard.component.html',
@@ -99,7 +97,7 @@ export class WorkAreasDashboardComponent {
     this.router.navigate(['/work-areas/update/' + id]);
   }
 
-  deleteWorkArea = (id: number) => {
+  deleteWorkArea(id: number) {
     this.userZoneService.delete(id).subscribe({
       next: () => {
         this.userZonesResource.reload();
@@ -118,5 +116,5 @@ export class WorkAreasDashboardComponent {
         );
       },
     });
-  };
+  }
 }
