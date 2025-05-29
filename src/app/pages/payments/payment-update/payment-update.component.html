@@ -6,7 +6,7 @@
   <p>Cargando...</p>
 } @else {
   <app-payment-form
-    (submitEvent)="updatePayment($event)"
     [isEdit]="true"
-    [payment]="payment()!" />
+    [payment]="payment()!"
+    (submitEvent)="updatePayment($event)" />
 }

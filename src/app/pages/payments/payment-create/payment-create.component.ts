@@ -14,9 +14,9 @@ import { PaymentFormComponent } from '../components/payment-form/payment-form.co
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaymentCreateComponent {
-  private paymentService = inject(PaymentsService);
-  private toastService = inject(ShareToasterService);
   private router = inject(Router);
+  private toastService = inject(ShareToasterService);
+  private paymentService = inject(PaymentsService);
 
   createPayment(data: PaymentCreate) {
     this.paymentService.create(data).subscribe({
