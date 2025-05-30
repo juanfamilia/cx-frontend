@@ -59,6 +59,12 @@ export const routes: Routes = [
     data: { title: 'Formularios de Encuestas' },
   },
   {
+    path: 'campaigns',
+    loadChildren: () =>
+      import('./pages/campaign/campaign.routes').then(r => r.campaignRoutes),
+    data: { title: 'Campañas' },
+  },
+  {
     path: '**',
     component: NotFoundComponent,
   },
