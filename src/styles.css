@@ -67,6 +67,10 @@ p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-input
   border-radius: 0px 6px 6px 0px !important;
 }
 
+.p-datepicker-input {
+  border-radius: 0px 6px 6px 0px !important;
+}
+
 .p-select-clear-icon {
   margin: -0.5rem !important;
 }
