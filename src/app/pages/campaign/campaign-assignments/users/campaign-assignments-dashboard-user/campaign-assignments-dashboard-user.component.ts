@@ -8,47 +8,35 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ButtonDangerComponent } from '@components/buttons/button-danger/button-danger.component';
 import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
 import { TableComponent } from '@components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
 import { provideIcons } from '@ng-icons/core';
-import {
-  lucideMegaphone,
-  lucidePencil,
-  lucideSettings2,
-  lucideTrash,
-} from '@ng-icons/lucide';
-import { CampaignService } from '@services/campaign.service';
+import { lucideSettings2, lucideTrash } from '@ng-icons/lucide';
+import { CampaignAssignmentsUserService } from '@services/campaign-assignments-user.service';
 import { ShareToasterService } from '@services/toast.service';
 import { PaginatorState } from 'primeng/paginator';
 import { Options } from 'src/app/types/options';
 
 @Component({
-  selector: 'app-campaign-dashboard',
+  selector: 'app-campaign-assignments-dashboard-user',
   imports: [
     PageHeaderComponent,
     ButtonPrimaryComponent,
     TableComponent,
-    ButtonSecondaryComponent,
     ButtonDangerComponent,
   ],
-  templateUrl: './campaign-dashboard.component.html',
-  styleUrl: './campaign-dashboard.component.css',
+  templateUrl: './campaign-assignments-dashboard-user.component.html',
+  styleUrl: './campaign-assignments-dashboard-user.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [
-    provideIcons({
-      lucideMegaphone,
-      lucideSettings2,
-      lucidePencil,
-      lucideTrash,
-    }),
-  ],
+  viewProviders: [provideIcons({ lucideSettings2, lucideTrash })],
 })
-export class CampaignDashboardComponent {
+export class CampaignAssignmentsDashboardUserComponent {
   private router = inject(Router);
   private toastService = inject(ShareToasterService);
-  private campaignService = inject(CampaignService);
+  private campaignAssignmentsUserService = inject(
+    CampaignAssignmentsUserService
+  );
 
   pagination = signal<PaginatorState>({
     page: 0,
@@ -60,38 +48,33 @@ export class CampaignDashboardComponent {
 
   columns = signal<TableColumn[]>([
     {
-      field: 'name',
-      header: 'Nombre',
+      field: 'user.first_name',
+      header: 'Nombre(s)',
       sortable: true,
     },
     {
-      field: 'objective',
-      header: 'Objetivo',
+      field: 'user.last_name',
+      header: 'Apellidos',
       sortable: true,
     },
     {
-      field: 'channel',
-      header: 'Canal',
+      field: 'campaign.name',
+      header: 'Campaña',
       sortable: true,
     },
     {
-      field: 'date_start',
+      field: 'campaign.date_start',
       header: 'Fecha de Inicio',
       sortable: true,
       pipe: 'date',
       pipeArgs: ['dd/MM/yyyy'],
     },
     {
-      field: 'date_end',
+      field: 'campaign.date_end',
       header: 'Fecha de Finalización',
       sortable: true,
       pipe: 'date',
       pipeArgs: ['dd/MM/yyyy'],
-    },
-    {
-      field: 'survey.title',
-      header: 'Nombre del formulario',
-      sortable: true,
     },
     {
       header: 'Acciones',
@@ -102,26 +85,22 @@ export class CampaignDashboardComponent {
 
   filters = signal<Options[]>([
     {
-      name: 'Nombre',
-      value: 'name',
+      name: 'Nombre y Apellido',
+      value: 'full_name',
     },
     {
-      name: 'Objetivo',
-      value: 'objective',
-    },
-    {
-      name: 'Nombre del formulario',
-      value: 'survey',
+      name: 'Campaña',
+      value: 'campaign',
     },
   ]);
 
-  campaignResource = rxResource({
+  campaignAssignmentsUserResource = rxResource({
     request: () => ({
       pagination: this.pagination(),
       search: this.searchEvent(),
     }),
     loader: ({ request }) =>
-      this.campaignService.getAll(
+      this.campaignAssignmentsUserService.getAll(
         request.pagination.first,
         request.pagination.rows,
         request.search?.filter,
@@ -129,33 +108,25 @@ export class CampaignDashboardComponent {
       ),
   });
 
-  createCampaign() {
-    this.router.navigate(['/campaigns/create']);
+  createAsignment() {
+    this.router.navigate(['/campaigns/assigns/by-user/create']);
   }
 
-  assignCampaign() {
-    this.router.navigate(['/campaigns/assigns']);
-  }
-
-  updateCampaign(id: number) {
-    this.router.navigate(['/campaigns/update/' + id]);
-  }
-
-  deleteCampaign(id: number) {
-    this.campaignService.delete(id).subscribe({
+  deleteAssignment(id: number) {
+    this.campaignAssignmentsUserService.delete(id).subscribe({
       next: () => {
-        this.campaignResource.reload();
+        this.campaignAssignmentsUserResource.reload();
         this.toastService.showToast(
           'success',
-          'Campaña eliminada',
-          'La campaña ha sido eliminada exitosamente.'
+          'Asignación eliminada',
+          'La asignación ha sido eliminada exitosamente.'
         );
       },
       error: error => {
-        console.error('Error deleting campaign:', error);
+        console.error('Error deleting campaign assignment:', error);
         this.toastService.showToast(
           'error',
-          'Error al eliminar la campaña',
+          'Error al eliminar la asignación',
           error.message
         );
       },

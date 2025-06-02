@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { User, UserCreate, UserList } from '@interfaces/user';
 import { Observable } from 'rxjs';
+import { Options } from '../types/options';
 
 @Injectable({
   providedIn: 'root',
@@ -28,6 +29,10 @@ export class UsersService {
     return this.http.get<UserList>(environment.apiUrl + 'user/', {
       params,
     });
+  }
+
+  getAllOptionsList(): Observable<Options[]> {
+    return this.http.get<Options[]>(environment.apiUrl + 'user/plain-list');
   }
 
   create(data: UserCreate): Observable<User> {

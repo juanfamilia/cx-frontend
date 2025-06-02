@@ -1,1 +1,80 @@
-<p>campaign-form works!</p>
+<form
+  [formGroup]="campaignForm"
+  autocomplete="off"
+  class="mt-5 flex flex-col gap-4">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <app-input-text
+      id="name"
+      label="Nombre"
+      icon="lucideType"
+      [ErrorMessage]="false"
+      formControlName="name" />
+
+    <app-input-text
+      id="objective"
+      label="Objetivo"
+      icon="lucideTarget"
+      [ErrorMessage]="false"
+      formControlName="objective" />
+
+    <app-input-date
+      id="date_start"
+      label="Fecha de Inicio"
+      icon="lucideCalendarDays"
+      [ErrorMessage]="false"
+      formControlName="date_start" />
+
+    <app-input-date
+      id="date_end"
+      label="Fecha de Finalización"
+      icon="lucideCalendarDays"
+      [ErrorMessage]="false"
+      formControlName="date_end" />
+
+    <app-input-select
+      id="channel"
+      label="Canal"
+      icon="lucideRss"
+      [errorMessage]="false"
+      [clear]="false"
+      [options]="channels"
+      formControlName="channel" />
+
+    <p-select
+      [options]="surveysResource.value()?.data || []"
+      formControlName="survey_id"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="38"
+      scrollHeight="140px"
+      filter="true"
+      optionLabel="title"
+      optionValue="id"
+      (onLazyLoad)="lazyLoad.set($event)"
+      (onFilter)="searchSurveys($event)"
+      placeholder="Seleccione un usuario"
+      class="h-10">
+    </p-select>
+
+    <div class="md:col-span-2">
+      <app-input-text
+        id="notes"
+        label="Notas"
+        icon="lucideStickyNote"
+        [ErrorMessage]="false"
+        formControlName="notes" />
+    </div>
+  </div>
+
+  <div class="mt-5 flex justify-between gap-5">
+    <app-button-secondary
+      title="Regresar"
+      icon="lucideArrowLeft"
+      (event)="goBack()" />
+
+    <app-button-primary
+      [title]="isEdit() ? 'Guardar Cambios' : 'Crear Formulario'"
+      icon="lucideSave"
+      [disabled]="campaignForm.invalid"
+      (event)="onSubmit()" />
+  </div>
+</form>

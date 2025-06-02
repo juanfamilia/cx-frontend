@@ -1,0 +1,25 @@
+<app-page-header
+  title="Asignaciones"
+  description="Modulo de asignación de campañas" />
+
+<h2 class="my-5 text-center text-gray-800 italic dark:text-gray-500">
+  Seleccione una opción
+</h2>
+<div class="item flex justify-center gap-10">
+  <app-button-primary
+    title="Por Usuario"
+    icon="lucideUser"
+    (event)="AssignsByUser()" />
+
+  <app-button-primary
+    title="Por Zonas"
+    icon="lucideMap"
+    (event)="AssignsByZones()" />
+</div>
+
+<div class="my-10 w-fit">
+  <app-button-secondary
+    title="Regresar"
+    icon="lucideArrowLeft"
+    (event)="goBack()" />
+</div>

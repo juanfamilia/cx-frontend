@@ -51,3 +51,8 @@ export interface UserList {
   data: User[];
   pagination: Pagination;
 }
+
+export interface UserOptions {
+  id: number;
+  full_name: string;
+}

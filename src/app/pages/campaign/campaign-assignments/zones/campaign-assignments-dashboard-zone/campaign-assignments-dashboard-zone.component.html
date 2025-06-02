@@ -1,38 +1,30 @@
 <!-- Header -->
 <div class="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
   <app-page-header
-    title="Campañas"
-    description="Modulo de administración de campañas" />
+    title="Asignaciones por Zonas"
+    description="Modulo de administración de asignaciones de campañas por zonas de trabajo" />
   <div class="flex justify-between gap-5">
     <app-button-primary
-      title="Crear Campaña"
-      icon="lucideMegaphone"
-      (event)="createCampaign()" />
-    <app-button-primary
-      title="Assignaciones"
+      title="Asignar Campaña"
       icon="lucideSettings2"
-      (event)="assignCampaign()" />
+      (event)="createAsignment()" />
   </div>
 </div>
-
 <!-- Table -->
 <app-table
-  [data]="campaignResource.value()?.data || []"
+  [data]="campaignAssignmentsZoneResource.value()?.data || []"
   [columnsInput]="columns()"
   [filters]="filters()"
-  [loading]="campaignResource.isLoading()"
+  [loading]="campaignAssignmentsZoneResource.isLoading()"
   (search)="searchEvent.set($event)"
   (pagination)="pagination.set($event)">
   <ng-template #tableActionTemplate let-company>
     <div class="flex items-center justify-center gap-5">
-      <app-button-secondary
-        icon="lucidePencil"
-        (event)="updateCampaign(company.id)" />
       <app-button-danger
         tooltip="Eliminar"
         icon="lucideTrash"
         message="¿Está seguro de eliminar esta campaña?"
-        (event)="deleteCampaign(company.id)" />
+        (event)="deleteAssignment(company.id)" />
     </div>
   </ng-template>
 </app-table>

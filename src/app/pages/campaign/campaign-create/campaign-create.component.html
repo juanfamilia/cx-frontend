@@ -1,1 +1,5 @@
-<p>campaign-create works!</p>
+<app-page-header
+  title="Crear Campaña"
+  description="Registrar una nueva campaña" />
+
+<app-campaign-form (submitEvent)="createCampaign($event)" />
