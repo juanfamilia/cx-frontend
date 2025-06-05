@@ -1,0 +1,19 @@
+<app-page-header
+  title="Editar Evaluación"
+  description="Editar una evaluación existente en el sistema" />
+
+@if (isLoading()) {
+  <p>Cargando...</p>
+} @else {
+  <app-evaluation-form
+    [isEditing]="true"
+    [byZone]="
+      evaluation()?.location === null || evaluation()?.location === 'null'
+        ? false
+        : true
+    "
+    [campaign]="evaluation()?.campaign!"
+    [evaluation]="evaluation()"
+    [isLoading]="isLoadingSubmit()"
+    (submitEvent)="updateEvaluation($event)" />
+}

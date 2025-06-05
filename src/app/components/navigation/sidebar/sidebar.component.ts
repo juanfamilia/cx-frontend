@@ -16,6 +16,7 @@ import {
 import {
   lucideBanknote,
   lucideBriefcaseBusiness,
+  lucideFileText,
   lucideHouse,
   lucideMapPinned,
   lucideMegaphone,
@@ -43,6 +44,7 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       lucideMapPinned,
       lucideTextCursorInput,
       lucideMegaphone,
+      lucideFileText,
     }),
   ],
 })
@@ -95,6 +97,12 @@ export class SidebarComponent {
       route: '/campaigns',
       icon: 'lucideMegaphone',
       roles: [1, 2],
+    },
+    {
+      title: 'Evaluaciones',
+      route: '/evaluations',
+      icon: 'lucideFileText',
+      roles: [1, 2, 3],
     },
     {
       title: 'Configuración',

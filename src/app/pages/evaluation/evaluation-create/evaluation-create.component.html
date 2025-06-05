@@ -1,0 +1,25 @@
+<app-page-header
+  title="Registrar Evaluación"
+  description="Por favor, seleccione una campaña para rellenar su evaluación" />
+
+<p-select
+  [options]="assignments()"
+  [loading]="assignmentsResource.isLoading()"
+  placeholder="Seleccione una campaña"
+  [group]="true"
+  class="mx-auto mt-4 w-105"
+  (onChange)="selectCampaign($event.value); isByZone($event.value)">
+  <ng-template let-group #group>
+    <div class="flex items-center">
+      <span>{{ group.label }}</span>
+    </div>
+  </ng-template>
+</p-select>
+
+@if (campaign()) {
+  <app-evaluation-form
+    [campaign]="campaign()!"
+    [byZone]="byZone()"
+    [isLoading]="isLoadingSubmit()"
+    (submitEvent)="createEvaluation($event)" />
+}

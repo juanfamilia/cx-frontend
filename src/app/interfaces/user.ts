@@ -8,6 +8,10 @@ export interface User {
   first_name: string;
   last_name: string;
   gender: string;
+  birthdate: string;
+  civil_status: string;
+  socioeconomic: string;
+  inclusivity: string;
   email: string;
   created_at: string;
   updated_at: string;
@@ -22,6 +26,10 @@ export class UserClass implements User {
   first_name!: string;
   last_name!: string;
   gender!: string;
+  birthdate!: string;
+  civil_status!: string;
+  socioeconomic!: string;
+  inclusivity!: string;
   email!: string;
   created_at!: string;
   updated_at!: string;

@@ -31,7 +31,7 @@ export class CompaniesService {
   }
 
   create(data: CompanyCreate): Observable<Company> {
-    return this.http.post<Company>(environment.apiUrl + 'company/', data);
+    return this.http.post<Company>(environment.apiUrl + 'company', data);
   }
 
   getOne(id: number): Observable<Company> {

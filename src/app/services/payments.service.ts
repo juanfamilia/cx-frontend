@@ -31,7 +31,7 @@ export class PaymentsService {
   }
 
   create(data: PaymentCreate): Observable<Payment> {
-    return this.http.post<Payment>(environment.apiUrl + 'payment/', data);
+    return this.http.post<Payment>(environment.apiUrl + 'payment', data);
   }
 
   getOne(id: number): Observable<Payment> {

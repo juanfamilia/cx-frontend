@@ -65,6 +65,14 @@ export const routes: Routes = [
     data: { title: 'Campañas' },
   },
   {
+    path: 'evaluations',
+    loadChildren: () =>
+      import('./pages/evaluation/evaluation.routes').then(
+        r => r.evaluationRoutes
+      ),
+    data: { title: 'Evaluaciones' },
+  },
+  {
     path: '**',
     component: NotFoundComponent,
   },

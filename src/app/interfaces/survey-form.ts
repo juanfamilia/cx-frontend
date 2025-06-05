@@ -23,6 +23,7 @@ export interface SurveyFormSectionCreate {
 
 export interface SurveyFormAspectCreate {
   description: string;
+  type: string;
   maximum_score: number;
   order: number;
 }
@@ -38,6 +39,7 @@ export interface SurveyFormSection {
 export interface SurveyFormAspect {
   id: number;
   description: string;
+  type: string;
   maximum_score: number;
   order: number;
 }

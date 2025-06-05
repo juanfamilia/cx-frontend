@@ -11,6 +11,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
 import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
+import { InputDateComponent } from '@components/inputs/input-date/input-date.component';
 import { InputPasswordComponent } from '@components/inputs/input-password/input-password.component';
 import { InputSelectComponent } from '@components/inputs/input-select/input-select.component';
 import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
@@ -19,8 +20,10 @@ import { User, UserCreate } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
 import {
   lucideArrowLeft,
+  lucideBanknote,
   lucideBriefcaseBusiness,
   lucideBuilding2,
+  lucideCalendarDays,
   lucideMail,
   lucideUser,
   lucideUserPlus,
@@ -32,7 +35,9 @@ import { LazyLoadEvent } from 'primeng/api';
 import { DividerModule } from 'primeng/divider';
 import { SelectFilterEvent, SelectModule } from 'primeng/select';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { CIVIL_STATUS } from 'src/app/constants/civilStatus.constant';
 import { GENDERS } from 'src/app/constants/genders.constant';
+import { SOCIOECONOMIC } from 'src/app/constants/socioeconomic.constant';
 import { Options } from 'src/app/types/options';
 
 @Component({
@@ -46,6 +51,7 @@ import { Options } from 'src/app/types/options';
     SelectModule,
     ButtonPrimaryComponent,
     ButtonSecondaryComponent,
+    InputDateComponent,
   ],
   templateUrl: './user-form.component.html',
   styleUrl: './user-form.component.css',
@@ -59,6 +65,8 @@ import { Options } from 'src/app/types/options';
       lucideBuilding2,
       lucideUserPlus,
       lucideArrowLeft,
+      lucideCalendarDays,
+      lucideBanknote,
     }),
   ],
 })
@@ -77,6 +85,8 @@ export class UserFormComponent implements OnInit {
 
   currentUser = this.authService.getCurrentUser();
   genders = GENDERS;
+  civilStatus = CIVIL_STATUS;
+  socioeconomic = SOCIOECONOMIC;
   roles = signal<Options[]>([]);
   companies = signal<Company[]>([]);
   selectedCompanyName = signal<string>('');
@@ -89,6 +99,10 @@ export class UserFormComponent implements OnInit {
     first_name: ['', [Validators.required]],
     last_name: ['', [Validators.required]],
     gender: ['', [Validators.required]],
+    birthdate: ['', [Validators.required]],
+    civil_status: ['', [Validators.required]],
+    socioeconomic: ['', [Validators.required]],
+    inclusivity: ['N/A', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
@@ -100,6 +114,10 @@ export class UserFormComponent implements OnInit {
         first_name: this.user()!.first_name,
         last_name: this.user()!.last_name,
         gender: this.user()!.gender,
+        birthdate: this.user()!.birthdate,
+        civil_status: this.user()!.civil_status,
+        socioeconomic: this.user()!.socioeconomic,
+        inclusivity: this.user()!.inclusivity,
         email: this.user()!.email,
         company_id: this.user()!.company_id,
       });

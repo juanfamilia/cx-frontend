@@ -23,6 +23,30 @@
       [options]="genders"
       [clear]="false"
       formControlName="gender" />
+
+    <app-input-date
+      label="Fecha de nacimiento"
+      icon="lucideCalendarDays"
+      formControlName="birthdate" />
+
+    <app-input-select
+      label="Estado civil"
+      icon="lucideUser"
+      [options]="civilStatus"
+      [clear]="false"
+      formControlName="civil_status" />
+
+    <app-input-select
+      label="Nivel Socioeconómico"
+      icon="lucideBanknote"
+      [options]="socioeconomic"
+      [clear]="false"
+      formControlName="socioeconomic" />
+
+    <app-input-text
+      label="Inclusividad"
+      icon="lucideUser"
+      formControlName="inclusivity" />
   </div>
 
   <p-divider align="center" type="solid">

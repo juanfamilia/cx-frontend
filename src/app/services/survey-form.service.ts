@@ -36,7 +36,7 @@ export class SurveyFormService {
 
   create(data: SurveyFormCreate): Observable<SurveyFormDetail> {
     return this.http.post<SurveyFormDetail>(
-      environment.apiUrl + 'survey/forms/',
+      environment.apiUrl + 'survey/forms',
       data
     );
   }

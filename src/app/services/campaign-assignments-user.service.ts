@@ -45,7 +45,7 @@ export class CampaignAssignmentsUserService {
 
   create(data: CampaignAssignmentUserCreate): Observable<string> {
     return this.http.post<string>(
-      environment.apiUrl + 'campaign-assignment/users/',
+      environment.apiUrl + 'campaign-assignment/users',
       data
     );
   }

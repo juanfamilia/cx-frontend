@@ -45,7 +45,7 @@ export class CampaignAssignmentsZoneService {
 
   create(data: CampaignAssignmentZoneCreate): Observable<string> {
     return this.http.post<string>(
-      environment.apiUrl + 'campaign-assignment/zones/',
+      environment.apiUrl + 'campaign-assignment/zones',
       data
     );
   }

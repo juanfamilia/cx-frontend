@@ -31,7 +31,7 @@ export class UserZoneService {
   }
 
   create(data: UserZoneCreate): Observable<UserZone> {
-    return this.http.post<UserZone>(environment.apiUrl + 'user-zone/', data);
+    return this.http.post<UserZone>(environment.apiUrl + 'user-zone', data);
   }
 
   getOne(id: number): Observable<UserZone> {

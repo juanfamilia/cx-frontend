@@ -32,7 +32,7 @@ export class UserCreateComponent {
         this.toastService.showToast(
           'error',
           'Error al crear usuario',
-          err.message
+          err.error.detail
         );
         console.error('Error creating user:', err);
       },

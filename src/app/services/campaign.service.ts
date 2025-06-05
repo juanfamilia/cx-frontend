@@ -1,7 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
-import { Campaign, CampaignCreate, CampaignList } from '@interfaces/campaign';
+import {
+  Campaign,
+  CampaignAssignments,
+  CampaignCreate,
+  CampaignList,
+} from '@interfaces/campaign';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -35,7 +40,7 @@ export class CampaignService {
   }
 
   create(data: CampaignCreate): Observable<Campaign> {
-    return this.http.post<Campaign>(environment.apiUrl + 'campaign/', data);
+    return this.http.post<Campaign>(environment.apiUrl + 'campaign', data);
   }
 
   update(data: CampaignCreate, id: number): Observable<Campaign> {
@@ -44,5 +49,11 @@ export class CampaignService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(environment.apiUrl + 'campaign/' + id);
+  }
+
+  getAssignments(): Observable<CampaignAssignments> {
+    return this.http.get<CampaignAssignments>(
+      environment.apiUrl + 'campaign-assignment/assignments'
+    );
   }
 }

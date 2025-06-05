@@ -1,4 +1,6 @@
 import { Pagination } from '../types/pagination';
+import { CampaignAssignmentUser } from './campaign-assigment-user';
+import { CampaignAssignmentZone } from './campaign-assignment-zone';
 import { SurveyFormDetail } from './survey-form';
 
 export interface Campaign {
@@ -30,4 +32,9 @@ export interface CampaignCreate {
 export interface CampaignList {
   data: Campaign[];
   pagination: Pagination;
+}
+
+export interface CampaignAssignments {
+  by_user: CampaignAssignmentUser[];
+  by_zone: CampaignAssignmentZone[];
 }

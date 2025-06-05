@@ -1,0 +1,36 @@
+<!-- Header -->
+<div class="flex items-center justify-between">
+  <app-page-header
+    title="Evaluaciones"
+    description="Modulo de administración de evaluaciones" />
+  @if (authUser().role === 3) {
+    <app-button-primary
+      title="Registrar Evaluación"
+      icon="lucideFileText"
+      (event)="createEvaluation()" />
+  }
+</div>
+<!-- Table -->
+<app-table
+  [data]="data() || []"
+  [columnsInput]="columns()"
+  [filters]="filters()"
+  [loading]="evaluationsResource.isLoading()"
+  (search)="searchEvent.set($event)"
+  (pagination)="pagination.set($event)">
+  <ng-template #tableActionTemplate let-evaluation>
+    <div class="flex items-center justify-center gap-5">
+      @if (authUser().role === 3) {
+        <app-button-secondary
+          icon="lucidePencil"
+          (event)="updateEvaluation(evaluation.id)" />
+      } @else {
+        <app-button-danger
+          tooltip="Eliminar"
+          icon="lucideTrash"
+          message="¿Está seguro de eliminar esta evaluación?"
+          (event)="deleteEvaluation(evaluation.id)" />
+      }
+    </div>
+  </ng-template>
+</app-table>

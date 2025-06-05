@@ -32,6 +32,7 @@ import {
 } from '@ng-icons/lucide';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
 
 @Component({
   selector: 'app-survey-forms-form',
@@ -43,6 +44,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     InputNumberModule,
     FloatLabelModule,
     ButtonSecondaryComponent,
+    SelectModule,
   ],
   templateUrl: './survey-forms-form.component.html',
   styleUrl: './survey-forms-form.component.css',
@@ -122,7 +124,8 @@ export class SurveyFormsFormComponent implements OnInit {
     aspects.push(
       this.fb.group({
         description: ['', [Validators.required]],
-        maximum_score: [0, [Validators.required]],
+        type: ['', [Validators.required]],
+        maximum_score: [0],
         order: [order, [Validators.required]],
       })
     );
