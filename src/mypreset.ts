@@ -1,7 +1,6 @@
 import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
 
-// TODO: change primary color
 export const MyPreset = definePreset(Aura, {
   semantic: {
     primary: {
