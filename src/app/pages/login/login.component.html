@@ -1,54 +1,82 @@
-<!-- TODO: change login style -->
 <section
-  class="grid min-h-screen w-full grid-cols-1 items-center justify-center lg:grid-cols-2">
+  class="dark:bg-bunker-950 flex min-h-screen w-full items-center justify-center bg-gray-50 px-15 lg:px-0">
+  <!-- Card -->
   <div
-    class="from-primary-900 to-primary-600 hidden h-full items-center justify-center bg-linear-to-t lg:flex">
-    <img
-      src="https://sieteic.com/wp-content/uploads/2025/01/siete-ic-logo-white.png"
-      alt="Login"
-      class="w-[500px]" />
-  </div>
-  <div
-    class="dark:bg-bunker-900 flex h-full w-full flex-col justify-center bg-white">
-    <div class="mx-auto w-full max-w-lg px-14">
-      <!-- Title -->
-      <div class="mb-8 flex flex-col gap-2 text-center">
-        <h1 class="text-primary-500 text-2xl font-bold">Iniciar Sesión</h1>
-        <p class="text-sm text-gray-500">
-          Ingresa tus credenciales para acceder al sistema
+    class="dark:bg-bunker-900 flex h-150 w-full max-w-7xl gap-10 rounded-2xl bg-white p-10 shadow-sm lg:h-200">
+    <!-- Login Form -->
+    <div
+      class="flex h-full w-full flex-col justify-between text-center lg:text-start">
+      <!-- Logo -->
+      <div class="flex items-center justify-center lg:justify-start">
+        @if (darkMode()) {
+          <img
+            src="../images/siete-logo-white.png"
+            alt="Logo Siete CX"
+            width="180px" />
+        } @else {
+          <img
+            src="../images/siete-logo-black.png"
+            alt="Logo Siete CX"
+            width="180px" />
+        }
+      </div>
+
+      <!-- Title and Form-->
+      <div class="flex flex-col gap-2">
+        <div class="mb-8 flex flex-col gap-2">
+          <h1 class="text-primary-500 text-2xl font-bold sm:text-3xl">
+            Iniciar Sesión
+          </h1>
+          <p class="sm:text-md text-sm text-gray-500">
+            Ingresa tus credenciales para acceder al sistema
+          </p>
+        </div>
+
+        <form
+          [formGroup]="form"
+          (ngSubmit)="onSubmit()"
+          class="flex flex-col gap-5">
+          <app-input-text
+            label="Correo Electrónico"
+            icon="heroEnvelope"
+            id="email"
+            formControlName="username" />
+
+          <app-input-password
+            label="Contraseña"
+            id="asfasfaf"
+            formControlName="password" />
+
+          <div class="mt-5 w-full lg:w-fit">
+            @if (!isLoading()) {
+              <app-button-primary
+                title="Ingresar"
+                buttonType="submit"
+                [fluid]="true"
+                [disabled]="form.invalid" />
+            } @else {
+              <app-spinner />
+            }
+          </div>
+        </form>
+      </div>
+
+      <div>
+        <p class="mt-5 cursor-default text-sm text-gray-400">
+          Copyright © {{ currentYear }}
+          <span class="text-primary-500 font-medium">Siete CX</span>
         </p>
       </div>
-      <!-- Form -->
-      <form
-        [formGroup]="form"
-        (ngSubmit)="onSubmit()"
-        class="mt-5 flex flex-col gap-5">
-        <app-input-text
-          label="Correo Electrónico"
-          icon="heroEnvelope"
-          id="email"
-          formControlName="username" />
-
-        <app-input-password
-          label="Contraseña"
-          id="asfasfaf"
-          formControlName="password" />
-
-        @if (!isLoading()) {
-          <app-button-primary
-            title="Ingresar"
-            buttonType="submit"
-            [fluid]="true"
-            [disabled]="form.invalid" />
-        } @else {
-          <app-spinner />
-        }
-      </form>
-
-      <p class="mt-5 cursor-default text-center text-sm text-gray-400">
-        Copyright © {{ currentYear }}
-        <span class="text-primary-500 font-medium">Siete CX</span>
-      </p>
+    </div>
+    <!-- Presentation Image -->
+    <div class="hidden h-full w-full items-center justify-center lg:flex">
+      <div
+        class="bg-primary-700 flex h-full w-full items-center justify-center rounded-t-2xl rounded-br-2xl rounded-bl-[5rem]">
+        <!-- <img
+          src="../images/siete-logo-white.png"
+          alt="Login"
+          class="w-[500px]" /> -->
+      </div>
     </div>
   </div>
 </section>

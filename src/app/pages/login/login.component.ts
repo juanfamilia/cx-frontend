@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnInit,
   signal,
@@ -19,6 +20,7 @@ import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { provideIcons } from '@ng-icons/core';
 import { heroEnvelope, heroLockClosed } from '@ng-icons/heroicons/outline';
 import { AuthService } from '@services/auth.service';
+import { ThemeServiceService } from '@services/theme-service.service';
 import { ShareToasterService } from '@services/toast.service';
 
 @Component({
@@ -40,11 +42,14 @@ export class LoginComponent implements OnInit {
   private authService = inject(AuthService);
   private toastService = inject(ShareToasterService);
   private router = inject(Router);
+  private themeService = inject(ThemeServiceService);
 
   form!: FormGroup;
   isLoading = signal(false);
 
   currentYear = new Date().getFullYear();
+
+  darkMode = computed(() => this.themeService.darkMode());
 
   constructor() {
     if (this.authService.isAuth()) {
