@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CommonModule } from '@angular/common';
+import { CommonModule, TitleCasePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -27,6 +27,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { SelectModule } from 'primeng/select';
 import { Table, TableModule, TablePageEvent } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { RolePipe } from 'src/app/pipes/role.pipe';
@@ -53,6 +54,8 @@ import { StateNamePipe } from '../../pipes/state-name.pipe';
     ReactiveFormsModule,
     TooltipModule,
     RolePipe,
+    TagModule,
+    TitleCasePipe,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css',
@@ -147,5 +150,24 @@ export class TableComponent implements OnInit {
 
   getPipeArg(col: TableColumn, index: number): string | boolean | undefined {
     return col.pipeArgs?.[index];
+  }
+
+  getSeverity(value: string) {
+    switch (value) {
+      case 'enviado':
+        return 'info';
+
+      case 'actualizado':
+        return 'warn';
+
+      case 'aprovado':
+        return 'success';
+
+      case 'rechazado':
+        return 'danger';
+
+      default:
+        return 'warn';
+    }
   }
 }

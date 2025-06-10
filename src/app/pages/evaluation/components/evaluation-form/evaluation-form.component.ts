@@ -2,6 +2,7 @@ import { DatePipe, TitleCasePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   inject,
   input,
   OnInit,
@@ -16,7 +17,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
 import { InputLocationComponent } from '@components/inputs/input-location/input-location.component';
 import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
 import { Campaign } from '@interfaces/campaign';
@@ -24,12 +27,14 @@ import { Evaluation } from '@interfaces/evaluation';
 import { SurveyFormDetail } from '@interfaces/survey-form';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  lucideArrowLeft,
   lucideMinus,
   lucidePlus,
   lucideSave,
   lucideType,
   lucideUser,
 } from '@ng-icons/lucide';
+import 'media-chrome';
 import { FileUploadHandlerEvent, FileUploadModule } from 'primeng/fileupload';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -49,6 +54,7 @@ import { TextareaModule } from 'primeng/textarea';
     InputTextComponent,
     ButtonPrimaryComponent,
     FileUploadModule,
+    ButtonSecondaryComponent,
   ],
   templateUrl: './evaluation-form.component.html',
   styleUrl: './evaluation-form.component.css',
@@ -60,8 +66,10 @@ import { TextareaModule } from 'primeng/textarea';
       lucideUser,
       lucideSave,
       lucideType,
+      lucideArrowLeft,
     }),
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class EvaluationFormComponent implements OnInit {
   campaign = input.required<Campaign>();
@@ -70,9 +78,12 @@ export class EvaluationFormComponent implements OnInit {
   evaluation = input<Evaluation | null>(null);
   isLoading = input<boolean>(false);
 
+  disabled = input<boolean>(false);
+
   submitEvent = output<FormData>();
 
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   evaluationForm!: FormGroup;
   selectMediaFile = signal<File | null>(null);
@@ -103,6 +114,10 @@ export class EvaluationFormComponent implements OnInit {
         }
       });
     }
+
+    if (this.disabled()) {
+      this.evaluationForm.get('evaluation_answers')?.disable();
+    }
   }
 
   generateEvaluationForm(survey: SurveyFormDetail): FormGroup {
@@ -126,10 +141,16 @@ export class EvaluationFormComponent implements OnInit {
     }
 
     return this.fb.group({
-      title: ['', Validators.required],
-      location: [null],
-      evaluated_collaborator: ['', Validators.required],
-      evaluation_answers: this.fb.group(answerControls),
+      title: new FormControl(
+        { value: '', disabled: this.disabled() },
+        Validators.required
+      ),
+      location: new FormControl({ value: null, disabled: this.disabled() }),
+      evaluated_collaborator: new FormControl(
+        { value: '', disabled: this.disabled() },
+        Validators.required
+      ),
+      evaluation_answers: new FormGroup(answerControls),
     });
   }
 
@@ -199,5 +220,9 @@ export class EvaluationFormComponent implements OnInit {
 
       this.submitEvent.emit(formData);
     }
+  }
+
+  goBack() {
+    this.router.navigate(['/evaluations']);
   }
 }

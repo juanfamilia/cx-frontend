@@ -17,24 +17,55 @@
     </p>
   </div>
   <form [formGroup]="evaluationForm">
-    <div class="px-2 pt-6">
-      <p-fileupload
-        name="media"
-        accept="image/*,video/*"
-        customUpload="true"
-        (onSelect)="onMediaUpload($event)"
-        (onRemove)="selectMediaFile.set(null)"
-        [multiple]="false"
-        [showUploadButton]="false"
-        [auto]="false"
-        [maxFileSize]="5368709120"
-        chooseLabel="Seleccionar archivo"
-        cancelLabel="Cancelar">
-        <ng-template #empty>
-          <div>No se ha seleccionado ningún archivo</div>
-        </ng-template>
-      </p-fileupload>
-    </div>
+    @if (!disabled()) {
+      <div class="px-2 pt-6">
+        <p-fileupload
+          name="media"
+          accept="image/*,video/*"
+          customUpload="true"
+          (onSelect)="onMediaUpload($event)"
+          (onRemove)="selectMediaFile.set(null)"
+          [multiple]="false"
+          [showUploadButton]="false"
+          [auto]="false"
+          [maxFileSize]="5368709120"
+          chooseLabel="Seleccionar archivo"
+          cancelLabel="Cancelar">
+          <ng-template #empty>
+            <div>No se ha seleccionado ningún archivo</div>
+          </ng-template>
+        </p-fileupload>
+      </div>
+    } @else {
+      <!-- Reproductor de video -->
+      <media-controller class="mt-5">
+        <video
+          class="flex h-full w-full items-center justify-center"
+          slot="media"
+          [src]="evaluation()?.video?.url"
+          poster="../images/video-cover.webp"
+          preload="none"></video>
+        <media-loading-indicator
+          slot="centered-chrome"
+          noautohide=""></media-loading-indicator>
+        <media-control-bar>
+          <media-play-button class="px-2"></media-play-button>
+          <media-seek-backward-button
+            class="px-2"
+            seekoffset="5"></media-seek-backward-button>
+          <media-seek-forward-button
+            class="px-2"
+            seekoffset="15"></media-seek-forward-button>
+          <media-mute-button class="px-2"></media-mute-button>
+          <media-volume-range class="px-2"></media-volume-range>
+          <media-time-display class="px-2"></media-time-display>
+          <media-time-range class="px-2"></media-time-range>
+          <media-duration-display class="px-2"></media-duration-display>
+          <media-playback-rate-button class="px-2"></media-playback-rate-button>
+          <media-fullscreen-button class="px-2"></media-fullscreen-button>
+        </media-control-bar>
+      </media-controller>
+    }
     <div class="mt-2 grid gap-4 px-2 py-4 md:grid-cols-2">
       <div class="md:col-span-2">
         @if (isEditing() && selectMediaFile() !== null) {
@@ -42,7 +73,7 @@
             label="Titulo del adjunto"
             formControlName="title"
             icon="lucideType" />
-        } @else if (!isEditing()) {
+        } @else if (!isEditing() || disabled()) {
           <app-input-text
             label="Titulo del adjunto"
             formControlName="title"
@@ -147,13 +178,19 @@
       @if (isLoading()) {
         <p>Cargando...</p>
       } @else {
-        @if (isEditing()) {
+        @if (isEditing() && disabled()) {
+          <app-button-secondary
+            title="Volver"
+            icon="lucideArrowLeft"
+            (event)="goBack()" />
+        }
+        @if (isEditing() && !disabled()) {
           <app-button-primary
             title="Editar Evaluación"
             icon="lucideSave"
             [disabled]="!this.evaluationForm.valid"
             (event)="onEdit()" />
-        } @else {
+        } @else if (!isEditing()) {
           <app-button-primary
             title="Registrar Evaluación"
             icon="lucideSave"

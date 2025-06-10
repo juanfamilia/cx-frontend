@@ -127,6 +127,13 @@
                   {{ getValue(rowData, col.field!) | roles }}
                 }
 
+                @case ('severity') {
+                  <p-tag
+                    [severity]="getSeverity(getValue(rowData, col.field!))"
+                    [rounded]="true"
+                    [value]="getValue(rowData, col.field!) | titlecase" />
+                }
+
                 @default {
                   {{ getValue(rowData, col.field!) }}
                 }

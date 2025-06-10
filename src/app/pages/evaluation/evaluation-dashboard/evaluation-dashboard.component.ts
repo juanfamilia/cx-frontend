@@ -15,7 +15,12 @@ import { TableComponent } from '@components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
 import { User, UserClass } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
-import { lucideFileText, lucidePencil, lucideTrash } from '@ng-icons/lucide';
+import {
+  lucideEye,
+  lucideFileText,
+  lucidePencil,
+  lucideTrash,
+} from '@ng-icons/lucide';
 import { AuthService } from '@services/auth.service';
 import { EvaluationService } from '@services/evaluation.service';
 import { ShareToasterService } from '@services/toast.service';
@@ -34,7 +39,9 @@ import { Options } from 'src/app/types/options';
   templateUrl: './evaluation-dashboard.component.html',
   styleUrl: './evaluation-dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [provideIcons({ lucideFileText, lucidePencil, lucideTrash })],
+  viewProviders: [
+    provideIcons({ lucideFileText, lucidePencil, lucideTrash, lucideEye }),
+  ],
 })
 export class EvaluationDashboardComponent {
   private router = inject(Router);
@@ -64,6 +71,13 @@ export class EvaluationDashboardComponent {
       sortable: true,
     },
     {
+      field: 'created_at',
+      header: 'Fecha',
+      sortable: true,
+      pipe: 'date',
+      pipeArgs: ['dd/MM/yyyy'],
+    },
+    {
       field: 'location',
       header: 'Ubicación',
       sortable: true,
@@ -73,6 +87,7 @@ export class EvaluationDashboardComponent {
       field: 'status',
       header: 'Estado',
       sortable: true,
+      pipe: 'severity',
     },
     {
       header: 'Acciones',
@@ -119,6 +134,10 @@ export class EvaluationDashboardComponent {
 
   createEvaluation() {
     this.router.navigate(['/evaluations/create']);
+  }
+
+  detailEvaluation(id: number) {
+    this.router.navigate(['/evaluations/detail/' + id]);
   }
 
   updateEvaluation(id: number) {

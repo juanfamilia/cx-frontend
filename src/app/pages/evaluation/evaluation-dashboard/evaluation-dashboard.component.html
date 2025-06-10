@@ -25,6 +25,11 @@
           icon="lucidePencil"
           (event)="updateEvaluation(evaluation.id)" />
       } @else {
+        <app-button-secondary
+          tooltip="Ver"
+          icon="lucideEye"
+          (event)="detailEvaluation(evaluation.id)" />
+
         <app-button-danger
           tooltip="Eliminar"
           icon="lucideTrash"

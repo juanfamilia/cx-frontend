@@ -1,0 +1,14 @@
+@if (isLoading()) {
+  <p>Cargando...</p>
+} @else {
+  <app-evaluation-form
+    [isEditing]="true"
+    [byZone]="
+      evaluation()?.location === null || evaluation()?.location === 'null'
+        ? false
+        : true
+    "
+    [disabled]="true"
+    [campaign]="evaluation()?.campaign!"
+    [evaluation]="evaluation()" />
+}

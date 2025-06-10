@@ -27,6 +27,7 @@
     "@tailwindcss/postcss": "^4.0.0",
     "country-state-city": "^3.2.1",
     "jwt-decode": "^4.0.0",
+    "media-chrome": "^4.11.0",
     "ngx-cookie-service": "^19.1.0",
     "postcss": "^8.5.1",
     "primeng": "^19.0.9",
