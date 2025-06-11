@@ -26,7 +26,7 @@ export class UsersService {
       params = params.set('search', search);
     }
 
-    return this.http.get<UserList>(environment.apiUrl + 'user', {
+    return this.http.get<UserList>(environment.apiUrl + 'user/', {
       params,
     });
   }

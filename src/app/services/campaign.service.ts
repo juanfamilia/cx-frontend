@@ -30,7 +30,7 @@ export class CampaignService {
       params = params.set('search', search);
     }
 
-    return this.http.get<CampaignList>(environment.apiUrl + 'campaign', {
+    return this.http.get<CampaignList>(environment.apiUrl + 'campaign/', {
       params,
     });
   }

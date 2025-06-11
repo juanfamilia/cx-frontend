@@ -25,7 +25,7 @@ export class EvaluationService {
       params = params.set('search', search);
     }
 
-    return this.http.get<EvaluationList>(environment.apiUrl + 'evaluations', {
+    return this.http.get<EvaluationList>(environment.apiUrl + 'evaluations/', {
       params,
     });
   }
