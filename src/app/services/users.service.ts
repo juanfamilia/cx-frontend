@@ -32,7 +32,7 @@ export class UsersService {
   }
 
   getAllOptionsList(): Observable<Options[]> {
-    return this.http.get<Options[]>(environment.apiUrl + 'user/plain-list/');
+    return this.http.get<Options[]>(environment.apiUrl + 'user/plain-list');
   }
 
   create(data: UserCreate): Observable<User> {
