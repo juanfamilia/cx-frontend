@@ -30,7 +30,7 @@ export class CampaignAssignmentsZoneService {
     }
 
     return this.http.get<CampaignAssignmentZoneList>(
-      environment.apiUrl + 'campaign-assignment-zones/',
+      environment.apiUrl + 'campaign-assignment-zones',
       {
         params,
       }

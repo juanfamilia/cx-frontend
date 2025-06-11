@@ -25,7 +25,7 @@ export class PaymentsService {
       params = params.set('search', search);
     }
 
-    return this.http.get<PaymentList>(environment.apiUrl + 'payment/', {
+    return this.http.get<PaymentList>(environment.apiUrl + 'payment', {
       params,
     });
   }

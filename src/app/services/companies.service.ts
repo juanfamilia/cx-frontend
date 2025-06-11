@@ -25,7 +25,7 @@ export class CompaniesService {
       params = params.set('search', search);
     }
 
-    return this.http.get<CompanyList>(environment.apiUrl + 'company/', {
+    return this.http.get<CompanyList>(environment.apiUrl + 'company', {
       params,
     });
   }
