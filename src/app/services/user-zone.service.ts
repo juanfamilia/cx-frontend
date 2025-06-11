@@ -25,7 +25,7 @@ export class UserZoneService {
       params = params.set('search', search);
     }
 
-    return this.http.get<UserZoneList>(environment.apiUrl + 'user-zone', {
+    return this.http.get<UserZoneList>(environment.apiUrl + 'user-zone/', {
       params,
     });
   }

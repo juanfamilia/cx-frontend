@@ -29,7 +29,7 @@ export class SurveyFormService {
       params = params.set('search', search);
     }
 
-    return this.http.get<SurveyFormList>(environment.apiUrl + 'survey/forms', {
+    return this.http.get<SurveyFormList>(environment.apiUrl + 'survey/forms/', {
       params,
     });
   }
