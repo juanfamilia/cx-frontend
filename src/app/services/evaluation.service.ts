@@ -25,7 +25,7 @@ export class EvaluationService {
       params = params.set('search', search);
     }
 
-    return this.http.get<EvaluationList>(environment.apiUrl + 'evaluations', {
+    return this.http.get<EvaluationList>(environment.apiUrl + 'evaluations/', {
       params,
     });
   }
@@ -35,7 +35,7 @@ export class EvaluationService {
   }
 
   create(data: FormData) {
-    return this.http.post(environment.apiUrl + 'evaluations', data);
+    return this.http.post(environment.apiUrl + 'evaluations/', data);
   }
 
   update(data: FormData, id: number): Observable<Evaluation> {

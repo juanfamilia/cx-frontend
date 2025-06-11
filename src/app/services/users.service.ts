@@ -32,11 +32,11 @@ export class UsersService {
   }
 
   getAllOptionsList(): Observable<Options[]> {
-    return this.http.get<Options[]>(environment.apiUrl + 'user/plain-list');
+    return this.http.get<Options[]>(environment.apiUrl + 'user/plain-list/');
   }
 
   create(data: UserCreate): Observable<User> {
-    return this.http.post<User>(environment.apiUrl + 'user', data);
+    return this.http.post<User>(environment.apiUrl + 'user/', data);
   }
 
   getOne(id: number): Observable<User> {

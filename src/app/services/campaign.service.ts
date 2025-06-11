@@ -30,7 +30,7 @@ export class CampaignService {
       params = params.set('search', search);
     }
 
-    return this.http.get<CampaignList>(environment.apiUrl + 'campaign', {
+    return this.http.get<CampaignList>(environment.apiUrl + 'campaign/', {
       params,
     });
   }
@@ -40,7 +40,7 @@ export class CampaignService {
   }
 
   create(data: CampaignCreate): Observable<Campaign> {
-    return this.http.post<Campaign>(environment.apiUrl + 'campaign', data);
+    return this.http.post<Campaign>(environment.apiUrl + 'campaign/', data);
   }
 
   update(data: CampaignCreate, id: number): Observable<Campaign> {

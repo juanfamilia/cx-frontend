@@ -29,14 +29,14 @@ export class SurveyFormService {
       params = params.set('search', search);
     }
 
-    return this.http.get<SurveyFormList>(environment.apiUrl + 'survey/forms', {
+    return this.http.get<SurveyFormList>(environment.apiUrl + 'survey/forms/', {
       params,
     });
   }
 
   create(data: SurveyFormCreate): Observable<SurveyFormDetail> {
     return this.http.post<SurveyFormDetail>(
-      environment.apiUrl + 'survey/forms',
+      environment.apiUrl + 'survey/forms/',
       data
     );
   }
