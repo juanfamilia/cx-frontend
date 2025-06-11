@@ -53,7 +53,7 @@ export class CampaignService {
 
   getAssignments(): Observable<CampaignAssignments> {
     return this.http.get<CampaignAssignments>(
-      environment.apiUrl + 'campaign-assignment/assignments'
+      environment.apiUrl + 'campaign-assignment/'
     );
   }
 }

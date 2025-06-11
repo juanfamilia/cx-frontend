@@ -30,7 +30,7 @@ export class CampaignAssignmentsUserService {
     }
 
     return this.http.get<CampaignAssignmentUserList>(
-      environment.apiUrl + 'campaign-assignment/users/',
+      environment.apiUrl + 'campaign-assignment-users/',
       {
         params,
       }
@@ -39,20 +39,20 @@ export class CampaignAssignmentsUserService {
 
   getOne(id: number): Observable<CampaignAssignmentUser> {
     return this.http.get<CampaignAssignmentUser>(
-      environment.apiUrl + 'campaign-assignment/users/' + id
+      environment.apiUrl + 'campaign-assignment-users/' + id
     );
   }
 
   create(data: CampaignAssignmentUserCreate): Observable<string> {
     return this.http.post<string>(
-      environment.apiUrl + 'campaign-assignment/users',
+      environment.apiUrl + 'campaign-assignment-users/',
       data
     );
   }
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(
-      environment.apiUrl + 'campaign-assignment/users/' + id
+      environment.apiUrl + 'campaign-assignment-users/' + id
     );
   }
 }

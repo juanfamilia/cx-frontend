@@ -30,7 +30,7 @@ export class CampaignAssignmentsZoneService {
     }
 
     return this.http.get<CampaignAssignmentZoneList>(
-      environment.apiUrl + 'campaign-assignment/zones/',
+      environment.apiUrl + 'campaign-assignment-zones/',
       {
         params,
       }
@@ -39,20 +39,20 @@ export class CampaignAssignmentsZoneService {
 
   getOne(id: number): Observable<CampaignAssignmentZone> {
     return this.http.get<CampaignAssignmentZone>(
-      environment.apiUrl + 'campaign-assignment/zones/' + id
+      environment.apiUrl + 'campaign-assignment-zones/' + id
     );
   }
 
   create(data: CampaignAssignmentZoneCreate): Observable<string> {
     return this.http.post<string>(
-      environment.apiUrl + 'campaign-assignment/zones/',
+      environment.apiUrl + 'campaign-assignment-zones/',
       data
     );
   }
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(
-      environment.apiUrl + 'campaign-assignment/zones/' + id
+      environment.apiUrl + 'campaign-assignment-zones/' + id
     );
   }
 }
