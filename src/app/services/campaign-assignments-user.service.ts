@@ -30,7 +30,7 @@ export class CampaignAssignmentsUserService {
     }
 
     return this.http.get<CampaignAssignmentUserList>(
-      environment.apiUrl + 'campaign-assignment/users/',
+      environment.apiUrl + 'campaign-assignment/users',
       {
         params,
       }
