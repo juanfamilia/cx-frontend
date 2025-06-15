@@ -1,17 +1,22 @@
 <div class="flex">
-  @if (loggedIn()) {
+  <!-- Sidebar -->
+  @if (loggedIn() && !isMobile()) {
     <app-sidebar />
   }
-
+  <!-- Content -->
   <main
     [ngClass]="{ 'px-7.5 pt-7.5': loggedIn() }"
     class="min-h-screen w-full overflow-auto">
-    @if (loggedIn()) {
+    @if (loggedIn() && !isMobile()) {
       <app-toggle-sidebar />
     }
     <router-outlet />
+    <!-- Mobile nav -->
   </main>
 </div>
+@if (loggedIn() && isMobile()) {
+  <app-nav-mobile />
+}
 <p-toast
   [breakpoints]="{
     '920px': { width: '95%', right: '0', left: '0', 'margin-inline': 'auto' },

@@ -3,10 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  HostListener,
   inject,
-  Signal,
+  OnInit,
+  signal,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { NavMobileComponent } from '@components/navigation/nav-mobile/nav-mobile.component';
 import { SidebarComponent } from '@components/navigation/sidebar/sidebar.component';
 import { ToggleSidebarComponent } from '@components/navigation/toggle-sidebar/toggle-sidebar.component';
 import { provideIcons } from '@ng-icons/core';
@@ -23,15 +26,32 @@ import { ToastModule } from 'primeng/toast';
     NgClass,
     ToastModule,
     ToggleSidebarComponent,
+    NavMobileComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [provideIcons({ heroHome })],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   themeService = inject(ThemeServiceService);
   authService = inject(AuthService);
 
-  loggedIn: Signal<boolean> = computed(() => this.authService.loggedIn());
+  isMobile = signal<boolean>(false);
+
+  loggedIn = computed(() => this.authService.loggedIn());
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+    const newWidth = (event.target as Window).innerWidth;
+    this.checkWindowSize(newWidth);
+  }
+
+  checkWindowSize(width: number) {
+    this.isMobile.set(width <= 1024);
+  }
+
+  ngOnInit() {
+    this.checkWindowSize(window.innerWidth);
+  }
 }

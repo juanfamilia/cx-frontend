@@ -1,8 +1,6 @@
-import { NgClass } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -23,15 +21,14 @@ import {
   lucideTextCursorInput,
 } from '@ng-icons/lucide';
 import { AuthService } from '@services/auth.service';
-import { SidebarService } from '@services/sidebar.service';
 import { NAVROUTES } from 'src/app/constants/navRoutes.constant';
 import { NavLinkComponent } from '../nav-link/nav-link.component';
 
 @Component({
-  selector: 'app-sidebar',
-  imports: [NavLinkComponent, NgIcon, NgClass],
-  templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css',
+  selector: 'app-nav-mobile',
+  imports: [NavLinkComponent, NgIcon],
+  templateUrl: './nav-mobile.component.html',
+  styleUrl: './nav-mobile.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [
     provideIcons({
@@ -48,14 +45,11 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
     }),
   ],
 })
-export class SidebarComponent {
+export class NavMobileComponent {
   private authService = inject(AuthService);
-  private sidebarService = inject(SidebarService);
-
-  isCollapsed = computed(() => this.sidebarService.isCollapsed());
-  currentUser = signal<User>(this.authService.getCurrentUser());
 
   routes = NAVROUTES;
+  currentUser = signal<User>(this.authService.getCurrentUser());
 
   logout() {
     this.authService.logout();
