@@ -40,6 +40,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TextareaModule } from 'primeng/textarea';
 
+import { EvaluationChangeStatusComponent } from '../evaluation-change-status/evaluation-change-status.component';
+
 @Component({
   selector: 'app-evaluation-form',
   imports: [
@@ -55,6 +57,7 @@ import { TextareaModule } from 'primeng/textarea';
     ButtonPrimaryComponent,
     FileUploadModule,
     ButtonSecondaryComponent,
+    EvaluationChangeStatusComponent,
   ],
   templateUrl: './evaluation-form.component.html',
   styleUrl: './evaluation-form.component.css',

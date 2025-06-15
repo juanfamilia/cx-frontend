@@ -160,7 +160,7 @@ export class TableComponent implements OnInit {
       case 'actualizado':
         return 'warn';
 
-      case 'aprovado':
+      case 'aprobado':
         return 'success';
 
       case 'rechazado':

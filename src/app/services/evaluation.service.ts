@@ -30,6 +30,13 @@ export class EvaluationService {
     });
   }
 
+  updateStatus(id: number, status: string): Observable<Evaluation> {
+    return this.http.put<Evaluation>(
+      environment.apiUrl + 'evaluations/status/' + id,
+      status
+    );
+  }
+
   getOne(id: number): Observable<Evaluation> {
     return this.http.get<Evaluation>(environment.apiUrl + 'evaluations/' + id);
   }

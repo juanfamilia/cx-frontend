@@ -1,0 +1,26 @@
+<div class="flex justify-center">
+  <p-button (click)="showDialog()" label="Show" />
+  <p-dialog
+    header="Actualizar Estado"
+    [modal]="true"
+    [(visible)]="visible"
+    [style]="{ width: '25rem' }">
+    <form [formGroup]="statusForm" class="mb-4 flex items-center gap-4 py-5">
+      <app-input-select
+        label="Estado"
+        icon="lucideClipboardCheck"
+        placeholder="Seleccione un estado"
+        [options]="status"
+        [clear]="false"
+        class="w-full"
+        formControlName="status" />
+    </form>
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        (click)="hiddenDialog()" />
+      <p-button label="Actualizar" (click)="onSubmit()" />
+    </div>
+  </p-dialog>
+</div>

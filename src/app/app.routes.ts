@@ -43,14 +43,6 @@ export const routes: Routes = [
     data: { title: 'Areas de Trabajo' },
   },
   {
-    path: 'configuration',
-    loadChildren: () =>
-      import('./pages/configuration/configuration.routes').then(
-        r => r.configurationRoutes
-      ),
-    data: { title: 'Configuración' },
-  },
-  {
     path: 'survey-forms',
     loadChildren: () =>
       import('./pages/survey-forms/survey-forms.routes').then(
@@ -71,6 +63,22 @@ export const routes: Routes = [
         r => r.evaluationRoutes
       ),
     data: { title: 'Evaluaciones' },
+  },
+  {
+    path: 'notifications',
+    loadChildren: () =>
+      import('./pages/notifications/notification.routes').then(
+        r => r.notificationRoutes
+      ),
+    data: { title: 'Notificaciones' },
+  },
+  {
+    path: 'configuration',
+    loadChildren: () =>
+      import('./pages/configuration/configuration.routes').then(
+        r => r.configurationRoutes
+      ),
+    data: { title: 'Configuración' },
   },
   {
     path: '**',

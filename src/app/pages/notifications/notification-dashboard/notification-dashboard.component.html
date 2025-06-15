@@ -1,0 +1,70 @@
+<div
+  class="dark:bg-bunker-900/50 dark:border-bunker-900 mx-auto flex max-w-7xl flex-col gap-4 rounded-lg border border-gray-300 bg-white p-4">
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <!-- Icon -->
+    <div
+      class="bg-primary-300/65 dark:bg-primary-500 text-primary-600 dark:text-primary-900 flex items-center justify-center rounded-lg p-2">
+      <ng-icon name="lucideBell" size="25" />
+    </div>
+    <!-- Title -->
+    <div class="flex flex-col">
+      <h3 class="text-2xl font-medium">Notificaciones</h3>
+      <p class="text-sm text-gray-500">
+        Recibe notificaciones sobre tus evaluaciones
+      </p>
+    </div>
+  </div>
+  @if (notificationsResource.isLoading()) {
+    <h2>Cargando...</h2>
+  } @else {
+    <!-- Filters -->
+    <div class="hidden w-full sm:block">
+      <p-selectbutton
+        [options]="stateOptions"
+        [(ngModel)]="value"
+        optionLabel="label"
+        optionValue="value"
+        aria-labelledby="basic"
+        styleClass="w-full">
+        <ng-template #item let-item>
+          <ng-icon [name]="item.icon" size="1.2em" />
+          <span>{{ item.label }}</span>
+          @switch (item.value) {
+            @case ('all') {
+              <p-badge
+                [value]="notifications().length"
+                severity="secondary"
+                class="flex items-center border border-gray-200" />
+            }
+
+            @case ('pending') {
+              <p-badge
+                [value]="getPendingCount()"
+                severity="danger"
+                class="flex items-center" />
+            }
+
+            @case ('read') {
+              <p-badge
+                [value]="getReadCount()"
+                severity="secondary"
+                class="flex items-center border border-gray-200" />
+            }
+          }
+        </ng-template>
+      </p-selectbutton>
+    </div>
+    <!-- Notifications -->
+    <div class="flex flex-col gap-4">
+      <!-- Card -->
+      @if (notificationsResource.value()!.length > 0) {
+        @for (notification of notifications(); track $index) {
+          <app-notification-card [notification]="notification" />
+        }
+      } @else {
+        <h2>No hay notificaciones</h2>
+      }
+    </div>
+  }
+</div>

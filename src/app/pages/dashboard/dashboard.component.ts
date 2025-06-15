@@ -4,6 +4,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { ButtonNotificationComponent } from '@components/buttons/button-notification/button-notification.component';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
 import { User } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
@@ -17,7 +18,7 @@ import { AuthService } from '@services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [PageHeaderComponent],
+  imports: [PageHeaderComponent, ButtonNotificationComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

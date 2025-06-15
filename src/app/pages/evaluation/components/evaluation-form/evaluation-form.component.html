@@ -178,12 +178,15 @@
       @if (isLoading()) {
         <p>Cargando...</p>
       } @else {
-        @if (isEditing() && disabled()) {
+        <div class="flex items-center gap-5">
           <app-button-secondary
             title="Volver"
             icon="lucideArrowLeft"
             (event)="goBack()" />
-        }
+          @if (disabled()) {
+            <app-evaluation-change-status [evaluation_id]="evaluation()!.id" />
+          }
+        </div>
         @if (isEditing() && !disabled()) {
           <app-button-primary
             title="Editar Evaluación"

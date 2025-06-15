@@ -5,11 +5,12 @@ import {
   output,
 } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
+import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-button-secondary',
-  imports: [NgIcon, TooltipModule],
+  imports: [NgIcon, TooltipModule, ButtonModule],
   templateUrl: './button-secondary.component.html',
   styleUrl: './button-secondary.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,6 +22,7 @@ export class ButtonSecondaryComponent {
   disabled = input<boolean>(false);
   event = output();
   tooltip = input<string>();
+  isLoading = input<boolean>(false);
 
   onClick() {
     this.event.emit();
