@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideBell, lucideCheckCheck, lucideFilter } from '@ng-icons/lucide';
 import { NotificationService } from '@services/notification.service';
@@ -22,6 +23,7 @@ import { NotificationCardComponent } from '../components/notification-card/notif
     SelectButtonModule,
     FormsModule,
     BadgeModule,
+    SpinnerComponent,
   ],
   templateUrl: './notification-dashboard.component.html',
   styleUrl: './notification-dashboard.component.css',

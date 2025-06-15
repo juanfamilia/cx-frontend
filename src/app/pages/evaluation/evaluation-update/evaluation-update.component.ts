@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { Evaluation } from '@interfaces/evaluation';
 import { EvaluationService } from '@services/evaluation.service';
 import { ShareToasterService } from '@services/toast.service';
@@ -14,7 +15,7 @@ import { EvaluationFormComponent } from '../components/evaluation-form/evaluatio
 
 @Component({
   selector: 'app-evaluation-update',
-  imports: [PageHeaderComponent, EvaluationFormComponent],
+  imports: [PageHeaderComponent, EvaluationFormComponent, SpinnerComponent],
   templateUrl: './evaluation-update.component.html',
   styleUrl: './evaluation-update.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

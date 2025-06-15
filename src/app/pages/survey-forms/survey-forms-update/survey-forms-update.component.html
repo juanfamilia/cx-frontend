@@ -3,7 +3,7 @@
   description="Editar un formulario de evaluación existente en el sistema" />
 
 @if (isLoading()) {
-  <p>Cargando...</p>
+  <app-spinner />
 } @else {
   <app-survey-forms-form
     [isEdit]="true"

@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { Campaign, CampaignCreate } from '@interfaces/campaign';
 import { CampaignService } from '@services/campaign.service';
 import { ShareToasterService } from '@services/toast.service';
@@ -14,7 +15,7 @@ import { CampaignFormComponent } from '../components/campaign-form/campaign-form
 
 @Component({
   selector: 'app-campaign-update',
-  imports: [PageHeaderComponent, CampaignFormComponent],
+  imports: [PageHeaderComponent, CampaignFormComponent, SpinnerComponent],
   templateUrl: './campaign-update.component.html',
   styleUrl: './campaign-update.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

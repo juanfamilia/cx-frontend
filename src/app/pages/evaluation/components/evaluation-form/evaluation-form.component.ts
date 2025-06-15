@@ -40,6 +40,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TextareaModule } from 'primeng/textarea';
 
+import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { EvaluationChangeStatusComponent } from '../evaluation-change-status/evaluation-change-status.component';
 
 @Component({
@@ -58,6 +59,7 @@ import { EvaluationChangeStatusComponent } from '../evaluation-change-status/eva
     FileUploadModule,
     ButtonSecondaryComponent,
     EvaluationChangeStatusComponent,
+    SpinnerComponent,
   ],
   templateUrl: './evaluation-form.component.html',
   styleUrl: './evaluation-form.component.css',

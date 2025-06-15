@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { Evaluation } from '@interfaces/evaluation';
 import { EvaluationService } from '@services/evaluation.service';
 import { ShareToasterService } from '@services/toast.service';
@@ -13,7 +14,7 @@ import { EvaluationFormComponent } from '../components/evaluation-form/evaluatio
 
 @Component({
   selector: 'app-evaluation-detail',
-  imports: [EvaluationFormComponent],
+  imports: [EvaluationFormComponent, SpinnerComponent],
   templateUrl: './evaluation-detail.component.html',
   styleUrl: './evaluation-detail.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

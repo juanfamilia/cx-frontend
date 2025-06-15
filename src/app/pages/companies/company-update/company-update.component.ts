@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { Company, CompanyCreate } from '@interfaces/company';
 import { CompaniesService } from '@services/companies.service';
 import { ShareToasterService } from '@services/toast.service';
@@ -14,7 +15,7 @@ import { CompanyFormComponent } from '../components/company-form/company-form.co
 
 @Component({
   selector: 'app-company-update',
-  imports: [PageHeaderComponent, CompanyFormComponent],
+  imports: [PageHeaderComponent, CompanyFormComponent, SpinnerComponent],
   templateUrl: './company-update.component.html',
   styleUrl: './company-update.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

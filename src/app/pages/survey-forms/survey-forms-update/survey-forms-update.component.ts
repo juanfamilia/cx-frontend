@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { SurveyFormCreate, SurveyFormDetail } from '@interfaces/survey-form';
 import { SurveyFormService } from '@services/survey-form.service';
 import { ShareToasterService } from '@services/toast.service';
@@ -14,7 +15,7 @@ import { SurveyFormsFormComponent } from '../components/survey-forms-form/survey
 
 @Component({
   selector: 'app-survey-forms-update',
-  imports: [PageHeaderComponent, SurveyFormsFormComponent],
+  imports: [PageHeaderComponent, SurveyFormsFormComponent, SpinnerComponent],
   templateUrl: './survey-forms-update.component.html',
   styleUrl: './survey-forms-update.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

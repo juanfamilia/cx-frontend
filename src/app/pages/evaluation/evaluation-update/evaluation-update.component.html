@@ -3,7 +3,7 @@
   description="Editar una evaluación existente en el sistema" />
 
 @if (isLoading()) {
-  <p>Cargando...</p>
+  <app-spinner />
 } @else {
   <app-evaluation-form
     [isEditing]="true"

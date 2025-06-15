@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { Payment, PaymentCreate } from '@interfaces/payments';
 import { PaymentsService } from '@services/payments.service';
 import { ShareToasterService } from '@services/toast.service';
@@ -14,7 +15,7 @@ import { PaymentFormComponent } from '../components/payment-form/payment-form.co
 
 @Component({
   selector: 'app-payment-update',
-  imports: [PageHeaderComponent, PaymentFormComponent],
+  imports: [PageHeaderComponent, PaymentFormComponent, SpinnerComponent],
   templateUrl: './payment-update.component.html',
   styleUrl: './payment-update.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

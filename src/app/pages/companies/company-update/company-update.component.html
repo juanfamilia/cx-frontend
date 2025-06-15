@@ -3,7 +3,7 @@
   description="Modificar una empresa existente en el sistema" />
 
 @if (isLoading()) {
-  <p>Cargando...</p>
+  <app-spinner />
 } @else {
   <app-company-form
     (submitEvent)="updateCompany($event)"
