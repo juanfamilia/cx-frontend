@@ -1,0 +1,16 @@
+<div
+  class="dark:bg-bunker-900/40 dark:border-bunker-900 rounded-lg border border-gray-300 bg-white p-6 py-4 shadow-xs">
+  <h3 class="text-2xl leading-none font-semibold tracking-tight">
+    Acciones Rápidas
+  </h3>
+  <div class="mt-4 flex flex-col gap-3">
+    @for (action of actions(); track $index) {
+      <button
+        (click)="goTo(action.route)"
+        class="dark:bg-bunker-900/60 dark:hover:bg-bunker-900/90 dark:border-bunker-900 inline-flex h-10 w-full cursor-pointer items-center justify-start gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-gray-100">
+        <ng-icon [name]="action.icon" strokeWidth="1.5" size="20" />
+        {{ action.title }}
+      </button>
+    }
+  </div>
+</div>

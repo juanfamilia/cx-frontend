@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { ButtonNotificationComponent } from '@components/buttons/button-notification/button-notification.component';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
-import { User } from '@interfaces/user';
+import { UserClass } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
 import {
   lucideCalendar,
@@ -15,10 +15,21 @@ import {
   lucideUsers,
 } from '@ng-icons/lucide';
 import { AuthService } from '@services/auth.service';
+import { DashboardAdminComponent } from './components/dashboard-admin/dashboard-admin.component';
+import { DashboardEvaluatorsComponent } from './components/dashboard-evaluators/dashboard-evaluators.component';
+import { DashboardManagerComponent } from './components/dashboard-manager/dashboard-manager.component';
+import { DashboardSuperadminComponent } from './components/dashboard-superadmin/dashboard-superadmin.component';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [PageHeaderComponent, ButtonNotificationComponent],
+  imports: [
+    PageHeaderComponent,
+    ButtonNotificationComponent,
+    DashboardEvaluatorsComponent,
+    DashboardAdminComponent,
+    DashboardManagerComponent,
+    DashboardSuperadminComponent,
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +45,27 @@ import { AuthService } from '@services/auth.service';
 export class DashboardComponent {
   private authService = inject(AuthService);
 
-  currentUser = signal<User>(this.authService.getCurrentUser());
+  currentUser = signal<UserClass>(
+    new UserClass(this.authService.getCurrentUser())
+  );
   loading = signal(false);
+
+  getDescription(): string {
+    switch (this.currentUser().role) {
+      case 0:
+        return 'Gestiona la aplicación, tus empresas y pagos';
+
+      case 1:
+        return 'Gestiona tus campañas, trabajadores y evaluaciones';
+
+      case 2:
+        return 'Dashboard Gerente';
+
+      case 3:
+        return 'Aquí tienes un resumen de las actividades recientes';
+
+      default:
+        return 'Dashboard';
+    }
+  }
 }

@@ -2,14 +2,28 @@
   <!-- Header -->
   <div class="flex items-center justify-between">
     <app-page-header
-      title="Inicio"
-      [description]="
-        (currentUser().gender === 'male' ? 'Bienvenido, ' : 'Bienvenida, ') +
-        currentUser().first_name +
-        ' ' +
-        currentUser().last_name
-      " />
+      [title]="'¡Bienvenido, ' + currentUser().first_name + '!'"
+      [description]="getDescription()" />
     <app-button-notification />
   </div>
   <!-- Cards -->
+  <div class="mt-4">
+    @switch (currentUser().role) {
+      @case (0) {
+        <app-dashboard-superadmin />
+      }
+
+      @case (1) {
+        <app-dashboard-admin />
+      }
+
+      @case (2) {
+        <app-dashboard-manager />
+      }
+
+      @case (3) {
+        <app-dashboard-evaluators />
+      }
+    }
+  </div>
 </section>
