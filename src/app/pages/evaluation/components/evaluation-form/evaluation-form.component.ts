@@ -41,6 +41,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { TextareaModule } from 'primeng/textarea';
 
 import { SpinnerComponent } from '@components/spinner/spinner.component';
+import { VideoService } from '@services/video.service';
 import { EvaluationChangeStatusComponent } from '../evaluation-change-status/evaluation-change-status.component';
 
 @Component({
@@ -89,9 +90,13 @@ export class EvaluationFormComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private videoService = inject(VideoService);
 
   evaluationForm!: FormGroup;
   selectMediaFile = signal<File | null>(null);
+
+  videoAvailableLoading = signal<boolean>(true);
+  videoAvailable = signal<boolean>(false);
 
   ngOnInit() {
     this.evaluationForm = this.generateEvaluationForm(this.campaign().survey!);
@@ -122,6 +127,19 @@ export class EvaluationFormComponent implements OnInit {
 
     if (this.disabled()) {
       this.evaluationForm.get('evaluation_answers')?.disable();
+
+      this.videoAvailableLoading.set(true);
+      this.videoService.updateStatus(this.evaluation()!.id).subscribe({
+        next: () => {
+          this.videoAvailable.set(true);
+          this.videoAvailableLoading.set(false);
+        },
+        error: error => {
+          console.error('Error updating video status:', error);
+          this.videoAvailable.set(false);
+          this.videoAvailableLoading.set(false);
+        },
+      });
     }
   }
 
