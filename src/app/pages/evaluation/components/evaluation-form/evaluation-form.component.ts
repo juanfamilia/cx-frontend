@@ -22,6 +22,7 @@ import { ButtonPrimaryComponent } from '@components/buttons/button-primary/butto
 import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
 import { InputLocationComponent } from '@components/inputs/input-location/input-location.component';
 import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
+import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { Campaign } from '@interfaces/campaign';
 import { Evaluation } from '@interfaces/evaluation';
 import { SurveyFormDetail } from '@interfaces/survey-form';
@@ -34,14 +35,18 @@ import {
   lucideType,
   lucideUser,
 } from '@ng-icons/lucide';
+import { CloudflareStreamService } from '@services/cloudflare-stream.service';
+import { VideoService } from '@services/video.service';
+import 'hls-video-element';
 import 'media-chrome';
+import 'media-chrome/menu';
+import { PrimeNG } from 'primeng/config';
 import { FileUploadHandlerEvent, FileUploadModule } from 'primeng/fileupload';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { ProgressBar } from 'primeng/progressbar';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TextareaModule } from 'primeng/textarea';
-
-import { SpinnerComponent } from '@components/spinner/spinner.component';
-import { VideoService } from '@services/video.service';
+import * as tus from 'tus-js-client';
 import { EvaluationChangeStatusComponent } from '../evaluation-change-status/evaluation-change-status.component';
 
 @Component({
@@ -61,6 +66,7 @@ import { EvaluationChangeStatusComponent } from '../evaluation-change-status/eva
     ButtonSecondaryComponent,
     EvaluationChangeStatusComponent,
     SpinnerComponent,
+    ProgressBar,
   ],
   templateUrl: './evaluation-form.component.html',
   styleUrl: './evaluation-form.component.css',
@@ -83,7 +89,6 @@ export class EvaluationFormComponent implements OnInit {
   isEditing = input<boolean>(false);
   evaluation = input<Evaluation | null>(null);
   isLoading = input<boolean>(false);
-
   disabled = input<boolean>(false);
 
   submitEvent = output<FormData>();
@@ -91,12 +96,19 @@ export class EvaluationFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private videoService = inject(VideoService);
+  private streamService = inject(CloudflareStreamService);
+  private config = inject(PrimeNG);
 
   evaluationForm!: FormGroup;
+
   selectMediaFile = signal<File | null>(null);
 
-  videoAvailableLoading = signal<boolean>(true);
-  videoAvailable = signal<boolean>(false);
+  uploadComplete = signal<boolean>(false);
+  uploadProgress = signal<number>(0);
+  uploadedSize = signal<string>('0 MB');
+  totalSize = signal<string>('0 MB');
+
+  videoUrl = signal<string>('');
 
   ngOnInit() {
     this.evaluationForm = this.generateEvaluationForm(this.campaign().survey!);
@@ -127,19 +139,6 @@ export class EvaluationFormComponent implements OnInit {
 
     if (this.disabled()) {
       this.evaluationForm.get('evaluation_answers')?.disable();
-
-      this.videoAvailableLoading.set(true);
-      this.videoService.updateStatus(this.evaluation()!.id).subscribe({
-        next: () => {
-          this.videoAvailable.set(true);
-          this.videoAvailableLoading.set(false);
-        },
-        error: error => {
-          console.error('Error updating video status:', error);
-          this.videoAvailable.set(false);
-          this.videoAvailableLoading.set(false);
-        },
-      });
     }
   }
 
@@ -188,44 +187,94 @@ export class EvaluationFormComponent implements OnInit {
   onMediaUpload(event: FileUploadHandlerEvent) {
     const file = event.files?.[0];
     if (!file) return;
-
     this.selectMediaFile.set(file);
+    this.totalSize.set(this.formatSize(file.size));
+  }
 
-    console.log(this.selectMediaFile());
+  onMediaSubmit() {
+    const file = this.selectMediaFile();
+    if (!file) return;
+
+    this.streamService.getTusUploadUrl(this.selectMediaFile()!).subscribe({
+      next: res => {
+        const location = res.headers.get('Location');
+        this.uploadWithTus(file, location);
+      },
+      error: err => {
+        console.error('❌ Error al obtener URL de subida:', err);
+      },
+    });
+  }
+
+  uploadWithTus(file: File, uploadUrl: string) {
+    const upload = new tus.Upload(file, {
+      endpoint: uploadUrl, // este debe ser la URL completa devuelta por el backend (Location)
+      metadata: {
+        filename: file.name,
+        filetype: file.type,
+      },
+      chunkSize: 5 * 1024 * 1024, // 5MB
+      retryDelays: [0, 1000, 3000, 5000],
+      onError: error => {
+        console.error('Error al subir a Cloudflare:', error);
+        this.uploadComplete.set(false);
+      },
+      onProgress: (bytesUploaded, bytesTotal) => {
+        this.uploadProgress.set((bytesUploaded / bytesTotal) * 100);
+        this.uploadedSize.set(this.formatSize(bytesUploaded));
+      },
+      onSuccess: () => {
+        const uid = upload.url!.split('/').pop()?.split('?')[0];
+        this.streamService.enableDownload(uid!).subscribe({
+          next: () => {
+            this.videoUrl.set(uid!);
+            this.uploadComplete.set(true);
+          },
+        });
+      },
+    });
+
+    upload.start();
+  }
+
+  onRemoveMedia() {
+    this.selectMediaFile.set(null);
+    this.uploadProgress.set(0);
+    this.uploadedSize.set('0 MB');
+    this.totalSize.set('0 MB');
+    this.uploadComplete.set(false);
   }
 
   onSubmit() {
-    if (!this.evaluationForm.valid || !this.selectMediaFile()) {
-      return;
+    if (this.evaluationForm.valid || this.uploadComplete()) {
+      const formData = new FormData();
+
+      formData.append('media_url', this.videoUrl()!);
+      formData.append('video_title', this.evaluationForm.get('title')?.value);
+      formData.append('campaign_id', this.campaign().id.toString());
+      formData.append('location', this.evaluationForm.get('location')?.value);
+      formData.append(
+        'evaluated_collaborator',
+        this.evaluationForm.get('evaluated_collaborator')?.value
+      );
+
+      const answersGroup = this.evaluationAnswers;
+      const answersArray = Object.values(answersGroup.controls).map(
+        ctrl => ctrl.value
+      );
+
+      formData.append('evaluation_answers', JSON.stringify(answersArray));
+
+      this.submitEvent.emit(formData);
     }
-
-    const formData = new FormData();
-
-    formData.append('media', this.selectMediaFile()!);
-    formData.append('video_title', this.evaluationForm.get('title')?.value);
-    formData.append('campaign_id', this.campaign().id.toString());
-    formData.append('location', this.evaluationForm.get('location')?.value);
-    formData.append(
-      'evaluated_collaborator',
-      this.evaluationForm.get('evaluated_collaborator')?.value
-    );
-
-    const answersGroup = this.evaluationAnswers;
-    const answersArray = Object.values(answersGroup.controls).map(
-      ctrl => ctrl.value
-    );
-
-    formData.append('evaluation_answers', JSON.stringify(answersArray));
-
-    this.submitEvent.emit(formData);
   }
 
   onEdit() {
     if (this.isEditing() && this.evaluationForm.valid) {
       const formData = new FormData();
 
-      if (this.selectMediaFile() !== null) {
-        formData.append('media', this.selectMediaFile()!);
+      if (this.uploadComplete() !== null) {
+        formData.append('media_url', this.videoUrl()!);
       }
 
       formData.append('video_title', this.evaluationForm.get('title')?.value);
@@ -247,5 +296,10 @@ export class EvaluationFormComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/evaluations']);
+  }
+
+  formatSize(bytes: number): string {
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(2)} MB`;
   }
 }

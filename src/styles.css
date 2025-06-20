@@ -142,3 +142,7 @@ p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-input
 .p-divider-content {
   @apply dark:bg-bunker-950 bg-gray-50;
 }
+
+.p-fileupload-content p-progressbar:first-of-type {
+  @apply !hidden;
+}
