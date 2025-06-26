@@ -21,11 +21,4 @@ export class CloudflareStreamService {
       responseType: 'text',
     });
   }
-
-  enableDownload(videoUid: string): Observable<any> {
-    return this.http.patch(
-      environment.apiUrl + 'cloudflare/stream/' + videoUid,
-      {}
-    );
-  }
 }
