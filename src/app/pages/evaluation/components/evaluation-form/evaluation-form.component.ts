@@ -213,7 +213,7 @@ export class EvaluationFormComponent implements OnInit {
         filename: file.name,
         filetype: file.type,
       },
-      chunkSize: 5 * 1024 * 1024, // 5MB
+      chunkSize: 50 * 1024 * 1024, // 50MB
       retryDelays: [0, 1000, 3000, 5000],
       onError: error => {
         console.error('Error al subir a Cloudflare:', error);
@@ -225,12 +225,9 @@ export class EvaluationFormComponent implements OnInit {
       },
       onSuccess: () => {
         const uid = upload.url!.split('/').pop()?.split('?')[0];
-        this.streamService.enableDownload(uid!).subscribe({
-          next: () => {
-            this.videoUrl.set(uid!);
-            this.uploadComplete.set(true);
-          },
-        });
+        console.log(uid);
+        this.videoUrl.set(uid!);
+        this.uploadComplete.set(true);
       },
     });
 
