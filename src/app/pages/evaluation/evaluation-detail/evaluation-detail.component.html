@@ -1,6 +1,7 @@
 @if (isLoading()) {
   <app-spinner />
 } @else {
+  <app-evaluation-analysis [evalutationId]="evaluation()!.id" />
   <app-evaluation-form
     [isEditing]="true"
     [byZone]="

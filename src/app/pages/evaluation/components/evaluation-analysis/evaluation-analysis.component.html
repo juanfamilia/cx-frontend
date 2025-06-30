@@ -1,4 +1,5 @@
-<div class="flex justify-center">
+<!-- Button -->
+<div class="fixed top-4 right-4 z-50">
   <button
     pTooltip="Análisis IA"
     tooltipPosition="top"
@@ -6,32 +7,33 @@
     (click)="showDialog()">
     <ng-icon name="lucideSparkles" size="20" />
   </button>
-  <p-dialog
-    header="🤖 Análisis (IA)"
-    [modal]="true"
-    [(visible)]="visible"
-    styleClass="w-full max-w-4xl">
-    <div
-      class="mb-4 flex items-center justify-center gap-4 py-5 text-gray-800 dark:text-gray-300">
-      @if (isLoading()) {
-        <div class="flex w-full flex-col items-center justify-center">
-          <app-spinner />
-          <h3>Cargando análisis...</h3>
-        </div>
-      } @else {
-        @if (analysis()) {
-          <p class="text-lg">
-            {{ analysis()?.analysis }}
-          </p>
-        } @else {
-          <p class="italic">
-            El análisis esta en proceso o no se encuentra disponible...
-          </p>
-        }
-      }
-    </div>
-    <div class="flex justify-end gap-2">
-      <p-button label="Cerrar" severity="secondary" (click)="hiddenDialog()" />
-    </div>
-  </p-dialog>
 </div>
+<!-- Dialog -->
+<p-dialog
+  header="🤖 Análisis (IA)"
+  [modal]="true"
+  [(visible)]="visible"
+  styleClass="w-full max-w-4xl">
+  <div
+    class="mb-4 flex items-center justify-center gap-4 py-5 text-gray-800 dark:text-gray-300">
+    @if (isLoading()) {
+      <div class="flex w-full flex-col items-center justify-center">
+        <app-spinner />
+        <h3>Cargando análisis...</h3>
+      </div>
+    } @else {
+      @if (analysis()) {
+        <p class="text-lg">
+          {{ analysis()?.analysis }}
+        </p>
+      } @else {
+        <p class="italic">
+          El análisis esta en proceso o no se encuentra disponible...
+        </p>
+      }
+    }
+  </div>
+  <div class="flex justify-end gap-2">
+    <p-button label="Cerrar" severity="secondary" (click)="hiddenDialog()" />
+  </div>
+</p-dialog>

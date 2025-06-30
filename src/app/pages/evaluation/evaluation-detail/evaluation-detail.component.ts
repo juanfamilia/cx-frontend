@@ -10,11 +10,16 @@ import { SpinnerComponent } from '@components/spinner/spinner.component';
 import { Evaluation } from '@interfaces/evaluation';
 import { EvaluationService } from '@services/evaluation.service';
 import { ShareToasterService } from '@services/toast.service';
+import { EvaluationAnalysisComponent } from '../components/evaluation-analysis/evaluation-analysis.component';
 import { EvaluationFormComponent } from '../components/evaluation-form/evaluation-form.component';
 
 @Component({
   selector: 'app-evaluation-detail',
-  imports: [EvaluationFormComponent, SpinnerComponent],
+  imports: [
+    EvaluationFormComponent,
+    SpinnerComponent,
+    EvaluationAnalysisComponent,
+  ],
   templateUrl: './evaluation-detail.component.html',
   styleUrl: './evaluation-detail.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
