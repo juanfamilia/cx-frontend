@@ -10,7 +10,7 @@ export class DynamicDialogService {
 
   event = signal<boolean>(false);
 
-  showDialog<T>(
+  open<T>(
     component: Type<T>,
     header?: string,
     width?: string,
