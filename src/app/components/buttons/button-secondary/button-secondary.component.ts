@@ -23,6 +23,7 @@ export class ButtonSecondaryComponent {
   event = output();
   tooltip = input<string>();
   isLoading = input<boolean>(false);
+  styleClass = input<string>('');
 
   onClick() {
     this.event.emit();
