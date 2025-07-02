@@ -12,7 +12,7 @@ export class EvaluationAnalysisService {
 
   getOne(id: number): Observable<EvaluationAnalysis> {
     return this.http.get<EvaluationAnalysis>(
-      `${environment.apiUrl}/evaluations-analysis/${id}`
+      environment.apiUrl + 'evaluations-analysis/' + id
     );
   }
 }
