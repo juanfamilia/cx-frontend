@@ -1,4 +1,3 @@
-import { NgClass } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -11,7 +10,7 @@ import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-button-secondary',
-  imports: [NgIcon, TooltipModule, ButtonModule, NgClass],
+  imports: [NgIcon, TooltipModule, ButtonModule],
   templateUrl: './button-secondary.component.html',
   styleUrl: './button-secondary.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,9 +23,13 @@ export class ButtonSecondaryComponent {
   event = output();
   tooltip = input<string>();
   isLoading = input<boolean>(false);
-  styleClass = input<string>('');
+  styleClass = input<string>('py-1.5');
 
   onClick() {
     this.event.emit();
+  }
+
+  setStyleClass() {
+    return `${this.styleClass()} dark:bg-bright-gray-800 dark:border-bright-gray-950 dark:hover:bg-bright-gray-900 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-800 transition-all duration-200 ease-in-out hover:bg-gray-200 disabled:cursor-not-allowed disabled:bg-gray-300/90 md:px-4 dark:text-gray-300`;
   }
 }
