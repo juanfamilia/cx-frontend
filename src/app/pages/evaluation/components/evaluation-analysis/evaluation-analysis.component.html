@@ -23,9 +23,7 @@
       </div>
     } @else {
       @if (analysis()) {
-        <p class="text-lg">
-          {{ analysis()?.analysis }}
-        </p>
+        <markdown [data]="analysis()?.analysis"></markdown>
       } @else {
         <p class="italic">
           El análisis esta en proceso o no se encuentra disponible...

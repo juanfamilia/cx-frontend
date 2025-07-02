@@ -11,13 +11,21 @@ import { EvaluationAnalysis } from '@interfaces/evaluation-analysis';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideSparkles } from '@ng-icons/lucide';
 import { EvaluationAnalysisService } from '@services/evaluation-analysis.service';
+import { MarkdownComponent } from 'ngx-markdown';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { Tooltip } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-evaluation-analysis',
-  imports: [Dialog, SpinnerComponent, NgIcon, ButtonModule, Tooltip],
+  imports: [
+    Dialog,
+    SpinnerComponent,
+    NgIcon,
+    ButtonModule,
+    Tooltip,
+    MarkdownComponent,
+  ],
   templateUrl: './evaluation-analysis.component.html',
   styleUrl: './evaluation-analysis.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
