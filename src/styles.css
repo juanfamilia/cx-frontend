@@ -147,3 +147,8 @@ p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-input
 .p-fileupload-content p-progressbar:first-of-type {
   @apply !hidden;
 }
+
+markdown :where(hr):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  margin-top: 1.5em !important;
+  margin-bottom: 1.5em !important;
+}
