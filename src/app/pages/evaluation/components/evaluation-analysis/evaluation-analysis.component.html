@@ -23,7 +23,9 @@
       </div>
     } @else {
       @if (analysis()) {
-        <markdown [data]="analysis()?.analysis"></markdown>
+        <markdown
+          [data]="analysis()?.analysis"
+          class="prose dark:prose-invert max-w-none"></markdown>
       } @else {
         <p class="italic">
           El análisis esta en proceso o no se encuentra disponible...

@@ -47,6 +47,7 @@
     "@angular/cli": "^19.1.6",
     "@angular/compiler-cli": "^19.1.0",
     "@angular/localize": "^19.1.5",
+    "@tailwindcss/typography": "^0.5.16",
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "19.0.2",
     "autoprefixer": "^10.4.20",
