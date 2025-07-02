@@ -10,6 +10,7 @@ import {
   withInterceptors,
 } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideMarkdown } from 'ngx-markdown';
 import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import { DialogService } from 'primeng/dynamicdialog';
@@ -36,6 +37,7 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
+    provideMarkdown(),
     MessageService,
     DialogService,
   ],
