@@ -1,3 +1,4 @@
+import { NgClass } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,7 +11,7 @@ import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-button-secondary',
-  imports: [NgIcon, TooltipModule, ButtonModule],
+  imports: [NgIcon, TooltipModule, ButtonModule, NgClass],
   templateUrl: './button-secondary.component.html',
   styleUrl: './button-secondary.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
