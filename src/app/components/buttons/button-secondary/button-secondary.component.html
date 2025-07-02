@@ -4,8 +4,10 @@
   [type]="buttonType()"
   (click)="onClick()"
   [loading]="isLoading()"
-  [styleClass]="styleClass()"
-  styleClass="dark:bg-bright-gray-800 dark:border-bright-gray-950 dark:hover:bg-bright-gray-900 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 transition-all duration-200 ease-in-out hover:bg-gray-200 disabled:cursor-not-allowed disabled:bg-gray-300/90 md:px-4 dark:text-gray-300"
+  [styleClass]="
+    styleClass() +
+    'dark:bg-bright-gray-800 dark:border-bright-gray-950 dark:hover:bg-bright-gray-900 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 transition-all duration-200 ease-in-out hover:bg-gray-200 disabled:cursor-not-allowed disabled:bg-gray-300/90 md:px-4 dark:text-gray-300'
+  "
   [disabled]="disabled()">
   @if (icon()) {
     <ng-icon [name]="icon()" class="text-xl" />
