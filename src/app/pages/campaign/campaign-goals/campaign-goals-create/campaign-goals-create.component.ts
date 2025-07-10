@@ -32,7 +32,7 @@ export class CampaignGoalsCreateComponent {
         this.toastService.showToast(
           'error',
           'Error al crear la meta',
-          err.message
+          err.error.detail
         );
         console.error('Error creating goal:', err);
       },
