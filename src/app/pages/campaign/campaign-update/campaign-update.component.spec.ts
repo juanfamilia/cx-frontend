@@ -8,9 +8,8 @@ describe('CampaignUpdateComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CampaignUpdateComponent]
-    })
-    .compileComponents();
+      imports: [CampaignUpdateComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CampaignUpdateComponent);
     component = fixture.componentInstance;

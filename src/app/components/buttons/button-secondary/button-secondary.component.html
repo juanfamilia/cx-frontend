@@ -1,13 +1,16 @@
-<p-button
-  [pTooltip]="tooltip()"
-  tooltipPosition="top"
-  [type]="buttonType()"
-  (click)="onClick()"
-  [loading]="isLoading()"
-  [styleClass]="setStyleClass()"
-  [disabled]="disabled()">
-  @if (icon()) {
-    <ng-icon [name]="icon()" class="text-xl" />
-  }
-  {{ title() }}
-</p-button>
+@if (show()) {
+  <p-button
+    [pTooltip]="tooltip()"
+    tooltipPosition="top"
+    [type]="buttonType()"
+    (click)="onClick()"
+    [loading]="isLoading()"
+    severity="secondary"
+    [styleClass]="setStyleClass()"
+    [disabled]="disabled()">
+    @if (icon()) {
+      <ng-icon [name]="icon()" class="text-xl" />
+    }
+    {{ title() }}
+  </p-button>
+}

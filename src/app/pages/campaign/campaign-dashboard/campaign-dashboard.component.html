@@ -3,15 +3,21 @@
   <app-page-header
     title="Campañas"
     description="Modulo de administración de campañas" />
-  <div class="flex justify-between gap-5">
+  <div class="flex items-center justify-between gap-5">
     <app-button-primary
       title="Crear Campaña"
       icon="lucideMegaphone"
       (event)="createCampaign()" />
-    <app-button-primary
+    <app-button-secondary
       title="Assignaciones"
       icon="lucideSettings2"
+      styleClass="py-2.5"
       (event)="assignCampaign()" />
+    <app-button-secondary
+      title="Metas"
+      icon="lucideGoal"
+      styleClass="py-2.5"
+      (event)="goalsCampaign()" />
   </div>
 </div>
 
@@ -23,16 +29,16 @@
   [loading]="campaignResource.isLoading()"
   (search)="searchEvent.set($event)"
   (pagination)="pagination.set($event)">
-  <ng-template #tableActionTemplate let-company>
+  <ng-template #tableActionTemplate let-campaign>
     <div class="flex items-center justify-center gap-5">
       <app-button-secondary
         icon="lucidePencil"
-        (event)="updateCampaign(company.id)" />
+        (event)="updateCampaign(campaign.id)" />
       <app-button-danger
         tooltip="Eliminar"
         icon="lucideTrash"
         message="¿Está seguro de eliminar esta campaña?"
-        (event)="deleteCampaign(company.id)" />
+        (event)="deleteCampaign(campaign.id)" />
     </div>
   </ng-template>
 </app-table>

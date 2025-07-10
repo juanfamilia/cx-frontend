@@ -41,7 +41,7 @@ export class CampaignUpdateComponent implements OnInit {
         error: err => {
           this.toastService.showToast(
             'error',
-            'Error al obtener el formulario',
+            'Error al obtener la campaña',
             err.message
           );
         },

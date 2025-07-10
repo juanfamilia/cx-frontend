@@ -55,14 +55,20 @@
       class="h-10">
     </p-select>
 
-    <div class="md:col-span-2">
-      <app-input-text
-        id="notes"
-        label="Notas"
-        icon="lucideStickyNote"
-        [ErrorMessage]="false"
-        formControlName="notes" />
-    </div>
+    <app-input-number
+      id="goal"
+      label="Objetivo"
+      icon="lucideGoal"
+      [min]="0"
+      [ErrorMessage]="false"
+      formControlName="goal" />
+
+    <app-input-text
+      id="notes"
+      label="Notas"
+      icon="lucideStickyNote"
+      [ErrorMessage]="false"
+      formControlName="notes" />
   </div>
 
   <div class="mt-5 flex justify-between gap-5">

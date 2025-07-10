@@ -68,16 +68,16 @@ export class WorkAreaFormComponent implements OnInit {
       zone_ids: ['', [Validators.required]],
     });
 
-    this.getCompanies({ first: 0, rows: 10 });
+    this.getUsers({ first: 0, rows: 10 });
 
     this.filterSubject
       .pipe(debounceTime(500), distinctUntilChanged())
       .subscribe(filterValue => {
-        this.getCompanies(this.lazyLoad(), filterValue);
+        this.getUsers(this.lazyLoad(), filterValue);
       });
   }
 
-  getCompanies(event: LazyLoadEvent, search?: string) {
+  getUsers(event: LazyLoadEvent, search?: string) {
     this.lazyLoad.set(event);
     const offset = event.first;
     const limit = event.rows;
@@ -89,7 +89,7 @@ export class WorkAreaFormComponent implements OnInit {
       });
   }
 
-  searchCompanies(event: SelectFilterEvent) {
+  searchUsers(event: SelectFilterEvent) {
     this.filterSubject.next(event.filter);
   }
 

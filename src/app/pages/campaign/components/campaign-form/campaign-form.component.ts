@@ -18,6 +18,7 @@ import { Router } from '@angular/router';
 import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
 import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
 import { InputDateComponent } from '@components/inputs/input-date/input-date.component';
+import { InputNumberComponent } from '@components/inputs/input-number/input-number.component';
 import { InputSelectComponent } from '@components/inputs/input-select/input-select.component';
 import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
 import { Campaign, CampaignCreate } from '@interfaces/campaign';
@@ -26,6 +27,7 @@ import { provideIcons } from '@ng-icons/core';
 import {
   lucideArrowLeft,
   lucideCalendarDays,
+  lucideGoal,
   lucideRss,
   lucideSave,
   lucideStickyNote,
@@ -49,6 +51,7 @@ import { Options } from 'src/app/types/options';
     ButtonSecondaryComponent,
     ButtonPrimaryComponent,
     SelectModule,
+    InputNumberComponent,
   ],
   templateUrl: './campaign-form.component.html',
   styleUrl: './campaign-form.component.css',
@@ -62,6 +65,7 @@ import { Options } from 'src/app/types/options';
       lucideStickyNote,
       lucideArrowLeft,
       lucideSave,
+      lucideGoal,
     }),
   ],
 })
@@ -113,6 +117,7 @@ export class CampaignFormComponent implements OnInit {
         date_end: ['', [Validators.required]],
         channel: ['', [Validators.required]],
         survey_id: ['', [Validators.required]],
+        goal: ['', [Validators.required]],
         notes: [''],
       },
       { validators: dateRangeValidator }
@@ -128,6 +133,7 @@ export class CampaignFormComponent implements OnInit {
         date_end: dateEndValue,
         channel: this.campaign()?.channel,
         survey_id: this.campaign()?.survey_id,
+        goal: this.campaign()?.goal,
         notes: this.campaign()?.notes,
       });
     }

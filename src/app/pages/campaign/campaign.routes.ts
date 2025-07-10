@@ -7,6 +7,9 @@ import { CampaignAssignmentsCreateZoneComponent } from './campaign-assignments/z
 import { CampaignAssignmentsDashboardZoneComponent } from './campaign-assignments/zones/campaign-assignments-dashboard-zone/campaign-assignments-dashboard-zone.component';
 import { CampaignCreateComponent } from './campaign-create/campaign-create.component';
 import { CampaignDashboardComponent } from './campaign-dashboard/campaign-dashboard.component';
+import { CampaignGoalsCreateComponent } from './campaign-goals/campaign-goals-create/campaign-goals-create.component';
+import { CampaignGoalsDashboardComponent } from './campaign-goals/campaign-goals-dashboard/campaign-goals-dashboard.component';
+import { CampaignGoalsUpdateComponent } from './campaign-goals/campaign-goals-update/campaign-goals-update.component';
 import { CampaignUpdateComponent } from './campaign-update/campaign-update.component';
 
 export const campaignRoutes: Routes = [
@@ -57,5 +60,23 @@ export const campaignRoutes: Routes = [
     component: CampaignAssignmentsCreateZoneComponent,
     canActivate: [authGuard],
     data: { role: [1, 2], title: 'Crear Asignación por Zonas' },
+  },
+  {
+    path: 'goals',
+    component: CampaignGoalsDashboardComponent,
+    canActivate: [authGuard],
+    data: { role: [1, 2], title: 'Gestionar metas de evaluación' },
+  },
+  {
+    path: 'goals/create',
+    component: CampaignGoalsCreateComponent,
+    canActivate: [authGuard],
+    data: { role: [1, 2], title: 'Crear nueva meta para evaluador' },
+  },
+  {
+    path: 'goals/update/:id',
+    component: CampaignGoalsUpdateComponent,
+    canActivate: [authGuard],
+    data: { role: [1, 2], title: 'Actualizar meta de evaluador' },
   },
 ];

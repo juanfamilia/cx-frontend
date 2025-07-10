@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -12,21 +13,16 @@ import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/b
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
 import { TableComponent } from '@components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
+import { UserClass } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
-import {
-  lucideGoal,
-  lucideMegaphone,
-  lucidePencil,
-  lucideSettings2,
-  lucideTrash,
-} from '@ng-icons/lucide';
-import { CampaignService } from '@services/campaign.service';
+import { lucideGoal, lucidePencil, lucideTrash } from '@ng-icons/lucide';
+import { CampaignGoalsEvaluatorService } from '@services/campaign-goals-evaluator.service';
 import { ShareToasterService } from '@services/toast.service';
 import { PaginatorState } from 'primeng/paginator';
 import { Options } from 'src/app/types/options';
 
 @Component({
-  selector: 'app-campaign-dashboard',
+  selector: 'app-campaign-goals-dashboard',
   imports: [
     PageHeaderComponent,
     ButtonPrimaryComponent,
@@ -34,23 +30,15 @@ import { Options } from 'src/app/types/options';
     ButtonSecondaryComponent,
     ButtonDangerComponent,
   ],
-  templateUrl: './campaign-dashboard.component.html',
-  styleUrl: './campaign-dashboard.component.css',
+  templateUrl: './campaign-goals-dashboard.component.html',
+  styleUrl: './campaign-goals-dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [
-    provideIcons({
-      lucideMegaphone,
-      lucideSettings2,
-      lucidePencil,
-      lucideTrash,
-      lucideGoal,
-    }),
-  ],
+  viewProviders: [provideIcons({ lucideGoal, lucidePencil, lucideTrash })],
 })
-export class CampaignDashboardComponent {
+export class CampaignGoalsDashboardComponent {
   private router = inject(Router);
   private toastService = inject(ShareToasterService);
-  private campaignService = inject(CampaignService);
+  private campaignGoalsService = inject(CampaignGoalsEvaluatorService);
 
   pagination = signal<PaginatorState>({
     page: 0,
@@ -62,37 +50,18 @@ export class CampaignDashboardComponent {
 
   columns = signal<TableColumn[]>([
     {
-      field: 'name',
-      header: 'Nombre',
+      field: 'evaluator.fullName',
+      header: 'Evaluador',
       sortable: true,
     },
     {
-      field: 'objective',
-      header: 'Objetivo',
+      field: 'campaign.name',
+      header: 'Campaña',
       sortable: true,
     },
     {
-      field: 'channel',
-      header: 'Canal',
-      sortable: true,
-    },
-    {
-      field: 'date_start',
-      header: 'Fecha de Inicio',
-      sortable: true,
-      pipe: 'date',
-      pipeArgs: ['dd/MM/yyyy'],
-    },
-    {
-      field: 'date_end',
-      header: 'Fecha de Finalización',
-      sortable: true,
-      pipe: 'date',
-      pipeArgs: ['dd/MM/yyyy'],
-    },
-    {
-      field: 'survey.title',
-      header: 'Nombre del formulario',
+      field: 'goal',
+      header: 'Meta',
       sortable: true,
     },
     {
@@ -104,26 +73,26 @@ export class CampaignDashboardComponent {
 
   filters = signal<Options[]>([
     {
-      name: 'Nombre',
-      value: 'name',
+      name: 'Evaluador',
+      value: 'evaluator',
     },
     {
-      name: 'Objetivo',
-      value: 'objective',
+      name: 'Campaña',
+      value: 'campaign',
     },
     {
-      name: 'Nombre del formulario',
-      value: 'survey',
+      name: 'Meta',
+      value: 'goal',
     },
   ]);
 
-  campaignResource = rxResource({
+  goalsResource = rxResource({
     request: () => ({
       pagination: this.pagination(),
       search: this.searchEvent(),
     }),
     loader: ({ request }) =>
-      this.campaignService.getAll(
+      this.campaignGoalsService.getAll(
         request.pagination.first,
         request.pagination.rows,
         request.search?.filter,
@@ -131,37 +100,37 @@ export class CampaignDashboardComponent {
       ),
   });
 
-  createCampaign() {
-    this.router.navigate(['/campaigns/create']);
+  goals = computed(() => {
+    const goals = this.goalsResource.value()?.data ?? [];
+    return goals.map(goal => {
+      goal.evaluator = new UserClass(goal.evaluator);
+      return goal;
+    });
+  });
+
+  createGoal() {
+    this.router.navigate(['/campaigns/goals/create']);
   }
 
-  assignCampaign() {
-    this.router.navigate(['/campaigns/assigns']);
+  updateGoal(id: number) {
+    this.router.navigate(['/campaigns/goals/update/' + id]);
   }
 
-  goalsCampaign() {
-    this.router.navigate(['/campaigns/goals']);
-  }
-
-  updateCampaign(id: number) {
-    this.router.navigate(['/campaigns/update/' + id]);
-  }
-
-  deleteCampaign(id: number) {
-    this.campaignService.delete(id).subscribe({
+  deleteGoal(id: number) {
+    this.campaignGoalsService.delete(id).subscribe({
       next: () => {
-        this.campaignResource.reload();
+        this.goalsResource.reload();
         this.toastService.showToast(
           'success',
-          'Campaña eliminada',
-          'La campaña ha sido eliminada exitosamente.'
+          'Meta eliminada',
+          'La meta ha sido eliminada exitosamente.'
         );
       },
       error: error => {
         console.error('Error deleting campaign:', error);
         this.toastService.showToast(
           'error',
-          'Error al eliminar la campaña',
+          'Error al eliminar la meta',
           error.message
         );
       },

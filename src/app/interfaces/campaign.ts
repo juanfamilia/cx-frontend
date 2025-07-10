@@ -12,6 +12,7 @@ export interface Campaign {
   date_end: string;
   channel: string;
   survey_id: number;
+  goal: number;
   notes: string;
   survey?: SurveyFormDetail;
   created_at: string;

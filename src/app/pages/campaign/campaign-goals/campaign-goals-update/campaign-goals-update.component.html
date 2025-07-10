@@ -1,0 +1,12 @@
+<app-page-header
+  title="Actualizar Meta"
+  description="A una nueva meta de campaña para evaluador" />
+
+@if (isLoading()) {
+  <app-spinner />
+} @else {
+  <app-campaign-goals-form
+    [isEdit]="true"
+    [goal]="goal()!"
+    (submitEvent)="updateGoal($event)" />
+}

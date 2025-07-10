@@ -1,0 +1,55 @@
+<form [formGroup]="goalForm" class="mt-5 flex flex-col gap-3">
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <p-select
+      [options]="users()"
+      formControlName="evaluator_id"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="38"
+      scrollHeight="140px"
+      filter="true"
+      optionLabel="fullName"
+      optionValue="id"
+      (onLazyLoad)="getUsers($event)"
+      (onFilter)="searchUsers($event)"
+      placeholder="Seleccione un usuario"
+      class="h-10">
+    </p-select>
+
+    <p-select
+      [options]="campaign()"
+      formControlName="campaign_id"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="38"
+      scrollHeight="140px"
+      filter="true"
+      optionLabel="name"
+      optionValue="id"
+      (onLazyLoad)="getCampaigns($event)"
+      (onFilter)="searchCampaigns($event)"
+      placeholder="Seleccione una campaña"
+      class="h-10">
+    </p-select>
+
+    <app-input-number
+      id="goal"
+      label="Meta"
+      icon="lucideGoal"
+      [min]="0"
+      [ErrorMessage]="false"
+      formControlName="goal" />
+  </div>
+
+  <div class="mt-5 flex justify-between gap-5">
+    <app-button-secondary
+      styleClass="py-3"
+      title="Regresar"
+      icon="lucideArrowLeft"
+      (event)="goBack()" />
+
+    <app-button-primary
+      [title]="isEdit() ? 'Guardar Cambios' : 'Crear Meta'"
+      icon="lucideSave"
+      [disabled]="goalForm.invalid"
+      (event)="onSubmit()" />
+  </div>
+</form>

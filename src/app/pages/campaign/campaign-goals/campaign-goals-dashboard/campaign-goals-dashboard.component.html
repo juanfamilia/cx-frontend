@@ -1,0 +1,31 @@
+<!-- Header -->
+<div class="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
+  <app-page-header
+    title="Metas de Campaña"
+    description="Modulo de administración de metas de evaluadores para campañas" />
+  <div class="flex items-center justify-between gap-5">
+    <app-button-primary
+      title="Asignar Meta"
+      icon="lucideGoal"
+      (event)="createGoal()" />
+  </div>
+</div>
+<!-- Table -->
+<app-table
+  [data]="goals() || []"
+  [columnsInput]="columns()"
+  [filters]="filters()"
+  [loading]="goalsResource.isLoading()"
+  (search)="searchEvent.set($event)"
+  (pagination)="pagination.set($event)">
+  <ng-template #tableActionTemplate let-goal>
+    <div class="flex items-center justify-center gap-5">
+      <app-button-secondary icon="lucidePencil" (event)="updateGoal(goal.id)" />
+      <app-button-danger
+        tooltip="Eliminar"
+        icon="lucideTrash"
+        message="¿Está seguro de eliminar esta meta?"
+        (event)="deleteGoal(goal.id)" />
+    </div>
+  </ng-template>
+</app-table>
