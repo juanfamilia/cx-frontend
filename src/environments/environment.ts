@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://cx-backend-production.up.railway.app/api/v1/',
+  apiUrl: 'https://backendcx.sieteic.com/api/v1/',
 };
