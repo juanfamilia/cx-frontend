@@ -1,16 +1,15 @@
 <form [formGroup]="goalForm" class="mt-5 flex flex-col gap-3">
   <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
     <p-select
-      [options]="users()"
+      [options]="userResource.value()"
       formControlName="evaluator_id"
       [virtualScroll]="true"
       [virtualScrollItemSize]="38"
       scrollHeight="140px"
       filter="true"
-      optionLabel="fullName"
-      optionValue="id"
-      (onLazyLoad)="getUsers($event)"
-      (onFilter)="searchUsers($event)"
+      optionLabel="name"
+      optionValue="value"
+      [loading]="userResource.isLoading()"
       placeholder="Seleccione un usuario"
       class="h-10">
     </p-select>

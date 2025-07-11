@@ -7,6 +7,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   FormGroup,
@@ -56,7 +57,6 @@ export class CampaignGoalsFormComponent implements OnInit {
   private userService = inject(UsersService);
   private campaginService = inject(CampaignService);
 
-  private filterSubjectUsers = new Subject<string>();
   private filterSubjectCampaigns = new Subject<string>();
 
   goalForm!: FormGroup;
@@ -73,15 +73,7 @@ export class CampaignGoalsFormComponent implements OnInit {
       goal: [0, [Validators.required, Validators.min(1)]],
     });
 
-    this.getUsers({ first: 0, rows: 10 });
-
     this.getCampaigns({ first: 0, rows: 10 });
-
-    this.filterSubjectUsers
-      .pipe(debounceTime(500), distinctUntilChanged())
-      .subscribe(filterValue => {
-        this.getUsers(this.lazyLoad(), filterValue);
-      });
 
     this.filterSubjectCampaigns
       .pipe(debounceTime(500), distinctUntilChanged())
@@ -100,21 +92,9 @@ export class CampaignGoalsFormComponent implements OnInit {
     }
   }
 
-  getUsers(event: LazyLoadEvent, search?: string) {
-    this.lazyLoad.set(event);
-    const offset = event.first;
-    const limit = event.rows;
-
-    this.userService
-      .getAll(offset, limit, 'name', search)
-      .subscribe(response => {
-        this.users.set(response.data.map(user => new UserClass(user)));
-      });
-  }
-
-  searchUsers(event: SelectFilterEvent) {
-    this.filterSubjectUsers.next(event.filter);
-  }
+  userResource = rxResource({
+    loader: () => this.userService.getAllOptionsList(),
+  });
 
   getCampaigns(event: LazyLoadEvent, search?: string) {
     this.lazyLoad.set(event);
