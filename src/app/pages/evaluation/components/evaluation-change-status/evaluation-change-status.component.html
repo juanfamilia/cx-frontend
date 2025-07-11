@@ -5,7 +5,9 @@
     [modal]="true"
     [(visible)]="visible"
     [style]="{ width: '25rem' }">
-    <form [formGroup]="statusForm" class="mb-4 flex items-center gap-4 py-5">
+    <form
+      [formGroup]="statusForm"
+      class="mb-4 flex flex-col items-center gap-4 py-5">
       <app-input-select
         label="Estado"
         icon="lucideClipboardCheck"
@@ -19,7 +21,8 @@
         <app-input-textarea
           label="Comentario"
           placeholder="Escriba un comentario"
-          formControlName="comment" />
+          formControlName="comment"
+          class="w-full" />
       }
     </form>
     <div class="flex justify-end gap-2">
@@ -27,7 +30,10 @@
         label="Cancelar"
         severity="secondary"
         (click)="hiddenDialog()" />
-      <p-button label="Actualizar" (click)="onSubmit()" />
+      <p-button
+        label="Actualizar"
+        (click)="onSubmit()"
+        [disabled]="statusForm.invalid" />
     </div>
   </p-dialog>
 </div>

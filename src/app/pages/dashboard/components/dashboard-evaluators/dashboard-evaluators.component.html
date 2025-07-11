@@ -29,9 +29,8 @@
 
   @if (resourceGoalsProgress.isLoading()) {
     <app-spinner />
-  } @else {
-    <hr class="my-8 border border-gray-200" />
-
+  } @else if (resourceGoalsProgress.value()) {
+    <hr class="dark:border-bunker-900 my-8 border border-gray-200" />
     <div
       class="mb-8 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
       @for (progress of resourceGoalsProgress.value(); track $index) {
@@ -49,14 +48,14 @@
             <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
               <p-progressbar
                 [value]="
-                  (progress.goal_evaluator / progress.goal_completed || 0) * 100
+                  (progress.goal_complete / progress.goal_evaluator || 0) * 100
                 "></p-progressbar>
             </div>
           </div>
           <!-- Progress values -->
           <p
             class="text-xs font-medium tracking-tight text-gray-600 dark:text-gray-300">
-            {{ progress.goal_completed || 0 }} / {{ progress.goal_evaluator }}
+            {{ progress.goal_complete || 0 }} / {{ progress.goal_evaluator }}
           </p>
         </div>
       }

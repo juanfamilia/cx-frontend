@@ -3,7 +3,7 @@ export interface CampaignGoalsProgressByEvaluator {
   campaign_name: string;
   evaluator_id: number;
   goal_evaluator: number;
-  goal_completed: number;
+  goal_complete: number;
   date_start: string;
   date_end: string;
 }
