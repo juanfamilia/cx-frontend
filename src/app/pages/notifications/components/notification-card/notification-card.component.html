@@ -61,6 +61,18 @@
         </span>
       </p>
     </div>
+    <!-- Comment -->
+    @if (notification().comment) {
+      <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+        <ng-icon name="lucideText" />
+        <p class="font-medium">
+          Comentario:
+          <span class="font-normal text-black dark:text-gray-50">
+            {{ notification().comment }}
+          </span>
+        </p>
+      </div>
+    }
     <!-- Readed-->
     @if (notification().read) {
       <div class="mt-1 font-medium">

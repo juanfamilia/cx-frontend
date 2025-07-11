@@ -13,6 +13,7 @@ import {
   lucideCalendar,
   lucideCheck,
   lucideFileText,
+  lucideText,
   lucideUser,
 } from '@ng-icons/lucide';
 import { NotificationService } from '@services/notification.service';
@@ -26,7 +27,13 @@ import { TagModule } from 'primeng/tag';
   styleUrl: './notification-card.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [
-    provideIcons({ lucideCheck, lucideCalendar, lucideFileText, lucideUser }),
+    provideIcons({
+      lucideCheck,
+      lucideCalendar,
+      lucideFileText,
+      lucideUser,
+      lucideText,
+    }),
   ],
 })
 export class NotificationCardComponent {

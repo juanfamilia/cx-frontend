@@ -2,15 +2,15 @@ import { Options } from '../types/options';
 
 export const STATUS: Options[] = [
   {
-    name: 'Edición',
+    name: 'Solicitar Edición',
     value: 'editar',
   },
   {
-    name: 'Aprobado',
+    name: 'Aprobar',
     value: 'aprobado',
   },
   {
-    name: 'Rechazado',
+    name: 'Rechazar',
     value: 'rechazado',
   },
 ];

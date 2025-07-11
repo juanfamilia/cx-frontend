@@ -7,6 +7,7 @@ export interface Notification {
   evaluation_id: number;
   status: string;
   read: boolean;
+  comment: string;
   user: User;
   evaluation: Evaluation;
   created_at: string;

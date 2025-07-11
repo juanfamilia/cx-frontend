@@ -1,7 +1,7 @@
 <div class="flex justify-center">
   <p-button (click)="showDialog()" label="Cambiar Estado" />
   <p-dialog
-    header="Actualizar Estado"
+    header="Cambiar Estado"
     [modal]="true"
     [(visible)]="visible"
     [style]="{ width: '25rem' }">
@@ -9,11 +9,18 @@
       <app-input-select
         label="Estado"
         icon="lucideClipboardCheck"
-        placeholder="Seleccione un estado"
+        placeholder="Seleccione una opción"
         [options]="status"
         [clear]="false"
         class="w-full"
+        (selectChange)="setStatus($event.value)"
         formControlName="status" />
+      @if (showComment()) {
+        <app-input-textarea
+          label="Comentario"
+          placeholder="Escriba un comentario"
+          formControlName="comment" />
+      }
     </form>
     <div class="flex justify-end gap-2">
       <p-button

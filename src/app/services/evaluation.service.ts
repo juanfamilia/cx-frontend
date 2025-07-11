@@ -30,7 +30,10 @@ export class EvaluationService {
     });
   }
 
-  updateStatus(id: number, status: string): Observable<Evaluation> {
+  updateStatus(
+    id: number,
+    status: { status: string; comment?: string }
+  ): Observable<Evaluation> {
     return this.http.put<Evaluation>(
       environment.apiUrl + 'evaluations/status/' + id,
       status
