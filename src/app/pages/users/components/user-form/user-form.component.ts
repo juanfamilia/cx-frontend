@@ -7,7 +7,12 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
 import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
@@ -93,40 +98,27 @@ export class UserFormComponent implements OnInit {
 
   lazyLoad = signal<LazyLoadEvent>({ first: 0, rows: 10 });
 
-  userForm = this.fb.group({
-    company_id: [0],
-    role: [3, [Validators.required]],
-    first_name: ['', [Validators.required]],
-    last_name: ['', [Validators.required]],
-    gender: ['', [Validators.required]],
-    birthdate: ['', [Validators.required]],
-    civil_status: ['', [Validators.required]],
-    socioeconomic: ['', [Validators.required]],
-    inclusivity: ['N/A', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-  });
+  userForm!: FormGroup;
 
   ngOnInit() {
-    if (this.isEdit()) {
-      this.userForm.patchValue({
-        role: this.user()!.role,
-        first_name: this.user()!.first_name,
-        last_name: this.user()!.last_name,
-        gender: this.user()!.gender,
-        birthdate: this.user()!.birthdate,
-        civil_status: this.user()!.civil_status,
-        socioeconomic: this.user()!.socioeconomic,
-        inclusivity: this.user()!.inclusivity,
-        email: this.user()!.email,
-        company_id: this.user()!.company_id,
-      });
-    }
+    this.userForm = this.fb.group({
+      company_id: [0],
+      role: [3, [Validators.required]],
+      first_name: ['', [Validators.required]],
+      last_name: ['', [Validators.required]],
+      gender: ['', [Validators.required]],
+      birthdate: ['', [Validators.required]],
+      civil_status: ['', [Validators.required]],
+      socioeconomic: ['', [Validators.required]],
+      inclusivity: ['N/A', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+    });
 
     switch (this.currentUser.role) {
       case 0:
         this.getCompanies({ first: 0, rows: 10 });
-        this.userForm.controls.company_id.addValidators(Validators.required);
+        this.userForm.get('company_id')!.setValidators([Validators.required]);
         this.roles.set([
           {
             name: 'Administrador',
@@ -167,6 +159,22 @@ export class UserFormComponent implements OnInit {
           },
         ]);
         break;
+    }
+
+    if (this.isEdit()) {
+      const birthdate = new Date(this.user()!.birthdate);
+      this.userForm.patchValue({
+        role: this.user()?.role,
+        first_name: this.user()!.first_name,
+        last_name: this.user()!.last_name,
+        gender: this.user()!.gender,
+        birthdate: birthdate,
+        civil_status: this.user()!.civil_status,
+        socioeconomic: this.user()!.socioeconomic,
+        inclusivity: this.user()!.inclusivity,
+        email: this.user()!.email,
+        company_id: this.user()!.company_id,
+      });
     }
   }
 

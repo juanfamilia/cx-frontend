@@ -16,7 +16,9 @@ import {
   lucidePlus,
   lucideSend,
 } from '@ng-icons/lucide';
+import { CampaignGoalsProgressService } from '@services/campaign-goals-progress.service';
 import { DashboardService } from '@services/dashboard.service';
+import { ProgressBar } from 'primeng/progressbar';
 import { ActionDashboard } from 'src/app/types/actionsDashboard';
 import { DashboardCardComponent } from '../dashboard-card/dashboard-card.component';
 import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashboard-quick-actions.component';
@@ -27,6 +29,7 @@ import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashb
     SpinnerComponent,
     DashboardCardComponent,
     DashboardQuickActionsComponent,
+    ProgressBar,
   ],
   templateUrl: './dashboard-evaluators.component.html',
   styleUrl: './dashboard-evaluators.component.css',
@@ -44,9 +47,14 @@ import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashb
 })
 export class DashboardEvaluatorsComponent {
   private dashboardService = inject(DashboardService);
+  private campaignGoalsProgressService = inject(CampaignGoalsProgressService);
 
   resourceDashboard = rxResource({
     loader: () => this.dashboardService.getDashboardEvaluator(),
+  });
+
+  resourceGoalsProgress = rxResource({
+    loader: () => this.campaignGoalsProgressService.getByEvaluator(),
   });
 
   data = computed(() => this.resourceDashboard.value());
