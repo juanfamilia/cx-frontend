@@ -53,6 +53,7 @@ export class EvaluationAnalysisComponent {
     this.isLoading.set(true);
     this.evaluationAnalysisService.getOne(this.evalutationId()).subscribe({
       next: data => {
+        data.analysis = JSON.parse(data.analysis);
         this.analysis.set(data);
         this.isLoading.set(false);
       },
