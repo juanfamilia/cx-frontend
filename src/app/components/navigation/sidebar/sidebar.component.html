@@ -6,11 +6,19 @@
     <!-- Logo -->
     <div class="mx-1 mt-1 mb-3 flex w-fit items-center gap-3">
       <div>
-        <img
-          src="../images/logo-cx.svg"
-          alt="Logo"
-          width="100px"
-          class="max-w-10 dark:invert" />
+        @if (darkMode()) {
+          <img
+            src="../images/logo-light.svg"
+            alt="Logo"
+            width="100px"
+            class="max-w-10" />
+        } @else {
+          <img
+            src="../images/logo-dark.svg"
+            alt="Logo"
+            width="100px"
+            class="max-w-10" />
+        }
       </div>
       @if (!isCollapsed()) {
         <h2 class="w-20 text-xl font-semibold text-gray-700 dark:text-gray-300">

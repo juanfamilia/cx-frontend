@@ -24,6 +24,7 @@ import {
 } from '@ng-icons/lucide';
 import { AuthService } from '@services/auth.service';
 import { SidebarService } from '@services/sidebar.service';
+import { ThemeServiceService } from '@services/theme-service.service';
 import { NAVROUTES } from 'src/app/constants/navRoutes.constant';
 import { NavLinkComponent } from '../nav-link/nav-link.component';
 
@@ -51,9 +52,12 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
 export class SidebarComponent {
   private authService = inject(AuthService);
   private sidebarService = inject(SidebarService);
+  private themeService = inject(ThemeServiceService);
 
   isCollapsed = computed(() => this.sidebarService.isCollapsed());
   currentUser = signal<User>(this.authService.getCurrentUser());
+
+  darkMode = computed(() => this.themeService.darkMode());
 
   routes = NAVROUTES;
 

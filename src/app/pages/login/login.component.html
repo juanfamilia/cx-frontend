@@ -10,14 +10,14 @@
       <div class="flex items-center justify-center lg:justify-start">
         @if (darkMode()) {
           <img
-            src="../images/siete-logo-white.png"
+            src="../images/siete-logo-dark.svg"
             alt="Logo Siete CX"
-            width="180px" />
+            width="220px" />
         } @else {
           <img
-            src="../images/siete-logo-black.png"
+            src="../images/siete-logo-light.svg"
             alt="Logo Siete CX"
-            width="180px" />
+            width="220px" />
         }
       </div>
 
@@ -25,10 +25,10 @@
       <div class="flex flex-col gap-2">
         <div class="mb-8 flex flex-col gap-2">
           <h1 class="text-primary-500 text-2xl font-bold sm:text-3xl">
-            Iniciar Sesión
+            Bienvenido a Siete CX
           </h1>
           <p class="sm:text-md text-sm text-gray-500">
-            Ingresa tus credenciales para acceder al sistema
+            Evalúa y mejora la experiencia de tus clientes desde un solo lugar.
           </p>
         </div>
 
@@ -62,9 +62,30 @@
       </div>
 
       <div>
-        <p class="mt-5 cursor-default text-sm text-gray-400">
+        <span>
+          <p class="text-primary-500 dark:text-primary-400 text-sm">
+            ¿Necesitas ayuda?
+          </p>
+          <p class="text-xs text-gray-300 dark:text-gray-400">
+            Escríbenos a
+            <a
+              href="mailto:soporte@sieteic.com"
+              class="text-primary-500 underline">
+              soporte&#64;sieteic.com
+            </a>
+            o visita
+            <a
+              href="https://sieteic.com/ayuda"
+              target="_blank"
+              class="text-primary-500 underline">
+              sieteic.com/ayuda
+            </a>
+          </p>
+        </span>
+        <p class="mt-5 cursor-default text-xs text-gray-400">
           Copyright © {{ currentYear }}
-          <span class="text-primary-500 font-medium">Siete CX</span>
+          <span class="text-primary-500 font-medium">Siete CX.</span>
+          Todos los derechos reservados.
         </p>
       </div>
     </div>
@@ -72,7 +93,7 @@
     <div class="hidden w-full items-center justify-center lg:flex">
       <div
         class="bg-primary-700 flex w-full items-center justify-center overflow-hidden rounded-t-2xl rounded-br-2xl rounded-bl-[5rem]">
-        <img src="../images/login.svg" alt="Login" class="h-auto w-full" />
+        <img src="../images/login.png" alt="Login" class="h-auto w-full" />
       </div>
     </div>
   </div>
