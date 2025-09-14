@@ -1,4 +1,4 @@
-<!-- Floating Button -->
+<!-- Button -->
 <div class="fixed top-4 right-4 z-50">
   <button
     pTooltip="Análisis IA"
@@ -14,82 +14,201 @@
   header="🤖 Análisis (IA)"
   [modal]="true"
   [(visible)]="visible"
-  styleClass="w-full max-w-5xl">
-  <div class="mb-4 flex flex-col gap-4 text-gray-800 dark:text-gray-300">
+  styleClass="w-full max-w-6xl h-[90vh]">
+  <!-- Header con timestamp y acciones -->
+  <div
+    class="sticky top-0 z-10 -mx-6 -mt-4 mb-4 border-b border-gray-200 bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="font-mono text-xs text-gray-500 dark:text-gray-400">
+          Generado: {{ getTimestamp() }}
+        </span>
+        @if (analysis()) {
+          <span
+            class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
+            <div
+              class="mr-1.5 h-1.5 w-1.5 animate-pulse rounded-full bg-green-500"></div>
+            Actualizado
+          </span>
+        }
+      </div>
+      <div class="flex items-center gap-2">
+        @if (analysis()) {
+          <button
+            class="inline-flex items-center rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            (click)="exportToPDF()"
+            pTooltip="Exportar a PDF"
+            tooltipPosition="bottom">
+            <ng-icon name="lucideDownload" size="14" class="mr-1" />
+            PDF
+          </button>
+          <button
+            class="inline-flex items-center rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            (click)="exportToCSV()"
+            pTooltip="Exportar datos a CSV"
+            tooltipPosition="bottom">
+            <ng-icon name="lucideTable" size="14" class="mr-1" />
+            CSV
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="h-full">
     @if (isLoading()) {
-      <div class="flex w-full flex-col items-center justify-center">
+      <div class="flex h-96 w-full flex-col items-center justify-center">
         <app-spinner />
-        <h3>Cargando análisis...</h3>
+        <h3 class="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300">
+          Cargando análisis...
+        </h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Esto puede tomar unos momentos
+        </p>
       </div>
     } @else {
       @if (analysis()) {
-        <!-- Tabs -->
-        <p-tabs value="0" class="flex h-full flex-col">
-          <!-- Tabs sticky -->
-          <div class="dark:bg-bunker-900 sticky top-0 z-40 bg-white">
-            <p-tablist>
-              <p-tab value="0">Vista Ejecutiva</p-tab>
-              <p-tab value="1">Vista Operativa</p-tab>
-            </p-tablist>
-          </div>
+        <!-- Tabs fijos -->
+        <div class="flex h-full flex-col">
+          <p-tabs value="0" class="flex h-full flex-col">
+            <div
+              class="sticky top-0 z-10 -mx-6 border-b border-gray-200 bg-white px-6 dark:border-gray-700 dark:bg-gray-800">
+              <p-tablist class="border-b-0">
+                <p-tab value="0">
+                  <div class="flex items-center gap-2">
+                    <ng-icon name="lucideChartBar" size="16" />
+                    Vista Ejecutiva
+                  </div>
+                </p-tab>
+                <p-tab value="1">
+                  <div class="flex items-center gap-2">
+                    <ng-icon name="lucideCode" size="16" />
+                    Vista Operativa
+                  </div>
+                </p-tab>
+              </p-tablist>
+            </div>
 
-          <p-tabpanels>
-            <!-- TAB 1 -->
-            <p-tabpanel value="0">
-              <markdown
-                [data]="analysis()?.executive_view"
-                class="prose dark:prose-invert max-w-none"></markdown>
-            </p-tabpanel>
+            <p-tabpanels class="flex-1 overflow-hidden">
+              <!-- TAB 1 - Vista Ejecutiva -->
+              <p-tabpanel value="0" class="h-full p-0">
+                <div
+                  class="scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent h-full overflow-y-auto px-1 py-4">
+                  <div class="max-w-none">
+                    <markdown
+                      [data]="analysis()?.executive_view"
+                      class="prose prose-sm dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-li:text-gray-700 dark:prose-li:text-gray-300 max-w-none">
+                    </markdown>
+                  </div>
+                </div>
+              </p-tabpanel>
 
-            <!-- TAB 2 -->
-            <p-tabpanel value="1">
-              <div class="relative">
-                <!-- Copy button -->
-                <button
-                  pTooltip="Copiar JSON"
-                  class="absolute top-2 right-2 text-gray-400 hover:text-white"
-                  (click)="copyJson()">
-                  <ng-icon name="lucideClipboard" size="18" />
-                </button>
+              <!-- TAB 2 - Vista Operativa -->
+              <p-tabpanel value="1" class="h-full p-0">
+                <div class="flex h-full flex-col">
+                  <!-- Header del JSON con botón de copiar -->
+                  <div
+                    class="sticky top-0 z-10 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <h4
+                          class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          Datos Operativos
+                        </h4>
+                        <span
+                          class="font-mono text-xs text-gray-500 dark:text-gray-400"
+                          >JSON</span
+                        >
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <button
+                          class="inline-flex items-center rounded px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                          (click)="toggleJsonExpansion()"
+                          pTooltip="{{
+                            isJsonExpanded() ? 'Colapsar todo' : 'Expandir todo'
+                          }}"
+                          tooltipPosition="bottom">
+                          <ng-icon
+                            [name]="
+                              isJsonExpanded()
+                                ? 'lucideChevronUp'
+                                : 'lucideChevronDown'
+                            "
+                            size="14"
+                            class="mr-1" />
+                          {{ isJsonExpanded() ? 'Colapsar' : 'Expandir' }}
+                        </button>
+                        <button
+                          class="inline-flex items-center rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700"
+                          (click)="copyJsonToClipboard()"
+                          pTooltip="Copiar JSON completo"
+                          tooltipPosition="bottom">
+                          <ng-icon
+                            [name]="
+                              copySuccess() ? 'lucideCheck' : 'lucideCopy'
+                            "
+                            size="14"
+                            class="mr-1" />
+                          {{ copySuccess() ? 'Copiado!' : 'Copiar' }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
 
-                <!-- JSON viewer -->
-                <ngx-json-viewer
-                  [json]="parsedJson"
-                  [expanded]="false"
-                  class="theme-dracula max-h-[60vh] overflow-auto rounded-xl p-4 text-sm">
-                </ngx-json-viewer>
-
-                <!-- Expand all -->
-                <button
-                  class="text-primary-400 mt-2 text-xs hover:underline"
-                  (click)="expandAll()">
-                  Expandir
-                </button>
-              </div>
-            </p-tabpanel>
-          </p-tabpanels>
-        </p-tabs>
+                  <!-- JSON Content -->
+                  <div
+                    class="scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent flex-1 overflow-y-auto">
+                    <pre
+                      class="m-0 h-full overflow-x-auto bg-gray-900 p-6 font-mono text-sm leading-relaxed text-gray-100"
+                      [style.font-family]="
+                        'JetBrains Mono, Fira Code, Monaco, Consolas, monospace'
+                      "
+                      #jsonContainer
+                      >{{ getFormattedJson() }}</pre
+                    >
+                  </div>
+                </div>
+              </p-tabpanel>
+            </p-tabpanels>
+          </p-tabs>
+        </div>
       } @else {
-        <p class="italic">
-          El análisis está en proceso o no se encuentra disponible...
-        </p>
+        <div class="flex h-96 flex-col items-center justify-center text-center">
+          <ng-icon
+            name="lucideCircleAlert"
+            size="48"
+            class="mb-4 text-gray-400" />
+          <p class="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
+            Análisis no disponible
+          </p>
+          <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+            El análisis está en proceso o no se encuentra disponible en este
+            momento
+          </p>
+          <button
+            class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            (click)="getAnalysis()">
+            <ng-icon name="lucideRefreshCw" size="16" class="mr-2" />
+            Reintentar
+          </button>
+        </div>
       }
     }
   </div>
 
-  <!-- Footer -->
-  <div class="mt-4 flex items-center justify-between">
-    <small class="text-xs text-gray-500 italic dark:text-gray-400">
-      Generado: {{ analysis()?.created_at | date: 'yyyy-MM-dd HH:mm' }}
-    </small>
-
-    <div class="flex gap-2">
-      <p-button label="Exportar CSV" icon="pi pi-file" (click)="exportCsv()" />
+  <div
+    class="sticky bottom-0 -mx-6 mt-6 -mb-6 border-t border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+    <div class="flex items-center justify-between">
+      <div class="text-xs text-gray-500 dark:text-gray-400">
+        @if (analysis()) {
+          Análisis completado • {{ getAnalysisSize() }} caracteres
+        }
+      </div>
       <p-button
-        label="Exportar PDF"
-        icon="pi pi-file-pdf"
-        (click)="exportPdf()" />
-      <p-button label="Cerrar" severity="secondary" (click)="hiddenDialog()" />
+        label="Cerrar"
+        severity="secondary"
+        (click)="hiddenDialog()"
+        size="small" />
     </div>
   </div>
 </p-dialog>
