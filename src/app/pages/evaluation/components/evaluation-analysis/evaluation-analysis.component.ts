@@ -14,6 +14,7 @@ import { EvaluationAnalysisService } from '@services/evaluation-analysis.service
 import { MarkdownComponent } from 'ngx-markdown';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
+import { TabsModule } from 'primeng/tabs';
 import { Tooltip } from 'primeng/tooltip';
 
 @Component({
@@ -25,6 +26,7 @@ import { Tooltip } from 'primeng/tooltip';
     ButtonModule,
     Tooltip,
     MarkdownComponent,
+    TabsModule,
   ],
   templateUrl: './evaluation-analysis.component.html',
   styleUrl: './evaluation-analysis.component.css',
