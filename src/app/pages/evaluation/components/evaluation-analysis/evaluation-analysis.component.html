@@ -52,18 +52,26 @@
                   <ng-icon name="lucideClipboard" size="18" />
                 </button>
 
-                <!-- JSON pretty print -->
-                <pre
-                  class="max-h-[60vh] overflow-auto rounded-xl bg-[#282c34] p-4 font-mono text-sm leading-relaxed text-gray-200">
-                  {{ prettyJson() }}
-                </pre>
+                <!-- JSON viewer -->
+                <ngx-json-viewer
+                  [json]="parsedJson"
+                  [expanded]="false"
+                  class="theme-dracula max-h-[60vh] overflow-auto rounded-xl p-4 text-sm">
+                </ngx-json-viewer>
+
+                <!-- Expand all -->
+                <button
+                  class="text-primary-400 mt-2 text-xs hover:underline"
+                  (click)="expandAll()">
+                  Expandir todo
+                </button>
               </div>
             </p-tabpanel>
           </p-tabpanels>
         </p-tabs>
       } @else {
         <p class="italic">
-          El análisis está en proceso o no se encuentra disponible
+          El análisis está en proceso o no se encuentra disponible...
         </p>
       }
     }

@@ -1,4 +1,16 @@
-pre,
-code {
+/* Tipografía monoespaciada moderna */
+pre, code, .json-viewer {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
 }
+
+/* Tema tipo Dracula / One Dark */
+.theme-dracula {
+  background-color: #282c34 !important;
+  color: #f8f8f2 !important;
+}
+
+.theme-dracula .string { color: #98c379; }
+.theme-dracula .number { color: #61afef; }
+.theme-dracula .boolean { color: #c678dd; }
+.theme-dracula .null { color: #56b6c2; }
+.theme-dracula .key { color: #e06c75; }

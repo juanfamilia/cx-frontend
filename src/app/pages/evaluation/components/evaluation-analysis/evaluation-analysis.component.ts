@@ -2,7 +2,6 @@ import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   inject,
   input,
   model,
@@ -13,6 +12,7 @@ import { EvaluationAnalysis } from '@interfaces/evaluation-analysis';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideClipboard, lucideSparkles } from '@ng-icons/lucide';
 import { EvaluationAnalysisService } from '@services/evaluation-analysis.service';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { MarkdownComponent } from 'ngx-markdown';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
@@ -29,6 +29,7 @@ import { Tooltip } from 'primeng/tooltip';
     Tooltip,
     MarkdownComponent,
     TabsModule,
+    NgxJsonViewerModule,
     DatePipe,
   ],
   templateUrl: './evaluation-analysis.component.html',
@@ -45,12 +46,7 @@ export class EvaluationAnalysisComponent {
   isLoading = signal<boolean>(false);
   analysis = signal<EvaluationAnalysis | null>(null);
 
-  // Pretty JSON
-  prettyJson = computed(() =>
-    this.analysis()?.operative_view
-      ? JSON.stringify(this.analysis()?.operative_view, null, 2)
-      : ''
-  );
+  parsedJson = {};
 
   showDialog() {
     this.visible.set(true);
@@ -66,6 +62,11 @@ export class EvaluationAnalysisComponent {
     this.evaluationAnalysisService.getOne(this.evalutationId()).subscribe({
       next: data => {
         this.analysis.set(data);
+        try {
+          this.parsedJson = JSON.parse(data.operative_view);
+        } catch {
+          this.parsedJson = { raw: data.operative_view };
+        }
         this.isLoading.set(false);
       },
       error: error => {
@@ -76,7 +77,12 @@ export class EvaluationAnalysisComponent {
   }
 
   copyJson() {
-    navigator.clipboard.writeText(this.prettyJson());
+    navigator.clipboard.writeText(JSON.stringify(this.parsedJson, null, 2));
+  }
+
+  expandAll() {
+    // hack: ngx-json-viewer no trae expandAll, forzamos [expanded]=true
+    this.parsedJson = { ...this.parsedJson }; // trigger rerender
   }
 
   exportCsv() {
