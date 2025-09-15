@@ -6,8 +6,8 @@ import {
   model,
   signal,
 } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { SpinnerComponent } from '@components/spinner/spinner.component';
-import { EvaluationAnalysis } from '@interfaces/evaluation-analysis';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideChartBar,
@@ -28,6 +28,8 @@ import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { TabsModule } from 'primeng/tabs';
 import { Tooltip } from 'primeng/tooltip';
+import { convertJsonToCsv } from 'src/app/helpers/json-csv-convert';
+import { PdfService } from 'src/app/helpers/markdown-pdf-convert';
 
 @Component({
   selector: 'app-evaluation-analysis',
@@ -63,43 +65,29 @@ export class EvaluationAnalysisComponent {
   evalutationId = input.required<number>();
 
   private evaluationAnalysisService = inject(EvaluationAnalysisService);
+  private pdfService = inject(PdfService);
 
   visible = model(false);
   isLoading = signal<boolean>(false);
-  analysis = signal<EvaluationAnalysis | null>(null);
+  analysis = rxResource({
+    request: () => this.evalutationId(),
+    loader: () => this.evaluationAnalysisService.getOne(this.evalutationId()),
+  });
   copySuccess = signal<boolean>(false);
   isJsonExpanded = signal<boolean>(true);
-  generatedAt = signal<Date | null>(null);
 
   showDialog() {
     this.visible.set(true);
-    this.getAnalysis();
   }
 
   hiddenDialog() {
     this.visible.set(false);
-    // Reset states
     this.copySuccess.set(false);
     this.isJsonExpanded.set(true);
   }
 
-  getAnalysis() {
-    this.isLoading.set(true);
-    this.evaluationAnalysisService.getOne(this.evalutationId()).subscribe({
-      next: data => {
-        this.analysis.set(data);
-        this.generatedAt.set(new Date());
-        this.isLoading.set(false);
-      },
-      error: error => {
-        console.error('Error getting evaluation analysis:', error);
-        this.isLoading.set(false);
-      },
-    });
-  }
-
   getTimestamp(): string {
-    const date = this.generatedAt();
+    const date = this.analysis.value();
     if (!date) return '';
 
     return new Intl.DateTimeFormat('es-ES', {
@@ -109,24 +97,24 @@ export class EvaluationAnalysisComponent {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-    }).format(date);
+    }).format(new Date(date.created_at!));
   }
 
   getFormattedJson(): string {
-    const analysisData = this.analysis();
-    if (!analysisData?.operative_view) return '';
+    const analysisData = this.analysis.value()?.operative_view;
+    if (!analysisData) return '';
 
     try {
       // Si operative_view ya es un string JSON, parsearlo primero
       const jsonData =
-        typeof analysisData.operative_view === 'string'
-          ? JSON.parse(analysisData.operative_view)
-          : analysisData.operative_view;
+        typeof analysisData === 'string'
+          ? JSON.parse(analysisData)
+          : analysisData;
 
       return JSON.stringify(jsonData, null, 2);
-    } catch (error) {
-      console.log('Error parsing JSON:', error);
-      return analysisData.operative_view;
+    } catch {
+      // Si no es JSON válido, devolver como string
+      return analysisData;
     }
   }
 
@@ -145,15 +133,8 @@ export class EvaluationAnalysisComponent {
     }
   }
 
-  toggleJsonExpansion() {
-    this.isJsonExpanded.set(!this.isJsonExpanded());
-    // Aquí podrías implementar lógica para colapsar/expandir el JSON
-    // Por ejemplo, usando una librería como json-viewer o implementando
-    // tu propia lógica de colapso
-  }
-
   getAnalysisSize(): string {
-    const analysis = this.analysis();
+    const analysis = this.analysis.value();
     if (!analysis) return '0';
 
     const totalSize =
@@ -170,109 +151,25 @@ export class EvaluationAnalysisComponent {
   }
 
   exportToPDF() {
-    const analysis = this.analysis();
+    const analysis = this.analysis.value()?.executive_view;
     if (!analysis) return;
 
-    // Implementa la lógica de exportación a PDF
-    // Podrías usar jsPDF o similar
-    console.log('Exporting to PDF...', analysis);
-
-    // Ejemplo básico con window.print (podrías mejorar esto)
-    const printContent = `
-      <html>
-        <head>
-          <title>Análisis IA - ${this.getTimestamp()}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-            .section { margin: 30px 0; }
-            .json { background: #f5f5f5; padding: 20px; border-radius: 8px; white-space: pre-wrap; font-family: monospace; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>🤖 Análisis IA</h1>
-            <p>Generado: ${this.getTimestamp()}</p>
-          </div>
-          <div class="section">
-            <h2>Vista Ejecutiva</h2>
-            <div>${analysis.executive_view}</div>
-          </div>
-          <div class="section">
-            <h2>Vista Operativa</h2>
-            <div class="json">${this.getFormattedJson()}</div>
-          </div>
-        </body>
-      </html>
-    `;
-
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      printWindow.print();
-    }
+    this.pdfService.markdownToPdf(analysis);
   }
 
   exportToCSV() {
-    const analysis = this.analysis();
-    if (!analysis?.operative_view) return;
+    const analysis = this.analysis.value()?.operative_view;
+    if (!analysis) return;
 
     try {
-      // Intenta convertir el JSON a CSV
-      const jsonData =
-        typeof analysis.operative_view === 'string'
-          ? JSON.parse(analysis.operative_view)
-          : analysis.operative_view;
+      // Parsear el JSON del operative_view
+      const csvContent = convertJsonToCsv(analysis);
 
-      // Función simple para convertir JSON a CSV
-      type SimpleObject = Record<
-        string,
-        string | number | boolean | null | undefined
-      >;
-
-      type JsonToCsvInput = SimpleObject | SimpleObject[];
-
-      const jsonToCSV = (obj: JsonToCsvInput): string => {
-        if (Array.isArray(obj)) {
-          if (obj.length === 0) return '';
-
-          const headers = Object.keys(obj[0]);
-          const csvHeaders = headers.join(',');
-          const csvRows = obj.map((row: SimpleObject) =>
-            headers
-              .map(header => {
-                const value = row[header];
-                // Escapar comillas y comas
-                if (
-                  typeof value === 'string' &&
-                  (value.includes(',') || value.includes('"'))
-                ) {
-                  return `"${value.replace(/"/g, '""')}"`;
-                }
-                return value;
-              })
-              .join(',')
-          );
-
-          return [csvHeaders, ...csvRows].join('\n');
-        } else {
-          // Para objetos simples, crear CSV de clave-valor
-          const entries = Object.entries(obj);
-          return (
-            'Key,Value\n' +
-            entries.map(([key, value]) => `"${key}","${value}"`).join('\n')
-          );
-        }
-      };
-
-      const csvContent = jsonToCSV(jsonData);
-
-      // Descargar archivo
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `analisis-${Date.now()}.csv`;
+      link.href = url;
+      link.download = 'data.csv';
       link.click();
     } catch (error) {
       console.error('Error exporting to CSV:', error);

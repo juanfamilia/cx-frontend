@@ -14,16 +14,17 @@
   header="🤖 Análisis (IA)"
   [modal]="true"
   [(visible)]="visible"
-  styleClass="w-full max-w-6xl h-[90vh]">
+  draggable="false"
+  styleClass="w-full max-w-6xl h-[90vh] bg-bunker-950">
   <!-- Header con timestamp y acciones -->
   <div
-    class="sticky top-0 z-10 -mx-6 -mt-4 mb-4 border-b border-gray-200 bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800">
+    class="dark:bg-bunker-900/50 sticky top-0 z-10 -mt-4 mb-4 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="font-mono text-xs text-gray-500 dark:text-gray-400">
           Generado: {{ getTimestamp() }}
         </span>
-        @if (analysis()) {
+        @if (analysis.value()) {
           <span
             class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
             <div
@@ -33,7 +34,7 @@
         }
       </div>
       <div class="flex items-center gap-2">
-        @if (analysis()) {
+        @if (analysis.value()) {
           <button
             class="inline-flex items-center rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
             (click)="exportToPDF()"
@@ -55,8 +56,9 @@
     </div>
   </div>
 
-  <div class="h-full">
-    @if (isLoading()) {
+  <div>
+    <!-- Loading spinner -->
+    @if (analysis.isLoading()) {
       <div class="flex h-96 w-full flex-col items-center justify-center">
         <app-spinner />
         <h3 class="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300">
@@ -67,12 +69,12 @@
         </p>
       </div>
     } @else {
-      @if (analysis()) {
+      @if (analysis.value()) {
         <!-- Tabs fijos -->
-        <div class="flex h-full flex-col">
+        <div class="flex flex-col">
           <p-tabs value="0" class="flex h-full flex-col">
             <div
-              class="sticky top-0 z-10 -mx-6 border-b border-gray-200 bg-white px-6 dark:border-gray-700 dark:bg-gray-800">
+              class="sticky top-0 z-10 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
               <p-tablist class="border-b-0">
                 <p-tab value="0">
                   <div class="flex items-center gap-2">
@@ -96,7 +98,7 @@
                   class="scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent h-full overflow-y-auto px-1 py-4">
                   <div class="max-w-none">
                     <markdown
-                      [data]="analysis()?.executive_view"
+                      [data]="analysis.value()?.executive_view"
                       class="prose prose-sm dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-li:text-gray-700 dark:prose-li:text-gray-300 max-w-none">
                     </markdown>
                   </div>
@@ -108,7 +110,7 @@
                 <div class="flex h-full flex-col">
                   <!-- Header del JSON con botón de copiar -->
                   <div
-                    class="sticky top-0 z-10 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
+                    class="sticky top-0 z-5 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-3">
                         <h4
@@ -121,23 +123,6 @@
                         >
                       </div>
                       <div class="flex items-center gap-2">
-                        <button
-                          class="inline-flex items-center rounded px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
-                          (click)="toggleJsonExpansion()"
-                          pTooltip="{{
-                            isJsonExpanded() ? 'Colapsar todo' : 'Expandir todo'
-                          }}"
-                          tooltipPosition="bottom">
-                          <ng-icon
-                            [name]="
-                              isJsonExpanded()
-                                ? 'lucideChevronUp'
-                                : 'lucideChevronDown'
-                            "
-                            size="14"
-                            class="mr-1" />
-                          {{ isJsonExpanded() ? 'Colapsar' : 'Expandir' }}
-                        </button>
                         <button
                           class="inline-flex items-center rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700"
                           (click)="copyJsonToClipboard()"
@@ -159,12 +144,13 @@
                   <div
                     class="scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent flex-1 overflow-y-auto">
                     <pre
-                      class="m-0 h-full overflow-x-auto bg-gray-900 p-6 font-mono text-sm leading-relaxed text-gray-100"
+                      class="h-full overflow-x-auto bg-gray-900 p-6 font-mono text-sm leading-relaxed text-gray-100"
                       [style.font-family]="
                         'JetBrains Mono, Fira Code, Monaco, Consolas, monospace'
                       "
-                      #jsonContainer
-                      >{{ getFormattedJson() }}</pre
+                      #jsonContainer>
+                      {{ getFormattedJson() }}
+                      </pre
                     >
                   </div>
                 </div>
@@ -185,22 +171,16 @@
             El análisis está en proceso o no se encuentra disponible en este
             momento
           </p>
-          <button
-            class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-            (click)="getAnalysis()">
-            <ng-icon name="lucideRefreshCw" size="16" class="mr-2" />
-            Reintentar
-          </button>
         </div>
       }
     }
   </div>
 
   <div
-    class="sticky bottom-0 -mx-6 mt-6 -mb-6 border-t border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+    class="flex-shrink-0 border-t border-gray-200 bg-white px-2 py-4 dark:border-gray-700 dark:bg-gray-800">
     <div class="flex items-center justify-between">
       <div class="text-xs text-gray-500 dark:text-gray-400">
-        @if (analysis()) {
+        @if (analysis.value()) {
           Análisis completado • {{ getAnalysisSize() }} caracteres
         }
       </div>
