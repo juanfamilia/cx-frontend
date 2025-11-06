@@ -34,4 +34,12 @@ export interface DashboardEvaluator {
     rechazadas: number;
   };
   weekly_progress: WeeklyProgress[];
+  coverage: {
+    campaign_id: number;
+    campaign_name: string;
+    coverage_percent: number;
+    evaluator_id: number;
+    goal_weekly: number;
+    reported_total: number;
+  };
 }
