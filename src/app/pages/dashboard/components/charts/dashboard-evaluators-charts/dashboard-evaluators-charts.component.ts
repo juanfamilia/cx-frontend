@@ -1,8 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   input,
+  OnInit,
 } from '@angular/core';
 import { WeeklyProgress } from '@interfaces/weekly-progress';
 import { BarChart, LineChart } from 'echarts/charts';
@@ -33,39 +33,37 @@ echarts.use([
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideEchartsCore({ echarts })],
 })
-export class DashboardEvaluatorsChartsComponent {
+export class DashboardEvaluatorsChartsComponent implements OnInit {
   data = input.required<WeeklyProgress[]>();
   chartOption: echarts.EChartsCoreOption = {};
 
-  constructor() {
-    computed(() => {
-      const days = this.data().map(d => d.day_name.trim());
-      const reported = this.data().map(d => d.reported_today);
-      const goals = this.data().map(d => d.daily_goal);
+  ngOnInit(): void {
+    const days = this.data().map(d => d.day_name.trim());
+    const reported = this.data().map(d => d.reported_today);
+    const goals = this.data().map(d => d.daily_goal);
 
-      this.chartOption = {
-        tooltip: { trigger: 'axis' },
-        legend: { data: ['Reportado', 'Meta diaria'] },
-        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-        xAxis: { type: 'category', data: days },
-        yAxis: { type: 'value' },
-        series: [
-          {
-            name: 'Reportado',
-            type: 'bar',
-            data: reported,
-            itemStyle: { color: '#42A5F5' },
-          },
-          {
-            name: 'Meta diaria',
-            type: 'line',
-            data: goals,
-            smooth: true,
-            lineStyle: { color: '#66BB6A', width: 3 },
-            symbol: 'circle',
-          },
-        ],
-      };
-    });
+    this.chartOption = {
+      tooltip: { trigger: 'axis' },
+      legend: { data: ['Reportado', 'Meta diaria'] },
+      grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+      xAxis: { type: 'category', data: days },
+      yAxis: { type: 'value' },
+      series: [
+        {
+          name: 'Reportado',
+          type: 'bar',
+          data: reported,
+          itemStyle: { color: '#42A5F5' },
+        },
+        {
+          name: 'Meta diaria',
+          type: 'line',
+          data: goals,
+          smooth: true,
+          lineStyle: { color: '#66BB6A', width: 3 },
+          symbol: 'circle',
+        },
+      ],
+    };
   }
 }
