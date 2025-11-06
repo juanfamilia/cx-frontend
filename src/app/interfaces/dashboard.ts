@@ -1,3 +1,5 @@
+import { WeeklyProgress } from './weekly-progress';
+
 export interface DashboardSuperAdmin {
   superadmin_id: number;
   total_empresas: number;
@@ -23,10 +25,13 @@ export interface DashboardManager {
 }
 
 export interface DashboardEvaluator {
-  user_id: number;
-  enviadas: number;
-  actualizadas: number;
-  ediciones_pendientes: number;
-  aprobadas: number;
-  rechazadas: number;
+  sumary: {
+    user_id: number;
+    enviadas: number;
+    actualizadas: number;
+    ediciones_pendientes: number;
+    aprobadas: number;
+    rechazadas: number;
+  };
+  weekly_progress: WeeklyProgress[];
 }

@@ -20,6 +20,7 @@ import { CampaignGoalsProgressService } from '@services/campaign-goals-progress.
 import { DashboardService } from '@services/dashboard.service';
 import { ProgressBar } from 'primeng/progressbar';
 import { ActionDashboard } from 'src/app/types/actionsDashboard';
+import { DashboardEvaluatorsChartsComponent } from '../charts/dashboard-evaluators-charts/dashboard-evaluators-charts.component';
 import { DashboardCardComponent } from '../dashboard-card/dashboard-card.component';
 import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashboard-quick-actions.component';
 
@@ -30,6 +31,7 @@ import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashb
     DashboardCardComponent,
     DashboardQuickActionsComponent,
     ProgressBar,
+    DashboardEvaluatorsChartsComponent,
   ],
   templateUrl: './dashboard-evaluators.component.html',
   styleUrl: './dashboard-evaluators.component.css',

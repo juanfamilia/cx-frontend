@@ -4,27 +4,31 @@
   <div class="mb-8 grid grid-cols-2 gap-2 sm:gap-6 lg:grid-cols-4">
     <app-dashboard-card
       title="Evaluaciones Enviadas"
-      [value]="data()?.enviadas || 0"
+      [value]="data()?.sumary?.enviadas || 0"
       icon="lucideSend"
       iconColor="text-sky-500" />
 
     <app-dashboard-card
       title="Evaluaciones Por Editar"
-      [value]="data()?.ediciones_pendientes || 0"
+      [value]="data()?.sumary?.ediciones_pendientes || 0"
       icon="lucideCircleAlert"
       iconColor="text-yellow-500" />
 
     <app-dashboard-card
       title="Evaluaciones Aprobadas"
-      [value]="data()?.aprobadas || 0"
+      [value]="data()?.sumary?.aprobadas || 0"
       icon="lucideCircleCheckBig"
       iconColor="text-green-500" />
 
     <app-dashboard-card
       title="Evaluaciones Rechazadas"
-      [value]="data()?.rechazadas || 0"
+      [value]="data()?.sumary?.rechazadas || 0"
       icon="lucideCircleX"
       iconColor="text-red-500" />
+  </div>
+
+  <div>
+    <app-dashboard-evaluators-charts [data]="data()!.weekly_progress" />
   </div>
 
   @if (resourceGoalsProgress.isLoading()) {
