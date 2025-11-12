@@ -4,19 +4,19 @@
   <div class="mb-8 grid grid-cols-3 gap-2 sm:gap-6">
     <app-dashboard-card
       title="Zonas Asignadas"
-      [value]="data()?.zonas_asignadas || 0"
+      [value]="data()?.summary?.zonas_asignadas || 0"
       icon="lucideUsers"
       iconColor="text-primary-500" />
 
     <app-dashboard-card
       title="Evaluadores Totales"
-      [value]="data()?.evaluadores_asignados || 0"
+      [value]="data()?.summary?.evaluadores_asignados || 0"
       icon="lucideUsers"
       iconColor="text-primary-500" />
 
     <app-dashboard-card
       title="Campañas Activas"
-      [value]="data()?.active_campaigns || 0"
+      [value]="data()?.summary?.active_campaigns || 0"
       icon="lucideCircleCheckBig"
       iconColor="text-green-500" />
   </div>
