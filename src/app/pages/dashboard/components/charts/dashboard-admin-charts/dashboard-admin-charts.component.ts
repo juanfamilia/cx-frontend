@@ -30,15 +30,15 @@ echarts.use([
 ]);
 
 @Component({
-  selector: 'app-dashboard-evaluators-charts',
+  selector: 'app-dashboard-admin-charts',
   standalone: true,
   imports: [NgxEchartsDirective],
-  templateUrl: './dashboard-evaluators-charts.component.html',
-  styleUrls: ['./dashboard-evaluators-charts.component.css'],
+  templateUrl: './dashboard-admin-charts.component.html',
+  styleUrls: ['./dashboard-admin-charts.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideEchartsCore({ echarts })],
 })
-export class DashboardEvaluatorsChartsComponent implements OnInit {
+export class DashboardAdminChartsComponent implements OnInit {
   weeklyProgress = input.required<WeeklyProgress[]>();
   campaignCoverage = input.required<CampaignCoverage[]>();
 

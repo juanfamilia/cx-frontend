@@ -75,4 +75,13 @@ export class DashboardAdminComponent {
       route: '/work-areas/create',
     },
   ]);
+
+  ngOnInit(): void {
+    const parsedAnalysis = this.data()?.analysis.map(campaign => ({
+      ...campaign,
+      operative_views: campaign.operative_views.map(viewString => JSON.parse(viewString))
+    }));
+
+    console.log(parsedAnalysis);
+  }
 }
