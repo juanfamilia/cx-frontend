@@ -76,12 +76,12 @@ export class DashboardAdminComponent {
     },
   ]);
 
-  ngOnInit(): void {
-    const parsedAnalysis = this.data()?.analysis.map(campaign => ({
-      ...campaign,
-      operative_views: campaign.operative_views.map(viewString => JSON.parse(viewString))
-    }));
+  // ngOnInit(): void {
+  //   const parsedAnalysis = this.data()?.analysis.map(campaign => ({
+  //     ...campaign,
+  //     operative_views: campaign.operative_views.map(viewString => JSON.parse(viewString))
+  //   }));
 
-    console.log(parsedAnalysis);
-  }
+  //   console.log(parsedAnalysis);
+  // }
 }
