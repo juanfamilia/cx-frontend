@@ -29,7 +29,6 @@ import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashb
     SpinnerComponent,
     DashboardCardComponent,
     DashboardQuickActionsComponent,
-
     DashboardEvaluatorsChartsComponent,
   ],
   templateUrl: './dashboard-evaluators.component.html',

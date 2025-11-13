@@ -1,12 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ChangeDetectionStrategy,
   Component,
   input,
   OnInit,
 } from '@angular/core';
-import { CampaignCoverage } from '@interfaces/campaing-coverage';
-import { WeeklyProgress } from '@interfaces/weekly-progress';
-import { BarChart, LineChart, PieChart } from 'echarts/charts';
+import {
+  AnalysisData,
+  EvaluationAnalysisDashboard,
+} from '@interfaces/evaluation-analysis-dashboard';
+import { BarChart, LineChart, PieChart, RadarChart } from 'echarts/charts';
 import {
   GridComponent,
   LegendComponent,
@@ -16,7 +19,6 @@ import {
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
-import { transformDayName } from 'src/app/helpers/day-name-transform';
 
 echarts.use([
   BarChart,
@@ -27,6 +29,7 @@ echarts.use([
   CanvasRenderer,
   TitleComponent,
   PieChart,
+  RadarChart,
 ]);
 
 @Component({
@@ -39,104 +42,105 @@ echarts.use([
   providers: [provideEchartsCore({ echarts })],
 })
 export class DashboardAdminChartsComponent implements OnInit {
-  weeklyProgress = input.required<WeeklyProgress[]>();
-  campaignCoverage = input.required<CampaignCoverage[]>();
+  analysis = input.required<EvaluationAnalysisDashboard[]>();
 
-  chartWeekly: echarts.EChartsCoreOption = {};
-  chartCampaignCoverage: echarts.EChartsCoreOption = {};
+  barChart: echarts.EChartsCoreOption = {};
+  radarChart: echarts.EChartsCoreOption = {};
+  lineChart: echarts.EChartsCoreOption = {};
+
+  qualities = [
+    'saludo',
+    'identificacion',
+    'ofrecimiento',
+    'cierre',
+    'valor agregado',
+  ];
 
   ngOnInit(): void {
-    this.createWeeklyChart();
-    this.createCoverageChart();
-  }
-
-  private createWeeklyChart(): void {
-    const days = this.weeklyProgress().map(d => d.day_name.trim());
-    const daysTransformed = transformDayName(days);
-    const reported = this.weeklyProgress().map(d => d.reported_today);
-    const goals = this.weeklyProgress().map(d => d.daily_goal);
-
-    this.chartWeekly = {
-      title: {
-        text: 'Progreso Semanal',
-        left: 'center',
-      },
-      tooltip: { trigger: 'axis' },
-      legend: { data: ['Reportado', 'Meta diaria'] },
-      grid: { left: '3%', right: '4%', bottom: '12%', containLabel: true },
-      xAxis: { type: 'category', data: daysTransformed },
-      yAxis: { type: 'value' },
-      series: [
-        {
-          name: 'Reportado',
-          type: 'bar',
-          data: reported,
-          itemStyle: { color: '#42A5F5' },
-        },
-        {
-          name: 'Meta diaria',
-          type: 'line',
-          data: goals,
-          smooth: true,
-          lineStyle: { color: '#66BB6A', width: 3 },
-          symbol: 'circle',
-        },
-      ],
-    };
-  }
-
-  private createCoverageChart(): void {
-    const grouped = this.groupByCampaign(this.campaignCoverage());
-    const seriesData = Object.keys(grouped).map(name => ({
-      name,
-      value: this.averageCoverage(grouped[name]),
+    const data = this.analysis().map(campaign => ({
+      campaign_name: campaign.campaign_name,
+      operative_views: campaign.operative_views.map(v => JSON.parse(v)),
     }));
+    this.createBarChart(data);
+    this.createRadarChart(data);
+    this.createLineChart(data);
+  }
 
-    this.chartCampaignCoverage = {
-      title: {
-        text: 'Cobertura de Campañas',
-        left: 'center',
-      },
-      tooltip: {
-        trigger: 'item',
-        formatter: '{b}: {c}% ({d}%)',
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
+  createBarChart(data: AnalysisData[]): void {
+    const campaigns = data.map(c => c.campaign_name);
+    const ioc = data.map(c => this.promedio(c.operative_views, 'IOC'));
+    const ird = data.map(c => this.promedio(c.operative_views, 'IRD'));
+    const ces = data.map(c => this.promedio(c.operative_views, 'CES'));
+
+    this.barChart = {
+      tooltip: { trigger: 'axis' },
+      legend: { data: ['IOC', 'IRD', 'CES'] },
+      xAxis: { type: 'category', data: campaigns },
+      yAxis: { type: 'value', name: 'Score' },
+      series: [
+        { name: 'IOC', type: 'bar', data: ioc },
+        { name: 'IRD', type: 'bar', data: ird },
+        { name: 'CES', type: 'bar', data: ces },
+      ],
+    };
+  }
+
+  createRadarChart(data: AnalysisData[]): void {
+    this.radarChart = {
+      tooltip: {},
+      legend: { data: data.map(c => c.campaign_name) },
+      radar: {
+        indicator: this.qualities.map(q => ({ name: q, max: 100 })),
       },
       series: [
         {
-          name: 'Cobertura',
-          type: 'pie',
-          radius: '60%',
-          data: seriesData,
-          label: {
-            formatter: '{b}\n{c}%',
-            fontSize: 13,
-          },
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
-            },
-          },
+          type: 'radar',
+          data: data.map(c => ({
+            value: this.promedioCalidad(c.operative_views),
+            name: c.campaign_name,
+          })),
         },
       ],
     };
   }
 
-  private groupByCampaign(data: CampaignCoverage[]) {
-    return data.reduce((acc, item) => {
-      acc[item.campaign_name] = acc[item.campaign_name] || [];
-      acc[item.campaign_name].push(item);
-      return acc;
-    }, {} as Record<string, CampaignCoverage[]>);
+  createLineChart(data: AnalysisData[]): void {
+    const allViews = data.flatMap(c =>
+      c.operative_views.map(v => ({
+        campaign: c.campaign_name,
+        date: new Date(v.timestamp_analisis),
+        ioc: v.IOC.score,
+      }))
+    );
+
+    this.lineChart = {
+      tooltip: { trigger: 'axis' },
+      xAxis: { type: 'time' },
+      yAxis: { type: 'value', name: 'IOC' },
+      series: data.map(c => ({
+        name: c.campaign_name,
+        type: 'line',
+        data: allViews
+          .filter(v => v.campaign === c.campaign_name)
+          .map(v => [v.date, v.ioc]),
+      })),
+      legend: { data: data.map(c => c.campaign_name) },
+    };
   }
 
-  private averageCoverage(items: CampaignCoverage[]) {
-    const sum = items.reduce((acc, i) => acc + i.coverage_percent, 0);
-    return +(sum / items.length).toFixed(2);
+  promedio(views: any[], key: string | number) {
+    return (
+      views.reduce(
+        (acc: number, v: Record<string, { score: number }>) =>
+          acc + v[key].score,
+        0
+      ) / views.length
+    );
+  }
+
+  promedioCalidad(views: any[]) {
+    return this.qualities.map(
+      q => (views.filter(v => v.Calidad[q]).length / views.length) * 100
+    );
   }
 }

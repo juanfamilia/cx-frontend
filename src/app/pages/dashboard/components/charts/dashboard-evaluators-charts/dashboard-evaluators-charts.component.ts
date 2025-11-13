@@ -128,11 +128,14 @@ export class DashboardEvaluatorsChartsComponent implements OnInit {
   }
 
   private groupByCampaign(data: CampaignCoverage[]) {
-    return data.reduce((acc, item) => {
-      acc[item.campaign_name] = acc[item.campaign_name] || [];
-      acc[item.campaign_name].push(item);
-      return acc;
-    }, {} as Record<string, CampaignCoverage[]>);
+    return data.reduce(
+      (acc, item) => {
+        acc[item.campaign_name] = acc[item.campaign_name] || [];
+        acc[item.campaign_name].push(item);
+        return acc;
+      },
+      {} as Record<string, CampaignCoverage[]>
+    );
   }
 
   private averageCoverage(items: CampaignCoverage[]) {
