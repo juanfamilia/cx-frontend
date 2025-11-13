@@ -57,10 +57,6 @@ export class DashboardEvaluatorsChartsComponent implements OnInit {
     const goals = this.weeklyProgress().map(d => d.daily_goal);
 
     this.chartWeekly = {
-      title: {
-        text: 'Progreso Semanal',
-        left: 'center',
-      },
       tooltip: { trigger: 'axis' },
       legend: { data: ['Reportado', 'Meta diaria'] },
       grid: { left: '3%', right: '4%', bottom: '12%', containLabel: true },
@@ -93,10 +89,6 @@ export class DashboardEvaluatorsChartsComponent implements OnInit {
     }));
 
     this.chartCampaignCoverage = {
-      title: {
-        text: 'Cobertura de Campañas',
-        left: 'center',
-      },
       tooltip: {
         trigger: 'item',
         formatter: '{b}: {c}% ({d}%)',

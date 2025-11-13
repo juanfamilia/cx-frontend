@@ -27,7 +27,7 @@
       iconColor="text-red-500" />
   </div>
 
-  <div class="py-2">
+  <div class="pb-7">
     <app-dashboard-evaluators-charts [weeklyProgress]="data()!.weekly_progress" [campaignCoverage]="data()!.coverage" />
   </div>
 <!--
@@ -67,7 +67,7 @@
   } 
 -->
 
-  <div class="my-4 grid md:grid-cols-3 pt-5">
+  <div class="y-4 mb-30 grid pt-5 md:mb-15 lg:grid-cols-2">
     <app-dashboard-quick-actions [actions]="actions()" />
   </div>
 }
