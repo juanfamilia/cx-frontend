@@ -48,6 +48,8 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { TextareaModule } from 'primeng/textarea';
 import * as tus from 'tus-js-client';
 import { EvaluationChangeStatusComponent } from '../evaluation-change-status/evaluation-change-status.component';
+import { VISITED_ZONES } from 'src/app/constants/visited_zones';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 @Component({
   selector: 'app-evaluation-form',
@@ -67,6 +69,7 @@ import { EvaluationChangeStatusComponent } from '../evaluation-change-status/eva
     EvaluationChangeStatusComponent,
     SpinnerComponent,
     ProgressBar,
+    MultiSelectModule,
   ],
   templateUrl: './evaluation-form.component.html',
   styleUrl: './evaluation-form.component.css',
@@ -93,6 +96,8 @@ export class EvaluationFormComponent implements OnInit {
 
   submitEvent = output<FormData>();
 
+  visitedZones = VISITED_ZONES;
+
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private videoService = inject(VideoService);
@@ -118,6 +123,7 @@ export class EvaluationFormComponent implements OnInit {
         title: this.evaluation()?.video.title,
         location: this.evaluation()?.location,
         evaluated_collaborator: this.evaluation()?.evaluated_collaborator,
+        visited_zones: this.evaluation()?.visited_zones,
         evaluation_answers: this.evaluation()?.evaluation_answers,
       });
 
@@ -253,6 +259,10 @@ export class EvaluationFormComponent implements OnInit {
       formData.append(
         'evaluated_collaborator',
         this.evaluationForm.get('evaluated_collaborator')?.value
+      );
+      formData.append(
+        'visited_zones',
+        JSON.stringify(this.evaluationForm.get('visited_zones')?.value)
       );
 
       const answersGroup = this.evaluationAnswers;

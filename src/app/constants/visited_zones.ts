@@ -1,0 +1,16 @@
+export const VISITED_ZONES = [
+    { name: 'New York' },
+    { name: 'Rome' },
+    { name: 'London' },
+    { name: 'Istanbul' },
+    { name: 'Paris' },
+    { name: 'Área de Negocio' },
+    { name: 'Áreas Administrativas' },
+    { name: 'Banca' },
+    { name: 'Caja' },
+    { name: 'Clinicas y Hospitales' },
+    { name: 'Facturación' },
+    { name: 'Laboratorio' },
+    { name: 'Otro' },
+    { name: 'Plataforma' },
+];

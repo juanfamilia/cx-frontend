@@ -119,6 +119,15 @@
         label="Nombre del Colaborador"
         formControlName="evaluated_collaborator"
         icon="lucideUser" />
+
+      <p-multiselect
+        [options]="visitedZones"
+        formControlName="city"
+        optionLabel="name"
+        placeholder="Select Cities"
+        [maxSelectedLabels]="3"
+        [fluid]="true"
+        />
     </div>
     <div class="mt-4 flex flex-col gap-4" formArrayName="evaluation_answers">
       @for (section of campaign().survey?.sections; track $index) {
