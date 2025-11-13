@@ -122,12 +122,11 @@
 
       <p-multiselect
         [options]="visitedZones"
-        formControlName="city"
+        formControlName="visited_zones"
         optionLabel="name"
-        placeholder="Select Cities"
+        placeholder="Zonas Visitadas"
         [maxSelectedLabels]="3"
-        [fluid]="true"
-        />
+        [fluid]="true" />
     </div>
     <div class="mt-4 flex flex-col gap-4" formArrayName="evaluation_answers">
       @for (section of campaign().survey?.sections; track $index) {

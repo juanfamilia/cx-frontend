@@ -43,13 +43,13 @@ import 'media-chrome/menu';
 import { PrimeNG } from 'primeng/config';
 import { FileUploadHandlerEvent, FileUploadModule } from 'primeng/fileupload';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { ProgressBar } from 'primeng/progressbar';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TextareaModule } from 'primeng/textarea';
+import { VISITED_ZONES } from 'src/app/constants/visited_zones';
 import * as tus from 'tus-js-client';
 import { EvaluationChangeStatusComponent } from '../evaluation-change-status/evaluation-change-status.component';
-import { VISITED_ZONES } from 'src/app/constants/visited_zones';
-import { MultiSelectModule } from 'primeng/multiselect';
 
 @Component({
   selector: 'app-evaluation-form',
@@ -178,6 +178,7 @@ export class EvaluationFormComponent implements OnInit {
         { value: '', disabled: this.disabled() },
         Validators.required
       ),
+      visited_zones: new FormControl({ value: [], disabled: this.disabled() }),
       evaluation_answers: new FormGroup(answerControls),
     });
   }
