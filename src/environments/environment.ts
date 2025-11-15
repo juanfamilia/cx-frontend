@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://backendcx.sieteic.com/api/v1/',
+  apiUrl: 'https://cx-api.sieteic.com/api/v1/',
 };
