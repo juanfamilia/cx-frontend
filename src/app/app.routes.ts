@@ -81,6 +81,15 @@ export const routes: Routes = [
     data: { title: 'Configuración' },
   },
   {
+    path: 'intelligence',
+    loadComponent: () =>
+      import('./pages/intelligence/intelligence-dashboard.component').then(
+        m => m.IntelligenceDashboardComponent
+      ),
+    canActivate: [authGuard],
+    data: { title: 'Intelligence Center', role: [0, 1, 2, 3] },
+  },
+  {
     path: '**',
     component: NotFoundComponent,
   },
