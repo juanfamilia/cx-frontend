@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PromptManagerService, Prompt, PromptCreate, PromptUpdate } from '../../services/prompt-manager.service';
-import { ToastService } from '../../services/toast.service';
+import { ShareToasterService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-prompt-manager',
@@ -38,7 +38,7 @@ export class PromptManagerComponent implements OnInit {
 
   constructor(
     private promptService: PromptManagerService,
-    private toastService: ToastService
+    private toastService: ShareToasterService
   ) {}
 
   ngOnInit(): void {

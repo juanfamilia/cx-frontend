@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardConfigService, DashboardConfig, WidgetDefinition } from '../../services/dashboard-config.service';
-import { ToastService } from '../../services/toast.service';
+import { ShareToasterService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-dashboard-configurator',
@@ -20,7 +20,7 @@ export class DashboardConfiguratorComponent implements OnInit {
 
   constructor(
     private dashboardConfigService: DashboardConfigService,
-    private toastService: ToastService
+    private toastService: ShareToasterService
   ) {}
 
   ngOnInit(): void {

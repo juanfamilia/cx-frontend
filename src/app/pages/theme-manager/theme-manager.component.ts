@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CompanyThemeService, CompanyTheme, ThemeUpdate } from '../../services/company-theme.service';
-import { ToastService } from '../../services/toast.service';
+import { ShareToasterService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-theme-manager',
@@ -38,7 +38,7 @@ export class ThemeManagerComponent implements OnInit {
 
   constructor(
     private themeService: CompanyThemeService,
-    private toastService: ToastService
+    private toastService: ShareToasterService
   ) {}
 
   ngOnInit(): void {

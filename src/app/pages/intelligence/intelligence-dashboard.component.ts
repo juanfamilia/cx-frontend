@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IntelligenceService, Insight, InsightSummary, Trend } from '../../services/intelligence.service';
-import { ToastService } from '../../services/toast.service';
+import { ShareToasterService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-intelligence-dashboard',
@@ -21,7 +21,7 @@ export class IntelligenceDashboardComponent implements OnInit {
 
   constructor(
     private intelligenceService: IntelligenceService,
-    private toastService: ToastService
+    private toastService: ShareToasterService
   ) {}
 
   ngOnInit(): void {
