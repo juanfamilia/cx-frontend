@@ -1,0 +1,159 @@
+<div class="intelligence-dashboard p-6">
+  <div class="header mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Intelligence CX Dashboard</h1>
+    <p class="text-gray-600 mt-2">Insights automáticos generados por IA para mejorar la experiencia del cliente</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <div *ngIf="!loading">
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" *ngIf="summary">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-600">Total Insights</div>
+        <div class="text-2xl font-bold text-gray-800">{{ summary.total_insights }}</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-600">Sin Leer</div>
+        <div class="text-2xl font-bold text-blue-600">{{ summary.unread_count }}</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-600">Alta Prioridad</div>
+        <div class="text-2xl font-bold text-red-600">{{ summary.high_priority_count }}</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-600">Última Actualización</div>
+        <div class="text-sm font-semibold text-gray-800">{{ summary.last_generated | date:'short' }}</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <div class="flex gap-4">
+        <div>
+          <label class="text-sm text-gray-600 mb-2 block">Categoría</label>
+          <select (change)="filterByCategory($any($event.target).value || null)" 
+                  class="border rounded px-3 py-2">
+            <option value="">Todas</option>
+            <option value="trend">Tendencias</option>
+            <option value="alert">Alertas</option>
+            <option value="recommendation">Recomendaciones</option>
+            <option value="anomaly">Anomalías</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600 mb-2 block">Prioridad</label>
+          <select (change)="filterByPriority($any($event.target).value || null)" 
+                  class="border rounded px-3 py-2">
+            <option value="">Todas</option>
+            <option value="high">Alta</option>
+            <option value="medium">Media</option>
+            <option value="low">Baja</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Insights List (2/3) -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow">
+          <div class="p-4 border-b">
+            <h2 class="text-xl font-bold text-gray-800">Insights Recientes</h2>
+          </div>
+          <div class="p-4">
+            <div *ngIf="insights.length === 0" class="text-center text-gray-500 py-8">
+              No hay insights disponibles
+            </div>
+            <div *ngFor="let insight of insights" 
+                 class="border-b last:border-b-0 py-4 hover:bg-gray-50 transition">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-2xl">{{ getCategoryIcon(insight.category) }}</span>
+                    <span [ngClass]="getPriorityClass(insight.priority)" 
+                          class="text-xs px-2 py-1 rounded-full font-semibold">
+                      {{ insight.priority.toUpperCase() }}
+                    </span>
+                    <span *ngIf="!insight.is_read" 
+                          class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                      NUEVO
+                    </span>
+                  </div>
+                  <h3 class="font-semibold text-gray-800 mb-1">{{ insight.title }}</h3>
+                  <p class="text-sm text-gray-600 mb-2">{{ insight.description }}</p>
+                  <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <span>Confianza: {{ (insight.confidence_score * 100).toFixed(0) }}%</span>
+                    <span>{{ insight.generated_at | date:'short' }}</span>
+                  </div>
+                </div>
+                <button *ngIf="!insight.is_read" 
+                        (click)="markAsRead(insight)"
+                        class="ml-4 text-blue-600 hover:text-blue-800 text-sm">
+                  Marcar leído
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar (1/3) -->
+      <div class="space-y-6">
+        <!-- Trends -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="p-4 border-b">
+            <h2 class="text-xl font-bold text-gray-800">Tendencias</h2>
+          </div>
+          <div class="p-4">
+            <div *ngIf="trends.length === 0" class="text-center text-gray-500 py-4">
+              No hay tendencias disponibles
+            </div>
+            <div *ngFor="let trend of trends" class="mb-4 pb-4 border-b last:border-b-0">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-semibold text-gray-800">{{ trend.metric_name }}</span>
+                <span class="text-xl">{{ getTrendIcon(trend.direction) }}</span>
+              </div>
+              <div class="text-sm text-gray-600">{{ trend.period }}</div>
+              <div [ngClass]="{
+                'text-green-600': trend.percentage_change > 0,
+                'text-red-600': trend.percentage_change < 0,
+                'text-gray-600': trend.percentage_change === 0
+              }" class="text-lg font-bold">
+                {{ trend.percentage_change > 0 ? '+' : '' }}{{ trend.percentage_change.toFixed(1) }}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Actions -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="p-4 border-b">
+            <h2 class="text-xl font-bold text-gray-800">Acciones Recomendadas</h2>
+          </div>
+          <div class="p-4">
+            <div *ngIf="topActions.length === 0" class="text-center text-gray-500 py-4">
+              No hay acciones disponibles
+            </div>
+            <div *ngFor="let action of topActions; let i = index" 
+                 class="mb-3 pb-3 border-b last:border-b-0">
+              <div class="flex items-start gap-2">
+                <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                  {{ i + 1 }}
+                </span>
+                <div class="flex-1">
+                  <div class="text-sm font-semibold text-gray-800">{{ action.title || action.name }}</div>
+                  <div class="text-xs text-gray-600 mt-1">{{ action.description }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,237 @@
+<div class="prompt-manager p-6">
+  <div class="header mb-6">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800">Gestor de Prompts</h1>
+        <p class="text-gray-600 mt-2">Administra los prompts de IA para evaluaciones y notificaciones</p>
+      </div>
+      <button (click)="startCreate()" 
+              class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold">
+        + Nuevo Prompt
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- List (1/3) -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-4 border-b">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Prompts</h2>
+        
+        <!-- Filters -->
+        <div class="space-y-3">
+          <input [(ngModel)]="searchTerm" 
+                 (ngModelChange)="applyFilters()"
+                 placeholder="Buscar..."
+                 class="w-full border rounded px-3 py-2 text-sm">
+          
+          <select [(ngModel)]="filterCategory" 
+                  (ngModelChange)="applyFilters()"
+                  class="w-full border rounded px-3 py-2 text-sm">
+            <option value="">Todas las categorías</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+
+          <select [(ngModel)]="filterActive" 
+                  (ngModelChange)="applyFilters()"
+                  class="w-full border rounded px-3 py-2 text-sm">
+            <option value="">Todos los estados</option>
+            <option value="true">Activos</option>
+            <option value="false">Inactivos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="overflow-y-auto" style="max-height: 600px;">
+        <div *ngIf="filteredPrompts.length === 0" class="p-4 text-center text-gray-500">
+          No hay prompts disponibles
+        </div>
+        <div *ngFor="let prompt of filteredPrompts" 
+             (click)="selectPrompt(prompt)"
+             [class.bg-blue-50]="selectedPrompt?.id === prompt.id"
+             class="p-4 border-b cursor-pointer hover:bg-gray-50 transition">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <div class="font-semibold text-gray-800">{{ prompt.name }}</div>
+              <div class="text-xs text-gray-600 mt-1">{{ prompt.category }}</div>
+            </div>
+            <span [ngClass]="prompt.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                  class="text-xs px-2 py-1 rounded-full">
+              {{ prompt.is_active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail/Edit (2/3) -->
+    <div class="lg:col-span-2 bg-white rounded-lg shadow">
+      <div class="p-4 border-b">
+        <h2 class="text-xl font-bold text-gray-800">
+          <span *ngIf="isCreating">Crear Nuevo Prompt</span>
+          <span *ngIf="isEditing">Editar Prompt</span>
+          <span *ngIf="!isCreating && !isEditing && selectedPrompt">Detalles del Prompt</span>
+          <span *ngIf="!isCreating && !isEditing && !selectedPrompt">Selecciona un prompt</span>
+        </h2>
+      </div>
+
+      <div class="p-6">
+        <!-- View Mode -->
+        <div *ngIf="!isCreating && !isEditing && selectedPrompt">
+          <div class="space-y-4">
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Nombre</label>
+              <div class="text-gray-800 mt-1">{{ selectedPrompt.name }}</div>
+            </div>
+
+            <div *ngIf="selectedPrompt.description">
+              <label class="text-sm font-semibold text-gray-700">Descripción</label>
+              <div class="text-gray-800 mt-1">{{ selectedPrompt.description }}</div>
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Categoría</label>
+              <div class="text-gray-800 mt-1">{{ selectedPrompt.category }}</div>
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Template</label>
+              <div class="bg-gray-50 p-4 rounded border mt-1 font-mono text-sm whitespace-pre-wrap">
+                {{ selectedPrompt.template }}
+              </div>
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Variables</label>
+              <div class="flex flex-wrap gap-2 mt-2">
+                <span *ngFor="let variable of selectedPrompt.variables" 
+                      class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  {{ variable }}
+                </span>
+                <span *ngIf="selectedPrompt.variables.length === 0" class="text-gray-500 text-sm">
+                  Sin variables
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Estado</label>
+              <div class="mt-1">
+                <span [ngClass]="selectedPrompt.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                      class="px-3 py-1 rounded-full text-sm">
+                  {{ selectedPrompt.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="text-xs text-gray-500">
+              <div>Creado: {{ selectedPrompt.created_at | date:'medium' }}</div>
+              <div>Actualizado: {{ selectedPrompt.updated_at | date:'medium' }}</div>
+              <div>Versión: {{ selectedPrompt.version }}</div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 mt-6">
+            <button (click)="startEdit(selectedPrompt)" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+              Editar
+            </button>
+            <button (click)="deletePrompt(selectedPrompt)" 
+                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg">
+              Eliminar
+            </button>
+          </div>
+        </div>
+
+        <!-- Edit/Create Mode -->
+        <div *ngIf="isCreating || isEditing">
+          <form (ngSubmit)="savePrompt()" class="space-y-4">
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Nombre *</label>
+              <input [(ngModel)]="form.name" 
+                     name="name"
+                     required
+                     class="w-full border rounded px-3 py-2 mt-1">
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Descripción</label>
+              <textarea [(ngModel)]="form.description" 
+                        name="description"
+                        rows="2"
+                        class="w-full border rounded px-3 py-2 mt-1"></textarea>
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Categoría *</label>
+              <select [(ngModel)]="form.category" 
+                      name="category"
+                      required
+                      class="w-full border rounded px-3 py-2 mt-1">
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Template *</label>
+              <textarea [(ngModel)]="form.template" 
+                        name="template"
+                        (ngModelChange)="extractVariables()"
+                        required
+                        rows="8"
+                        placeholder="Escribe tu prompt aquí... Usa {{variable}} para variables dinámicas"
+                        class="w-full border rounded px-3 py-2 mt-1 font-mono text-sm"></textarea>
+              <div class="text-xs text-gray-500 mt-1">
+                Usa {{'{{'}}nombre_variable{{'}}'}} para insertar variables dinámicas
+              </div>
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Variables detectadas</label>
+              <div class="flex flex-wrap gap-2 mt-2">
+                <span *ngFor="let variable of form.variables" 
+                      class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  {{ variable }}
+                </span>
+                <span *ngIf="form.variables && form.variables.length === 0" class="text-gray-500 text-sm">
+                  No hay variables detectadas
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input [(ngModel)]="form.is_active" 
+                     name="is_active"
+                     type="checkbox" 
+                     id="is_active" 
+                     class="h-4 w-4">
+              <label for="is_active" class="text-sm font-semibold text-gray-700">Activo</label>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+              <button type="submit" 
+                      class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                {{ isCreating ? 'Crear' : 'Guardar' }}
+              </button>
+              <button type="button" 
+                      (click)="cancelEdit()" 
+                      class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isCreating && !isEditing && !selectedPrompt" class="text-center text-gray-500 py-12">
+          Selecciona un prompt de la lista o crea uno nuevo
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

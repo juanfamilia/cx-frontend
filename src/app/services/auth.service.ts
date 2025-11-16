@@ -20,18 +20,22 @@ export class AuthService {
   loggedIn = signal<boolean>(false);
 
   login(data: Login): Observable<LoginResponse> {
-    const formData = new FormData();
-    formData.append('username', data.username);
-    formData.append('password', data.password);
-
+    // Agregamos esto para depurar
+    console.log('🔍 DEBUG - API URL:', environment.apiUrl);
+    console.log('🔍 DEBUG - URL completa:', environment.apiUrl + 'auth/login');
+    console.log('🔍 DEBUG - Environment completo:', environment);
+    
+    const body = `grant_type=password&username=${encodeURIComponent(data.username)}&password=${encodeURIComponent(data.password)}&scope=&client_id=&client_secret=`;
     return this.http.post<LoginResponse>(
       environment.apiUrl + 'auth/login',
-      formData,
+      body,
       {
-        withCredentials: true,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        // withCredentials: true,  // Comentado temporalmente para pruebas con CORS "*"
       }
     );
   }
+
 
   logout() {
     localStorage.removeItem('currentUser');

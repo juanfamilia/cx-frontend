@@ -67,23 +67,38 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     if (this.form.valid) {
       this.isLoading.set(true);
+      
+      console.log('🔍 Enviando login con datos:', this.form.value);
+      
       this.authService.login(this.form.value).subscribe({
         next: data => {
+          console.log('✅ LOGIN SUCCESS - Data completa:', data);
+          console.log('✅ Token recibido:', data.access_token);
+          console.log('✅ Usuario recibido:', data.user);
+          
           this.authService.setCredentials(data.access_token, data.user);
         },
         error: error => {
+          console.error('❌ LOGIN ERROR - Error completo:', error);
+          console.error('❌ Error status:', error.status);
+          console.error('❌ Error detail:', error.error?.detail);
+          console.error('❌ Error message:', error.message);
+          
           this.isLoading.set(false);
           this.toastService.showToast(
             'error',
             'Error al iniciar sesión',
-            error.error.detail
+            error.error?.detail || 'Error desconocido'
           );
         },
         complete: () => {
+          console.log('✅ LOGIN COMPLETE - Redirigiendo...');
           this.isLoading.set(false);
           this.router.navigate(['/']);
         },
       });
+    } else {
+      console.warn('⚠️ Formulario inválido:', this.form.errors);
     }
   }
 }

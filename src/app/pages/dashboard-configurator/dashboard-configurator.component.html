@@ -1,0 +1,129 @@
+<div class="dashboard-configurator p-6">
+  <div class="header mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Configurador de Dashboards</h1>
+    <p class="text-gray-600 mt-2">Personaliza los dashboards para cada rol de usuario</p>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Configs List -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-4 border-b">
+        <h2 class="text-xl font-bold text-gray-800">Configuraciones</h2>
+      </div>
+      <div class="p-4">
+        <div *ngIf="configs.length === 0" class="text-center text-gray-500 py-4">
+          No hay configuraciones
+        </div>
+        <div *ngFor="let config of configs" 
+             (click)="selectConfig(config)"
+             [class.bg-blue-50]="selectedConfig?.id === config.id"
+             class="p-3 border-b cursor-pointer hover:bg-gray-50 transition">
+          <div class="font-semibold text-gray-800">{{ config.name }}</div>
+          <div class="text-xs text-gray-600 mt-1">Rol: {{ config.role }}</div>
+          <span *ngIf="config.is_default" 
+                class="inline-block mt-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+            Por defecto
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Config Details -->
+    <div class="lg:col-span-2 bg-white rounded-lg shadow">
+      <div class="p-4 border-b">
+        <h2 class="text-xl font-bold text-gray-800">
+          {{ selectedConfig ? 'Detalles de Configuración' : 'Selecciona una configuración' }}
+        </h2>
+      </div>
+
+      <div class="p-6">
+        <div *ngIf="selectedConfig">
+          <div class="space-y-4">
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Nombre</label>
+              <div class="text-gray-800 mt-1">{{ selectedConfig.name }}</div>
+            </div>
+
+            <div *ngIf="selectedConfig.description">
+              <label class="text-sm font-semibold text-gray-700">Descripción</label>
+              <div class="text-gray-800 mt-1">{{ selectedConfig.description }}</div>
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Rol</label>
+              <div class="text-gray-800 mt-1">
+                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  {{ selectedConfig.role }}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Widgets Configurados</label>
+              <div class="mt-2 space-y-2">
+                <div *ngIf="selectedConfig.widgets.length === 0" class="text-gray-500 text-sm">
+                  No hay widgets configurados
+                </div>
+                <div *ngFor="let widget of selectedConfig.widgets" 
+                     class="bg-gray-50 p-3 rounded border">
+                  <div class="font-semibold text-sm text-gray-800">Widget ID: {{ widget.widget_id }}</div>
+                  <div class="text-xs text-gray-600 mt-1">
+                    Posición: x={{ widget.position.x }}, y={{ widget.position.y }}, 
+                    w={{ widget.position.w }}, h={{ widget.position.h }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Estado</label>
+              <div class="mt-1">
+                <span [ngClass]="selectedConfig.is_default ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                      class="px-3 py-1 rounded-full text-sm">
+                  {{ selectedConfig.is_default ? 'Por defecto' : 'Personalizado' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="text-xs text-gray-500">
+              <div>Creado: {{ selectedConfig.created_at | date:'medium' }}</div>
+              <div>Actualizado: {{ selectedConfig.updated_at | date:'medium' }}</div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 mt-6">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+              Editar
+            </button>
+            <button (click)="deleteConfig(selectedConfig)" 
+                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg">
+              Eliminar
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="!selectedConfig" class="text-center text-gray-500 py-12">
+          Selecciona una configuración de la lista
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Widgets -->
+  <div class="mt-6 bg-white rounded-lg shadow" *ngIf="availableWidgets.length > 0">
+    <div class="p-4 border-b">
+      <h2 class="text-xl font-bold text-gray-800">Widgets Disponibles</h2>
+    </div>
+    <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div *ngFor="let widget of availableWidgets" class="border rounded p-4">
+        <div class="font-semibold text-gray-800">{{ widget.name }}</div>
+        <div class="text-sm text-gray-600 mt-1">{{ widget.description }}</div>
+        <div class="text-xs text-gray-500 mt-2">Tipo: {{ widget.type }}</div>
+      </div>
+    </div>
+  </div>
+</div>
