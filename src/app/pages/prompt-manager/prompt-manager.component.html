@@ -184,7 +184,7 @@
                         (ngModelChange)="extractVariables()"
                         required
                         rows="8"
-                        placeholder="Escribe tu prompt aquí... Usa {{variable}} para variables dinámicas"
+                        placeholder="Escribe tu prompt aquí... Usa {{ '{{' }}variable{{ '}}' }} para variables dinámicas"
                         class="w-full border rounded px-3 py-2 mt-1 font-mono text-sm"></textarea>
               <div class="text-xs text-gray-500 mt-1">
                 Usa {{'{{'}}nombre_variable{{'}}'}} para insertar variables dinámicas
