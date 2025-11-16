@@ -1,235 +1,159 @@
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
-  <!-- Header -->
-  <div class="max-w-7xl mx-auto mb-8">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
-          <span class="text-5xl">🧠</span>
-          Intelligence Center
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400">
-          AI-powered insights and analytics for your business
-        </p>
-      </div>
-      <button 
-        (click)="loadData()"
-        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all transform hover:scale-105 shadow-lg">
-        🔄 Refresh
-      </button>
-    </div>
-  </div>
-
-  <!-- Stats Cards -->
-  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-gray-700 transform transition-all hover:scale-105">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Insights</p>
-          <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ totalInsights() }}</p>
-        </div>
-        <div class="text-5xl">📊</div>
-      </div>
-    </div>
-
-    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-gray-700 transform transition-all hover:scale-105">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Unread</p>
-          <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ unreadInsights() }}</p>
-        </div>
-        <div class="text-5xl">📬</div>
-      </div>
-    </div>
-
-    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-gray-700 transform transition-all hover:scale-105">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Critical</p>
-          <p class="text-3xl font-bold text-red-600 dark:text-red-400">{{ criticalInsights() }}</p>
-        </div>
-        <div class="text-5xl">🔴</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="max-w-7xl mx-auto mb-6">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-xl border border-gray-200 dark:border-gray-700">
-      <div class="flex gap-2">
-        <button
-          (click)="selectTab('insights')"
-          [class]="selectedTab() === 'insights' 
-            ? 'bg-blue-600 text-white' 
-            : 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'"
-          class="flex-1 px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105">
-          💡 Insights ({{ insights().length }})
-        </button>
-        <button
-          (click)="selectTab('trends')"
-          [class]="selectedTab() === 'trends' 
-            ? 'bg-blue-600 text-white' 
-            : 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'"
-          class="flex-1 px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105">
-          📈 Trends ({{ trends().length }})
-        </button>
-        <button
-          (click)="selectTab('tags')"
-          [class]="selectedTab() === 'tags' 
-            ? 'bg-blue-600 text-white' 
-            : 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'"
-          class="flex-1 px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105">
-          🏷️ AI Tags ({{ aiTags().length }})
-        </button>
-      </div>
-    </div>
+<div class="intelligence-dashboard p-6">
+  <div class="header mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Intelligence CX Dashboard</h1>
+    <p class="text-gray-600 mt-2">Insights automáticos generados por IA para mejorar la experiencia del cliente</p>
   </div>
 
   <!-- Loading State -->
-  @if (loading()) {
-    <div class="max-w-7xl mx-auto text-center py-20">
-      <div class="inline-block animate-spin text-6xl mb-4">⚙️</div>
-      <p class="text-xl text-gray-600 dark:text-gray-400">Loading intelligence data...</p>
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <div *ngIf="!loading">
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" *ngIf="summary">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-600">Total Insights</div>
+        <div class="text-2xl font-bold text-gray-800">{{ summary.total_insights }}</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-600">Sin Leer</div>
+        <div class="text-2xl font-bold text-blue-600">{{ summary.unread_count }}</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-600">Alta Prioridad</div>
+        <div class="text-2xl font-bold text-red-600">{{ summary.high_priority_count }}</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="text-sm text-gray-600">Última Actualización</div>
+        <div class="text-sm font-semibold text-gray-800">{{ summary.last_generated | date:'short' }}</div>
+      </div>
     </div>
-  }
 
-  <!-- Insights Tab -->
-  @if (!loading() && selectedTab() === 'insights') {
-    <div class="max-w-7xl mx-auto space-y-4">
-      @if (insights().length === 0) {
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-xl border border-gray-200 dark:border-gray-700">
-          <div class="text-6xl mb-4">🎯</div>
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Insights Yet</h3>
-          <p class="text-gray-600 dark:text-gray-400">AI-powered insights will appear here as data is analyzed</p>
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <div class="flex gap-4">
+        <div>
+          <label class="text-sm text-gray-600 mb-2 block">Categoría</label>
+          <select (change)="filterByCategory($any($event.target).value || null)" 
+                  class="border rounded px-3 py-2">
+            <option value="">Todas</option>
+            <option value="trend">Tendencias</option>
+            <option value="alert">Alertas</option>
+            <option value="recommendation">Recomendaciones</option>
+            <option value="anomaly">Anomalías</option>
+          </select>
         </div>
-      }
-      @for (insight of insights(); track insight.id) {
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-gray-700 transform transition-all hover:scale-[1.02] hover:shadow-2xl"
-             [class.opacity-60]="insight.is_read">
-          <div class="flex items-start gap-4">
-            <div class="text-4xl">{{ getSeverityIcon(insight.severity) }}</div>
-            <div class="flex-1">
-              <div class="flex items-center gap-3 mb-2">
-                <span [class]="getSeverityColor(insight.severity) + ' px-3 py-1 rounded-full text-xs font-semibold uppercase border'">
-                  {{ insight.severity }}
-                </span>
-                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-xs font-semibold">
-                  {{ insight.insight_type }}
-                </span>
-                @if (!insight.is_read) {
-                  <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-semibold">
-                    ● NEW
-                  </span>
-                }
-              </div>
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ insight.title }}</h3>
-              <p class="text-gray-600 dark:text-gray-300 mb-4">{{ insight.description }}</p>
-              
-              @if (insight.suggested_actions && insight.suggested_actions.length > 0) {
-                <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 mb-4">
-                  <p class="font-semibold text-blue-900 dark:text-blue-200 mb-2">🎯 Suggested Actions:</p>
-                  <ul class="list-disc list-inside space-y-1">
-                    @for (action of insight.suggested_actions; track action) {
-                      <li class="text-blue-800 dark:text-blue-300">{{ action }}</li>
-                    }
-                  </ul>
-                </div>
-              }
-
-              <div class="flex items-center gap-3">
-                @if (!insight.is_read) {
-                  <button 
-                    (click)="markAsRead(insight.id)"
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all">
-                    ✓ Mark as Read
-                  </button>
-                }
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ insight.created_at | date: 'medium' }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      }
-    </div>
-  }
-
-  <!-- Trends Tab -->
-  @if (!loading() && selectedTab() === 'trends') {
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      @if (trends().length === 0) {
-        <div class="col-span-full bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-xl border border-gray-200 dark:border-gray-700">
-          <div class="text-6xl mb-4">📊</div>
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Trends Data</h3>
-          <p class="text-gray-600 dark:text-gray-400">Trend analysis will appear here as metrics are tracked</p>
-        </div>
-      }
-      @for (trend of trends(); track trend.id) {
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-gray-700 transform transition-all hover:scale-105 hover:shadow-2xl">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white">{{ trend.metric_name }}</h3>
-            <span class="text-3xl">{{ getTrendIcon(trend.trend_direction) }}</span>
-          </div>
-          
-          <div class="space-y-3">
-            <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Current Value</p>
-              <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ trend.current_value }}</p>
-            </div>
-            
-            @if (trend.previous_value !== null && trend.previous_value !== undefined) {
-              <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Previous Value</p>
-                <p class="text-xl text-gray-700 dark:text-gray-300">{{ trend.previous_value }}</p>
-              </div>
-            }
-            
-            @if (trend.change_percentage !== null && trend.change_percentage !== undefined) {
-              <div [class]="getTrendColor(trend.trend_direction)">
-                <p class="text-sm">Change</p>
-                <p class="text-2xl font-bold">{{ trend.change_percentage > 0 ? '+' : '' }}{{ trend.change_percentage }}%</p>
-              </div>
-            }
-          </div>
-
-          <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              Period: {{ trend.period }} | {{ trend.start_date | date: 'shortDate' }} - {{ trend.end_date | date: 'shortDate' }}
-            </p>
-          </div>
-        </div>
-      }
-    </div>
-  }
-
-  <!-- AI Tags Tab -->
-  @if (!loading() && selectedTab() === 'tags') {
-    <div class="max-w-7xl mx-auto">
-      @if (aiTags().length === 0) {
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-xl border border-gray-200 dark:border-gray-700">
-          <div class="text-6xl mb-4">🏷️</div>
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">No AI Tags</h3>
-          <p class="text-gray-600 dark:text-gray-400">AI-generated tags will appear here from analyzed content</p>
-        </div>
-      }
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
-        <div class="flex flex-wrap gap-3">
-          @for (tag of aiTags(); track tag.id) {
-            <div class="group relative">
-              <div class="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full font-medium shadow-lg transform transition-all hover:scale-110 hover:shadow-xl cursor-pointer">
-                <span class="mr-2">🏷️</span>
-                {{ tag.tag_name }}
-                <span class="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">
-                  {{ tag.usage_count }}
-                </span>
-              </div>
-              <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                {{ tag.category }} • Used {{ tag.usage_count }} times
-              </div>
-            </div>
-          }
+        <div>
+          <label class="text-sm text-gray-600 mb-2 block">Prioridad</label>
+          <select (change)="filterByPriority($any($event.target).value || null)" 
+                  class="border rounded px-3 py-2">
+            <option value="">Todas</option>
+            <option value="high">Alta</option>
+            <option value="medium">Media</option>
+            <option value="low">Baja</option>
+          </select>
         </div>
       </div>
     </div>
-  }
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Insights List (2/3) -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow">
+          <div class="p-4 border-b">
+            <h2 class="text-xl font-bold text-gray-800">Insights Recientes</h2>
+          </div>
+          <div class="p-4">
+            <div *ngIf="insights.length === 0" class="text-center text-gray-500 py-8">
+              No hay insights disponibles
+            </div>
+            <div *ngFor="let insight of insights" 
+                 class="border-b last:border-b-0 py-4 hover:bg-gray-50 transition">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-2xl">{{ getCategoryIcon(insight.category) }}</span>
+                    <span [ngClass]="getPriorityClass(insight.priority)" 
+                          class="text-xs px-2 py-1 rounded-full font-semibold">
+                      {{ insight.priority.toUpperCase() }}
+                    </span>
+                    <span *ngIf="!insight.is_read" 
+                          class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                      NUEVO
+                    </span>
+                  </div>
+                  <h3 class="font-semibold text-gray-800 mb-1">{{ insight.title }}</h3>
+                  <p class="text-sm text-gray-600 mb-2">{{ insight.description }}</p>
+                  <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <span>Confianza: {{ (insight.confidence_score * 100).toFixed(0) }}%</span>
+                    <span>{{ insight.generated_at | date:'short' }}</span>
+                  </div>
+                </div>
+                <button *ngIf="!insight.is_read" 
+                        (click)="markAsRead(insight)"
+                        class="ml-4 text-blue-600 hover:text-blue-800 text-sm">
+                  Marcar leído
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar (1/3) -->
+      <div class="space-y-6">
+        <!-- Trends -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="p-4 border-b">
+            <h2 class="text-xl font-bold text-gray-800">Tendencias</h2>
+          </div>
+          <div class="p-4">
+            <div *ngIf="trends.length === 0" class="text-center text-gray-500 py-4">
+              No hay tendencias disponibles
+            </div>
+            <div *ngFor="let trend of trends" class="mb-4 pb-4 border-b last:border-b-0">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-semibold text-gray-800">{{ trend.metric_name }}</span>
+                <span class="text-xl">{{ getTrendIcon(trend.direction) }}</span>
+              </div>
+              <div class="text-sm text-gray-600">{{ trend.period }}</div>
+              <div [ngClass]="{
+                'text-green-600': trend.percentage_change > 0,
+                'text-red-600': trend.percentage_change < 0,
+                'text-gray-600': trend.percentage_change === 0
+              }" class="text-lg font-bold">
+                {{ trend.percentage_change > 0 ? '+' : '' }}{{ trend.percentage_change.toFixed(1) }}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Actions -->
+        <div class="bg-white rounded-lg shadow">
+          <div class="p-4 border-b">
+            <h2 class="text-xl font-bold text-gray-800">Acciones Recomendadas</h2>
+          </div>
+          <div class="p-4">
+            <div *ngIf="topActions.length === 0" class="text-center text-gray-500 py-4">
+              No hay acciones disponibles
+            </div>
+            <div *ngFor="let action of topActions; let i = index" 
+                 class="mb-3 pb-3 border-b last:border-b-0">
+              <div class="flex items-start gap-2">
+                <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                  {{ i + 1 }}
+                </span>
+                <div class="flex-1">
+                  <div class="text-sm font-semibold text-gray-800">{{ action.title || action.name }}</div>
+                  <div class="text-xs text-gray-600 mt-1">{{ action.description }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,120 +1,99 @@
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
-export interface Widget {
-  id: number;
-  widget_type: string;
-  widget_name: string;
+export interface WidgetDefinition {
+  id: string;
+  name: string;
   description: string;
-  data_source: string;
-  default_config?: any;
-  available_for_roles: number[];
-  category: string;
+  type: string;
+  default_config: any;
+  available_for_roles: string[];
 }
 
-export interface WidgetsResponse {
-  data: Widget[];
-  total: number;
+export interface DashboardWidget {
+  widget_id: string;
+  position: { x: number; y: number; w: number; h: number };
+  config: any;
 }
 
 export interface DashboardConfig {
-  id: number;
-  user_id: number;
-  layout_config: any;
+  id: string;
+  name: string;
+  description?: string;
+  role: string;
+  widgets: DashboardWidget[];
   is_default: boolean;
-  config_name: string;
+  company_id?: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface DashboardConfigsResponse {
-  data: DashboardConfig[];
-  total: number;
+export interface DashboardConfigCreate {
+  name: string;
+  description?: string;
+  role: string;
+  widgets: DashboardWidget[];
+  is_default?: boolean;
+  company_id?: string;
+}
+
+export interface DashboardConfigUpdate {
+  name?: string;
+  description?: string;
+  widgets?: DashboardWidget[];
+  is_default?: boolean;
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class DashboardConfigService {
-  private http = inject(HttpClient);
-  private baseUrl = environment.apiUrl + 'dashboard-config/';
+  private apiUrl = `${environment.apiUrl}/dashboard-config`;
 
-  // Widgets
-  getWidgets(params?: {
-    skip?: number;
-    limit?: number;
-    category?: string;
-  }): Observable<WidgetsResponse> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach((key) => {
-        const value = (params as any)[key];
-        if (value !== undefined && value !== null) {
-          httpParams = httpParams.set(key, value.toString());
-        }
-      });
-    }
-    return this.http.get<WidgetsResponse>(this.baseUrl + 'widgets', {
-      params: httpParams,
-    });
+  constructor(private http: HttpClient) {}
+
+  getAvailableWidgets(): Observable<WidgetDefinition[]> {
+    return this.http.get<WidgetDefinition[]>(`${this.apiUrl}/widgets/available`);
   }
 
-  getWidget(widgetId: number): Observable<Widget> {
-    return this.http.get<Widget>(this.baseUrl + `widgets/${widgetId}`);
-  }
-
-  // Dashboard Configs
   getDashboardConfigs(params?: {
     skip?: number;
     limit?: number;
-  }): Observable<DashboardConfigsResponse> {
+    role?: string;
+  }): Observable<DashboardConfig[]> {
     let httpParams = new HttpParams();
     if (params) {
-      Object.keys(params).forEach((key) => {
-        const value = (params as any)[key];
+      Object.keys(params).forEach(key => {
+        const value = params[key as keyof typeof params];
         if (value !== undefined && value !== null) {
           httpParams = httpParams.set(key, value.toString());
         }
       });
     }
-    return this.http.get<DashboardConfigsResponse>(this.baseUrl, {
-      params: httpParams,
+    return this.http.get<DashboardConfig[]>(this.apiUrl, { params: httpParams });
+  }
+
+  getDefaultConfig(role: string): Observable<DashboardConfig> {
+    return this.http.get<DashboardConfig>(`${this.apiUrl}/default`, {
+      params: { role }
     });
   }
 
-  getDashboardConfig(configId: number): Observable<DashboardConfig> {
-    return this.http.get<DashboardConfig>(this.baseUrl + `${configId}`);
+  getConfigById(id: string): Observable<DashboardConfig> {
+    return this.http.get<DashboardConfig>(`${this.apiUrl}/${id}`);
   }
 
-  createDashboardConfig(config: {
-    layout_config: any;
-    config_name: string;
-    is_default?: boolean;
-  }): Observable<DashboardConfig> {
-    return this.http.post<DashboardConfig>(this.baseUrl, config);
+  createConfig(config: DashboardConfigCreate): Observable<DashboardConfig> {
+    return this.http.post<DashboardConfig>(this.apiUrl, config);
   }
 
-  updateDashboardConfig(
-    configId: number,
-    config: Partial<DashboardConfig>
-  ): Observable<DashboardConfig> {
-    return this.http.put<DashboardConfig>(this.baseUrl + `${configId}`, config);
+  updateConfig(id: string, config: DashboardConfigUpdate): Observable<DashboardConfig> {
+    return this.http.put<DashboardConfig>(`${this.apiUrl}/${id}`, config);
   }
 
-  deleteDashboardConfig(configId: number): Observable<void> {
-    return this.http.delete<void>(this.baseUrl + `${configId}`);
-  }
-
-  getDefaultConfig(): Observable<any> {
-    return this.http.get(this.baseUrl + 'default');
-  }
-
-  setAsDefault(configId: number): Observable<DashboardConfig> {
-    return this.http.post<DashboardConfig>(
-      this.baseUrl + `${configId}/set-default`,
-      {}
-    );
+  deleteConfig(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

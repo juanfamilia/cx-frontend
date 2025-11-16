@@ -1,151 +1,94 @@
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Insight {
-  id: number;
-  company_id: number;
-  evaluation_id?: number;
-  insight_type: string;
-  severity: string;
+  id: string;
   title: string;
   description: string;
-  metrics?: any;
-  suggested_actions?: string[];
+  category: 'trend' | 'alert' | 'recommendation' | 'anomaly';
+  priority: 'high' | 'medium' | 'low';
+  confidence_score: number;
+  data_points: any;
+  generated_at: string;
   is_read: boolean;
-  is_resolved: boolean;
-  created_at: string;
-  updated_at: string;
+  company_id?: string;
 }
 
-export interface InsightsResponse {
-  data: Insight[];
-  total: number;
-  skip: number;
-  limit: number;
+export interface InsightSummary {
+  total_insights: number;
+  unread_count: number;
+  high_priority_count: number;
+  by_category: Record<string, number>;
+  last_generated: string;
 }
 
 export interface Trend {
-  id: number;
-  company_id: number;
+  id: string;
   metric_name: string;
+  direction: 'up' | 'down' | 'stable';
+  percentage_change: number;
   period: string;
-  start_date: string;
-  end_date: string;
-  current_value: number;
-  previous_value?: number;
-  change_percentage?: number;
-  trend_direction?: string;
-  metadata?: any;
-  created_at: string;
-}
-
-export interface TrendsResponse {
-  data: Trend[];
-  total: number;
-}
-
-export interface AITag {
-  id: number;
-  tag_name: string;
-  category: string;
-  usage_count: number;
-  is_active: boolean;
-}
-
-export interface AITagsResponse {
-  data: AITag[];
-  total: number;
+  data_points: any[];
+  generated_at: string;
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class IntelligenceService {
-  private http = inject(HttpClient);
-  private baseUrl = environment.apiUrl + 'intelligence/';
+  private apiUrl = `${environment.apiUrl}/intelligence`;
 
-  // Insights
+  constructor(private http: HttpClient) {}
+
   getInsights(params?: {
     skip?: number;
     limit?: number;
-    insight_type?: string;
-    severity?: string;
+    category?: string;
+    priority?: string;
     is_read?: boolean;
-  }): Observable<InsightsResponse> {
+  }): Observable<Insight[]> {
     let httpParams = new HttpParams();
     if (params) {
-      Object.keys(params).forEach((key) => {
-        const value = (params as any)[key];
+      Object.keys(params).forEach(key => {
+        const value = params[key as keyof typeof params];
         if (value !== undefined && value !== null) {
           httpParams = httpParams.set(key, value.toString());
         }
       });
     }
-    return this.http.get<InsightsResponse>(this.baseUrl + 'insights', {
-      params: httpParams,
-    });
+    return this.http.get<Insight[]>(`${this.apiUrl}/insights`, { params: httpParams });
   }
 
-  getInsightsSummary(): Observable<any> {
-    return this.http.get(this.baseUrl + 'insights/summary');
+  getInsightsSummary(): Observable<InsightSummary> {
+    return this.http.get<InsightSummary>(`${this.apiUrl}/insights/summary`);
   }
 
-  getTopActions(): Observable<any> {
-    return this.http.get(this.baseUrl + 'insights/top-actions');
-  }
-
-  getInsightTrends(): Observable<any> {
-    return this.http.get(this.baseUrl + 'insights/trends');
-  }
-
-  markInsightAsRead(insightId: number): Observable<Insight> {
-    return this.http.put<Insight>(
-      this.baseUrl + `insights/${insightId}/read`,
-      {}
-    );
-  }
-
-  // Trends
   getTrends(params?: {
     skip?: number;
     limit?: number;
-    metric_name?: string;
-    period?: string;
-  }): Observable<TrendsResponse> {
+    metric?: string;
+  }): Observable<Trend[]> {
     let httpParams = new HttpParams();
     if (params) {
-      Object.keys(params).forEach((key) => {
-        const value = (params as any)[key];
+      Object.keys(params).forEach(key => {
+        const value = params[key as keyof typeof params];
         if (value !== undefined && value !== null) {
           httpParams = httpParams.set(key, value.toString());
         }
       });
     }
-    return this.http.get<TrendsResponse>(this.baseUrl + 'trends', {
-      params: httpParams,
+    return this.http.get<Trend[]>(`${this.apiUrl}/insights/trends`, { params: httpParams });
+  }
+
+  getTopActions(limit: number = 5): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/insights/top-actions`, {
+      params: { limit: limit.toString() }
     });
   }
 
-  // AI Tags
-  getAITags(params?: {
-    skip?: number;
-    limit?: number;
-    category?: string;
-    is_active?: boolean;
-  }): Observable<AITagsResponse> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach((key) => {
-        const value = (params as any)[key];
-        if (value !== undefined && value !== null) {
-          httpParams = httpParams.set(key, value.toString());
-        }
-      });
-    }
-    return this.http.get<AITagsResponse>(this.baseUrl + 'tags', {
-      params: httpParams,
-    });
+  markInsightAsRead(insightId: string): Observable<Insight> {
+    return this.http.put<Insight>(`${this.apiUrl}/insights/${insightId}/read`, {});
   }
 }

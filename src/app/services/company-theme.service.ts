@@ -1,60 +1,81 @@
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface CompanyTheme {
-  id: number;
-  company_id: number;
-  company_logo_url?: string;
-  company_favicon_url?: string;
-  company_name_override?: string;
+  id: string;
+  company_id: string;
   primary_color: string;
   secondary_color: string;
   accent_color: string;
-  success_color: string;
-  warning_color: string;
-  error_color: string;
-  font_family_primary: string;
-  font_family_secondary?: string;
-  sidebar_background: string;
-  header_background: string;
+  logo_url?: string;
+  favicon_url?: string;
   custom_css?: string;
-  features_config?: any;
+  font_family?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
+export interface ThemeCreate {
+  company_id: string;
+  primary_color: string;
+  secondary_color: string;
+  accent_color: string;
+  logo_url?: string;
+  favicon_url?: string;
+  custom_css?: string;
+  font_family?: string;
+  is_active?: boolean;
+}
+
+export interface ThemeUpdate {
+  primary_color?: string;
+  secondary_color?: string;
+  accent_color?: string;
+  logo_url?: string;
+  favicon_url?: string;
+  custom_css?: string;
+  font_family?: string;
+  is_active?: boolean;
+}
+
+export interface ThemePreview {
+  css: string;
+  preview_url: string;
+}
+
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CompanyThemeService {
-  private http = inject(HttpClient);
-  private baseUrl = environment.apiUrl + 'theme/';
+  private apiUrl = `${environment.apiUrl}/theme`;
+
+  constructor(private http: HttpClient) {}
 
   getTheme(): Observable<CompanyTheme> {
-    return this.http.get<CompanyTheme>(this.baseUrl);
+    return this.http.get<CompanyTheme>(this.apiUrl);
   }
 
-  getPublicTheme(companyId: number): Observable<CompanyTheme> {
-    return this.http.get<CompanyTheme>(this.baseUrl + `public/${companyId}`);
+  getPublicTheme(companyId: string): Observable<CompanyTheme> {
+    return this.http.get<CompanyTheme>(`${this.apiUrl}/public/${companyId}`);
   }
 
-  updateTheme(theme: Partial<CompanyTheme>): Observable<CompanyTheme> {
-    return this.http.put<CompanyTheme>(this.baseUrl, theme);
+  getThemeCSS(): Observable<{ css: string }> {
+    return this.http.get<{ css: string }>(`${this.apiUrl}/css`);
   }
 
-  getCustomCSS(): Observable<{ css: string }> {
-    return this.http.get<{ css: string }>(this.baseUrl + 'css');
+  createTheme(theme: ThemeCreate): Observable<CompanyTheme> {
+    return this.http.post<CompanyTheme>(this.apiUrl, theme);
   }
 
-  previewTheme(theme: Partial<CompanyTheme>): Observable<{ css: string }> {
-    return this.http.post<{ css: string }>(this.baseUrl + 'preview', theme);
+  updateTheme(theme: ThemeUpdate): Observable<CompanyTheme> {
+    return this.http.put<CompanyTheme>(this.apiUrl, theme);
   }
 
-  resetToDefault(): Observable<CompanyTheme> {
-    return this.http.post<CompanyTheme>(this.baseUrl + 'reset', {});
+  previewTheme(theme: ThemeUpdate): Observable<ThemePreview> {
+    return this.http.post<ThemePreview>(`${this.apiUrl}/preview`, theme);
   }
 
   applyTheme(theme: CompanyTheme): void {
@@ -62,35 +83,21 @@ export class CompanyThemeService {
     root.style.setProperty('--primary-color', theme.primary_color);
     root.style.setProperty('--secondary-color', theme.secondary_color);
     root.style.setProperty('--accent-color', theme.accent_color);
-    root.style.setProperty('--success-color', theme.success_color);
-    root.style.setProperty('--warning-color', theme.warning_color);
-    root.style.setProperty('--error-color', theme.error_color);
-    root.style.setProperty('--font-primary', theme.font_family_primary);
-    if (theme.font_family_secondary) {
-      root.style.setProperty('--font-secondary', theme.font_family_secondary);
+    if (theme.font_family) {
+      root.style.setProperty('--font-family', theme.font_family);
     }
-    root.style.setProperty('--sidebar-bg', theme.sidebar_background);
-    root.style.setProperty('--header-bg', theme.header_background);
-
     if (theme.custom_css) {
-      let styleEl = document.getElementById('custom-theme-css');
-      if (!styleEl) {
-        styleEl = document.createElement('style');
-        styleEl.id = 'custom-theme-css';
-        document.head.appendChild(styleEl);
-      }
-      styleEl.textContent = theme.custom_css;
+      this.injectCustomCSS(theme.custom_css);
     }
+  }
 
-    if (theme.company_favicon_url) {
-      let link: HTMLLinkElement | null =
-        document.querySelector("link[rel*='icon']");
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        document.head.appendChild(link);
-      }
-      link.href = theme.company_favicon_url;
+  private injectCustomCSS(css: string): void {
+    let styleEl = document.getElementById('custom-theme-css');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'custom-theme-css';
+      document.head.appendChild(styleEl);
     }
+    styleEl.textContent = css;
   }
 }
