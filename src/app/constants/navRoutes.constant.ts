@@ -50,6 +50,30 @@ export const NAVROUTES: RouteData[] = [
     roles: [1, 2, 3],
   },
   {
+    title: 'Intelligence CX',
+    route: '/intelligence',
+    icon: 'lucideBrain',
+    roles: [0, 1],
+  },
+  {
+    title: 'Prompts',
+    route: '/prompts',
+    icon: 'lucideMessageSquare',
+    roles: [0, 1],
+  },
+  {
+    title: 'Dashboards',
+    route: '/dashboard-config',
+    icon: 'lucideLayoutDashboard',
+    roles: [0],
+  },
+  {
+    title: 'Temas',
+    route: '/theme',
+    icon: 'lucidePalette',
+    roles: [0, 1],
+  },
+  {
     title: 'Configuración',
     route: '/configuration',
     icon: 'heroCog6Tooth',
