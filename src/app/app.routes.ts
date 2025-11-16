@@ -81,42 +81,6 @@ export const routes: Routes = [
     data: { title: 'Configuración' },
   },
   {
-    path: 'intelligence',
-    loadComponent: () =>
-      import('./pages/intelligence/intelligence-dashboard.component').then(
-        m => m.IntelligenceDashboardComponent
-      ),
-    canActivate: [authGuard],
-    data: { title: 'Intelligence CX', role: [0, 1] },
-  },
-  {
-    path: 'prompts',
-    loadComponent: () =>
-      import('./pages/prompt-manager/prompt-manager.component').then(
-        m => m.PromptManagerComponent
-      ),
-    canActivate: [authGuard],
-    data: { title: 'Gestor de Prompts', role: [0, 1] },
-  },
-  {
-    path: 'dashboard-config',
-    loadComponent: () =>
-      import('./pages/dashboard-configurator/dashboard-configurator.component').then(
-        m => m.DashboardConfiguratorComponent
-      ),
-    canActivate: [authGuard],
-    data: { title: 'Configurador de Dashboards', role: [0] },
-  },
-  {
-    path: 'theme',
-    loadComponent: () =>
-      import('./pages/theme-manager/theme-manager.component').then(
-        m => m.ThemeManagerComponent
-      ),
-    canActivate: [authGuard],
-    data: { title: 'Gestor de Temas', role: [0, 1] },
-  },
-  {
     path: '**',
     component: NotFoundComponent,
   },
