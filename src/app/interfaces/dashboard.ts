@@ -1,3 +1,5 @@
+import { CampaignCoverage } from './campaing-coverage';
+import { EvaluationAnalysisDashboard } from './evaluation-analysis-dashboard';
 import { WeeklyProgress } from './weekly-progress';
 
 export interface DashboardSuperAdmin {
@@ -9,23 +11,29 @@ export interface DashboardSuperAdmin {
 }
 
 export interface DashboardAdmin {
-  company_id: number;
-  evaluaciones_aprobadas: number;
-  evaluaciones_rechazadas: number;
-  evaluadores: number;
-  gerentes: number;
+  summary: {
+    company_id: number;
+    evaluaciones_aprobadas: number;
+    evaluaciones_rechazadas: number;
+    evaluadores: number;
+    gerentes: number;
+  },
+  analysis: EvaluationAnalysisDashboard[];
 }
 
 export interface DashboardManager {
-  user_id: number;
-  company_id: number;
-  zonas_asignadas: number;
-  evaluadores_asignados: number;
-  active_campaigns: number;
+  summary: {
+    user_id: number;
+    company_id: number;
+    zonas_asignadas: number;
+    evaluadores_asignados: number;
+    active_campaigns: number;
+  },
+  analysis: EvaluationAnalysisDashboard[];
 }
 
 export interface DashboardEvaluator {
-  sumary: {
+  summary: {
     user_id: number;
     enviadas: number;
     actualizadas: number;
@@ -34,12 +42,5 @@ export interface DashboardEvaluator {
     rechazadas: number;
   };
   weekly_progress: WeeklyProgress[];
-  coverage: {
-    campaign_id: number;
-    campaign_name: string;
-    coverage_percent: number;
-    evaluator_id: number;
-    goal_weekly: number;
-    reported_total: number;
-  };
+  coverage: CampaignCoverage[];
 }

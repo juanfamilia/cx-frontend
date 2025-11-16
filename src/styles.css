@@ -152,3 +152,10 @@ markdown :where(hr):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
   margin-top: 1.5em !important;
   margin-bottom: 1.5em !important;
 }
+
+.p-togglebutton.p-togglebutton-checked {
+  @apply dark:bg-[#27272a];
+}
+.p-togglebutton {
+  @apply dark:bg-bunker-950/75;
+}

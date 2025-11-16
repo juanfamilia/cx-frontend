@@ -4,16 +4,19 @@ import {
   input,
   OnInit,
 } from '@angular/core';
+import { CampaignCoverage } from '@interfaces/campaing-coverage';
 import { WeeklyProgress } from '@interfaces/weekly-progress';
-import { BarChart, LineChart } from 'echarts/charts';
+import { BarChart, LineChart, PieChart } from 'echarts/charts';
 import {
   GridComponent,
   LegendComponent,
+  TitleComponent,
   TooltipComponent,
 } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
+import { transformDayName } from 'src/app/helpers/day-name-transform';
 
 echarts.use([
   BarChart,
@@ -22,31 +25,42 @@ echarts.use([
   TooltipComponent,
   LegendComponent,
   CanvasRenderer,
+  TitleComponent,
+  PieChart,
 ]);
 
 @Component({
   selector: 'app-dashboard-evaluators-charts',
   standalone: true,
   imports: [NgxEchartsDirective],
-  template: `<div echarts [options]="chartOption" class="h-100 w-100"></div>`,
+  templateUrl: './dashboard-evaluators-charts.component.html',
   styleUrls: ['./dashboard-evaluators-charts.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideEchartsCore({ echarts })],
 })
 export class DashboardEvaluatorsChartsComponent implements OnInit {
-  data = input.required<WeeklyProgress[]>();
-  chartOption: echarts.EChartsCoreOption = {};
+  weeklyProgress = input.required<WeeklyProgress[]>();
+  campaignCoverage = input.required<CampaignCoverage[]>();
+
+  chartWeekly: echarts.EChartsCoreOption = {};
+  chartCampaignCoverage: echarts.EChartsCoreOption = {};
 
   ngOnInit(): void {
-    const days = this.data().map(d => d.day_name.trim());
-    const reported = this.data().map(d => d.reported_today);
-    const goals = this.data().map(d => d.daily_goal);
+    this.createWeeklyChart();
+    this.createCoverageChart();
+  }
 
-    this.chartOption = {
+  private createWeeklyChart(): void {
+    const days = this.weeklyProgress().map(d => d.day_name.trim());
+    const daysTransformed = transformDayName(days);
+    const reported = this.weeklyProgress().map(d => d.reported_today);
+    const goals = this.weeklyProgress().map(d => d.daily_goal);
+
+    this.chartWeekly = {
       tooltip: { trigger: 'axis' },
       legend: { data: ['Reportado', 'Meta diaria'] },
-      grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-      xAxis: { type: 'category', data: days },
+      grid: { left: '3%', right: '4%', bottom: '12%', containLabel: true },
+      xAxis: { type: 'category', data: daysTransformed },
       yAxis: { type: 'value' },
       series: [
         {
@@ -65,5 +79,59 @@ export class DashboardEvaluatorsChartsComponent implements OnInit {
         },
       ],
     };
+  }
+
+  private createCoverageChart(): void {
+    const grouped = this.groupByCampaign(this.campaignCoverage());
+    const seriesData = Object.keys(grouped).map(name => ({
+      name,
+      value: this.averageCoverage(grouped[name]),
+    }));
+
+    this.chartCampaignCoverage = {
+      tooltip: {
+        trigger: 'item',
+        formatter: '{b}: {c}% ({d}%)',
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+      },
+      series: [
+        {
+          name: 'Cobertura',
+          type: 'pie',
+          radius: '60%',
+          data: seriesData,
+          label: {
+            formatter: '{b}\n{c}%',
+            fontSize: 13,
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+            },
+          },
+        },
+      ],
+    };
+  }
+
+  private groupByCampaign(data: CampaignCoverage[]) {
+    return data.reduce(
+      (acc, item) => {
+        acc[item.campaign_name] = acc[item.campaign_name] || [];
+        acc[item.campaign_name].push(item);
+        return acc;
+      },
+      {} as Record<string, CampaignCoverage[]>
+    );
+  }
+
+  private averageCoverage(items: CampaignCoverage[]) {
+    const sum = items.reduce((acc, i) => acc + i.coverage_percent, 0);
+    return +(sum / items.length).toFixed(2);
   }
 }

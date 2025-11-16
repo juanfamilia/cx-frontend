@@ -4,30 +4,34 @@
   <div class="mb-8 grid grid-cols-2 gap-2 sm:gap-6 lg:grid-cols-4">
     <app-dashboard-card
       title="Gerentes Totales"
-      [value]="data()?.gerentes || 0"
+      [value]="data()?.summary?.gerentes || 0"
       icon="lucideUsers"
       iconColor="text-primary-500" />
 
     <app-dashboard-card
       title="Evaluadores Totales"
-      [value]="data()?.evaluadores || 0"
+      [value]="data()?.summary?.evaluadores || 0"
       icon="lucideUsers"
       iconColor="text-primary-500" />
 
     <app-dashboard-card
       title="Evaluaciones Aprobadas"
-      [value]="data()?.evaluaciones_aprobadas || 0"
+      [value]="data()?.summary?.evaluaciones_aprobadas || 0"
       icon="lucideCircleCheckBig"
       iconColor="text-green-500" />
 
     <app-dashboard-card
       title="Evaluaciones Rechazadas"
-      [value]="data()?.evaluaciones_rechazadas || 0"
+      [value]="data()?.summary?.evaluaciones_rechazadas || 0"
       icon="lucideCircleX"
       iconColor="text-red-500" />
   </div>
 
-  <div class="grid md:grid-cols-3">
+  <div class="pb-7">
+    <app-dashboard-admin-charts [analysis]="data()!.analysis" />
+  </div>
+
+  <div class="my-4 mb-30 grid pt-5 md:mb-15 lg:grid-cols-2">
     <app-dashboard-quick-actions [actions]="actions()" />
   </div>
 }

@@ -119,6 +119,15 @@
         label="Nombre del Colaborador"
         formControlName="evaluated_collaborator"
         icon="lucideUser" />
+
+      <p-multiselect
+        [options]="visitedZones"
+        formControlName="visited_zones"
+        optionLabel="name"
+        optionValue="value"
+        placeholder="Zonas Visitadas"
+        [maxSelectedLabels]="3"
+        [fluid]="true" />
     </div>
     <div class="mt-4 flex flex-col gap-4" formArrayName="evaluation_answers">
       @for (section of campaign().survey?.sections; track $index) {
@@ -184,7 +193,7 @@
                         <label
                           class="text-sm font-semibold"
                           [for]="aspect.id + '-bool'">
-                          Cumple
+                          Respuesta
                         </label>
                         <p-selectbutton
                           [options]="[
@@ -203,6 +212,16 @@
           </div>
         </div>
       }
+    </div>
+    <div class="mt-4 flex flex-col items-end gap-2">
+      <div class="font-semibold">
+        Puntaje Total: {{ totalScore() }} / {{ maxScore() }}
+      </div>
+      <p-progressBar
+        [value]="totalScore()"
+        [showValue]="true"
+        [max]="maxScore()"
+        styleClass="w-full md:w-96"></p-progressBar>
     </div>
     <div class="mt-5 flex justify-between gap-5">
       @if (isLoading()) {

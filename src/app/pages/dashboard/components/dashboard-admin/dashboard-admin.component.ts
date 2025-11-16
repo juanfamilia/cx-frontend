@@ -21,6 +21,7 @@ import { DashboardService } from '@services/dashboard.service';
 import { ActionDashboard } from 'src/app/types/actionsDashboard';
 import { DashboardCardComponent } from '../dashboard-card/dashboard-card.component';
 import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashboard-quick-actions.component';
+import { DashboardAdminChartsComponent } from '../charts/dashboard-admin-charts/dashboard-admin-charts.component';
 
 @Component({
   selector: 'app-dashboard-admin',
@@ -28,6 +29,7 @@ import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashb
     SpinnerComponent,
     DashboardQuickActionsComponent,
     DashboardCardComponent,
+    DashboardAdminChartsComponent,
   ],
   templateUrl: './dashboard-admin.component.html',
   styleUrl: './dashboard-admin.component.css',

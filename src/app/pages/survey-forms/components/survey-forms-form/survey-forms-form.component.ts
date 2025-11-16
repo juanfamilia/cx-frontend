@@ -174,6 +174,7 @@ export class SurveyFormsFormComponent implements OnInit {
         aspectsArray.push(
           this.fb.group({
             description: [aspect.description, [Validators.required]],
+            type: [aspect.type, Validators.required],
             maximum_score: [aspect.maximum_score, [Validators.required]],
             order: [aspect.order, [Validators.required]],
           })

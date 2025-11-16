@@ -18,7 +18,6 @@ import {
 } from '@ng-icons/lucide';
 import { CampaignGoalsProgressService } from '@services/campaign-goals-progress.service';
 import { DashboardService } from '@services/dashboard.service';
-import { ProgressBar } from 'primeng/progressbar';
 import { ActionDashboard } from 'src/app/types/actionsDashboard';
 import { DashboardEvaluatorsChartsComponent } from '../charts/dashboard-evaluators-charts/dashboard-evaluators-charts.component';
 import { DashboardCardComponent } from '../dashboard-card/dashboard-card.component';
@@ -30,7 +29,6 @@ import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashb
     SpinnerComponent,
     DashboardCardComponent,
     DashboardQuickActionsComponent,
-    ProgressBar,
     DashboardEvaluatorsChartsComponent,
   ],
   templateUrl: './dashboard-evaluators.component.html',

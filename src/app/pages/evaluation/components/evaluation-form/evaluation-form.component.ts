@@ -43,9 +43,11 @@ import 'media-chrome/menu';
 import { PrimeNG } from 'primeng/config';
 import { FileUploadHandlerEvent, FileUploadModule } from 'primeng/fileupload';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { ProgressBar } from 'primeng/progressbar';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TextareaModule } from 'primeng/textarea';
+import { VISITED_ZONES } from 'src/app/constants/visited_zones';
 import * as tus from 'tus-js-client';
 import { EvaluationChangeStatusComponent } from '../evaluation-change-status/evaluation-change-status.component';
 
@@ -67,6 +69,7 @@ import { EvaluationChangeStatusComponent } from '../evaluation-change-status/eva
     EvaluationChangeStatusComponent,
     SpinnerComponent,
     ProgressBar,
+    MultiSelectModule,
   ],
   templateUrl: './evaluation-form.component.html',
   styleUrl: './evaluation-form.component.css',
@@ -93,6 +96,8 @@ export class EvaluationFormComponent implements OnInit {
 
   submitEvent = output<FormData>();
 
+  visitedZones = VISITED_ZONES;
+
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private videoService = inject(VideoService);
@@ -110,14 +115,33 @@ export class EvaluationFormComponent implements OnInit {
 
   videoUrl = signal<string>('');
 
+  totalScore = signal<number>(0);
+  maxScore = signal<number>(0);
+
   ngOnInit() {
     this.evaluationForm = this.generateEvaluationForm(this.campaign().survey!);
+
+    // Calcular puntaje máximo de la encuesta
+    const max = this.campaign().survey!.sections.reduce(
+      (sum, s) =>
+        sum + s.aspects.reduce((aSum, a) => aSum + a.maximum_score, 0),
+      0
+    );
+    this.maxScore.set(max);
+
+    // Escuchar cambios para recalcular total
+    this.evaluationForm
+      .get('evaluation_answers')
+      ?.valueChanges.subscribe(() => {
+        this.calculateTotalScore();
+      });
 
     if (this.isEditing() && this.evaluation()) {
       this.evaluationForm.patchValue({
         title: this.evaluation()?.video.title,
         location: this.evaluation()?.location,
         evaluated_collaborator: this.evaluation()?.evaluated_collaborator,
+        visited_zones: this.evaluation()?.visited_zones,
         evaluation_answers: this.evaluation()?.evaluation_answers,
       });
 
@@ -172,6 +196,7 @@ export class EvaluationFormComponent implements OnInit {
         { value: '', disabled: this.disabled() },
         Validators.required
       ),
+      visited_zones: new FormControl({ value: [], disabled: this.disabled() }),
       evaluation_answers: new FormGroup(answerControls),
     });
   }
@@ -184,6 +209,30 @@ export class EvaluationFormComponent implements OnInit {
     return this.evaluationAnswers.get(id.toString()) as FormGroup;
   }
 
+  calculateTotalScore() {
+    const survey = this.campaign().survey!;
+    let total = 0;
+
+    Object.values(this.evaluationAnswers.controls).forEach(ctrl => {
+      const group = ctrl as FormGroup;
+      const aspectId = group.get('aspect_id')?.value;
+      const aspect = survey.sections
+        .flatMap(s => s.aspects)
+        .find(a => a.id === aspectId);
+
+      if (!aspect) return;
+
+      if (aspect.type === 'number') {
+        const val = group.get('value_number')?.value;
+        if (val !== null && val !== undefined) total += val;
+      } else if (aspect.type === 'boolean') {
+        const val = group.get('value_boolean')?.value;
+        if (val === true) total += aspect.maximum_score;
+      }
+    });
+
+    this.totalScore.set(total);
+  }
   onMediaUpload(event: FileUploadHandlerEvent) {
     const file = event.files?.[0];
     if (!file) return;
@@ -253,6 +302,10 @@ export class EvaluationFormComponent implements OnInit {
       formData.append(
         'evaluated_collaborator',
         this.evaluationForm.get('evaluated_collaborator')?.value
+      );
+      formData.append(
+        'visited_zones',
+        JSON.stringify(this.evaluationForm.get('visited_zones')?.value)
       );
 
       const answersGroup = this.evaluationAnswers;
