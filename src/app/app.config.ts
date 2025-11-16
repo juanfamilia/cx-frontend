@@ -17,12 +17,13 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { MyPreset } from 'src/mypreset';
 import { routes } from './app.routes';
 import { jwtInterceptor } from './interceptors/jwt.interceptor';
+import { apiUrlFixInterceptor } from './interceptors/api-url-fix.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideExperimentalZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(withFetch(), withInterceptors([jwtInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([apiUrlFixInterceptor, jwtInterceptor])),
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
