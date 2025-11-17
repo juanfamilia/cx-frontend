@@ -16,7 +16,7 @@ import {
   lucideUsers,
 } from '@ng-icons/lucide';
 import { AuthService } from '@services/auth.service';
-import { OnboardingService } from '@services/onboarding.service';
+// import { OnboardingService } from '@services/onboarding.service'; // Temporalmente deshabilitado
 import { DashboardAdminComponent } from './components/dashboard-admin/dashboard-admin.component';
 import { DashboardEvaluatorsComponent } from './components/dashboard-evaluators/dashboard-evaluators.component';
 import { DashboardManagerComponent } from './components/dashboard-manager/dashboard-manager.component';
@@ -46,7 +46,7 @@ import { DashboardSuperadminComponent } from './components/dashboard-superadmin/
 })
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
-  private onboardingService = inject(OnboardingService);
+  // private onboardingService = inject(OnboardingService); // Temporalmente deshabilitado
 
   currentUser = signal<UserClass>(
     new UserClass(this.authService.getCurrentUser())
@@ -54,14 +54,16 @@ export class DashboardComponent implements OnInit {
   loading = signal(false);
 
   ngOnInit(): void {
-    // Verificar si el usuario ya completó el onboarding
+    // Onboarding temporalmente deshabilitado debido a problemas de compilación
+    // TODO: Reactivar después de resolver problemas con Shepherd.js
+    /*
     if (!this.onboardingService.hasCompletedOnboarding()) {
-      // Esperar un poco para que el DOM esté completamente renderizado
       setTimeout(() => {
         const userRole = this.currentUser().role;
         this.onboardingService.startOnboarding(userRole);
       }, 1000);
     }
+    */
   }
 
   getDescription(): string {

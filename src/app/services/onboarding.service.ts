@@ -14,7 +14,7 @@ export interface OnboardingStep {
   providedIn: 'root'
 })
 export class OnboardingService {
-  private tour: Shepherd.Tour | null = null;
+  private tour: any = null;
 
   /**
    * Verifica si el usuario ya completó el onboarding
@@ -239,8 +239,8 @@ export class OnboardingService {
   /**
    * Genera los botones para cada paso
    */
-  private getButtonsForStep(index: number, totalSteps: number): Shepherd.Step.StepOptionsButton[] {
-    const buttons: Shepherd.Step.StepOptionsButton[] = [];
+  private getButtonsForStep(index: number, totalSteps: number): any[] {
+    const buttons: any[] = [];
 
     // Botón "Atrás" (excepto en el primer paso)
     if (index > 0) {
