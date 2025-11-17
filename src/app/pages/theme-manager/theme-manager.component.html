@@ -78,11 +78,9 @@
         </div>
 
         <div>
-          <h3 class="text-xl font-bold text-gray-800 mb-4">Estado</h3>
-          <span [ngClass]="theme.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-                class="inline-block px-3 py-1 rounded-full text-sm">
-            {{ theme.is_active ? 'Activo' : 'Inactivo' }}
-          </span>
+          <h3 class="text-xl font-bold text-gray-800 mb-4">Información</h3>
+          <p class="text-sm text-gray-600">ID: {{ theme.id }}</p>
+          <p class="text-sm text-gray-600">Compañía: {{ theme.company_id }}</p>
         </div>
       </div>
 
@@ -183,15 +181,6 @@
                     rows="6"
                     placeholder="/* CSS personalizado aquí */"
                     class="w-full border rounded px-3 py-2 font-mono text-sm"></textarea>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <input [(ngModel)]="form.is_active" 
-                 name="is_active"
-                 type="checkbox" 
-                 id="is_active_edit" 
-                 class="h-4 w-4">
-          <label for="is_active_edit" class="text-sm font-semibold text-gray-700">Tema Activo</label>
         </div>
 
         <div class="flex gap-3 pt-4">

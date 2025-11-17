@@ -22,6 +22,7 @@ export interface PromptCreate {
   category: string;
   is_active?: boolean;
   company_id?: string;
+  variables?: string[];
 }
 
 export interface PromptUpdate {
@@ -30,6 +31,7 @@ export interface PromptUpdate {
   template?: string;
   category?: string;
   is_active?: boolean;
+  variables?: string[];
 }
 
 @Injectable({
