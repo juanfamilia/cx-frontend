@@ -20,18 +20,18 @@ export class AuthService {
   loggedIn = signal<boolean>(false);
 
   login(data: Login): Observable<LoginResponse> {
-    // Agregamos esto para depurar
-    console.log('🔍 DEBUG - API URL:', environment.apiUrl);
-    console.log('🔍 DEBUG - URL completa:', environment.apiUrl + '/auth/login');
-    console.log('🔍 DEBUG - Environment completo:', environment);
-    
     const body = `grant_type=password&username=${encodeURIComponent(data.username)}&password=${encodeURIComponent(data.password)}&scope=&client_id=&client_secret=`;
+    
+    // Construir URL correctamente con un solo slash
+    const loginUrl = `${environment.apiUrl}/auth/login`;
+    
+    console.log('🔐 Login URL:', loginUrl);
+    
     return this.http.post<LoginResponse>(
-      environment.apiUrl + '//auth/login',
+      loginUrl,
       body,
       {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        // withCredentials: true,  // Comentado temporalmente para pruebas con CORS "*"
       }
     );
   }
