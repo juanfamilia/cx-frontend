@@ -31,7 +31,7 @@ export class CampaignGoalsEvaluatorService {
     }
 
     return this.http.get<CampaignGoalsEvaluatorList>(
-      environment.apiUrl + 'campaign-goals-evaluator/',
+      environment.apiUrl + '/campaign-goals-evaluator/',
       {
         params,
       }
@@ -40,7 +40,7 @@ export class CampaignGoalsEvaluatorService {
 
   getOne(id: number): Observable<CampaignGoalsEvaluator> {
     return this.http.get<CampaignGoalsEvaluator>(
-      environment.apiUrl + 'campaign-goals-evaluator/' + id
+      environment.apiUrl + '/campaign-goals-evaluator/' + id
     );
   }
 
@@ -48,7 +48,7 @@ export class CampaignGoalsEvaluatorService {
     data: CampaignGoalsEvaluatorCreate
   ): Observable<CampaignGoalsEvaluator> {
     return this.http.post<CampaignGoalsEvaluator>(
-      environment.apiUrl + 'campaign-goals-evaluator/',
+      environment.apiUrl + '/campaign-goals-evaluator/',
       data
     );
   }
@@ -58,14 +58,14 @@ export class CampaignGoalsEvaluatorService {
     id: number
   ): Observable<CampaignGoalsEvaluator> {
     return this.http.put<CampaignGoalsEvaluator>(
-      environment.apiUrl + 'campaign-goals-evaluator/' + id,
+      environment.apiUrl + '/campaign-goals-evaluator/' + id,
       data
     );
   }
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(
-      environment.apiUrl + 'campaign-goals-evaluator/' + id
+      environment.apiUrl + '/campaign-goals-evaluator/' + id
     );
   }
 }

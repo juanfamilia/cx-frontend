@@ -17,19 +17,19 @@ export class DashboardService {
 
   getDashboardSuperAdmin(): Observable<DashboardSuperAdmin> {
     return this.http.get<DashboardSuperAdmin>(
-      environment.apiUrl + 'dashboard/'
+      environment.apiUrl + '/dashboard/'
     );
   }
 
   getDashboardAdmin(): Observable<DashboardAdmin> {
-    return this.http.get<DashboardAdmin>(environment.apiUrl + 'dashboard/');
+    return this.http.get<DashboardAdmin>(environment.apiUrl + '/dashboard/');
   }
 
   getDashboardManager(): Observable<DashboardManager> {
-    return this.http.get<DashboardManager>(environment.apiUrl + 'dashboard/');
+    return this.http.get<DashboardManager>(environment.apiUrl + '/dashboard/');
   }
 
   getDashboardEvaluator(): Observable<DashboardEvaluator> {
-    return this.http.get<DashboardEvaluator>(environment.apiUrl + 'dashboard/');
+    return this.http.get<DashboardEvaluator>(environment.apiUrl + '/dashboard/');
   }
 }

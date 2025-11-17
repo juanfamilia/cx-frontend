@@ -12,7 +12,7 @@ export class VideoService {
 
   updateStatus(id: number): Observable<Video> {
     return this.http.get<Video>(
-      environment.apiUrl + 'evaluations/check-video/' + id
+      environment.apiUrl + '/evaluations/check-video/' + id
     );
   }
 }

@@ -11,7 +11,7 @@ export class CloudflareStreamService {
   private http = inject(HttpClient);
 
   getTusUploadUrl(file: File): Observable<any> {
-    return this.http.post(environment.apiUrl + 'cloudflare/stream', null, {
+    return this.http.post(environment.apiUrl + '/cloudflare/stream', null, {
       headers: {
         'Tus-Resumable': '1.0.0',
         'Upload-Length': file.size.toString(),

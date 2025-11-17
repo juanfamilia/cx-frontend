@@ -12,7 +12,7 @@ export class CampaignGoalsProgressService {
 
   getByEvaluator(): Observable<CampaignGoalsProgressByEvaluator[]> {
     return this.http.get<CampaignGoalsProgressByEvaluator[]>(
-      environment.apiUrl + 'campaign-goals-progress/by-evaluator'
+      environment.apiUrl + '/campaign-goals-progress/by-evaluator'
     );
   }
 }

@@ -25,7 +25,7 @@ export interface PromptsResponse {
 })
 export class PromptService {
   private http = inject(HttpClient);
-  private baseUrl = environment.apiUrl + 'prompts/';
+  private baseUrl = environment.apiUrl + '/prompts/';
 
   getPrompts(params?: {
     skip?: number;

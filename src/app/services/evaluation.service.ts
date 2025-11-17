@@ -25,7 +25,7 @@ export class EvaluationService {
       params = params.set('search', search);
     }
 
-    return this.http.get<EvaluationList>(environment.apiUrl + 'evaluations/', {
+    return this.http.get<EvaluationList>(environment.apiUrl + '/evaluations/', {
       params,
     });
   }
@@ -35,27 +35,27 @@ export class EvaluationService {
     status: { status: string; comment?: string }
   ): Observable<Evaluation> {
     return this.http.put<Evaluation>(
-      environment.apiUrl + 'evaluations/status/' + id,
+      environment.apiUrl + '/evaluations/status/' + id,
       status
     );
   }
 
   getOne(id: number): Observable<Evaluation> {
-    return this.http.get<Evaluation>(environment.apiUrl + 'evaluations/' + id);
+    return this.http.get<Evaluation>(environment.apiUrl + '/evaluations/' + id);
   }
 
   create(data: FormData) {
-    return this.http.post(environment.apiUrl + 'evaluations/', data);
+    return this.http.post(environment.apiUrl + '/evaluations/', data);
   }
 
   update(data: FormData, id: number): Observable<Evaluation> {
     return this.http.put<Evaluation>(
-      environment.apiUrl + 'evaluations/' + id,
+      environment.apiUrl + '/evaluations/' + id,
       data
     );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(environment.apiUrl + 'evaluations/' + id);
+    return this.http.delete<void>(environment.apiUrl + '/evaluations/' + id);
   }
 }

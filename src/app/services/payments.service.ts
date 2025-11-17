@@ -25,24 +25,24 @@ export class PaymentsService {
       params = params.set('search', search);
     }
 
-    return this.http.get<PaymentList>(environment.apiUrl + 'payment/', {
+    return this.http.get<PaymentList>(environment.apiUrl + '/payment/', {
       params,
     });
   }
 
   create(data: PaymentCreate): Observable<Payment> {
-    return this.http.post<Payment>(environment.apiUrl + 'payment/', data);
+    return this.http.post<Payment>(environment.apiUrl + '/payment/', data);
   }
 
   getOne(id: number): Observable<Payment> {
-    return this.http.get<Payment>(environment.apiUrl + 'payment/' + id);
+    return this.http.get<Payment>(environment.apiUrl + '/payment/' + id);
   }
 
   update(data: PaymentCreate, id: number): Observable<Payment> {
-    return this.http.put<Payment>(environment.apiUrl + 'payment/' + id, data);
+    return this.http.put<Payment>(environment.apiUrl + '/payment/' + id, data);
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(environment.apiUrl + 'payment/' + id);
+    return this.http.delete<void>(environment.apiUrl + '/payment/' + id);
   }
 }

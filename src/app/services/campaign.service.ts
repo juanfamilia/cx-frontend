@@ -30,30 +30,30 @@ export class CampaignService {
       params = params.set('search', search);
     }
 
-    return this.http.get<CampaignList>(environment.apiUrl + 'campaign/', {
+    return this.http.get<CampaignList>(environment.apiUrl + '/campaign/', {
       params,
     });
   }
 
   getOne(id: number): Observable<Campaign> {
-    return this.http.get<Campaign>(environment.apiUrl + 'campaign/' + id);
+    return this.http.get<Campaign>(environment.apiUrl + '/campaign/' + id);
   }
 
   create(data: CampaignCreate): Observable<Campaign> {
-    return this.http.post<Campaign>(environment.apiUrl + 'campaign/', data);
+    return this.http.post<Campaign>(environment.apiUrl + '/campaign/', data);
   }
 
   update(data: CampaignCreate, id: number): Observable<Campaign> {
-    return this.http.put<Campaign>(environment.apiUrl + 'campaign/' + id, data);
+    return this.http.put<Campaign>(environment.apiUrl + '/campaign/' + id, data);
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(environment.apiUrl + 'campaign/' + id);
+    return this.http.delete<void>(environment.apiUrl + '/campaign/' + id);
   }
 
   getAssignments(): Observable<CampaignAssignments> {
     return this.http.get<CampaignAssignments>(
-      environment.apiUrl + 'campaign-assignment/'
+      environment.apiUrl + '/campaign-assignment/'
     );
   }
 }

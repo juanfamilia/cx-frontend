@@ -29,30 +29,30 @@ export class SurveyFormService {
       params = params.set('search', search);
     }
 
-    return this.http.get<SurveyFormList>(environment.apiUrl + 'survey/', {
+    return this.http.get<SurveyFormList>(environment.apiUrl + '/survey/', {
       params,
     });
   }
 
   create(data: SurveyFormCreate): Observable<SurveyFormDetail> {
     return this.http.post<SurveyFormDetail>(
-      environment.apiUrl + 'survey/',
+      environment.apiUrl + '/survey/',
       data
     );
   }
 
   update(data: SurveyFormCreate, id: number): Observable<SurveyFormDetail> {
     return this.http.put<SurveyFormDetail>(
-      environment.apiUrl + 'survey/' + id,
+      environment.apiUrl + '/survey/' + id,
       data
     );
   }
 
   getOne(id: number): Observable<SurveyFormDetail> {
-    return this.http.get<SurveyFormDetail>(environment.apiUrl + 'survey/' + id);
+    return this.http.get<SurveyFormDetail>(environment.apiUrl + '/survey/' + id);
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(environment.apiUrl + 'survey/' + id);
+    return this.http.delete<void>(environment.apiUrl + '/survey/' + id);
   }
 }

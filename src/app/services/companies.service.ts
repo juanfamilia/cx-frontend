@@ -25,24 +25,24 @@ export class CompaniesService {
       params = params.set('search', search);
     }
 
-    return this.http.get<CompanyList>(environment.apiUrl + 'company/', {
+    return this.http.get<CompanyList>(environment.apiUrl + '/company/', {
       params,
     });
   }
 
   create(data: CompanyCreate): Observable<Company> {
-    return this.http.post<Company>(environment.apiUrl + 'company/', data);
+    return this.http.post<Company>(environment.apiUrl + '/company/', data);
   }
 
   getOne(id: number): Observable<Company> {
-    return this.http.get<Company>(environment.apiUrl + 'company/' + id);
+    return this.http.get<Company>(environment.apiUrl + '/company/' + id);
   }
 
   update(data: CompanyCreate, id: number): Observable<Company> {
-    return this.http.put<Company>(environment.apiUrl + 'company/' + id, data);
+    return this.http.put<Company>(environment.apiUrl + '/company/' + id, data);
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(environment.apiUrl + 'company/' + id);
+    return this.http.delete<void>(environment.apiUrl + '/company/' + id);
   }
 }
