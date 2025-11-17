@@ -32,7 +32,7 @@ export class SurveyFormsCreateComponent {
         this.toastService.showToast(
           'error',
           'Error al crear el formulario',
-          err.message
+          err.error.detail
         );
         console.error('Error creating survey form:', err);
       },

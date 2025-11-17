@@ -66,7 +66,7 @@ export class SurveyFormsUpdateComponent implements OnInit {
         this.toastService.showToast(
           'error',
           'Error al actualizar el formulario',
-          err.message
+          err.error.detail
         );
         console.error('Error updating survey form:', err);
       },
