@@ -37,6 +37,7 @@
     "postcss": "^8.5.1",
     "primeng": "^19.0.9",
     "rxjs": "~7.8.0",
+    "shepherd.js": "^14.5.1",
     "tailwindcss": "^4.0.0",
     "tailwindcss-animate": "^1.0.7",
     "tailwindcss-primeui": "^0.5.1",

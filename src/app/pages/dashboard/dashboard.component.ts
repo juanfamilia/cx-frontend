@@ -3,6 +3,7 @@ import {
   Component,
   inject,
   signal,
+  OnInit,
 } from '@angular/core';
 import { ButtonNotificationComponent } from '@components/buttons/button-notification/button-notification.component';
 import { PageHeaderComponent } from '@components/page-header/page-header.component';
@@ -15,6 +16,7 @@ import {
   lucideUsers,
 } from '@ng-icons/lucide';
 import { AuthService } from '@services/auth.service';
+import { OnboardingService } from '@services/onboarding.service';
 import { DashboardAdminComponent } from './components/dashboard-admin/dashboard-admin.component';
 import { DashboardEvaluatorsComponent } from './components/dashboard-evaluators/dashboard-evaluators.component';
 import { DashboardManagerComponent } from './components/dashboard-manager/dashboard-manager.component';
@@ -42,13 +44,25 @@ import { DashboardSuperadminComponent } from './components/dashboard-superadmin/
     }),
   ],
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
+  private onboardingService = inject(OnboardingService);
 
   currentUser = signal<UserClass>(
     new UserClass(this.authService.getCurrentUser())
   );
   loading = signal(false);
+
+  ngOnInit(): void {
+    // Verificar si el usuario ya completó el onboarding
+    if (!this.onboardingService.hasCompletedOnboarding()) {
+      // Esperar un poco para que el DOM esté completamente renderizado
+      setTimeout(() => {
+        const userRole = this.currentUser().role;
+        this.onboardingService.startOnboarding(userRole);
+      }, 1000);
+    }
+  }
 
   getDescription(): string {
     switch (this.currentUser().role) {

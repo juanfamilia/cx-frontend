@@ -1,6 +1,7 @@
 <li>
   <a
     [routerLink]="[navLinkData().route]"
+    [attr.data-onboarding]="navLinkData().route.substring(1)"
     class="dark:hover:bg-primary-400 hover:bg-primary-600 dark:hover:text-bunker-900 dark:text-bunker-300/75 mx-1 flex items-center rounded-lg px-3 py-2.5 text-gray-600 transition-all duration-200 ease-in-out hover:text-white"
     routerLinkActive="dark:bg-primary-400 bg-primary-500 text-white dark:text-bunker-900"
     [routerLinkActiveOptions]="{ exact: true }">
