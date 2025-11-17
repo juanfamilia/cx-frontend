@@ -1,6 +1,4 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { environment } from '@env/environment';
+import { Injectable } from '@angular/core';
 import {
   DashboardAdmin,
   DashboardEvaluator,
@@ -8,28 +6,27 @@ import {
   DashboardSuperAdmin,
 } from '@interfaces/dashboard';
 import { Observable } from 'rxjs';
+import { BaseHttpService } from './base/base-http.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class DashboardService {
-  private http = inject(HttpClient);
+export class DashboardService extends BaseHttpService {
+  private readonly endpoint = 'dashboard';
 
   getDashboardSuperAdmin(): Observable<DashboardSuperAdmin> {
-    return this.http.get<DashboardSuperAdmin>(
-      environment.apiUrl + '/dashboard/'
-    );
+    return this.get<DashboardSuperAdmin>(this.endpoint);
   }
 
   getDashboardAdmin(): Observable<DashboardAdmin> {
-    return this.http.get<DashboardAdmin>(environment.apiUrl + '/dashboard/');
+    return this.get<DashboardAdmin>(this.endpoint);
   }
 
   getDashboardManager(): Observable<DashboardManager> {
-    return this.http.get<DashboardManager>(environment.apiUrl + '/dashboard/');
+    return this.get<DashboardManager>(this.endpoint);
   }
 
   getDashboardEvaluator(): Observable<DashboardEvaluator> {
-    return this.http.get<DashboardEvaluator>(environment.apiUrl + '/dashboard/');
+    return this.get<DashboardEvaluator>(this.endpoint);
   }
 }
