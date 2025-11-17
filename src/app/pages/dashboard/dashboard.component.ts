@@ -16,7 +16,8 @@ import {
   lucideUsers,
 } from '@ng-icons/lucide';
 import { AuthService } from '@services/auth.service';
-// import { OnboardingService } from '@services/onboarding.service'; // Temporalmente deshabilitado
+import { OnboardingService, OnboardingStep } from '@services/onboarding.service';
+import { OnboardingTourComponent } from '@components/onboarding-tour/onboarding-tour.component';
 import { DashboardAdminComponent } from './components/dashboard-admin/dashboard-admin.component';
 import { DashboardEvaluatorsComponent } from './components/dashboard-evaluators/dashboard-evaluators.component';
 import { DashboardManagerComponent } from './components/dashboard-manager/dashboard-manager.component';
@@ -31,6 +32,7 @@ import { DashboardSuperadminComponent } from './components/dashboard-superadmin/
     DashboardAdminComponent,
     DashboardManagerComponent,
     DashboardSuperadminComponent,
+    OnboardingTourComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
@@ -46,24 +48,36 @@ import { DashboardSuperadminComponent } from './components/dashboard-superadmin/
 })
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
-  // private onboardingService = inject(OnboardingService); // Temporalmente deshabilitado
+  private onboardingService = inject(OnboardingService);
 
   currentUser = signal<UserClass>(
     new UserClass(this.authService.getCurrentUser())
   );
   loading = signal(false);
+  
+  // Onboarding state
+  showOnboarding = signal(false);
+  onboardingSteps = signal<OnboardingStep[]>([]);
 
   ngOnInit(): void {
-    // Onboarding temporalmente deshabilitado debido a problemas de compilación
-    // TODO: Reactivar después de resolver problemas con Shepherd.js
-    /*
+    // Check if user needs onboarding
     if (!this.onboardingService.hasCompletedOnboarding()) {
       setTimeout(() => {
         const userRole = this.currentUser().role;
-        this.onboardingService.startOnboarding(userRole);
-      }, 1000);
+        this.onboardingSteps.set(this.onboardingService.getStepsForRole(userRole));
+        this.showOnboarding.set(true);
+      }, 800);
     }
-    */
+  }
+  
+  onOnboardingComplete(): void {
+    this.onboardingService.markAsCompleted();
+    this.showOnboarding.set(false);
+  }
+  
+  onOnboardingSkip(): void {
+    this.onboardingService.markAsCompleted();
+    this.showOnboarding.set(false);
   }
 
   getDescription(): string {

@@ -3,9 +3,6 @@
 @plugin 'tailwindcss-animate';
 @plugin "@tailwindcss/typography";
 
-/* Shepherd.js Onboarding Styles */
-@import './styles/shepherd-custom.css';
-
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {

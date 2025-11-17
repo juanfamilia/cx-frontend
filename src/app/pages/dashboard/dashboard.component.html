@@ -26,4 +26,12 @@
       }
     }
   </div>
+  
+  <!-- Onboarding Tour -->
+  <app-onboarding-tour
+    [steps]="onboardingSteps()"
+    [isVisible]="showOnboarding()"
+    (complete)="onOnboardingComplete()"
+    (skip)="onOnboardingSkip()">
+  </app-onboarding-tour>
 </section>
