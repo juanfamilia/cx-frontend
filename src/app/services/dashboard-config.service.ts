@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { BaseHttpService } from './base/base-http.service';
 
 export interface WidgetDefinition {
   id: string;
@@ -49,13 +48,11 @@ export interface DashboardConfigUpdate {
 @Injectable({
   providedIn: 'root'
 })
-export class DashboardConfigService {
-  private apiUrl = `${environment.apiUrl}/dashboard-config`;
-
-  constructor(private http: HttpClient) {}
+export class DashboardConfigService extends BaseHttpService {
+  private readonly endpoint = 'dashboard-config';
 
   getAvailableWidgets(): Observable<WidgetDefinition[]> {
-    return this.http.get<WidgetDefinition[]>(`${this.apiUrl}/widgets/available`);
+    return this.get<WidgetDefinition[]>(`${this.endpoint}/widgets/available`);
   }
 
   getDashboardConfigs(params?: {
@@ -63,37 +60,26 @@ export class DashboardConfigService {
     limit?: number;
     role?: string;
   }): Observable<DashboardConfig[]> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach(key => {
-        const value = params[key as keyof typeof params];
-        if (value !== undefined && value !== null) {
-          httpParams = httpParams.set(key, value.toString());
-        }
-      });
-    }
-    return this.http.get<DashboardConfig[]>(this.apiUrl, { params: httpParams });
+    return this.get<DashboardConfig[]>(this.endpoint, params, true);
   }
 
   getDefaultConfig(role: string): Observable<DashboardConfig> {
-    return this.http.get<DashboardConfig>(`${this.apiUrl}/default`, {
-      params: { role }
-    });
+    return this.get<DashboardConfig>(`${this.endpoint}/default`, { role });
   }
 
   getConfigById(id: string): Observable<DashboardConfig> {
-    return this.http.get<DashboardConfig>(`${this.apiUrl}/${id}`);
+    return this.get<DashboardConfig>(`${this.endpoint}/${id}`);
   }
 
   createConfig(config: DashboardConfigCreate): Observable<DashboardConfig> {
-    return this.http.post<DashboardConfig>(this.apiUrl, config);
+    return this.post<DashboardConfig>(this.endpoint, config, true);
   }
 
   updateConfig(id: string, config: DashboardConfigUpdate): Observable<DashboardConfig> {
-    return this.http.put<DashboardConfig>(`${this.apiUrl}/${id}`, config);
+    return this.put<DashboardConfig>(`${this.endpoint}/${id}`, config);
   }
 
   deleteConfig(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.delete<void>(`${this.endpoint}/${id}`);
   }
 }

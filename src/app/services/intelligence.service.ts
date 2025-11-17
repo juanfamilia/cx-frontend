@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { BaseHttpService } from './base/base-http.service';
 
 export interface Insight {
   id: string;
@@ -37,10 +36,8 @@ export interface Trend {
 @Injectable({
   providedIn: 'root'
 })
-export class IntelligenceService {
-  private apiUrl = `${environment.apiUrl}/intelligence`;
-
-  constructor(private http: HttpClient) {}
+export class IntelligenceService extends BaseHttpService {
+  private readonly endpoint = 'intelligence';
 
   getInsights(params?: {
     skip?: number;
@@ -49,20 +46,11 @@ export class IntelligenceService {
     priority?: string;
     is_read?: boolean;
   }): Observable<Insight[]> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach(key => {
-        const value = params[key as keyof typeof params];
-        if (value !== undefined && value !== null) {
-          httpParams = httpParams.set(key, value.toString());
-        }
-      });
-    }
-    return this.http.get<Insight[]>(`${this.apiUrl}/insights`, { params: httpParams });
+    return this.get<Insight[]>(`${this.endpoint}/insights`, params);
   }
 
   getInsightsSummary(): Observable<InsightSummary> {
-    return this.http.get<InsightSummary>(`${this.apiUrl}/insights/summary`);
+    return this.get<InsightSummary>(`${this.endpoint}/insights/summary`);
   }
 
   getTrends(params?: {
@@ -70,25 +58,14 @@ export class IntelligenceService {
     limit?: number;
     metric?: string;
   }): Observable<Trend[]> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach(key => {
-        const value = params[key as keyof typeof params];
-        if (value !== undefined && value !== null) {
-          httpParams = httpParams.set(key, value.toString());
-        }
-      });
-    }
-    return this.http.get<Trend[]>(`${this.apiUrl}/insights/trends`, { params: httpParams });
+    return this.get<Trend[]>(`${this.endpoint}/insights/trends`, params);
   }
 
   getTopActions(limit: number = 5): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/insights/top-actions`, {
-      params: { limit: limit.toString() }
-    });
+    return this.get<any[]>(`${this.endpoint}/insights/top-actions`, { limit });
   }
 
   markInsightAsRead(insightId: string): Observable<Insight> {
-    return this.http.put<Insight>(`${this.apiUrl}/insights/${insightId}/read`, {});
+    return this.put<Insight>(`${this.endpoint}/insights/${insightId}/read`, {});
   }
 }

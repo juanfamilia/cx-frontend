@@ -1,17 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { BaseHttpService } from './base/base-http.service';
 
 export interface Prompt {
   id: string;
   name: string;
   description?: string;
   template: string;
-  category: string;
   variables: string[];
+  category: string;
   is_active: boolean;
-  version: number;
   company_id?: string;
   created_at: string;
   updated_at: string;
@@ -22,7 +20,6 @@ export interface PromptCreate {
   description?: string;
   template: string;
   category: string;
-  variables: string[];
   is_active?: boolean;
   company_id?: string;
 }
@@ -32,17 +29,14 @@ export interface PromptUpdate {
   description?: string;
   template?: string;
   category?: string;
-  variables?: string[];
   is_active?: boolean;
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class PromptManagerService {
-  private apiUrl = `${environment.apiUrl}/prompts`;
-
-  constructor(private http: HttpClient) {}
+export class PromptManagerService extends BaseHttpService {
+  private readonly endpoint = 'prompts';
 
   getPrompts(params?: {
     skip?: number;
@@ -50,37 +44,22 @@ export class PromptManagerService {
     category?: string;
     is_active?: boolean;
   }): Observable<Prompt[]> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach(key => {
-        const value = params[key as keyof typeof params];
-        if (value !== undefined && value !== null) {
-          httpParams = httpParams.set(key, value.toString());
-        }
-      });
-    }
-    return this.http.get<Prompt[]>(this.apiUrl, { params: httpParams });
+    return this.get<Prompt[]>(this.endpoint, params, true);
   }
 
   getPromptById(id: string): Observable<Prompt> {
-    return this.http.get<Prompt>(`${this.apiUrl}/${id}`);
+    return this.get<Prompt>(`${this.endpoint}/${id}`);
   }
 
   createPrompt(prompt: PromptCreate): Observable<Prompt> {
-    return this.http.post<Prompt>(this.apiUrl, prompt);
+    return this.post<Prompt>(this.endpoint, prompt, true);
   }
 
   updatePrompt(id: string, prompt: PromptUpdate): Observable<Prompt> {
-    return this.http.put<Prompt>(`${this.apiUrl}/${id}`, prompt);
+    return this.put<Prompt>(`${this.endpoint}/${id}`, prompt);
   }
 
   deletePrompt(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  duplicatePrompt(id: string): Observable<Prompt> {
-    return this.getPromptById(id).pipe(
-      // We'll handle duplication in the component
-    );
+    return this.delete<void>(`${this.endpoint}/${id}`);
   }
 }
