@@ -49,13 +49,15 @@ export class PromptManagerComponent implements OnInit {
     this.loading = true;
     this.promptService.getPrompts().subscribe({
       next: (prompts) => {
-        this.prompts = prompts;
+        this.prompts = prompts || [];
         this.applyFilters();
         this.loading = false;
       },
       error: (err) => {
         console.error('Error loading prompts:', err);
         this.toastService.showError('Error al cargar prompts');
+        this.prompts = [];
+        this.filteredPrompts = [];
         this.loading = false;
       }
     });
