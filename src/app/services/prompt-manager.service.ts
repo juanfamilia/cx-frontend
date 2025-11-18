@@ -1,67 +1,153 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { BaseHttpService } from './base/base-http.service';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { PromptManagerService, Prompt, PromptCreate, PromptUpdate } from '../../services/prompt-manager.service';
+import { ShareToasterService } from '../../services/toast.service';
 
-export interface Prompt {
-  id: string;
-  name: string;
-  description?: string;
-  template: string;
-  variables: string[];
-  category: string;
-  is_active: boolean;
-  company_id?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PromptCreate {
-  name: string;
-  description?: string;
-  template: string;
-  category: string;
-  is_active?: boolean;
-  company_id?: string;
-  variables?: string[];
-}
-
-export interface PromptUpdate {
-  name?: string;
-  description?: string;
-  template?: string;
-  category?: string;
-  is_active?: boolean;
-  variables?: string[];
-}
-
-@Injectable({
-  providedIn: 'root'
+@Component({
+  selector: 'app-prompt-manager',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './prompt-manager.component.html',
+  styleUrls: ['./prompt-manager.component.scss']
 })
-export class PromptManagerService extends BaseHttpService {
-  private readonly endpoint = 'prompts';
+export class PromptManagerComponent implements OnInit {
+  prompts: Prompt[] = [];
+  filteredPrompts: Prompt[] = [];
+  selectedPrompt: Prompt | null = null;
+  isEditing = false;
+  isCreating = false;
+  loading = true;
 
-  getPrompts(params?: {
-    skip?: number;
-    limit?: number;
-    category?: string;
-    is_active?: boolean;
-  }): Observable<Prompt[]> {
-    return this.get<Prompt[]>(this.endpoint, params, true);
+  // Form data
+  form: PromptCreate | PromptUpdate = {
+    name: '',
+    description: '',
+    template: '',
+    category: 'general',
+    variables: [],
+    is_active: true
+  };
+
+  // Filters
+  filterCategory: string = '';
+  filterActive: string = '';
+  searchTerm: string = '';
+
+  categories = ['general', 'evaluation', 'notification', 'analysis', 'report'];
+
+  constructor(
+    private promptService: PromptManagerService,
+    private toastService: ShareToasterService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadPrompts();
   }
 
-  getPromptById(id: string): Observable<Prompt> {
-    return this.get<Prompt>(`${this.endpoint}/${id}`);
+  loadPrompts(): void {
+    this.loading = true;
+    this.promptService.getPrompts().subscribe({
+      next: (prompts) => {
+        this.prompts = Array.isArray(prompts) ? prompts : [];
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading prompts:', err);
+        this.toastService.showError('Error al cargar prompts');
+        this.prompts = [];
+        this.filteredPrompts = [];
+        this.loading = false;
+      }
+    });
   }
 
-  createPrompt(prompt: PromptCreate): Observable<Prompt> {
-    return this.post<Prompt>(this.endpoint, prompt, true);
+  applyFilters(): void {
+    let filtered = Array.isArray(this.prompts) ? [...this.prompts] : [];
+
+    if (this.filterCategory) {
+      filtered = filtered.filter(p => p.category === this.filterCategory);
+    }
+
+    if (this.filterActive === 'true') {
+      filtered = filtered.filter(p => p.is_active);
+    } else if (this.filterActive === 'false') {
+      filtered = filtered.filter(p => !p.is_active);
+    }
+
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(term) ||
+        (p.description?.toLowerCase().includes(term) ?? false)
+      );
+    }
+
+    this.filteredPrompts = filtered;
   }
 
-  updatePrompt(id: string, prompt: PromptUpdate): Observable<Prompt> {
-    return this.put<Prompt>(`${this.endpoint}/${id}`, prompt);
+  selectPrompt(prompt: Prompt): void {
+    this.selectedPrompt = prompt;
+    this.isEditing = false;
+    this.isCreating = false;
   }
 
-  deletePrompt(id: string): Observable<void> {
-    return this.delete<void>(`${this.endpoint}/${id}`);
+  startEdit(prompt: Prompt): void {
+    this.selectedPrompt = prompt;
+    this.isEditing = true;
+    this.isCreating = false;
+    this.form = {
+      name: prompt.name,
+      description: prompt.description,
+      template: prompt.template,
+      category: prompt.category,
+      variables: [...prompt.variables],
+      is_active: prompt.is_active
+    };
   }
-}
+
+  startCreate(): void {
+    this.isCreating = true;
+    this.isEditing = false;
+    this.selectedPrompt = null;
+    this.form = {
+      name: '',
+      description: '',
+      template: '',
+      category: 'general',
+      variables: [],
+      is_active: true
+    };
+  }
+
+  savePrompt(): void {
+    if (this.isCreating) {
+      this.createPrompt();
+    } else if (this.isEditing && this.selectedPrompt) {
+      this.updatePrompt();
+    }
+  }
+
+  createPrompt(): void {
+    this.promptService.createPrompt(this.form as PromptCreate).subscribe({
+      next: (prompt) => {
+        this.prompts.push(prompt);
+        this.applyFilters();
+        this.toastService.showSuccess('Prompt creado exitosamente');
+        this.cancelEdit();
+      },
+      error: (err) => {
+        console.error('Error creating prompt:', err);
+        this.toastService.showError('Error al crear prompt');
+      }
+    });
+  }
+
+  updatePrompt(): void {
+    if (!this.selectedPrompt) return;
+
+    this.promptService.updatePrompt(this.selectedPrompt.id, this.form).subscribe({
+      next: (updated) => {
+        const index = this.prompts.findIndex(p => p.id === updated.id);
+        if (index !==
