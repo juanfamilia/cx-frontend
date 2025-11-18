@@ -10,7 +10,8 @@ export interface Prompt {
   prompt_type: string;
   system_prompt: string;
   is_active: boolean;
-  metadata?: any;
+  variables: string[];
+  description?:string;
   created_at: string;
   updated_at: string;
 }
@@ -19,6 +20,8 @@ export interface PromptCreate {
   prompt_type: string;
   system_prompt: string;
   is_active?: boolean;
+  variables?: string[];
+   description?: string; 
   metadata?: any;
   variables?: string[]; // Si usas variables en el componente
 }
