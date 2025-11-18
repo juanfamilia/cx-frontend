@@ -48,8 +48,9 @@ export class PromptManagerComponent implements OnInit {
   loadPrompts(): void {
     this.loading = true;
     this.promptService.getPrompts().subscribe({
-      next: (prompts) => {
-        this.prompts = prompts || [];
+      next: (response) => {
+        // defensive: verifica que data es array antes de asignar
+        this.prompts = Array.isArray(response?.data) ? response.data : [];
         this.applyFilters();
         this.loading = false;
       },
@@ -64,7 +65,7 @@ export class PromptManagerComponent implements OnInit {
   }
 
   applyFilters(): void {
-    let filtered = [...this.prompts];
+    let filtered = Array.isArray(this.prompts) ? [...this.prompts] : [];
 
     if (this.filterCategory) {
       filtered = filtered.filter(p => p.category === this.filterCategory);
