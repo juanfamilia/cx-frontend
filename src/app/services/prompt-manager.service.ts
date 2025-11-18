@@ -48,12 +48,12 @@ export class PromptManagerComponent implements OnInit {
   loadPrompts(): void {
     this.loading = true;
     this.promptService.getPrompts().subscribe({
-      next: (prompts) => {
+      next: (prompts: Prompt[]) => {
         this.prompts = Array.isArray(prompts) ? prompts : [];
         this.applyFilters();
         this.loading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error loading prompts:', err);
         this.toastService.showError('Error al cargar prompts');
         this.prompts = [];
@@ -67,18 +67,18 @@ export class PromptManagerComponent implements OnInit {
     let filtered = Array.isArray(this.prompts) ? [...this.prompts] : [];
 
     if (this.filterCategory) {
-      filtered = filtered.filter(p => p.category === this.filterCategory);
+      filtered = filtered.filter((p: Prompt) => p.category === this.filterCategory);
     }
 
     if (this.filterActive === 'true') {
-      filtered = filtered.filter(p => p.is_active);
+      filtered = filtered.filter((p: Prompt) => p.is_active);
     } else if (this.filterActive === 'false') {
-      filtered = filtered.filter(p => !p.is_active);
+      filtered = filtered.filter((p: Prompt) => !p.is_active);
     }
 
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter((p: Prompt) =>
         p.name.toLowerCase().includes(term) ||
         (p.description?.toLowerCase().includes(term) ?? false)
       );
@@ -131,13 +131,13 @@ export class PromptManagerComponent implements OnInit {
 
   createPrompt(): void {
     this.promptService.createPrompt(this.form as PromptCreate).subscribe({
-      next: (prompt) => {
+      next: (prompt: Prompt) => {
         this.prompts.push(prompt);
         this.applyFilters();
         this.toastService.showSuccess('Prompt creado exitosamente');
         this.cancelEdit();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error creating prompt:', err);
         this.toastService.showError('Error al crear prompt');
       }
@@ -146,8 +146,64 @@ export class PromptManagerComponent implements OnInit {
 
   updatePrompt(): void {
     if (!this.selectedPrompt) return;
-
     this.promptService.updatePrompt(this.selectedPrompt.id, this.form).subscribe({
-      next: (updated) => {
-        const index = this.prompts.findIndex(p => p.id === updated.id);
-        if (index !==
+      next: (updated: Prompt) => {
+        const index = this.prompts.findIndex((p: Prompt) => p.id === updated.id);
+        if (index !== -1) {
+          this.prompts[index] = updated;
+        }
+        this.applyFilters();
+        this.toastService.showSuccess('Prompt actualizado exitosamente');
+        this.selectedPrompt = updated;
+        this.isEditing = false;
+      },
+      error: (err: any) => {
+        console.error('Error updating prompt:', err);
+        this.toastService.showError('Error al actualizar prompt');
+      }
+    });
+  }
+
+  deletePrompt(prompt: Prompt): void {
+    if (!confirm(`¿Estás seguro de eliminar el prompt "${prompt.name}"?`)) return;
+    this.promptService.deletePrompt(prompt.id).subscribe({
+      next: () => {
+        this.prompts = this.prompts.filter((p: Prompt) => p.id !== prompt.id);
+        this.applyFilters();
+        this.toastService.showSuccess('Prompt eliminado exitosamente');
+        if (this.selectedPrompt?.id === prompt.id) {
+          this.selectedPrompt = null;
+        }
+      },
+      error: (err: any) => {
+        console.error('Error deleting prompt:', err);
+        this.toastService.showError('Error al eliminar prompt');
+      }
+    });
+  }
+
+  cancelEdit(): void {
+    this.isEditing = false;
+    this.isCreating = false;
+    this.form = {
+      name: '',
+      description: '',
+      template: '',
+      category: 'general',
+      variables: [],
+      is_active: true
+    };
+  }
+
+  extractVariables(): void {
+    const regex = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
+    const matches = this.form.template?.matchAll(regex);
+    const variables = new Set<string>();
+    if (matches) {
+      for (const match of matches) {
+        variables.add(match[1]);
+      }
+    }
+    this.form.variables = Array.from(variables);
+  }
+}
