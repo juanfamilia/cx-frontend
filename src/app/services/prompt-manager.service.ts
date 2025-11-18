@@ -20,8 +20,7 @@ export interface PromptCreate {
   prompt_type: string;
   system_prompt: string;
   is_active?: boolean;
-  variables?: string[];
-   description?: string; 
+  description?: string; 
   metadata?: any;
   variables?: string[]; // Si usas variables en el componente
 }
