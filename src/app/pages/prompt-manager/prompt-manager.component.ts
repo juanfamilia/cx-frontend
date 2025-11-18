@@ -21,18 +21,18 @@ export class PromptManagerComponent implements OnInit {
   isCreating = false;
   loading = true;
 
-  // Form data (ajusta los campos según PromptCreate)
+  // Form data con campos CORRECTOS del modelo/backend
   form: PromptCreate | PromptUpdate = {
     prompt_name: '',
-    prompt_type: '',
+    prompt_type: 'general',
     system_prompt: '',
-    category: 'general',
+    description: '',
     variables: [],
     is_active: true
   };
 
-  // Filters
-  filterCategory: string = '';
+  // Filtros
+  filterType: string = '';
   filterActive: string = '';
   searchTerm: string = '';
 
@@ -67,8 +67,8 @@ export class PromptManagerComponent implements OnInit {
 
   applyFilters(): void {
     let filtered = Array.isArray(this.prompts) ? [...this.prompts] : [];
-    if (this.filterCategory) {
-      filtered = filtered.filter((p: Prompt) => p.category === this.filterCategory);
+    if (this.filterType) {
+      filtered = filtered.filter((p: Prompt) => p.prompt_type === this.filterType);
     }
     if (this.filterActive === 'true') {
       filtered = filtered.filter((p: Prompt) => p.is_active);
@@ -79,8 +79,7 @@ export class PromptManagerComponent implements OnInit {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter((p: Prompt) =>
         p.prompt_name.toLowerCase().includes(term) ||
-        // Si agregaste description en el modelo:
-        (p['description']?.toLowerCase().includes(term) ?? false)
+        (p.description?.toLowerCase().includes(term) ?? false)
       );
     }
     this.filteredPrompts = filtered;
@@ -100,7 +99,7 @@ export class PromptManagerComponent implements OnInit {
       prompt_name: prompt.prompt_name,
       prompt_type: prompt.prompt_type,
       system_prompt: prompt.system_prompt,
-      category: (prompt as any).category ?? 'general',
+      description: prompt.description || '',
       variables: [...(prompt.variables ?? [])],
       is_active: prompt.is_active
     };
@@ -112,9 +111,9 @@ export class PromptManagerComponent implements OnInit {
     this.selectedPrompt = null;
     this.form = {
       prompt_name: '',
-      prompt_type: '',
+      prompt_type: 'general',
       system_prompt: '',
-      category: 'general',
+      description: '',
       variables: [],
       is_active: true
     };
@@ -186,9 +185,9 @@ export class PromptManagerComponent implements OnInit {
     this.isCreating = false;
     this.form = {
       prompt_name: '',
-      prompt_type: '',
+      prompt_type: 'general',
       system_prompt: '',
-      category: 'general',
+      description: '',
       variables: [],
       is_active: true
     };
