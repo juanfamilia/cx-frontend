@@ -3,7 +3,6 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
 
-// Export interfaces para importarlas desde otros componentes o servicios
 export interface Prompt {
   id: number;
   company_id: number;
@@ -15,17 +14,25 @@ export interface Prompt {
   created_at: string;
   updated_at: string;
 }
+export interface PromptCreate {
+  prompt_name: string;
+  prompt_type: string;
+  system_prompt: string;
+  is_active?: boolean;
+  metadata?: any;
+  variables?: string[]; // Si usas variables en el componente
+}
+export interface PromptUpdate extends Partial<PromptCreate> {}
 
 export interface PromptsResponse {
   data: Prompt[];
   total: number;
 }
 
-// Exporta la clase PromptService correctamente
 @Injectable({
   providedIn: 'root',
 })
-export class PromptService {
+export class PromptManagerService {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl + '/prompts/';
 
@@ -50,11 +57,11 @@ export class PromptService {
     return this.http.get<Prompt>(`${this.baseUrl}${promptId}`);
   }
 
-  createPrompt(prompt: Partial<Prompt>): Observable<Prompt> {
+  createPrompt(prompt: PromptCreate): Observable<Prompt> {
     return this.http.post<Prompt>(this.baseUrl, prompt);
   }
 
-  updatePrompt(promptId: number, prompt: Partial<Prompt>): Observable<Prompt> {
+  updatePrompt(promptId: number, prompt: PromptUpdate): Observable<Prompt> {
     return this.http.put<Prompt>(`${this.baseUrl}${promptId}`, prompt);
   }
 
@@ -67,5 +74,4 @@ export class PromptService {
   }
 }
 
-// Puedes exportar todo junto si lo prefieres (opcional):
-export { PromptService, Prompt, PromptsResponse };
+// Ya está todo correctamente exportado arriba
