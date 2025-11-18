@@ -41,13 +41,11 @@ export class PromptService {
         }
       });
     }
-    return this.http.get<PromptsResponse>(this.baseUrl, {
-      params: httpParams,
-    });
+    return this.http.get<PromptsResponse>(this.baseUrl, { params: httpParams });
   }
 
   getPrompt(promptId: number): Observable<Prompt> {
-    return this.http.get<Prompt>(this.baseUrl + `${promptId}`);
+    return this.http.get<Prompt>(`${this.baseUrl}${promptId}`);
   }
 
   createPrompt(prompt: {
@@ -61,14 +59,14 @@ export class PromptService {
   }
 
   updatePrompt(promptId: number, prompt: Partial<Prompt>): Observable<Prompt> {
-    return this.http.put<Prompt>(this.baseUrl + `${promptId}`, prompt);
+    return this.http.put<Prompt>(`${this.baseUrl}${promptId}`, prompt);
   }
 
   deletePrompt(promptId: number): Observable<void> {
-    return this.http.delete<void>(this.baseUrl + `${promptId}`);
+    return this.http.delete<void>(`${this.baseUrl}${promptId}`);
   }
 
   getActivePrompt(): Observable<Prompt> {
-    return this.http.get<Prompt>(this.baseUrl + 'active');
+    return this.http.get<Prompt>(`${this.baseUrl}active`);
   }
 }
