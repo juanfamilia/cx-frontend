@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PromptManagerService, Prompt, PromptCreate, PromptUpdate } from '../../services/prompt-manager.service';
+import {
+  PromptManagerService, Prompt, PromptCreate, PromptUpdate, PromptsResponse
+} from '../../services/prompt-manager.service';
 import { ShareToasterService } from '../../services/toast.service';
 
 @Component({
@@ -19,11 +21,11 @@ export class PromptManagerComponent implements OnInit {
   isCreating = false;
   loading = true;
 
-  // Form data
+  // Form data (ajusta los campos según PromptCreate)
   form: PromptCreate | PromptUpdate = {
-    name: '',
-    description: '',
-    template: '',
+    prompt_name: '',
+    prompt_type: '',
+    system_prompt: '',
     category: 'general',
     variables: [],
     is_active: true
@@ -48,13 +50,12 @@ export class PromptManagerComponent implements OnInit {
   loadPrompts(): void {
     this.loading = true;
     this.promptService.getPrompts().subscribe({
-      next: (response) => {
-        // defensive: verifica que data es array antes de asignar
+      next: (response: PromptsResponse) => {
         this.prompts = Array.isArray(response?.data) ? response.data : [];
         this.applyFilters();
         this.loading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error loading prompts:', err);
         this.toastService.showError('Error al cargar prompts');
         this.prompts = [];
@@ -66,25 +67,22 @@ export class PromptManagerComponent implements OnInit {
 
   applyFilters(): void {
     let filtered = Array.isArray(this.prompts) ? [...this.prompts] : [];
-
     if (this.filterCategory) {
-      filtered = filtered.filter(p => p.category === this.filterCategory);
+      filtered = filtered.filter((p: Prompt) => p.category === this.filterCategory);
     }
-
     if (this.filterActive === 'true') {
-      filtered = filtered.filter(p => p.is_active);
+      filtered = filtered.filter((p: Prompt) => p.is_active);
     } else if (this.filterActive === 'false') {
-      filtered = filtered.filter(p => !p.is_active);
+      filtered = filtered.filter((p: Prompt) => !p.is_active);
     }
-
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(term) ||
-        (p.description?.toLowerCase().includes(term) ?? false)
+      filtered = filtered.filter((p: Prompt) =>
+        p.prompt_name.toLowerCase().includes(term) ||
+        // Si agregaste description en el modelo:
+        (p['description']?.toLowerCase().includes(term) ?? false)
       );
     }
-
     this.filteredPrompts = filtered;
   }
 
@@ -99,11 +97,11 @@ export class PromptManagerComponent implements OnInit {
     this.isEditing = true;
     this.isCreating = false;
     this.form = {
-      name: prompt.name,
-      description: prompt.description,
-      template: prompt.template,
-      category: prompt.category,
-      variables: [...prompt.variables],
+      prompt_name: prompt.prompt_name,
+      prompt_type: prompt.prompt_type,
+      system_prompt: prompt.system_prompt,
+      category: (prompt as any).category ?? 'general',
+      variables: [...(prompt.variables ?? [])],
       is_active: prompt.is_active
     };
   }
@@ -113,9 +111,9 @@ export class PromptManagerComponent implements OnInit {
     this.isEditing = false;
     this.selectedPrompt = null;
     this.form = {
-      name: '',
-      description: '',
-      template: '',
+      prompt_name: '',
+      prompt_type: '',
+      system_prompt: '',
       category: 'general',
       variables: [],
       is_active: true
@@ -132,13 +130,13 @@ export class PromptManagerComponent implements OnInit {
 
   createPrompt(): void {
     this.promptService.createPrompt(this.form as PromptCreate).subscribe({
-      next: (prompt) => {
+      next: (prompt: Prompt) => {
         this.prompts.push(prompt);
         this.applyFilters();
         this.toastService.showSuccess('Prompt creado exitosamente');
         this.cancelEdit();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error creating prompt:', err);
         this.toastService.showError('Error al crear prompt');
       }
@@ -147,10 +145,9 @@ export class PromptManagerComponent implements OnInit {
 
   updatePrompt(): void {
     if (!this.selectedPrompt) return;
-
-    this.promptService.updatePrompt(this.selectedPrompt.id, this.form).subscribe({
-      next: (updated) => {
-        const index = this.prompts.findIndex(p => p.id === updated.id);
+    this.promptService.updatePrompt(this.selectedPrompt.id, this.form as PromptUpdate).subscribe({
+      next: (updated: Prompt) => {
+        const index = this.prompts.findIndex((p: Prompt) => p.id === updated.id);
         if (index !== -1) {
           this.prompts[index] = updated;
         }
@@ -159,7 +156,7 @@ export class PromptManagerComponent implements OnInit {
         this.selectedPrompt = updated;
         this.isEditing = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error updating prompt:', err);
         this.toastService.showError('Error al actualizar prompt');
       }
@@ -167,18 +164,17 @@ export class PromptManagerComponent implements OnInit {
   }
 
   deletePrompt(prompt: Prompt): void {
-    if (!confirm(`¿Estás seguro de eliminar el prompt "${prompt.name}"?`)) return;
-
+    if (!confirm(`¿Estás seguro de eliminar el prompt "${prompt.prompt_name}"?`)) return;
     this.promptService.deletePrompt(prompt.id).subscribe({
       next: () => {
-        this.prompts = this.prompts.filter(p => p.id !== prompt.id);
+        this.prompts = this.prompts.filter((p: Prompt) => p.id !== prompt.id);
         this.applyFilters();
         this.toastService.showSuccess('Prompt eliminado exitosamente');
         if (this.selectedPrompt?.id === prompt.id) {
           this.selectedPrompt = null;
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error deleting prompt:', err);
         this.toastService.showError('Error al eliminar prompt');
       }
@@ -189,9 +185,9 @@ export class PromptManagerComponent implements OnInit {
     this.isEditing = false;
     this.isCreating = false;
     this.form = {
-      name: '',
-      description: '',
-      template: '',
+      prompt_name: '',
+      prompt_type: '',
+      system_prompt: '',
       category: 'general',
       variables: [],
       is_active: true
@@ -200,15 +196,14 @@ export class PromptManagerComponent implements OnInit {
 
   extractVariables(): void {
     const regex = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
-    const matches = this.form.template?.matchAll(regex);
+    const matches = this.form.system_prompt?.matchAll(regex);
     const variables = new Set<string>();
-    
+
     if (matches) {
       for (const match of matches) {
         variables.add(match[1]);
       }
     }
-    
     this.form.variables = Array.from(variables);
   }
 }
