@@ -12,6 +12,7 @@ import { RouterOutlet } from '@angular/router';
 import { NavMobileComponent } from '@components/navigation/nav-mobile/nav-mobile.component';
 import { SidebarComponent } from '@components/navigation/sidebar/sidebar.component';
 import { ToggleSidebarComponent } from '@components/navigation/toggle-sidebar/toggle-sidebar.component';
+import { TourSpotlightComponent } from '@components/tour-spotlight/tour-spotlight.component';
 import { provideIcons } from '@ng-icons/core';
 import { heroHome } from '@ng-icons/heroicons/outline';
 import { AuthService } from '@services/auth.service';
@@ -27,6 +28,7 @@ import { ToastModule } from 'primeng/toast';
     ToastModule,
     ToggleSidebarComponent,
     NavMobileComponent,
+    TourSpotlightComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
