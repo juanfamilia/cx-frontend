@@ -15,9 +15,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { InputNumberComponent } from '@components/inputs/input-number/input-number.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { InputNumberComponent } from '@shared/components/inputs/input-number/input-number.component';
 import { Campaign } from '@interfaces/campaign';
 import {
   CampaignGoalsEvaluator,
@@ -26,8 +26,9 @@ import {
 import { UserClass } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
 import { lucideArrowLeft, lucideGoal, lucideSave } from '@ng-icons/lucide';
-import { CampaignService } from '@services/campaign.service';
-import { UsersService } from '@services/users.service';
+import { CampaignService } from '@pages/campaign/campaign.service';
+import { UsersService } from '@pages/users/users.service';
+import { Options } from '@data/types/options';
 import { LazyLoadEvent } from 'primeng/api';
 import { SelectFilterEvent, SelectModule } from 'primeng/select';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
@@ -66,6 +67,11 @@ export class CampaignGoalsFormComponent implements OnInit {
 
   lazyLoad = signal<LazyLoadEvent>({ first: 0, rows: 10 });
 
+  userResource = rxResource<Options[], void>({
+    request: () => undefined,
+    loader: () => this.userService.getAllOptionsList(),
+  });
+
   ngOnInit(): void {
     this.goalForm = this.fb.group({
       evaluator_id: [null, [Validators.required]],
@@ -92,10 +98,6 @@ export class CampaignGoalsFormComponent implements OnInit {
     }
   }
 
-  userResource = rxResource({
-    loader: () => this.userService.getAllOptionsList(),
-  });
-
   getCampaigns(event: LazyLoadEvent, search?: string) {
     this.lazyLoad.set(event);
     const offset = event.first;
@@ -103,7 +105,7 @@ export class CampaignGoalsFormComponent implements OnInit {
 
     this.campaginService
       .getAll(offset, limit, 'name', search)
-      .subscribe(response => {
+      .subscribe((response: { data: Campaign[] }) => {
         this.campaign.set(response.data);
       });
   }

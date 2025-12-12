@@ -6,12 +6,13 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { ButtonDangerComponent } from '@components/buttons/button-danger/button-danger.component';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
-import { TableComponent } from '@components/table/table.component';
+import { ButtonDangerComponent } from '@shared/components/buttons/button-danger/button-danger.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { TableComponent } from '@shared/components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
+import { Campaign } from '@interfaces/campaign';
 import { provideIcons } from '@ng-icons/core';
 import {
   lucideGoal,
@@ -20,10 +21,11 @@ import {
   lucideSettings2,
   lucideTrash,
 } from '@ng-icons/lucide';
-import { CampaignService } from '@services/campaign.service';
-import { ShareToasterService } from '@services/toast.service';
+import { ShareToasterService } from '@core/services/toast.service';
+import { CampaignService } from '@pages/campaign/campaign.service';
+import { Options } from '@data/types/options';
+import { PaginatedResponse } from '@data/types/pagination';
 import { PaginatorState } from 'primeng/paginator';
-import { Options } from 'src/app/types/options';
 
 @Component({
   selector: 'app-campaign-dashboard',
@@ -117,19 +119,22 @@ export class CampaignDashboardComponent {
     },
   ]);
 
-  campaignResource = rxResource({
-    request: () => ({
-      pagination: this.pagination(),
-      search: this.searchEvent(),
-    }),
-    loader: ({ request }) =>
-      this.campaignService.getAll(
-        request.pagination.first,
-        request.pagination.rows,
-        request.search?.filter,
-        request.search?.search
-      ),
-  });
+  campaignResource = rxResource<
+  PaginatedResponse<Campaign>,
+  { pagination: PaginatorState; search: { filter: string; search: string } | null }
+>({
+  request: () => ({
+    pagination: this.pagination(),
+    search: this.searchEvent(),
+  }),
+  loader: ({ request }) =>
+    this.campaignService.getAll(
+      request.pagination.first,
+      request.pagination.rows,
+      request.search?.filter,
+      request.search?.search
+    ),
+});
 
   createCampaign() {
     this.router.navigate(['/campaigns/create']);
@@ -157,12 +162,12 @@ export class CampaignDashboardComponent {
           'La campaña ha sido eliminada exitosamente.'
         );
       },
-      error: error => {
+      error: (error: unknown) => {
         console.error('Error deleting campaign:', error);
         this.toastService.showToast(
           'error',
           'Error al eliminar la campaña',
-          error.message
+          'Ocurrió un error al eliminar la campaña'
         );
       },
     });

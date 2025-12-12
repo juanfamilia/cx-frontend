@@ -18,11 +18,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { InputLocationComponent } from '@components/inputs/input-location/input-location.component';
-import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
-import { SpinnerComponent } from '@components/spinner/spinner.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { InputLocationComponent } from '@shared/components/inputs/input-location/input-location.component';
+import { InputTextComponent } from '@shared/components/inputs/input-text/input-text.component';
+import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
 import { Campaign } from '@interfaces/campaign';
 import { Evaluation } from '@interfaces/evaluation';
 import { SurveyFormDetail } from '@interfaces/survey-form';
@@ -36,7 +36,7 @@ import {
   lucideUser,
 } from '@ng-icons/lucide';
 import { CloudflareStreamService } from '@services/cloudflare-stream.service';
-import { VideoService } from '@services/video.service';
+import { VideoService } from '@pages/evaluation/video.service';
 import 'hls-video-element';
 import 'media-chrome';
 import 'media-chrome/menu';

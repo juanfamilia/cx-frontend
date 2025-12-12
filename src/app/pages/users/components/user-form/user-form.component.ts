@@ -14,12 +14,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { InputDateComponent } from '@components/inputs/input-date/input-date.component';
-import { InputPasswordComponent } from '@components/inputs/input-password/input-password.component';
-import { InputSelectComponent } from '@components/inputs/input-select/input-select.component';
-import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { InputDateComponent } from '@shared/components/inputs/input-date/input-date.component';
+import { InputPasswordComponent } from '@shared/components/inputs/input-password/input-password.component';
+import { InputSelectComponent } from '@shared/components/inputs/input-select/input-select.component';
+import { InputTextComponent } from '@shared/components/inputs/input-text/input-text.component';
 import { Company } from '@interfaces/company';
 import { User, UserCreate } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
@@ -34,16 +34,16 @@ import {
   lucideUserPlus,
   lucideVenusAndMars,
 } from '@ng-icons/lucide';
-import { AuthService } from '@services/auth.service';
-import { CompaniesService } from '@services/companies.service';
+import { AuthService } from '@core/services/auth.service';
+import { CompaniesService } from '@pages/companies/companies.service';
 import { LazyLoadEvent } from 'primeng/api';
 import { DividerModule } from 'primeng/divider';
 import { SelectFilterEvent, SelectModule } from 'primeng/select';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
-import { CIVIL_STATUS } from 'src/app/constants/civilStatus.constant';
-import { GENDERS } from 'src/app/constants/genders.constant';
-import { SOCIOECONOMIC } from 'src/app/constants/socioeconomic.constant';
-import { Options } from 'src/app/types/options';
+import { CIVIL_STATUS } from '@shared/constants/civilStatus.constant';
+import { GENDERS } from '@shared/constants/genders.constant';
+import { SOCIOECONOMIC } from '@shared/constants/socioeconomic.constant';
+import { Options } from '@data/types/options';
 
 @Component({
   selector: 'app-user-form',
@@ -120,25 +120,13 @@ export class UserFormComponent implements OnInit {
         this.getCompanies({ first: 0, rows: 10 });
         this.userForm.get('company_id')!.setValidators([Validators.required]);
         this.roles.set([
-          {
-            name: 'Administrador',
-            value: 1,
-          },
-          {
-            name: 'Gerente',
-            value: 2,
-          },
-          {
-            name: 'Evaluador',
-            value: 3,
-          },
+          { name: 'Administrador', value: 1 },
+          { name: 'Gerente', value: 2 },
+          { name: 'Evaluador', value: 3 },
         ]);
 
         this.filterSubject
-          .pipe(
-            debounceTime(500), // Espera 500 ms antes de ejecutar la búsqueda
-            distinctUntilChanged() // Solo ejecuta si el valor cambió
-          )
+          .pipe(debounceTime(500), distinctUntilChanged())
           .subscribe(filterValue => {
             this.getCompanies(this.lazyLoad(), filterValue);
           });
@@ -149,14 +137,8 @@ export class UserFormComponent implements OnInit {
           role: 1,
         });
         this.roles.set([
-          {
-            name: 'Gerente',
-            value: 2,
-          },
-          {
-            name: 'Evaluador',
-            value: 3,
-          },
+          { name: 'Gerente', value: 2 },
+          { name: 'Evaluador', value: 3 },
         ]);
         break;
     }
@@ -184,7 +166,7 @@ export class UserFormComponent implements OnInit {
     const limit = event.rows;
 
     this.companiesService
-      .getAll(offset, limit, 'name', search)
+      .getAll(offset ?? 0, limit ?? 10, 'name', search)
       .subscribe(response => {
         this.companies.set(response.data);
 

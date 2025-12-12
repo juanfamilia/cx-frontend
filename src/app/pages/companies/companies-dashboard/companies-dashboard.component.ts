@@ -6,18 +6,21 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { ButtonDangerComponent } from '@components/buttons/button-danger/button-danger.component';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
-import { TableComponent } from '@components/table/table.component';
+import { ButtonDangerComponent } from '@shared/components/buttons/button-danger/button-danger.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { TableComponent } from '@shared/components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
+import { ShareToasterService } from '@core/services/toast.service';
+import { CompaniesService } from '@pages/companies/companies.service';
+import { Company } from '@interfaces/company';
+import { Options } from '@data/types/options';
+import { PaginatedResponse } from '@data/types/pagination';
 import { provideIcons } from '@ng-icons/core';
 import { lucideBuilding2, lucidePencil, lucideTrash } from '@ng-icons/lucide';
-import { CompaniesService } from '@services/companies.service';
-import { ShareToasterService } from '@services/toast.service';
 import { PaginatorState } from 'primeng/paginator';
-import { Options } from 'src/app/types/options';
+
 @Component({
   selector: 'app-companies-dashboard',
   imports: [
@@ -89,19 +92,22 @@ export class CompaniesDashboardComponent {
     },
   ]);
 
-  companiesResource = rxResource({
-    request: () => ({
-      pagination: this.pagination(),
-      search: this.searchEvent(),
-    }),
-    loader: ({ request }) =>
-      this.companyService.getAll(
-        request.pagination.first,
-        request.pagination.rows,
-        request.search?.filter,
-        request.search?.search
-      ),
-  });
+  companiesResource = rxResource<
+  PaginatedResponse<Company>,
+  { pagination: PaginatorState; search: { filter: string; search: string } | null }
+>({
+  request: () => ({
+    pagination: this.pagination(),
+    search: this.searchEvent(),
+  }),
+  loader: ({ request }) =>
+    this.companyService.getAll(
+      request.pagination.first,
+      request.pagination.rows,
+      request.search?.filter,
+      request.search?.search
+    ),
+});
 
   createCompany() {
     this.router.navigate(['/companies/create']);
@@ -121,12 +127,12 @@ export class CompaniesDashboardComponent {
           'La empresa ha sido eliminada exitosamente.'
         );
       },
-      error: error => {
+      error: (error: unknown) => {
         console.error('Error deleting company:', error);
         this.toastService.showToast(
           'error',
           'Error al eliminar la empresa',
-          error.message
+          'Ocurrió un error al eliminar la empresa'
         );
       },
     });

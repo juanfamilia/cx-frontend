@@ -6,15 +6,15 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { ButtonDangerComponent } from '@components/buttons/button-danger/button-danger.component';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
-import { TableComponent } from '@components/table/table.component';
+import { ButtonDangerComponent } from '@shared/components/buttons/button-danger/button-danger.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { TableComponent } from '@shared/components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
 import { provideIcons } from '@ng-icons/core';
 import { lucideMap, lucidePencil, lucideTrash } from '@ng-icons/lucide';
-import { ShareToasterService } from '@services/toast.service';
-import { UserZoneService } from '@services/user-zone.service';
+import { ShareToasterService } from '@core/services/toast.service';
+import { UserZoneService } from '@pages/work-areas/user-zone.service';
 import { PaginatorState } from 'primeng/paginator';
 import { Options } from 'src/app/types/options';
 

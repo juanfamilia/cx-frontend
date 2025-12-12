@@ -6,7 +6,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
 import { Notification } from '@interfaces/notification';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -16,8 +16,8 @@ import {
   lucideText,
   lucideUser,
 } from '@ng-icons/lucide';
-import { NotificationService } from '@services/notification.service';
-import { ShareToasterService } from '@services/toast.service';
+import { NotificationService } from '@pages/notifications/notification.service';
+import { ShareToasterService } from '@core/services/toast.service';
 import { TagModule } from 'primeng/tag';
 
 @Component({

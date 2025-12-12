@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { SpinnerComponent } from '@components/spinner/spinner.component';
+import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
 import { provideIcons } from '@ng-icons/core';
 import {
   lucideCircleAlert,
@@ -16,8 +16,8 @@ import {
   lucidePlus,
   lucideSend,
 } from '@ng-icons/lucide';
-import { CampaignGoalsProgressService } from '@services/campaign-goals-progress.service';
-import { DashboardService } from '@services/dashboard.service';
+import { CampaignGoalsProgressService } from '@pages/dashboard/campaign-goals-progress.service';
+import { DashboardService } from '@pages/dashboard/dashboard.service';
 import { ActionDashboard } from 'src/app/types/actionsDashboard';
 import { DashboardEvaluatorsChartsComponent } from '../charts/dashboard-evaluators-charts/dashboard-evaluators-charts.component';
 import { DashboardCardComponent } from '../dashboard-card/dashboard-card.component';

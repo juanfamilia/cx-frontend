@@ -6,11 +6,11 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { ButtonDangerComponent } from '@components/buttons/button-danger/button-danger.component';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
-import { TableComponent } from '@components/table/table.component';
+import { ButtonDangerComponent } from '@shared/components/buttons/button-danger/button-danger.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { TableComponent } from '@shared/components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
 import { provideIcons } from '@ng-icons/core';
 import {
@@ -18,8 +18,8 @@ import {
   lucideTextCursorInput,
   lucideTrash,
 } from '@ng-icons/lucide';
-import { SurveyFormService } from '@services/survey-form.service';
-import { ShareToasterService } from '@services/toast.service';
+import { SurveyFormService } from '@pages/survey-forms/survey-form.service';
+import { ShareToasterService } from '@core/services/toast.service';
 import { PaginatorState } from 'primeng/paginator';
 import { Options } from 'src/app/types/options';
 

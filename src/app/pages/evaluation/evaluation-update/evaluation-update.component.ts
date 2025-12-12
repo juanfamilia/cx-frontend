@@ -6,11 +6,11 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
-import { SpinnerComponent } from '@components/spinner/spinner.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
 import { Evaluation } from '@interfaces/evaluation';
-import { EvaluationService } from '@services/evaluation.service';
-import { ShareToasterService } from '@services/toast.service';
+import { EvaluationService } from '@pages/evaluation/evaluation.service';
+import { ShareToasterService } from '@core/services/toast.service';
 import { EvaluationFormComponent } from '../components/evaluation-form/evaluation-form.component';
 
 @Component({

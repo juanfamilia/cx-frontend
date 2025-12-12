@@ -4,8 +4,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { ButtonNotificationComponent } from '@components/buttons/button-notification/button-notification.component';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { ButtonNotificationComponent } from '@shared/components/buttons/button-notification/button-notification.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { UserClass } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
 import {
@@ -14,7 +14,7 @@ import {
   lucideClock,
   lucideUsers,
 } from '@ng-icons/lucide';
-import { AuthService } from '@services/auth.service';
+import { AuthService } from '@core/services/auth.service';
 import { DashboardAdminComponent } from './components/dashboard-admin/dashboard-admin.component';
 import { DashboardEvaluatorsComponent } from './components/dashboard-evaluators/dashboard-evaluators.component';
 import { DashboardManagerComponent } from './components/dashboard-manager/dashboard-manager.component';

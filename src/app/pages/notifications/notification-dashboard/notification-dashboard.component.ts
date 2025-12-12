@@ -7,10 +7,10 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { SpinnerComponent } from '@components/spinner/spinner.component';
+import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideBell, lucideCheckCheck, lucideFilter } from '@ng-icons/lucide';
-import { NotificationService } from '@services/notification.service';
+import { NotificationService } from '@pages/notifications/notification.service';
 import { BadgeModule } from 'primeng/badge';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { NotificationCardComponent } from '../components/notification-card/notification-card.component';

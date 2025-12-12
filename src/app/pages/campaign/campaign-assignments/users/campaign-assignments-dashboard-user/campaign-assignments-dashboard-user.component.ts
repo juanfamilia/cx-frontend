@@ -6,17 +6,18 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { ButtonDangerComponent } from '@components/buttons/button-danger/button-danger.component';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
-import { TableComponent } from '@components/table/table.component';
+import { ButtonDangerComponent } from '@shared/components/buttons/button-danger/button-danger.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { TableComponent } from '@shared/components/table/table.component';
 import { TableColumn } from '@interfaces/table-column';
+import { ShareToasterService } from '@core/services/toast.service';
+import { CampaignAssignmentsUserService } from '@pages/campaign/campaign-assignments-user.service';
+import { Options } from '@data/types/options';
+import { PaginatedResponse } from '@data/types/pagination';
 import { provideIcons } from '@ng-icons/core';
 import { lucideSettings2, lucideTrash } from '@ng-icons/lucide';
-import { CampaignAssignmentsUserService } from '@services/campaign-assignments-user.service';
-import { ShareToasterService } from '@services/toast.service';
 import { PaginatorState } from 'primeng/paginator';
-import { Options } from 'src/app/types/options';
 
 @Component({
   selector: 'app-campaign-assignments-dashboard-user',
@@ -34,9 +35,7 @@ import { Options } from 'src/app/types/options';
 export class CampaignAssignmentsDashboardUserComponent {
   private router = inject(Router);
   private toastService = inject(ShareToasterService);
-  private campaignAssignmentsUserService = inject(
-    CampaignAssignmentsUserService
-  );
+  private campaignAssignmentsUserService = inject(CampaignAssignmentsUserService);
 
   pagination = signal<PaginatorState>({
     page: 0,
@@ -94,7 +93,10 @@ export class CampaignAssignmentsDashboardUserComponent {
     },
   ]);
 
-  campaignAssignmentsUserResource = rxResource({
+  campaignAssignmentsUserResource = rxResource<
+    PaginatedResponse<unknown>,
+    { pagination: PaginatorState; search: { filter: string; search: string } | null }
+  >({
     request: () => ({
       pagination: this.pagination(),
       search: this.searchEvent(),
@@ -122,12 +124,12 @@ export class CampaignAssignmentsDashboardUserComponent {
           'La asignación ha sido eliminada exitosamente.'
         );
       },
-      error: error => {
+      error: (error: unknown) => {
         console.error('Error deleting campaign assignment:', error);
         this.toastService.showToast(
           'error',
           'Error al eliminar la asignación',
-          error.message
+          'Ocurrió un error al eliminar la asignación'
         );
       },
     });

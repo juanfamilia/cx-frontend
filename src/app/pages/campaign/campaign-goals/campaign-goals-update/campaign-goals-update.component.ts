@@ -6,15 +6,15 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
-import { SpinnerComponent } from '@components/spinner/spinner.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
 import {
   CampaignGoalsEvaluator,
   CampaignGoalsEvaluatorCreate,
   CampaignGoalsEvaluatorUpdate,
 } from '@interfaces/campaign-goals-evaluator';
-import { CampaignGoalsEvaluatorService } from '@services/campaign-goals-evaluator.service';
-import { ShareToasterService } from '@services/toast.service';
+import { CampaignGoalsEvaluatorService } from '@pages/dashboard/campaign-goals-evaluator.service';
+import { ShareToasterService } from '@core/services/toast.service';
 import { CampaignGoalsFormComponent } from '../components/campaign-goals-form/campaign-goals-form.component';
 
 @Component({
@@ -39,15 +39,17 @@ export class CampaignGoalsUpdateComponent implements OnInit {
       this.id.set(params['id']);
       this.isLoading.set(true);
       this.campaignGoalsService.getOne(this.id()).subscribe({
-        next: data => {
+        next: (data: CampaignGoalsEvaluator) => {
           this.goal.set(data);
         },
-        error: err => {
+        error: (err: unknown) => {
+          console.error(err);
           this.toastService.showToast(
             'error',
             'Error al obtener la meta',
-            err.message
+            'Ocurrió un error al obtener la meta'
           );
+          this.isLoading.set(false);
         },
         complete: () => {
           this.isLoading.set(false);
@@ -70,13 +72,13 @@ export class CampaignGoalsUpdateComponent implements OnInit {
         );
         this.router.navigate(['/campaigns/goals']);
       },
-      error: err => {
+      error: (err: unknown) => {
+        console.error('Error updating goal:', err);
         this.toastService.showToast(
           'error',
           'Error al actualizar la meta',
-          err.error.detail
+          'Ocurrió un error al actualizar la meta'
         );
-        console.error('Error updating goal:', err);
       },
     });
   }

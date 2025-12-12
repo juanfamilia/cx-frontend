@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { CampaignAssignmentZoneCreate } from '@interfaces/campaign-assignment-zone';
-import { CampaignAssignmentsZoneService } from '@services/campaign-assignments-zone.service';
-import { ShareToasterService } from '@services/toast.service';
+import { CampaignAssignmentsZoneService } from '@pages/campaign/campaign-assignments-zone.service';
+import { ShareToasterService } from '@core/services/toast.service';
 import { CampaignAssignmentsZoneFormComponent } from '../components/campaign-assignments-zone-form/campaign-assignments-zone-form.component';
 
 @Component({

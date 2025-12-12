@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '../../guards/auth.guard';
+import { authGuard } from '@core/guards/auth.guard';
 import { PaymentCreateComponent } from './payment-create/payment-create.component';
 import { PaymentUpdateComponent } from './payment-update/payment-update.component';
 import { PaymentsDashboardComponent } from './payments-dashboard/payments-dashboard.component';

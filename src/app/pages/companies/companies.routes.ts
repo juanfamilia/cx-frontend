@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '../../guards/auth.guard';
+import { authGuard } from '@core/guards/auth.guard';
 import { CompaniesDashboardComponent } from './companies-dashboard/companies-dashboard.component';
 import { CompanyCreateComponent } from './company-create/company-create.component';
 import { CompanyUpdateComponent } from './company-update/company-update.component';

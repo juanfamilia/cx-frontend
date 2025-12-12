@@ -13,15 +13,15 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { InputPasswordComponent } from '@components/inputs/input-password/input-password.component';
-import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
-import { SpinnerComponent } from '@components/spinner/spinner.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { InputPasswordComponent } from '@shared/components/inputs/input-password/input-password.component';
+import { InputTextComponent } from '@shared/components/inputs/input-text/input-text.component';
+import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
 import { provideIcons } from '@ng-icons/core';
 import { heroEnvelope, heroLockClosed } from '@ng-icons/heroicons/outline';
-import { AuthService } from '@services/auth.service';
+import { AuthService } from '@core/services/auth.service';
 import { ThemeServiceService } from '@services/theme-service.service';
-import { ShareToasterService } from '@services/toast.service';
+import { ShareToasterService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-login',

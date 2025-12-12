@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { SpinnerComponent } from '@components/spinner/spinner.component';
+import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideChartBar,
@@ -22,14 +22,14 @@ import {
   lucideSparkles,
   lucideTable,
 } from '@ng-icons/lucide';
-import { EvaluationAnalysisService } from '@services/evaluation-analysis.service';
+import { EvaluationAnalysisService } from '@pages/evaluation/evaluation-analysis.service';
 import { MarkdownComponent } from 'ngx-markdown';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { TabsModule } from 'primeng/tabs';
 import { Tooltip } from 'primeng/tooltip';
-import { convertJsonToCsv } from 'src/app/helpers/json-csv-convert';
-import { PdfService } from 'src/app/helpers/markdown-pdf-convert';
+import { convertJsonToCsv } from '@core/helpers/json-csv-convert';
+import { PdfService } from '@core/helpers/markdown-pdf-convert';
 
 @Component({
   selector: 'app-evaluation-analysis',

@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { CompanyCreate } from '@interfaces/company';
-import { CompaniesService } from '@services/companies.service';
-import { ShareToasterService } from '@services/toast.service';
+import { CompaniesService } from '@pages/companies/companies.service';
+import { ShareToasterService } from '@core/services/toast.service';
 import { CompanyFormComponent } from '../components/company-form/company-form.component';
 
 @Component({

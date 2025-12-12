@@ -14,21 +14,27 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { InputMultiSelectComponent } from '@components/inputs/input-zone/input-multi-select.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { InputMultiSelectComponent } from '@shared/components/inputs/input-zone/input-multi-select.component';
 import { CampaignAssignmentUserCreate } from '@interfaces/campaign-assigment-user';
+import { Campaign } from '@interfaces/campaign';
 import { provideIcons } from '@ng-icons/core';
 import { lucideArrowLeft, lucideSettings2 } from '@ng-icons/lucide';
-import { CampaignService } from '@services/campaign.service';
-import { UsersService } from '@services/users.service';
+import { CampaignService } from '@pages/campaign/campaign.service';
+import { UsersService } from '@pages/users/users.service';
+import { Options } from '@data/types/options';
+import { PaginatedResponse } from '@data/types/pagination';
 import { LazyLoadEvent } from 'primeng/api';
 import { SelectFilterEvent, SelectModule } from 'primeng/select';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-campaign-assignments-user-form',
+  standalone: true,
   imports: [
+    PageHeaderComponent,            // CORRECTO
     ReactiveFormsModule,
     SelectModule,
     InputMultiSelectComponent,
@@ -36,7 +42,7 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
     ButtonSecondaryComponent,
   ],
   templateUrl: './campaign-assignments-user-form.component.html',
-  styleUrl: './campaign-assignments-user-form.component.css',
+  styleUrls: ['./campaign-assignments-user-form.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [provideIcons({ lucideSettings2, lucideArrowLeft })],
 })
@@ -55,7 +61,10 @@ export class CampaignAssignmentsUserFormComponent implements OnInit {
   lazyLoadCampaign = signal<LazyLoadEvent>({ first: 0, rows: 10 });
   lazySearchCampaign = signal<string>('');
 
-  campaignsResource = rxResource({
+  campaignsResource = rxResource<
+    PaginatedResponse<Campaign>,
+    { pagination: LazyLoadEvent; filter: string; search: string }
+  >({
     request: () => ({
       pagination: this.lazyLoadCampaign(),
       filter: 'name',
@@ -70,7 +79,8 @@ export class CampaignAssignmentsUserFormComponent implements OnInit {
       ),
   });
 
-  usersResource = rxResource({
+  usersResource = rxResource<Options[], void>({
+    request: () => undefined,
     loader: () => this.userService.getAllOptionsList(),
   });
 

@@ -6,7 +6,7 @@ import {
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideMoon, lucideSunMedium } from '@ng-icons/lucide';
 import { ThemeServiceService } from '@services/theme-service.service';

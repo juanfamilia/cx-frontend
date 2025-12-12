@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '../../guards/auth.guard';
+import { authGuard } from '@core/guards/auth.guard';
 import { SurveyFormsCreateComponent } from './survey-forms-create/survey-forms-create.component';
 import { SurveyFormsDashboardComponent } from './survey-forms-dashboard/survey-forms-dashboard.component';
 import { SurveyFormsUpdateComponent } from './survey-forms-update/survey-forms-update.component';

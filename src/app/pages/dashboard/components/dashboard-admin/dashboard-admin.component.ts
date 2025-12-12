@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { SpinnerComponent } from '@components/spinner/spinner.component';
+import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
 import { provideIcons } from '@ng-icons/core';
 import {
   lucideCircleCheckBig,
@@ -17,7 +17,7 @@ import {
   lucideUserPlus,
   lucideUsers,
 } from '@ng-icons/lucide';
-import { DashboardService } from '@services/dashboard.service';
+import { DashboardService } from '@pages/dashboard/dashboard.service';
 import { ActionDashboard } from 'src/app/types/actionsDashboard';
 import { DashboardCardComponent } from '../dashboard-card/dashboard-card.component';
 import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashboard-quick-actions.component';

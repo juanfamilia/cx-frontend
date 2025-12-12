@@ -15,12 +15,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { InputDateComponent } from '@components/inputs/input-date/input-date.component';
-import { InputNumberComponent } from '@components/inputs/input-number/input-number.component';
-import { InputSelectComponent } from '@components/inputs/input-select/input-select.component';
-import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { InputDateComponent } from '@shared/components/inputs/input-date/input-date.component';
+import { InputNumberComponent } from '@shared/components/inputs/input-number/input-number.component';
+import { InputSelectComponent } from '@shared/components/inputs/input-select/input-select.component';
+import { InputTextComponent } from '@shared/components/inputs/input-text/input-text.component';
 import { Campaign, CampaignCreate } from '@interfaces/campaign';
 import { SurveyForm } from '@interfaces/survey-form';
 import { provideIcons } from '@ng-icons/core';
@@ -34,11 +34,11 @@ import {
   lucideTarget,
   lucideType,
 } from '@ng-icons/lucide';
-import { SurveyFormService } from '@services/survey-form.service';
+import { SurveyFormService } from '@pages/survey-forms/survey-form.service';
 import { LazyLoadEvent } from 'primeng/api';
 import { SelectFilterEvent, SelectModule } from 'primeng/select';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
-import { dateRangeValidator } from 'src/app/helpers/date-range-validator';
+import { dateRangeValidator } from '@core/helpers/date-range-validator';
 import { Options } from 'src/app/types/options';
 
 @Component({

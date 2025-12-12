@@ -1,5 +1,3 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
@@ -13,20 +11,60 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "moduleResolution": "bundler",
+
+    "moduleResolution": "node",
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
-    "baseUrl": "./",
+
+    "baseUrl": "./src",
+
     "paths": {
-      "@components/*": ["src/app/components/*"],
-      "@pages/*": ["src/app/pages/*"],
-      "@services/*": ["src/app/services/*"],
-      "@interfaces/*": ["src/app/interfaces/*"],
-      "@assets/*": ["src/public/*"],
-      "@env/*": ["src/environments/*"]
+      /* CORE */
+      "@core/*": ["app/core/*"],
+      "@core/services/*": ["app/core/services/*"],
+      "@core/helpers/*": ["app/core/helpers/*"],
+      "@core/guards/*": ["app/core/guards/*"],
+      "@core/interceptors/*": ["app/core/interceptors/*"],
+
+      /* SHARED */
+      "@shared/*": ["app/shared/*"],
+      "@shared/components/*": ["app/shared/components/*"],
+      "@shared/services/*": ["app/shared/services/*"],
+      "@shared/pipes/*": ["app/shared/pipes/*"],
+      "@shared/constants/*": ["app/shared/constants/*"],
+
+      /* COMPONENTS (ALIAS COMPLETO Y FUNCIONAL) */
+      "@components/*": ["app/shared/components/*"],
+
+      /* SERVICES */
+      "@services/*": ["app/shared/services/*"],
+
+      /* INTERFACES */
+      "@interfaces/*": ["app/data/interfaces/*"],
+
+      /* PAGES */
+      "@pages/*": ["app/pages/*"],
+
+      /* DATA */
+      "@data/*": ["app/data/*"],
+      "@data/interfaces/*": ["app/data/interfaces/*"],
+      "@data/types/*": ["app/data/types/*"],
+
+      /* ENV */
+      "@env/*": ["environments/*"],
+
+      /* ASSETS */
+      "@assets/*": ["public/*"],
+
+      /* LEGACY (evita romper imports antiguos) */
+      "src/app/types/*": ["app/data/types/*"],
+      "src/app/pipes/*": ["app/shared/pipes/*"],
+      "src/app/constants/*": ["app/shared/constants/*"],
+      "../types/*": ["app/data/types/*"]
     }
   },
+
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,

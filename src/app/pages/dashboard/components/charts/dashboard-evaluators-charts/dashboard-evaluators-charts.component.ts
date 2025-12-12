@@ -18,7 +18,7 @@ import {
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
-import { transformDayName } from 'src/app/helpers/day-name-transform';
+import { transformDayName } from '@core/helpers/day-name-transform';
 
 echarts.use([
   BarChart,

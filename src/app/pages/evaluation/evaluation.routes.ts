@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '../../guards/auth.guard';
+import { authGuard } from '@core/guards/auth.guard';
 import { EvaluationCreateComponent } from './evaluation-create/evaluation-create.component';
 import { EvaluationDashboardComponent } from './evaluation-dashboard/evaluation-dashboard.component';
 import { EvaluationDetailComponent } from './evaluation-detail/evaluation-detail.component';

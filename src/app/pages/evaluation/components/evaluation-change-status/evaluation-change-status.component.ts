@@ -15,11 +15,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { InputSelectComponent } from '@components/inputs/input-select/input-select.component';
-import { InputTextareaComponent } from '@components/inputs/input-textarea/input-textarea.component';
+import { InputSelectComponent } from '@shared/components/inputs/input-select/input-select.component';
+import { InputTextareaComponent } from '@shared/components/inputs/input-textarea/input-textarea.component';
 import { provideIcons } from '@ng-icons/core';
 import { lucideClipboardCheck } from '@ng-icons/lucide';
-import { EvaluationService } from '@services/evaluation.service';
+import { EvaluationService } from '@pages/evaluation/evaluation.service';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { STATUS } from 'src/app/constants/evaluationStatus.constants';

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '../../guards/auth.guard';
+import { authGuard } from '@core/guards/auth.guard';
 import { NotificationDashboardComponent } from './notification-dashboard/notification-dashboard.component';
 
 export const notificationRoutes: Routes = [

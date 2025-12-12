@@ -6,11 +6,11 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
-import { SpinnerComponent } from '@components/spinner/spinner.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
 import { SurveyFormCreate, SurveyFormDetail } from '@interfaces/survey-form';
-import { SurveyFormService } from '@services/survey-form.service';
-import { ShareToasterService } from '@services/toast.service';
+import { SurveyFormService } from '@pages/survey-forms/survey-form.service';
+import { ShareToasterService } from '@core/services/toast.service';
 import { SurveyFormsFormComponent } from '../components/survey-forms-form/survey-forms-form.component';
 
 @Component({

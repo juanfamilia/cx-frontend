@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { provideIcons } from '@ng-icons/core';
 import { lucideArrowLeft, lucideMap, lucideUser } from '@ng-icons/lucide';
 

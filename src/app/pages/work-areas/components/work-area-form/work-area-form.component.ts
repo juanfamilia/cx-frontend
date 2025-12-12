@@ -14,13 +14,13 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { InputMultiSelectComponent } from '@components/inputs/input-zone/input-multi-select.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { InputMultiSelectComponent } from '@shared/components/inputs/input-zone/input-multi-select.component';
 import { UserClass } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
 import { lucideMap } from '@ng-icons/lucide';
-import { UsersService } from '@services/users.service';
-import { ZoneService } from '@services/zone.service';
+import { UsersService } from '@pages/users/users.service';
+import { ZoneService } from '@pages/work-areas/zone.service';
 import { LazyLoadEvent } from 'primeng/api';
 import { SelectFilterEvent, SelectModule } from 'primeng/select';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';

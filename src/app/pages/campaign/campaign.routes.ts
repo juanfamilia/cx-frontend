@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '../../guards/auth.guard';
+import { authGuard } from '@core/guards/auth.guard';
 import { CampaignAssignmentsMenuComponent } from './campaign-assignments/campaign-assignments-menu/campaign-assignments-menu.component';
 import { CampaignAssignmentsCreateUserComponent } from './campaign-assignments/users/campaign-assignments-create-user/campaign-assignments-create-user.component';
 import { CampaignAssignmentsDashboardUserComponent } from './campaign-assignments/users/campaign-assignments-dashboard-user/campaign-assignments-dashboard-user.component';

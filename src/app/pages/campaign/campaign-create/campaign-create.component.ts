@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { CampaignCreate } from '@interfaces/campaign';
-import { CampaignService } from '@services/campaign.service';
-import { ShareToasterService } from '@services/toast.service';
+import { CampaignService } from '@pages/campaign/campaign.service';
+import { ShareToasterService } from '@core/services/toast.service';
 import { CampaignFormComponent } from '../components/campaign-form/campaign-form.component';
 
 @Component({

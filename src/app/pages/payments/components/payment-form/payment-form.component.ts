@@ -14,11 +14,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { InputDateComponent } from '@components/inputs/input-date/input-date.component';
-import { InputNumberComponent } from '@components/inputs/input-number/input-number.component';
-import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { InputDateComponent } from '@shared/components/inputs/input-date/input-date.component';
+import { InputNumberComponent } from '@shared/components/inputs/input-number/input-number.component';
+import { InputTextComponent } from '@shared/components/inputs/input-text/input-text.component';
 import { Company } from '@interfaces/company';
 import { Payment, PaymentCreate } from '@interfaces/payments';
 import { provideIcons } from '@ng-icons/core';
@@ -30,7 +30,7 @@ import {
   lucideReceipt,
   lucideStickyNote,
 } from '@ng-icons/lucide';
-import { CompaniesService } from '@services/companies.service';
+import { CompaniesService } from '@pages/companies/companies.service';
 import { LazyLoadEvent } from 'primeng/api';
 import { SelectFilterEvent, SelectModule } from 'primeng/select';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';

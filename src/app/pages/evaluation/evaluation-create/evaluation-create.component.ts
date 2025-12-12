@@ -7,11 +7,11 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { PageHeaderComponent } from '@components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { Campaign } from '@interfaces/campaign';
-import { CampaignService } from '@services/campaign.service';
-import { EvaluationService } from '@services/evaluation.service';
-import { ShareToasterService } from '@services/toast.service';
+import { CampaignService } from '@pages/campaign/campaign.service';
+import { EvaluationService } from '@pages/evaluation/evaluation.service';
+import { ShareToasterService } from '@core/services/toast.service';
 import { SelectModule } from 'primeng/select';
 import { EvaluationFormComponent } from '../components/evaluation-form/evaluation-form.component';
 

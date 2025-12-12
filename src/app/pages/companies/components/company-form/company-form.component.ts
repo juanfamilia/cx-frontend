@@ -8,11 +8,11 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@components/buttons/button-secondary/button-secondary.component';
-import { InputLocationComponent } from '@components/inputs/input-location/input-location.component';
-import { InputTextComponent } from '@components/inputs/input-text/input-text.component';
-import { InputTextareaComponent } from '@components/inputs/input-textarea/input-textarea.component';
+import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { InputLocationComponent } from '@shared/components/inputs/input-location/input-location.component';
+import { InputTextComponent } from '@shared/components/inputs/input-text/input-text.component';
+import { InputTextareaComponent } from '@shared/components/inputs/input-textarea/input-textarea.component';
 import { Company, CompanyCreate } from '@interfaces/company';
 import { provideIcons } from '@ng-icons/core';
 import {

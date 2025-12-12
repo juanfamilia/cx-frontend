@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '../../guards/auth.guard';
+import { authGuard } from '@core/guards/auth.guard';
 import { UserCreateComponent } from './user-create/user-create.component';
 import { UserDashboardComponent } from './user-dashboard/user-dashboard.component';
 import { UserUpdateComponent } from './user-update/user-update.component';
