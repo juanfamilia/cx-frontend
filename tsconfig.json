@@ -29,27 +29,24 @@
 
       /* SHARED */
       "@shared/*": ["app/shared/*"],
-      "@shared/components/*": ["app/shared/components/*"],
+      "@shared/ui/*": ["app/shared/ui/*"],
       "@shared/services/*": ["app/shared/services/*"],
       "@shared/pipes/*": ["app/shared/pipes/*"],
+      "@shared/directives/*": ["app/shared/directives/*"],
       "@shared/constants/*": ["app/shared/constants/*"],
 
-      /* COMPONENTS (ALIAS COMPLETO Y FUNCIONAL) */
-      "@components/*": ["app/shared/components/*"],
+      /* FEATURES */
+      "@features/*": ["app/features/*"],
 
-      /* SERVICES */
-      "@services/*": ["app/shared/services/*"],
+      /* TYPES */
+      "@types/*": ["app/types/*"],
+      "@interfaces/*": ["app/types/interfaces/*"],
 
-      /* INTERFACES */
-      "@interfaces/*": ["app/data/interfaces/*"],
+      /* CONFIG */
+      "@config/*": ["app/config/*"],
 
-      /* PAGES */
-      "@pages/*": ["app/pages/*"],
-
-      /* DATA */
-      "@data/*": ["app/data/*"],
-      "@data/interfaces/*": ["app/data/interfaces/*"],
-      "@data/types/*": ["app/data/types/*"],
+      /* HELPERS */
+      "@helpers/*": ["app/helpers/*"],
 
       /* ENV */
       "@env/*": ["environments/*"],
@@ -57,11 +54,17 @@
       /* ASSETS */
       "@assets/*": ["public/*"],
 
-      /* LEGACY (evita romper imports antiguos) */
-      "src/app/types/*": ["app/data/types/*"],
+      /* LEGACY (backward compatibility) */
+      "@components/*": ["app/shared/ui/*"],
+      "@services/*": ["app/shared/services/*"],
+      "@pages/*": ["app/features/*"],
+      "@data/*": ["app/types/*"],
+      "@data/interfaces/*": ["app/types/interfaces/*"],
+      "@data/types/*": ["app/types/*"],
+      "src/app/types/*": ["app/types/*"],
       "src/app/pipes/*": ["app/shared/pipes/*"],
       "src/app/constants/*": ["app/shared/constants/*"],
-      "../types/*": ["app/data/types/*"]
+      "../types/*": ["app/types/*"]
     }
   },
 
