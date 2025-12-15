@@ -6,7 +6,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { ButtonSecondaryComponent } from '@shared/ui/buttons/button-secondary/button-secondary.component';
 import { Notification } from '@interfaces/notification';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {

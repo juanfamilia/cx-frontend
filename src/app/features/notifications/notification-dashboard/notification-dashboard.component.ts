@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
+import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideBell, lucideCheckCheck, lucideFilter } from '@ng-icons/lucide';
 import { NotificationService } from '@pages/notifications/notification.service';

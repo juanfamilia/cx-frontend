@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { PaymentCreate } from '@interfaces/payments';
 import { PaymentsService } from '@pages/payments/payments.service';
 import { ShareToasterService } from '@core/services/toast.service';

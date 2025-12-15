@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
+import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 import { Evaluation } from '@interfaces/evaluation';
 import { EvaluationService } from '@pages/evaluation/evaluation.service';
 import { ShareToasterService } from '@core/services/toast.service';

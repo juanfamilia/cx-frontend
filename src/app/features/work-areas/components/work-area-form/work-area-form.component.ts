@@ -14,8 +14,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
-import { InputMultiSelectComponent } from '@shared/components/inputs/input-zone/input-multi-select.component';
+import { ButtonPrimaryComponent } from '@shared/ui/buttons/button-primary/button-primary.component';
+import { InputMultiSelectComponent } from '@shared/ui/inputs/input-zone/input-multi-select.component';
 import { UserClass } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
 import { lucideMap } from '@ng-icons/lucide';

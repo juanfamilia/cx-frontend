@@ -6,8 +6,8 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
-import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
+import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
+import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 import { Campaign, CampaignCreate } from '@interfaces/campaign';
 import { CampaignService } from '@pages/campaign/campaign.service';
 import { ShareToasterService } from '@core/services/toast.service';

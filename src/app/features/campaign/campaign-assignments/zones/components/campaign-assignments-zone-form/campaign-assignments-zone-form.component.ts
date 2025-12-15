@@ -15,9 +15,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
-import { InputMultiSelectComponent } from '@shared/components/inputs/input-zone/input-multi-select.component';
+import { ButtonPrimaryComponent } from '@shared/ui/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/ui/buttons/button-secondary/button-secondary.component';
+import { InputMultiSelectComponent } from '@shared/ui/inputs/input-zone/input-multi-select.component';
 import { CampaignAssignmentZoneCreate } from '@interfaces/campaign-assignment-zone';
 import { provideIcons } from '@ng-icons/core';
 import { lucideArrowLeft, lucideSettings2 } from '@ng-icons/lucide';

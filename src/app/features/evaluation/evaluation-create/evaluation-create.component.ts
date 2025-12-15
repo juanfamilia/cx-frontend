@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { Campaign } from '@interfaces/campaign';
 import { CampaignService } from '@pages/campaign/campaign.service';
 import { EvaluationService } from '@pages/evaluation/evaluation.service';

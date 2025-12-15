@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
+import { ButtonPrimaryComponent } from '@shared/ui/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/ui/buttons/button-secondary/button-secondary.component';
 import { provideIcons } from '@ng-icons/core';
 import { heroHome, heroQuestionMarkCircle } from '@ng-icons/heroicons/outline';
 

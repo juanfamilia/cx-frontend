@@ -1,4 +1,4 @@
-import { Pagination } from '../types/pagination';
+import { Pagination } from '../pagination';
 import { Company } from './company';
 
 export interface User {

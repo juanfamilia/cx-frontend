@@ -1,4 +1,4 @@
-import { Pagination } from '../types/pagination';
+import { Pagination } from '../pagination';
 import { Campaign } from './campaign';
 import { SurveyFormAspect } from './survey-form';
 import { UserClass } from './user';

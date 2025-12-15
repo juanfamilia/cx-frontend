@@ -14,12 +14,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
-import { InputDateComponent } from '@shared/components/inputs/input-date/input-date.component';
-import { InputPasswordComponent } from '@shared/components/inputs/input-password/input-password.component';
-import { InputSelectComponent } from '@shared/components/inputs/input-select/input-select.component';
-import { InputTextComponent } from '@shared/components/inputs/input-text/input-text.component';
+import { ButtonPrimaryComponent } from '@shared/ui/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/ui/buttons/button-secondary/button-secondary.component';
+import { InputDateComponent } from '@shared/ui/inputs/input-date/input-date.component';
+import { InputPasswordComponent } from '@shared/ui/inputs/input-password/input-password.component';
+import { InputSelectComponent } from '@shared/ui/inputs/input-select/input-select.component';
+import { InputTextComponent } from '@shared/ui/inputs/input-text/input-text.component';
 import { Company } from '@interfaces/company';
 import { User, UserCreate } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';

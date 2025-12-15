@@ -1,4 +1,4 @@
-import { Pagination } from '../types/pagination';
+import { Pagination } from '../pagination';
 
 export interface SurveyForm {
   id: number;

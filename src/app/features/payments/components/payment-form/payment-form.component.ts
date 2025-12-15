@@ -14,11 +14,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
-import { InputDateComponent } from '@shared/components/inputs/input-date/input-date.component';
-import { InputNumberComponent } from '@shared/components/inputs/input-number/input-number.component';
-import { InputTextComponent } from '@shared/components/inputs/input-text/input-text.component';
+import { ButtonPrimaryComponent } from '@shared/ui/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/ui/buttons/button-secondary/button-secondary.component';
+import { InputDateComponent } from '@shared/ui/inputs/input-date/input-date.component';
+import { InputNumberComponent } from '@shared/ui/inputs/input-number/input-number.component';
+import { InputTextComponent } from '@shared/ui/inputs/input-text/input-text.component';
 import { Company } from '@interfaces/company';
 import { Payment, PaymentCreate } from '@interfaces/payments';
 import { provideIcons } from '@ng-icons/core';

@@ -3,7 +3,7 @@ import {
   Component,
   inject,
 } from '@angular/core';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { Router } from '@angular/router';
 import {
   CampaignGoalsEvaluatorCreate,

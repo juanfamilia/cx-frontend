@@ -14,9 +14,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
-import { InputTextComponent } from '@shared/components/inputs/input-text/input-text.component';
+import { ButtonPrimaryComponent } from '@shared/ui/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/ui/buttons/button-secondary/button-secondary.component';
+import { InputTextComponent } from '@shared/ui/inputs/input-text/input-text.component';
 import { SurveyFormCreate, SurveyFormDetail } from '@interfaces/survey-form';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {

@@ -4,8 +4,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { ButtonNotificationComponent } from '@shared/components/buttons/button-notification/button-notification.component';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { ButtonNotificationComponent } from '@shared/ui/buttons/button-notification/button-notification.component';
+import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { UserClass } from '@interfaces/user';
 import { provideIcons } from '@ng-icons/core';
 import {

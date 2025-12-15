@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { SurveyFormCreate } from '@interfaces/survey-form';
 import { SurveyFormService } from '@pages/survey-forms/survey-form.service';
 import { ShareToasterService } from '@core/services/toast.service';

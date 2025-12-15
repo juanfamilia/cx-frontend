@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { SpinnerComponent } from '@shared/components/spinner/spinner.component';
+import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 import { provideIcons } from '@ng-icons/core';
 import {
   lucideBanknote,

@@ -15,9 +15,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
-import { InputNumberComponent } from '@shared/components/inputs/input-number/input-number.component';
+import { ButtonPrimaryComponent } from '@shared/ui/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/ui/buttons/button-secondary/button-secondary.component';
+import { InputNumberComponent } from '@shared/ui/inputs/input-number/input-number.component';
 import { Campaign } from '@interfaces/campaign';
 import {
   CampaignGoalsEvaluator,

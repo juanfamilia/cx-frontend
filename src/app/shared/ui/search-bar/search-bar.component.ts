@@ -7,8 +7,8 @@ import {
   output,
 } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
-import { InputTextComponent } from '@shared/components/inputs/input-text/input-text.component';
+import { ButtonSecondaryComponent } from '@shared/ui/buttons/button-secondary/button-secondary.component';
+import { InputTextComponent } from '@shared/ui/inputs/input-text/input-text.component';
 import { provideIcons } from '@ng-icons/core';
 import {
   heroDocumentArrowUp,

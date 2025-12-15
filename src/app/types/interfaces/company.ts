@@ -1,4 +1,4 @@
-import { Pagination } from '../types/pagination';
+import { Pagination } from '../pagination';
 
 export interface Company {
   id: number;

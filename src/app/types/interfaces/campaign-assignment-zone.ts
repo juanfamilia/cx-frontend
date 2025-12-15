@@ -1,4 +1,4 @@
-import { Pagination } from '../types/pagination';
+import { Pagination } from '../pagination';
 import { Campaign } from './campaign';
 import { Zone } from './zone';
 

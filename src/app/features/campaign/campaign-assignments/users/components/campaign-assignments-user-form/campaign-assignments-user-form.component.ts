@@ -14,9 +14,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonPrimaryComponent } from '@shared/components/buttons/button-primary/button-primary.component';
-import { ButtonSecondaryComponent } from '@shared/components/buttons/button-secondary/button-secondary.component';
-import { InputMultiSelectComponent } from '@shared/components/inputs/input-zone/input-multi-select.component';
+import { ButtonPrimaryComponent } from '@shared/ui/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/ui/buttons/button-secondary/button-secondary.component';
+import { InputMultiSelectComponent } from '@shared/ui/inputs/input-zone/input-multi-select.component';
 import { CampaignAssignmentUserCreate } from '@interfaces/campaign-assigment-user';
 import { Campaign } from '@interfaces/campaign';
 import { provideIcons } from '@ng-icons/core';
@@ -28,7 +28,7 @@ import { PaginatedResponse } from '@data/types/pagination';
 import { LazyLoadEvent } from 'primeng/api';
 import { SelectFilterEvent, SelectModule } from 'primeng/select';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-campaign-assignments-user-form',

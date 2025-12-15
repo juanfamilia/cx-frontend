@@ -4,7 +4,7 @@ import { CampaignAssignmentsUserService } from '@pages/campaign/campaign-assignm
 import { ShareToasterService } from '@core/services/toast.service';
 import { CampaignAssignmentUserCreate } from '@interfaces/campaign-assigment-user';
 import { CampaignAssignmentsUserFormComponent } from '../components/campaign-assignments-user-form/campaign-assignments-user-form.component';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-campaign-assignments-create-user',

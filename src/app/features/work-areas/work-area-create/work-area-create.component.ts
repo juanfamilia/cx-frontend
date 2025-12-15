@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { ShareToasterService } from '@core/services/toast.service';
 import { UserZoneService } from '@pages/work-areas/user-zone.service';
 import { WorkAreaFormComponent } from '../components/work-area-form/work-area-form.component';

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { UserCreate } from '@interfaces/user';
 import { ShareToasterService } from '@core/services/toast.service';
 import { UsersService } from '@pages/users/users.service';

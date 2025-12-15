@@ -19,25 +19,25 @@ export const routes: Routes = [
   {
     path: 'users',
     loadChildren: () =>
-      import('./pages/users/users.routes').then(r => r.userRoutes),
+      import('./features/users/users.routes').then(r => r.userRoutes),
     data: { title: 'Usuarios' },
   },
   {
     path: 'companies',
     loadChildren: () =>
-      import('./pages/companies/companies.routes').then(r => r.companiesRoutes),
+      import('./features/companies/companies.routes').then(r => r.companiesRoutes),
     data: { title: 'Empresas' },
   },
   {
     path: 'payments',
     loadChildren: () =>
-      import('./pages/payments/payments.routes').then(r => r.paymentsRoutes),
+      import('./features/payments/payments.routes').then(r => r.paymentsRoutes),
     data: { title: 'Pagos' },
   },
   {
     path: 'work-areas',
     loadChildren: () =>
-      import('./pages/work-areas/work-areas.routes').then(
+      import('./features/work-areas/work-areas.routes').then(
         r => r.workAreasRoutes
       ),
     data: { title: 'Areas de Trabajo' },
@@ -45,7 +45,7 @@ export const routes: Routes = [
   {
     path: 'survey-forms',
     loadChildren: () =>
-      import('./pages/survey-forms/survey-forms.routes').then(
+      import('./features/survey-forms/survey-forms.routes').then(
         r => r.surveyFormsRoutes
       ),
     data: { title: 'Formularios de Encuestas' },
@@ -53,13 +53,13 @@ export const routes: Routes = [
   {
     path: 'campaigns',
     loadChildren: () =>
-      import('./pages/campaign/campaign.routes').then(r => r.campaignRoutes),
+      import('./features/campaign/campaign.routes').then(r => r.campaignRoutes),
     data: { title: 'Campañas' },
   },
   {
     path: 'evaluations',
     loadChildren: () =>
-      import('./pages/evaluation/evaluation.routes').then(
+      import('./features/evaluation/evaluation.routes').then(
         r => r.evaluationRoutes
       ),
     data: { title: 'Evaluaciones' },
@@ -67,7 +67,7 @@ export const routes: Routes = [
   {
     path: 'notifications',
     loadChildren: () =>
-      import('./pages/notifications/notification.routes').then(
+      import('./features/notifications/notification.routes').then(
         r => r.notificationRoutes
       ),
     data: { title: 'Notificaciones' },
@@ -75,7 +75,7 @@ export const routes: Routes = [
   {
     path: 'configuration',
     loadChildren: () =>
-      import('./pages/configuration/configuration.routes').then(
+      import('./features/configuration/configuration.routes').then(
         r => r.configurationRoutes
       ),
     data: { title: 'Configuración' },

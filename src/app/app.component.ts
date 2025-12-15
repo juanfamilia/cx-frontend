@@ -9,9 +9,9 @@ import {
   signal,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavMobileComponent } from '@shared/components/navigation/nav-mobile/nav-mobile.component';
-import { SidebarComponent } from '@shared/components/navigation/sidebar/sidebar.component';
-import { ToggleSidebarComponent } from '@shared/components/navigation/toggle-sidebar/toggle-sidebar.component';
+import { NavMobileComponent } from '@shared/ui/navigation/nav-mobile/nav-mobile.component';
+import { SidebarComponent } from '@shared/ui/navigation/sidebar/sidebar.component';
+import { ToggleSidebarComponent } from '@shared/ui/navigation/toggle-sidebar/toggle-sidebar.component';
 import { provideIcons } from '@ng-icons/core';
 import { heroHome } from '@ng-icons/heroicons/outline';
 import { AuthService } from '@core/services/auth.service';

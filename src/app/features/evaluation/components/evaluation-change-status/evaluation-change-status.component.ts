@@ -15,8 +15,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { InputSelectComponent } from '@shared/components/inputs/input-select/input-select.component';
-import { InputTextareaComponent } from '@shared/components/inputs/input-textarea/input-textarea.component';
+import { InputSelectComponent } from '@shared/ui/inputs/input-select/input-select.component';
+import { InputTextareaComponent } from '@shared/ui/inputs/input-textarea/input-textarea.component';
 import { provideIcons } from '@ng-icons/core';
 import { lucideClipboardCheck } from '@ng-icons/lucide';
 import { EvaluationService } from '@pages/evaluation/evaluation.service';

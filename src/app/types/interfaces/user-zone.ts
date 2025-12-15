@@ -1,4 +1,4 @@
-import { Pagination } from '../types/pagination';
+import { Pagination } from '../pagination';
 import { User } from './user';
 import { Zone } from './zone';
 

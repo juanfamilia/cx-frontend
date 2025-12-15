@@ -1,4 +1,4 @@
-import { Pagination } from '../types/pagination';
+import { Pagination } from '../pagination';
 import { CampaignAssignmentUser } from './campaign-assigment-user';
 import { CampaignAssignmentZone } from './campaign-assignment-zone';
 import { SurveyFormDetail } from './survey-form';
