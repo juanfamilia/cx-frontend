@@ -1,3 +1,69 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  OnInit,
+  output,
+} from '@angular/core';
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { Router } from '@angular/router';
+import { ButtonPrimaryComponent } from '@shared/ui/buttons/button-primary/button-primary.component';
+import { ButtonSecondaryComponent } from '@shared/ui/buttons/button-secondary/button-secondary.component';
+import { InputTextComponent } from '@shared/ui/inputs/input-text/input-text.component';
+import { SurveyFormCreate, SurveyFormDetail } from '@interfaces/survey-form';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideArrowLeft,
+  lucideLayoutTemplate,
+  lucideMinus,
+  lucidePlus,
+  lucideProportions,
+  lucideSave,
+  lucideText,
+  lucideTrash,
+  lucideType,
+} from '@ng-icons/lucide';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+
+@Component({
+  selector: 'app-survey-forms-form',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    InputTextComponent,
+    ButtonPrimaryComponent,
+    NgIcon,
+    InputNumberModule,
+    FloatLabelModule,
+    ButtonSecondaryComponent,
+    SelectModule,
+  ],
+  templateUrl: './survey-forms-form.component.html',
+  styleUrl: './survey-forms-form.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  viewProviders: [
+    provideIcons({
+      lucideType,
+      lucideLayoutTemplate,
+      lucideProportions,
+      lucideText,
+      lucideTrash,
+      lucidePlus,
+      lucideMinus,
+      lucideArrowLeft,
+      lucideSave,
+    }),
+  ],
+})
 export class SurveyFormsFormComponent implements OnInit {
   isEdit = input<boolean>(false);
   surveyForm = input<SurveyFormDetail | null>(null);
@@ -15,7 +81,7 @@ export class SurveyFormsFormComponent implements OnInit {
       sections: this.fb.array([]),
     });
 
-    const formData = this.surveyForm(); // puede ser null
+    const formData = this.surveyForm();
 
     if (this.isEdit() && formData) {
       this.pathFormData(formData);
@@ -38,7 +104,7 @@ export class SurveyFormsFormComponent implements OnInit {
         maximum_score: [0, [Validators.required]],
         order: [index, [Validators.required]],
         aspects: this.fb.array([]),
-      })
+      }),
     );
   }
 
@@ -62,7 +128,7 @@ export class SurveyFormsFormComponent implements OnInit {
         type: ['', [Validators.required]],
         maximum_score: [0],
         order: [order, [Validators.required]],
-      })
+      }),
     );
   }
 
@@ -94,9 +160,28 @@ export class SurveyFormsFormComponent implements OnInit {
       title: formData.title,
     });
 
-    formData.sections.forEach(section => {
+    formData.sections.forEach((section) => {
       const sectionGroup = this.fb.group({
         name: [section.name, [Validators.required]],
         maximum_score: [section.maximum_score, [Validators.required]],
         order: [section.order, [Validators.required]],
-        aspects
+        aspects: this.fb.array([]),
+      });
+
+      const aspectsArray = sectionGroup.get('aspects') as FormArray;
+
+      section.aspects.forEach((aspect) => {
+        aspectsArray.push(
+          this.fb.group({
+            description: [aspect.description, [Validators.required]],
+            type: [aspect.type, Validators.required],
+            maximum_score: [aspect.maximum_score, [Validators.required]],
+            order: [aspect.order, [Validators.required]],
+          }),
+        );
+      });
+
+      this.sections.push(sectionGroup);
+    });
+  }
+}
