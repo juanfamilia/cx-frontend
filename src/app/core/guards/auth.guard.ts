@@ -6,35 +6,36 @@ import {
   UrlTree,
 } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
+import { map, Observable } from 'rxjs';
 
-export const authGuard: CanActivateFn = (route, state): boolean | UrlTree => {
-  const authService = inject(AuthService) as AuthService;
+export const authGuard: CanActivateFn = (route, state): Observable<boolean | UrlTree> => {
+  const authService = inject(AuthService);
   const router = inject(Router);
 
   const allowedRoles = route.data['role'] as number[] | undefined;
 
-  const isLoggedIn = authService.loggedIn();
-  let userRole: number | undefined = undefined;
+  return authService.isAuth().pipe(
+    map((isLoggedIn) => {
+      if (!isLoggedIn) {
+        return router.createUrlTree(['/login'], {
+          queryParams: { returnUrl: state.url },
+        });
+      }
 
-  if (isLoggedIn) {
-    try {
-      const user = authService.getCurrentUser();
-      // ajusta si tu interfaz User usa otra propiedad
-      userRole = (user as any).role as number | undefined;
-    } catch {
-      // si falla currentUser, se trata como no logueado
-    }
-  }
+      let userRole: number | undefined = undefined;
+      try {
+        const user = authService.getCurrentUser();
+        userRole = (user as any).role as number | undefined;
+      } catch {
+        // si falla currentUser, se trata como no logueado
+        return router.createUrlTree(['/login']);
+      }
 
-  if (!isLoggedIn) {
-    return router.createUrlTree(['/login'], {
-      queryParams: { returnUrl: state.url },
-    });
-  }
+      if (allowedRoles && userRole != null && !allowedRoles.includes(userRole)) {
+        return router.createUrlTree(['/']);
+      }
 
-  if (allowedRoles && userRole != null && !allowedRoles.includes(userRole)) {
-    return router.createUrlTree(['/']);
-  }
-
-  return true;
+      return true;
+    })
+  );
 };

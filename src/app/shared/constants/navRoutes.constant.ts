@@ -50,6 +50,12 @@ export const NAVROUTES: RouteData[] = [
     roles: [1, 2, 3],
   },
   {
+    title: 'Prompts',
+    route: '/prompts',
+    icon: 'lucideSparkles',
+    roles: [0, 1],
+  },
+  {
     title: 'Configuración',
     route: '/configuration',
     icon: 'heroCog6Tooth',

@@ -20,6 +20,7 @@ import {
   lucideHouse,
   lucideMapPinned,
   lucideMegaphone,
+  lucideSparkles,
   lucideTextCursorInput,
 } from '@ng-icons/lucide';
 import { AuthService } from '@core/services/auth.service';
@@ -46,6 +47,7 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       lucideTextCursorInput,
       lucideMegaphone,
       lucideFileText,
+      lucideSparkles,
     }),
   ],
 })

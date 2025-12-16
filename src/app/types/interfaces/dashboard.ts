@@ -11,14 +11,12 @@ export interface DashboardSuperAdmin {
 }
 
 export interface DashboardAdmin {
-  summary: {
-    company_id: number;
-    evaluaciones_aprobadas: number;
-    evaluaciones_rechazadas: number;
-    evaluadores: number;
-    gerentes: number;
-  },
-  analysis: EvaluationAnalysisDashboard[];
+  company_id: number;
+  evaluaciones_aprobadas: number;
+  evaluaciones_rechazadas: number;
+  evaluadores: number;
+  gerentes: number;
+  analysis?: EvaluationAnalysisDashboard[];
 }
 
 export interface DashboardManager {

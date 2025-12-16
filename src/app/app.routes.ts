@@ -81,6 +81,14 @@ export const routes: Routes = [
     data: { title: 'Configuración' },
   },
   {
+    path: 'prompts',
+    loadChildren: () =>
+      import('./features/prompt-manager/prompt-manager.routes').then(
+        r => r.promptManagerRoutes
+      ),
+    data: { title: 'Gestor de Prompts' },
+  },
+  {
     path: '**',
     component: NotFoundComponent,
   },

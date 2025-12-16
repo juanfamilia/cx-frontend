@@ -1,4 +1,11 @@
 <section>
+  <!-- Onboarding Tour -->
+  <app-onboarding-tour
+    [steps]="onboardingSteps()"
+    [isVisible]="showOnboarding()"
+    (complete)="onOnboardingComplete()"
+    (skip)="onOnboardingSkip()" />
+
   <!-- Header -->
   <div class="flex items-center justify-between">
     <app-page-header
