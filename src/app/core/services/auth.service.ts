@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import { CookieService } from 'ngx-cookie-service';
 import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
-import { Router } from '@angular/router';
 import { environment } from '@env/environment';
 import { Login, LoginResponse } from '@interfaces/login';
 import { User } from '@interfaces/user';
@@ -30,6 +31,12 @@ export class AuthService {
       {
         withCredentials: true,
       }
+    ).pipe(
+      tap((res) => {
+        // adapta los nombres a tu LoginResponse real
+        this.setCredentials(res.access_token, res.user);
+        this.loggedIn.set(true);
+      }),
     );
   }
 
