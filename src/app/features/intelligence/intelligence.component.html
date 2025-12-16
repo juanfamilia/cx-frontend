@@ -1,0 +1,156 @@
+<app-page-header title="Intelligence Dashboard" subtitle="Insights automáticos generados por IA para mejorar la experiencia del cliente" />
+
+<div class="p-6">
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  } @else {
+    <!-- Summary Cards -->
+    @if (summary()) {
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div class="text-sm text-gray-600 dark:text-gray-400">Sin Leer</div>
+          <div class="text-2xl font-bold text-blue-600">{{ summary()!.total_unread }}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div class="text-sm text-gray-600 dark:text-gray-400">Críticos</div>
+          <div class="text-2xl font-bold text-red-600">{{ summary()!.critical }}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div class="text-sm text-gray-600 dark:text-gray-400">Alta Prioridad</div>
+          <div class="text-2xl font-bold text-orange-600">{{ summary()!.high }}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div class="text-sm text-gray-600 dark:text-gray-400">Media</div>
+          <div class="text-2xl font-bold text-yellow-600">{{ summary()!.medium }}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div class="text-sm text-gray-600 dark:text-gray-400">Baja</div>
+          <div class="text-2xl font-bold text-blue-500">{{ summary()!.low }}</div>
+        </div>
+      </div>
+    }
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
+      <div class="flex flex-wrap gap-4 items-center">
+        <div>
+          <label class="text-sm text-gray-600 dark:text-gray-400 mb-1 block">Severidad</label>
+          <select [ngModel]="selectedSeverity()" (ngModelChange)="filterBySeverity($event)"
+                  class="border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-3 py-2">
+            <option value="">Todas</option>
+            <option value="critical">Crítica</option>
+            <option value="high">Alta</option>
+            <option value="medium">Media</option>
+            <option value="low">Baja</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="unreadOnly" [checked]="unreadOnly()" (change)="toggleUnreadOnly()" class="h-4 w-4">
+          <label for="unreadOnly" class="text-sm text-gray-600 dark:text-gray-400">Solo no leídos</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Insights List (2/3) -->
+      <div class="lg:col-span-2">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+          <div class="p-4 border-b dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Insights Recientes</h2>
+          </div>
+          <div class="p-4 max-h-[600px] overflow-y-auto">
+            @if (filteredInsights().length === 0) {
+              <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                No hay insights disponibles
+              </div>
+            }
+            @for (insight of filteredInsights(); track insight.id) {
+              <div class="border-b dark:border-gray-700 last:border-b-0 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-2xl">{{ getTypeIcon(insight.insight_type) }}</span>
+                      <span [class]="getSeverityClass(insight.severity)" class="text-xs px-2 py-1 rounded-full font-semibold">
+                        {{ insight.severity.toUpperCase() }}
+                      </span>
+                      @if (!insight.is_read) {
+                        <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">NUEVO</span>
+                      }
+                    </div>
+                    <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1">{{ insight.title }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ insight.description }}</p>
+                    @if (insight.suggested_actions?.length) {
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        <strong>Acciones:</strong> {{ insight.suggested_actions.join(', ') }}
+                      </div>
+                    }
+                    <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      <span>Confianza: {{ (insight.confidence_score * 100).toFixed(0) }}%</span>
+                      <span>{{ insight.created_at | date:'short' }}</span>
+                    </div>
+                  </div>
+                  @if (!insight.is_read) {
+                    <button (click)="markAsRead(insight)" class="ml-4 text-blue-600 hover:text-blue-800 text-sm whitespace-nowrap">
+                      Marcar leído
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar (1/3) -->
+      <div class="space-y-6">
+        <!-- Top Actions -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+          <div class="p-4 border-b dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Acciones Recomendadas</h2>
+          </div>
+          <div class="p-4">
+            @if (topActions().length === 0) {
+              <div class="text-center text-gray-500 dark:text-gray-400 py-4">No hay acciones disponibles</div>
+            }
+            @for (action of topActions(); track action.action; let i = $index) {
+              <div class="mb-3 pb-3 border-b dark:border-gray-700 last:border-b-0">
+                <div class="flex items-start gap-2">
+                  <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                    {{ i + 1 }}
+                  </span>
+                  <div class="flex-1">
+                    <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ action.action }}</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">Frecuencia: {{ action.frequency }}</div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Trends Info -->
+        @if (trends()?.datasets?.length) {
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="p-4 border-b dark:border-gray-700">
+              <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Tendencias (Últimos 30 días)</h2>
+            </div>
+            <div class="p-4">
+              @for (dataset of trends()!.datasets; track dataset.label) {
+                <div class="mb-3 pb-3 border-b dark:border-gray-700 last:border-b-0">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ dataset.label }}</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ sumData(dataset.data) }} total</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

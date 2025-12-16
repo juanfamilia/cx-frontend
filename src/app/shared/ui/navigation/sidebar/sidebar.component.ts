@@ -15,6 +15,7 @@ import {
 } from '@ng-icons/heroicons/outline';
 import {
   lucideBanknote,
+  lucideBrain,
   lucideBriefcaseBusiness,
   lucideFileText,
   lucideHouse,
@@ -48,6 +49,7 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       lucideMegaphone,
       lucideFileText,
       lucideSparkles,
+      lucideBrain,
     }),
   ],
 })

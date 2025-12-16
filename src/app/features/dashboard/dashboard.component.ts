@@ -60,19 +60,20 @@ export class DashboardComponent implements OnInit {
   onboardingSteps = signal<OnboardingStep[]>([]);
 
   ngOnInit(): void {
-    if (!this.onboardingService.hasCompletedOnboarding()) {
+    const userId = this.currentUser().id;
+    if (!this.onboardingService.hasCompletedOnboarding(userId)) {
       this.onboardingSteps.set(this.onboardingService.getStepsForRole(this.currentUser().role));
       this.showOnboarding.set(true);
     }
   }
 
   onOnboardingComplete(): void {
-    this.onboardingService.markAsCompleted();
+    this.onboardingService.markAsCompleted(this.currentUser().id);
     this.showOnboarding.set(false);
   }
 
   onOnboardingSkip(): void {
-    this.onboardingService.markAsCompleted();
+    this.onboardingService.markAsCompleted(this.currentUser().id);
     this.showOnboarding.set(false);
   }
 

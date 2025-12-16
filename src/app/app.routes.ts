@@ -89,6 +89,14 @@ export const routes: Routes = [
     data: { title: 'Gestor de Prompts' },
   },
   {
+    path: 'intelligence',
+    loadChildren: () =>
+      import('./features/intelligence/intelligence.routes').then(
+        r => r.intelligenceRoutes
+      ),
+    data: { title: 'Intelligence Dashboard' },
+  },
+  {
     path: '**',
     component: NotFoundComponent,
   },
