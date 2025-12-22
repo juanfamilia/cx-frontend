@@ -17,4 +17,7 @@ export class ZoneService {
   getOne(id: number): Observable<Zone> {
     return this.http.get<Zone>(environment.apiUrl + 'zone/' + id);
   }
+  create(zone: Pick<Zone, 'name' | 'value' | 'country'>): Observable<Zone> {
+    return this.http.post<Zone>(environment.apiUrl + 'zone/', zone);
+  }  
 }
