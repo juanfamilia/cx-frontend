@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { DashboardComponent } from '@pages/dashboard/dashboard.component';
+import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { LoginComponent } from '@pages/login/login.component';
 import { NotFoundComponent } from '@pages/not-found/not-found.component';
 import { authGuard } from './core/guards/auth.guard';
@@ -10,6 +10,16 @@ export const routes: Routes = [
     component: DashboardComponent,
     canActivate: [authGuard],
     data: { role: [0, 1, 2, 3] },
+  },
+  {
+    path: 'dashboard',
+    redirectTo: '',
+    pathMatch: 'full',
+  },
+  {
+    path: 'zones',
+    redirectTo: 'work-areas',
+    pathMatch: 'full',
   },
   {
     path: 'login',

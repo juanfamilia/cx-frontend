@@ -1,0 +1,5 @@
+yarn run v1.22.22
+$ ng serve
+ Port 3000 is already in use.
+Would you like to use a different port? (Y/n)[47Gerror Command failed with signal "SIGTERM".
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
