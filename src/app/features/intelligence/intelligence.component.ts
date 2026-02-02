@@ -10,11 +10,12 @@ import {
   InsightTrends,
   TopAction,
 } from './intelligence.service';
+import { ExecutiveEvidenceComponent } from '../clips/executive-evidence.component';
 
 @Component({
   selector: 'app-intelligence',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, PageHeaderComponent, ExecutiveEvidenceComponent],
   templateUrl: './intelligence.component.html',
 })
 export class IntelligenceComponent implements OnInit {
@@ -29,6 +30,10 @@ export class IntelligenceComponent implements OnInit {
   loading = signal(true);
   selectedSeverity = signal<string>('');
   unreadOnly = signal(false);
+  
+  // Evidence viewer
+  selectedEvaluationId = signal<number | null>(null);
+  showEvidencePanel = signal(false);
 
   // Computed values
   filteredInsights = computed(() => {
@@ -138,5 +143,20 @@ export class IntelligenceComponent implements OnInit {
 
   sumData(data: number[]): number {
     return data.reduce((acc, val) => acc + val, 0);
+  }
+
+  // Evidence methods
+  viewEvidence(insight: Insight): void {
+    if (insight.evaluation_id) {
+      this.selectedEvaluationId.set(insight.evaluation_id);
+      this.showEvidencePanel.set(true);
+    } else {
+      this.toastService.showToast('warning', 'Sin evidencia', 'Este insight no tiene evaluación asociada');
+    }
+  }
+
+  closeEvidencePanel(): void {
+    this.showEvidencePanel.set(false);
+    this.selectedEvaluationId.set(null);
   }
 }

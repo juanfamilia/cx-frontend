@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 export interface Insight {
   id: number;
   company_id: number;
+  evaluation_id?: number;  // Link to evaluation for evidence
   title: string;
   description: string;
   insight_type: string;

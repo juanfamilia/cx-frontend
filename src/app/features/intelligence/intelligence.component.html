@@ -93,11 +93,24 @@
                       <span>{{ insight.created_at | date:'short' }}</span>
                     </div>
                   </div>
-                  @if (!insight.is_read) {
-                    <button (click)="markAsRead(insight)" class="ml-4 text-blue-600 hover:text-blue-800 text-sm whitespace-nowrap">
-                      Marcar leído
-                    </button>
-                  }
+                  <div class="flex flex-col gap-2 ml-4">
+                    @if (insight.evaluation_id) {
+                      <button 
+                        (click)="viewEvidence(insight)" 
+                        class="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition whitespace-nowrap"
+                      >
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        Ver evidencia
+                      </button>
+                    }
+                    @if (!insight.is_read) {
+                      <button (click)="markAsRead(insight)" class="text-blue-600 hover:text-blue-800 text-sm whitespace-nowrap">
+                        Marcar leído
+                      </button>
+                    }
+                  </div>
                 </div>
               </div>
             }
@@ -154,3 +167,35 @@
     </div>
   }
 </div>
+
+<!-- Evidence Panel (Slide-over) -->
+@if (showEvidencePanel()) {
+  <div class="fixed inset-0 z-40 flex justify-end">
+    <!-- Backdrop -->
+    <div 
+      class="fixed inset-0 bg-black/50 transition-opacity"
+      (click)="closeEvidencePanel()"
+    ></div>
+    
+    <!-- Panel -->
+    <div class="relative w-full max-w-2xl bg-white dark:bg-gray-900 shadow-xl">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-4 border-b dark:border-gray-700">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white">Evidence Engine</h2>
+        <button 
+          (click)="closeEvidencePanel()"
+          class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition"
+        >
+          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Content -->
+      <div class="p-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+        <app-executive-evidence [evaluationId]="selectedEvaluationId()" />
+      </div>
+    </div>
+  </div>
+}
