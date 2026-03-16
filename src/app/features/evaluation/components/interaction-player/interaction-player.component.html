@@ -1,0 +1,90 @@
+<div class="interaction-player-container">
+  <!-- Video Section -->
+  <div class="video-section">
+    @if (videoUrl()) {
+      <video
+        #videoPlayer
+        class="video-player"
+        [src]="videoUrl()"
+        controls
+        (loadedmetadata)="onVideoLoadedMetadata($event)"
+        (timeupdate)="onVideoTimeUpdate($event)"
+        (play)="onVideoPlay()"
+        (pause)="onVideoPause()">
+        Tu navegador no soporta video HTML5.
+      </video>
+    } @else {
+      <div class="video-placeholder">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+        <p>Video no disponible</p>
+      </div>
+    }
+    
+    <!-- Video Controls Bar -->
+    <div class="video-info-bar">
+      <span class="current-time">{{ formatTime(currentTime()) }}</span>
+      <span class="duration">/ {{ formatTime(duration()) }}</span>
+      @if (isPlaying()) {
+        <span class="status playing">Reproduciendo</span>
+      }
+    </div>
+  </div>
+  
+  <!-- Transcript Section -->
+  <div class="transcript-section">
+    <div class="transcript-header">
+      <h3>Transcripción</h3>
+      <div class="transcript-controls">
+        <button 
+          class="auto-scroll-btn"
+          [class.active]="autoScroll()"
+          (click)="toggleAutoScroll()"
+          title="Auto-scroll">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+          Auto-scroll
+        </button>
+        <span class="segment-count">
+          {{ (transcriptResource.value() || []).length }} segmentos
+        </span>
+      </div>
+    </div>
+    
+    <div #transcriptContainer class="transcript-container">
+      @if (transcriptResource.isLoading()) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Cargando transcripción...</p>
+        </div>
+      } @else if ((transcriptResource.value() || []).length === 0) {
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p>No hay transcripción disponible</p>
+          <p class="hint">La transcripción se genera automáticamente al procesar el video</p>
+        </div>
+      } @else {
+        <div class="transcript-list">
+          @for (segment of segments(); track segment.id) {
+            <div 
+              class="transcript-segment"
+              [class.active]="segment.isActive"
+              [attr.data-segment-id]="segment.id"
+              (click)="seekTo(segment.start_time)"
+              role="button"
+              tabindex="0"
+              (keydown.enter)="seekTo(segment.start_time)"
+              (keydown.space)="seekTo(segment.start_time); $event.preventDefault()">
+              <span class="timestamp">{{ segment.formattedTime }}</span>
+              <span class="text">{{ segment.text }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

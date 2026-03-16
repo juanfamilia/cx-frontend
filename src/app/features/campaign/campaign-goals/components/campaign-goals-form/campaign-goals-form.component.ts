@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   OnInit,
@@ -31,7 +32,7 @@ import { UsersService } from '@pages/users/users.service';
 import { Options } from '@data/types/options';
 import { LazyLoadEvent } from 'primeng/api';
 import { SelectFilterEvent, SelectModule } from 'primeng/select';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, of, Subject, tap, catchError } from 'rxjs';
 
 @Component({
   selector: 'app-campaign-goals-form',
@@ -67,10 +68,25 @@ export class CampaignGoalsFormComponent implements OnInit {
 
   lazyLoad = signal<LazyLoadEvent>({ first: 0, rows: 10 });
 
-  userResource = rxResource<Options[], void>({
-    request: () => undefined,
-    loader: () => this.userService.getAllOptionsList(),
+  // Trigger signal to load users - starts with true to load immediately
+  private loadUsers = signal(true);
+  
+  userResource = rxResource<Options[], { load: boolean }>({
+    request: () => ({ load: this.loadUsers() }),
+    loader: ({ request }) => {
+      if (!request.load) return of([]);
+      return this.userService.getAllOptionsList().pipe(
+        tap(users => console.log('[UserResource Goals] Loaded users:', users)),
+        catchError(err => {
+          console.error('[UserResource Goals] Error loading users:', err);
+          return of([]);
+        })
+      );
+    },
   });
+
+  // Computed signal for users options with fallback
+  usersOptions = computed(() => this.userResource.value() ?? []);
 
   ngOnInit(): void {
     this.goalForm = this.fb.group({

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnInit,
   output,
@@ -27,7 +28,7 @@ import { Options } from '@data/types/options';
 import { PaginatedResponse } from '@data/types/pagination';
 import { LazyLoadEvent } from 'primeng/api';
 import { SelectFilterEvent, SelectModule } from 'primeng/select';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, of, Subject, tap, catchError } from 'rxjs';
 import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 
 @Component({
@@ -79,9 +80,28 @@ export class CampaignAssignmentsUserFormComponent implements OnInit {
       ),
   });
 
-  usersResource = rxResource<Options[], void>({
-    request: () => undefined,
-    loader: () => this.userService.getAllOptionsList(),
+  // Trigger signal to load users - starts with true to load immediately
+  private loadUsers = signal(true);
+  
+  usersResource = rxResource<Options[], { load: boolean }>({
+    request: () => ({ load: this.loadUsers() }),
+    loader: ({ request }) => {
+      if (!request.load) return of([]);
+      return this.userService.getAllOptionsList().pipe(
+        tap(users => console.log('[UsersResource] Loaded users:', users)),
+        catchError(err => {
+          console.error('[UsersResource] Error loading users:', err);
+          return of([]);
+        })
+      );
+    },
+  });
+
+  // Computed signal for users options with fallback
+  usersOptions = computed(() => {
+    const value = this.usersResource.value();
+    console.log('[UsersOptions] Current value:', value, 'isLoading:', this.usersResource.isLoading());
+    return value ?? [];
   });
 
   ngOnInit() {
