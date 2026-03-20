@@ -1,15 +1,38 @@
 @if (isLoading()) {
   <app-spinner />
 } @else {
-  <app-evaluation-analysis [evalutationId]="evaluation()!.id" />
-  <app-evaluation-form
-    [isEditing]="true"
-    [byZone]="
-      evaluation()?.location === null || evaluation()?.location === 'null'
-        ? false
-        : true
-    "
-    [disabled]="true"
-    [campaign]="evaluation()?.campaign!"
-    [evaluation]="evaluation()" />
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-btn"
+      [class.active]="activeTab() === 'analysis'"
+      (click)="setTab('analysis')">
+      Análisis
+    </button>
+    <button 
+      class="tab-btn"
+      [class.active]="activeTab() === 'player'"
+      (click)="setTab('player')">
+      Video + Transcripción
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  @if (activeTab() === 'analysis') {
+    <app-evaluation-analysis [evalutationId]="evaluation()!.id" />
+    <app-evaluation-form
+      [isEditing]="true"
+      [byZone]="
+        evaluation()?.location === null || evaluation()?.location === 'null'
+          ? false
+          : true
+      "
+      [disabled]="true"
+      [campaign]="evaluation()?.campaign!"
+      [evaluation]="evaluation()" />
+  } @else {
+    <app-interaction-player 
+      [evaluationId]="evaluation()!.id"
+      [videoUrl]="evaluation()?.video?.url || null" />
+  }
 }

@@ -17,6 +17,24 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'executive-dashboard',
+    loadComponent: () =>
+      import('./features/dashboard/executive-dashboard/executive-dashboard.component').then(
+        m => m.ExecutiveDashboardComponent
+      ),
+    canActivate: [authGuard],
+    data: { title: 'Dashboard Ejecutivo', role: [0, 1] },
+  },
+  {
+    path: 'transcript-search',
+    loadComponent: () =>
+      import('./features/evaluation/components/transcript-search/transcript-search.component').then(
+        m => m.TranscriptSearchComponent
+      ),
+    canActivate: [authGuard],
+    data: { title: 'Búsqueda de Transcripciones', role: [0, 1, 2] },
+  },
+  {
     path: 'zones',
     redirectTo: 'work-areas',
     pathMatch: 'full',

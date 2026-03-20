@@ -12,6 +12,7 @@ import { EvaluationService } from '@pages/evaluation/evaluation.service';
 import { ShareToasterService } from '@core/services/toast.service';
 import { EvaluationAnalysisComponent } from '../components/evaluation-analysis/evaluation-analysis.component';
 import { EvaluationFormComponent } from '../components/evaluation-form/evaluation-form.component';
+import { InteractionPlayerComponent } from '../components/interaction-player/interaction-player.component';
 
 @Component({
   selector: 'app-evaluation-detail',
@@ -19,6 +20,7 @@ import { EvaluationFormComponent } from '../components/evaluation-form/evaluatio
     EvaluationFormComponent,
     SpinnerComponent,
     EvaluationAnalysisComponent,
+    InteractionPlayerComponent,
   ],
   templateUrl: './evaluation-detail.component.html',
   styleUrl: './evaluation-detail.component.css',
@@ -34,6 +36,9 @@ export class EvaluationDetailComponent implements OnInit {
   evaluation = signal<Evaluation | null>(null);
 
   isLoading = signal<boolean>(false);
+  
+  // Tab control for switching views
+  activeTab = signal<'analysis' | 'player'>('analysis');
 
   ngOnInit() {
     this.route.params.subscribe(params => {
@@ -55,5 +60,9 @@ export class EvaluationDetailComponent implements OnInit {
         },
       });
     });
+  }
+  
+  setTab(tab: 'analysis' | 'player') {
+    this.activeTab.set(tab);
   }
 }
