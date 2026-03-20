@@ -8,6 +8,18 @@ export const NAVROUTES: RouteData[] = [
     roles: [0, 1, 2, 3],
   },
   {
+    title: 'Dashboard Ejecutivo',
+    route: '/executive-dashboard',
+    icon: 'lucideChartArea',
+    roles: [0, 1],
+  },
+  {
+    title: 'Búsqueda',
+    route: '/transcript-search',
+    icon: 'lucideSearch',
+    roles: [0, 1, 2],
+  },
+  {
     title: 'Usuarios',
     route: '/users',
     icon: 'heroUsers',

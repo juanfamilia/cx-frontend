@@ -15,12 +15,14 @@ import {
 } from '@ng-icons/heroicons/outline';
 import {
   lucideBanknote,
+  lucideChartArea,
   lucideBrain,
   lucideBriefcaseBusiness,
   lucideFileText,
   lucideHouse,
   lucideMapPinned,
   lucideMegaphone,
+  lucideSearch,
   lucideSparkles,
   lucideTextCursorInput,
 } from '@ng-icons/lucide';
@@ -50,6 +52,8 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       lucideFileText,
       lucideSparkles,
       lucideBrain,
+      lucideChartArea,
+      lucideSearch,
     }),
   ],
 })
