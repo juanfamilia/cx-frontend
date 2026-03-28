@@ -1,6 +1,7 @@
 @if (isLoading()) {
   <app-spinner />
-} @else if (evaluation(); as ev) {
+} @else {
+  @if (evaluation(); as ev) {
   <!-- Tab Navigation -->
   <div class="tab-navigation">
     <button 
@@ -36,11 +37,12 @@
       [videoUrl]="ev.video?.url || null"
       [initialSeekSeconds]="seekFromRoute()" />
   }
-} @else {
+  } @else {
   <div class="detail-error-state">
     <p>No se pudo cargar esta evaluación.</p>
     <button type="button" class="back-link-btn" (click)="backToList()">
       Volver al listado
     </button>
   </div>
+  }
 }

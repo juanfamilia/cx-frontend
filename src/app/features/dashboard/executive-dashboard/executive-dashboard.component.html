@@ -90,7 +90,8 @@
         Reintentar
       </button>
     </div>
-  } @else if (metrics(); as m) {
+  } @else {
+    @if (metrics(); as m) {
     <!-- KPI Cards Row -->
     <div class="kpi-grid">
       <!-- Total Interactions -->
@@ -263,7 +264,7 @@
         </div>
       </div>
     }
-  } @else if (
+    } @else if (
     !awaitingCompanySelection() &&
     !dashboardResource.isLoading() &&
     !dashboardResource.error()
@@ -275,5 +276,6 @@
       <p>No hay datos disponibles</p>
       <p class="hint">Las métricas se actualizarán cuando haya evaluaciones procesadas</p>
     </div>
+  }
   }
 </div>
