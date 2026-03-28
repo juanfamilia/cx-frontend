@@ -333,6 +333,10 @@ export class EvaluationFormComponent implements OnInit {
         'evaluated_collaborator',
         this.evaluationForm.get('evaluated_collaborator')?.value
       );
+      formData.append(
+        'visited_zones',
+        JSON.stringify(this.evaluationForm.get('visited_zones')?.value ?? [])
+      );
       const answersGroup = this.evaluationAnswers;
       const answersArray = Object.values(answersGroup.controls).map(
         ctrl => ctrl.value

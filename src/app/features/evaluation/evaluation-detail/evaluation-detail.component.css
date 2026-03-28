@@ -27,3 +27,23 @@
   color: var(--primary-color, #3b82f6);
   border-bottom-color: var(--primary-color, #3b82f6);
 }
+
+.detail-error-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-color-secondary, #6b7280);
+}
+
+.detail-error-state .back-link-btn {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--surface-border, #e5e7eb);
+  background: var(--surface-card, #fff);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.detail-error-state .back-link-btn:hover {
+  background: var(--surface-hover, #f9fafb);
+}

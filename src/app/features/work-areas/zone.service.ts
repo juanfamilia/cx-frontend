@@ -11,13 +11,10 @@ export class ZoneService {
   private http = inject(HttpClient);
 
   getAll(): Observable<Zone[]> {
-    return this.http.get<Zone[]>(environment.apiUrl + 'zones/');
+    return this.http.get<Zone[]>(environment.apiUrl + 'zone/');
   }
 
   getOne(id: number): Observable<Zone> {
-    return this.http.get<Zone>(environment.apiUrl + 'zones/' + id);
+    return this.http.get<Zone>(environment.apiUrl + 'zone/' + id);
   }
-  create(zone: Pick<Zone, 'name' | 'value' | 'country'>): Observable<Zone> {
-    return this.http.post<Zone>(environment.apiUrl + 'zones/', zone);
-  }  
 }

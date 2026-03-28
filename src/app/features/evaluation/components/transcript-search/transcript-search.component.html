@@ -92,13 +92,21 @@
                 <span class="date">{{ result.interaction_date | date:'dd/MM/yyyy' }}</span>
               }
               <span class="timestamp">{{ formatTime(result.start_time) }}</span>
-              @if (result.similarity_score) {
+              @if (result.similarity_score != null) {
                 <span class="similarity" [title]="'Similitud: ' + (result.similarity_score * 100).toFixed(0) + '%'">
                   {{ (result.similarity_score * 100).toFixed(0) }}%
                 </span>
               }
             </div>
-            <p class="result-text" [innerHTML]="highlightMatch(result.text)"></p>
+            <p class="result-text">
+              @for (chunk of highlightChunks(result.text); track $index) {
+                @if (chunk.mark) {
+                  <mark>{{ chunk.text }}</mark>
+                } @else {
+                  <span>{{ chunk.text }}</span>
+                }
+              }
+            </p>
             <div class="result-action">
               <svg xmlns="http://www.w3.org/2000/svg" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />

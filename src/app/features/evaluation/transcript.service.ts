@@ -1,16 +1,17 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+/** OpenAPI: `TranscriptSegmentPublic`. */
 export interface TranscriptSegment {
   id: number;
   evaluation_id: number;
   start_time: number;
   end_time: number;
   text: string;
-  speaker?: string;
-  confidence?: number;
+  speaker?: string | null;
+  confidence?: number | null;
   created_at: string;
 }
 
@@ -20,15 +21,16 @@ export interface TranscriptSegmentsResponse {
   duration: number;
 }
 
+/** OpenAPI: `TranscriptSearchResult` (nullable fields as returned by JSON). */
 export interface TranscriptSearchResult {
   segment_id: number;
   evaluation_id: number;
   start_time: number;
   end_time: number;
   text: string;
-  branch_name?: string;
-  interaction_date?: string;
-  similarity_score?: number;
+  branch_name?: string | null;
+  interaction_date?: string | null;
+  similarity_score?: number | null;
 }
 
 export interface TranscriptSearchResponse {
@@ -54,6 +56,13 @@ export class TranscriptService {
     );
   }
 
+  /** Segments list for playback (maps API envelope to a plain array). */
+  getEvaluationSegments(evaluationId: number): Observable<TranscriptSegment[]> {
+    return this.getEvaluationTranscript(evaluationId).pipe(
+      map(res => res.data ?? [])
+    );
+  }
+
   /**
    * Keyword search across transcript segments
    */
@@ -62,9 +71,10 @@ export class TranscriptService {
     branchId?: string,
     limit: number = 50
   ): Observable<TranscriptSearchResponse> {
-    const params: any = { q: query, limit };
-    if (branchId) params.branch_id = branchId;
-    
+    let params = new HttpParams().set('q', query).set('limit', String(limit));
+    if (branchId) {
+      params = params.set('branch_id', branchId);
+    }
     return this.http.get<TranscriptSearchResponse>(
       `${this.apiUrl}transcript-segments/search`,
       { params }
@@ -72,24 +82,25 @@ export class TranscriptService {
   }
 
   /**
-   * Semantic search using AI embeddings
+   * Semantic search (OpenAPI: POST `/transcript-segments/semantic-search`, query params `q`, `limit`).
    */
   semanticSearch(
     query: string,
     limit: number = 20
   ): Observable<TranscriptSearchResponse> {
+    const params = new HttpParams().set('q', query).set('limit', String(limit));
     return this.http.post<TranscriptSearchResponse>(
       `${this.apiUrl}transcript-segments/semantic-search`,
       null,
-      { params: { q: query, limit } }
+      { params }
     );
   }
 
   /**
-   * Generate embeddings for an evaluation (enables semantic search)
+   * Generate embeddings (OpenAPI: POST `.../generate-embeddings`; 200 schema is unspecified).
    */
-  generateEmbeddings(evaluationId: number): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
+  generateEmbeddings(evaluationId: number): Observable<unknown> {
+    return this.http.post<unknown>(
       `${this.apiUrl}transcript-segments/evaluation/${evaluationId}/generate-embeddings`,
       {}
     );

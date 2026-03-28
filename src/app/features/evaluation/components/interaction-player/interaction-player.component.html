@@ -37,6 +37,17 @@
     <div class="transcript-header">
       <h3>Transcripción</h3>
       <div class="transcript-controls">
+        <button
+          type="button"
+          class="auto-scroll-btn embeddings-btn"
+          [disabled]="embeddingsLoading()"
+          (click)="generateEmbeddings()"
+          title="Genera embeddings para búsqueda semántica">
+          @if (embeddingsLoading()) {
+            <span class="btn-spinner"></span>
+          }
+          Embeddings
+        </button>
         <button 
           class="auto-scroll-btn"
           [class.active]="autoScroll()"
@@ -58,6 +69,13 @@
         <div class="loading-state">
           <div class="spinner"></div>
           <p>Cargando transcripción...</p>
+        </div>
+      } @else if (transcriptResource.error()) {
+        <div class="empty-state transcript-error">
+          <p>No se pudo cargar la transcripción.</p>
+          <button type="button" class="retry-btn" (click)="transcriptResource.reload()">
+            Reintentar
+          </button>
         </div>
       } @else if ((transcriptResource.value() || []).length === 0) {
         <div class="empty-state">

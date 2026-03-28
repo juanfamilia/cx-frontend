@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
 import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { Campaign } from '@interfaces/campaign';
 import { CampaignService } from '@pages/campaign/campaign.service';
@@ -88,27 +89,26 @@ export class EvaluationCreateComponent {
 
   createEvaluation(data: FormData) {
     this.isLoadingSubmit.set(true);
-    this.evaluationService.create(data).subscribe({
-      next: () => {
-        this.toastService.showToast(
-          'success',
-          'Evaluación creada',
-          'La evaluación ha sido creada exitosamente'
-        );
-      },
-      error: err => {
-        this.toastService.showToast(
-          'error',
-          'Error al crear la evaluación',
-          err.message
-        );
-        this.isLoadingSubmit.set(false);
-        console.error('Error creating evaluation:', err);
-      },
-      complete: () => {
-        this.isLoadingSubmit.set(false);
-        this.router.navigate(['/']);
-      },
-    });
+    this.evaluationService
+      .create(data)
+      .pipe(finalize(() => this.isLoadingSubmit.set(false)))
+      .subscribe({
+        next: () => {
+          this.toastService.showToast(
+            'success',
+            'Evaluación creada',
+            'La evaluación ha sido creada exitosamente'
+          );
+          void this.router.navigate(['/']);
+        },
+        error: err => {
+          this.toastService.showToast(
+            'error',
+            'Error al crear la evaluación',
+            err.message
+          );
+          console.error('Error creating evaluation:', err);
+        },
+      });
   }
 }

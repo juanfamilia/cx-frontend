@@ -1,6 +1,6 @@
 @if (isLoading()) {
   <app-spinner />
-} @else {
+} @else if (evaluation(); as ev) {
   <!-- Tab Navigation -->
   <div class="tab-navigation">
     <button 
@@ -19,20 +19,28 @@
 
   <!-- Tab Content -->
   @if (activeTab() === 'analysis') {
-    <app-evaluation-analysis [evalutationId]="evaluation()!.id" />
+    <app-evaluation-analysis [evalutationId]="ev.id" />
     <app-evaluation-form
       [isEditing]="true"
       [byZone]="
-        evaluation()?.location === null || evaluation()?.location === 'null'
+        ev.location === null || ev.location === 'null'
           ? false
           : true
       "
       [disabled]="true"
-      [campaign]="evaluation()?.campaign!"
-      [evaluation]="evaluation()" />
+      [campaign]="ev.campaign"
+      [evaluation]="ev" />
   } @else {
     <app-interaction-player 
-      [evaluationId]="evaluation()!.id"
-      [videoUrl]="evaluation()?.video?.url || null" />
+      [evaluationId]="ev.id"
+      [videoUrl]="ev.video?.url || null"
+      [initialSeekSeconds]="seekFromRoute()" />
   }
+} @else {
+  <div class="detail-error-state">
+    <p>No se pudo cargar esta evaluación.</p>
+    <button type="button" class="back-link-btn" (click)="backToList()">
+      Volver al listado
+    </button>
+  </div>
 }

@@ -26,28 +26,28 @@ export class UsersService {
       params = params.set('search', search);
     }
 
-    return this.http.get<UserList>(environment.apiUrl + 'users/', {
+    return this.http.get<UserList>(environment.apiUrl + 'user/', {
       params,
     });
   }
 
   getAllOptionsList(): Observable<Options[]> {
-    return this.http.get<Options[]>(environment.apiUrl + 'users/plain-list');
+    return this.http.get<Options[]>(environment.apiUrl + 'user/plain-list');
   }
 
   create(data: UserCreate): Observable<User> {
-    return this.http.post<User>(environment.apiUrl + 'users/', data);
+    return this.http.post<User>(environment.apiUrl + 'user/', data);
   }
 
   getOne(id: number): Observable<User> {
-    return this.http.get<User>(environment.apiUrl + 'users/' + id);
+    return this.http.get<User>(environment.apiUrl + 'user/' + id);
   }
 
   update(data: UserCreate, id: number): Observable<User> {
-    return this.http.put<User>(environment.apiUrl + 'users/' + id, data);
+    return this.http.put<User>(environment.apiUrl + 'user/' + id, data);
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(environment.apiUrl + 'users/' + id);
+    return this.http.delete<void>(environment.apiUrl + 'user/' + id);
   }
 }

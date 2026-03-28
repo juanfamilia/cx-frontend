@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
-  OnInit,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { filter, finalize, map, switchMap } from 'rxjs';
 import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 import { Evaluation } from '@interfaces/evaluation';
@@ -20,7 +22,7 @@ import { EvaluationFormComponent } from '../components/evaluation-form/evaluatio
   styleUrl: './evaluation-update.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EvaluationUpdateComponent implements OnInit {
+export class EvaluationUpdateComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private toastService = inject(ShareToasterService);
@@ -28,55 +30,61 @@ export class EvaluationUpdateComponent implements OnInit {
 
   id = signal<number>(0);
   evaluation = signal<Evaluation | null>(null);
-
   isLoading = signal<boolean>(false);
   isLoadingSubmit = signal<boolean>(false);
 
-  ngOnInit() {
-    this.route.params.subscribe(params => {
-      this.id.set(params['id']);
-      this.isLoading.set(true);
-      this.evaluationService.getOne(this.id()).subscribe({
-        next: data => {
-          this.evaluation.set(data);
-        },
-        error: err => {
+  constructor() {
+    this.route.paramMap
+      .pipe(
+        takeUntilDestroyed(),
+        map(p => Number(p.get('id'))),
+        filter((id): id is number => Number.isFinite(id) && id > 0),
+        tap(id => {
+          this.id.set(id);
+          this.evaluation.set(null);
+          this.isLoading.set(true);
+        }),
+        switchMap(id =>
+          this.evaluationService.getOne(id).pipe(
+            finalize(() => this.isLoading.set(false))
+          )
+        )
+      )
+      .subscribe({
+        next: data => this.evaluation.set(data),
+        error: (err: HttpErrorResponse) => {
+          this.evaluation.set(null);
           this.toastService.showToast(
             'error',
             'Error al obtener la evaluación',
-            err.message
+            err.error?.message ?? err.message ?? 'Error desconocido'
           );
         },
-        complete: () => {
-          this.isLoading.set(false);
-        },
       });
-    });
   }
 
   updateEvaluation(data: FormData) {
     this.isLoadingSubmit.set(true);
-    this.evaluationService.update(data, this.id()).subscribe({
-      next: () => {
-        this.toastService.showToast(
-          'success',
-          'Evaluación actualizada',
-          'La evaluación ha sido actualizada exitosamente.'
-        );
-      },
-      error: err => {
-        this.toastService.showToast(
-          'error',
-          'Error al actualizar la evaluación',
-          err.message
-        );
-        this.isLoadingSubmit.set(false);
-        console.error('Error updating evaluation:', err);
-      },
-      complete: () => {
-        this.isLoadingSubmit.set(false);
-        this.router.navigate(['/evaluations']);
-      },
-    });
+    this.evaluationService
+      .update(data, this.id())
+      .pipe(finalize(() => this.isLoadingSubmit.set(false)))
+      .subscribe({
+        next: () => {
+          this.toastService.showToast(
+            'success',
+            'Evaluación actualizada',
+            'La evaluación ha sido actualizada exitosamente.'
+          );
+          void this.router.navigate(['/evaluations']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.toastService.showToast(
+            'error',
+            'Error al actualizar la evaluación',
+            err.error?.message ?? err.message ?? 'Error desconocido'
+          );
+          console.error('Error updating evaluation:', err);
+        },
+      });
   }
 }

@@ -52,6 +52,72 @@
   color: #94a3b8;
 }
 
+.filter-advanced {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.25rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 160px;
+}
+
+.filter-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.filter-select,
+.filter-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  background: #fff;
+  min-width: 180px;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.company-prompt {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  color: #92400e;
+  margin-bottom: 1rem;
+}
+
+.company-prompt .hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: #b45309;
+}
+
 /* Loading */
 .loading-overlay {
   display: flex;
@@ -330,6 +396,24 @@
 .branch-name {
   font-weight: 500;
   color: #1e293b;
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.error-state .filter-btn {
+  margin-top: 1rem;
+}
+
+.metric-card.metric-undefined .progress-bar {
+  opacity: 0.45;
 }
 
 /* Empty State */

@@ -8,22 +8,89 @@
     
     <!-- Date Range Filters -->
     <div class="filter-group">
-      <button class="filter-btn" (click)="setDateRange('week')">7 días</button>
-      <button class="filter-btn" (click)="setDateRange('month')">30 días</button>
-      <button class="filter-btn" (click)="setDateRange('quarter')">90 días</button>
-      <button class="filter-btn" (click)="setDateRange('year')">1 año</button>
-      <button class="filter-btn secondary" (click)="clearFilters()">Limpiar</button>
+      <button type="button" class="filter-btn" (click)="setDateRange('week')">7 días</button>
+      <button type="button" class="filter-btn" (click)="setDateRange('month')">30 días</button>
+      <button type="button" class="filter-btn" (click)="setDateRange('quarter')">90 días</button>
+      <button type="button" class="filter-btn" (click)="setDateRange('year')">1 año</button>
+      <button type="button" class="filter-btn secondary" (click)="clearFilters()">Limpiar</button>
     </div>
   </div>
-  
-  @if (dashboardResource.isLoading()) {
+
+  <div class="filter-advanced">
+    @if (pickerNeeded()) {
+      <div class="filter-field">
+        <label for="exec-company">Empresa</label>
+        @if (companiesResource.isLoading()) {
+          <span class="field-hint">Cargando empresas…</span>
+        }
+        <select
+          id="exec-company"
+          class="filter-select"
+          [ngModel]="companySelectModel()"
+          (ngModelChange)="onCompanyChange($event)">
+          <option value="">Seleccione una empresa…</option>
+          @for (c of companiesResource.value()?.data ?? []; track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    <div class="filter-field">
+      <label for="exec-branch">Sucursal (ID)</label>
+      <input
+        id="exec-branch"
+        type="text"
+        class="filter-input"
+        placeholder="Opcional"
+        [ngModel]="filters().branch_id ?? ''"
+        (ngModelChange)="onBranchChange($event)" />
+    </div>
+
+    <div class="filter-field">
+      <label for="exec-country">País</label>
+      <input
+        id="exec-country"
+        type="text"
+        class="filter-input"
+        placeholder="Ej. DO, MX"
+        [ngModel]="filters().country ?? ''"
+        (ngModelChange)="onCountryChange($event)" />
+    </div>
+
+    <div class="filter-field">
+      <label for="exec-interaction">Tipo de interacción</label>
+      <select
+        id="exec-interaction"
+        class="filter-select"
+        [ngModel]="filters().interaction_type ?? ''"
+        (ngModelChange)="onInteractionTypeChange($event)">
+        @for (opt of interactionTypeOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (awaitingCompanySelection()) {
+    <div class="company-prompt">
+      <p>Seleccione una <strong>empresa</strong> para cargar las métricas ejecutivas.</p>
+      <p class="hint">Según el API, el alcance por compañía es obligatorio para su perfil.</p>
+    </div>
+  } @else if (dashboardResource.isLoading()) {
     <div class="loading-overlay">
       <div class="spinner"></div>
       <p>Cargando métricas...</p>
     </div>
-  }
-  
-  @if (metrics(); as m) {
+  } @else if (dashboardResource.error()) {
+    <div class="error-state">
+      <p>No se pudieron cargar las métricas.</p>
+      <p class="hint">Compruebe su conexión e intente de nuevo.</p>
+      <button type="button" class="filter-btn" (click)="dashboardResource.reload()">
+        Reintentar
+      </button>
+    </div>
+  } @else if (metrics(); as m) {
     <!-- KPI Cards Row -->
     <div class="kpi-grid">
       <!-- Total Interactions -->
@@ -82,41 +149,41 @@
     
     <!-- Secondary Metrics -->
     <div class="metrics-row">
-      <div class="metric-card">
+      <div class="metric-card" [class.metric-undefined]="!isDefinedRate(m.greeting_rate)">
         <div class="metric-header">
           <span class="metric-title">Tasa de Saludo</span>
-          <span class="metric-value" [class.success]="(m.greeting_rate || 0) >= 80">
+          <span class="metric-value" [class.success]="isDefinedRate(m.greeting_rate) && m.greeting_rate >= 80">
             {{ formatPct(m.greeting_rate) }}
           </span>
         </div>
         <div class="progress-bar">
-          <div class="progress-fill green" [style.width.%]="m.greeting_rate || 0"></div>
+          <div class="progress-fill green" [style.width.%]="progressWidth(m.greeting_rate)"></div>
         </div>
       </div>
       
-      <div class="metric-card">
+      <div class="metric-card" [class.metric-undefined]="!isDefinedRate(m.product_offer_rate)">
         <div class="metric-header">
           <span class="metric-title">Ofrecimiento Producto</span>
           <span class="metric-value">{{ formatPct(m.product_offer_rate) }}</span>
         </div>
         <div class="progress-bar">
-          <div class="progress-fill blue" [style.width.%]="m.product_offer_rate || 0"></div>
+          <div class="progress-fill blue" [style.width.%]="progressWidth(m.product_offer_rate)"></div>
         </div>
       </div>
       
-      <div class="metric-card">
+      <div class="metric-card" [class.metric-undefined]="!isDefinedRate(m.resolution_rate)">
         <div class="metric-header">
           <span class="metric-title">Resolución</span>
-          <span class="metric-value" [class.success]="(m.resolution_rate || 0) >= 70">
+          <span class="metric-value" [class.success]="isDefinedRate(m.resolution_rate) && m.resolution_rate >= 70">
             {{ formatPct(m.resolution_rate) }}
           </span>
         </div>
         <div class="progress-bar">
-          <div class="progress-fill teal" [style.width.%]="m.resolution_rate || 0"></div>
+          <div class="progress-fill teal" [style.width.%]="progressWidth(m.resolution_rate)"></div>
         </div>
       </div>
       
-      <div class="metric-card">
+      <div class="metric-card" [class.metric-undefined]="!isDefinedRate(m.churn_risk_rate)">
         <div class="metric-header">
           <span class="metric-title">Riesgo de Deserción</span>
           <span class="metric-value risk" [class]="getRisk(m.churn_risk_rate).color">
@@ -124,7 +191,7 @@
           </span>
         </div>
         <div class="progress-bar">
-          <div class="progress-fill red" [style.width.%]="m.churn_risk_rate || 0"></div>
+          <div class="progress-fill red" [style.width.%]="progressWidth(m.churn_risk_rate)"></div>
         </div>
       </div>
     </div>
@@ -196,7 +263,11 @@
         </div>
       </div>
     }
-  } @else if (!dashboardResource.isLoading()) {
+  } @else if (
+    !awaitingCompanySelection() &&
+    !dashboardResource.isLoading() &&
+    !dashboardResource.error()
+  ) {
     <div class="empty-state">
       <svg xmlns="http://www.w3.org/2000/svg" class="icon-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />

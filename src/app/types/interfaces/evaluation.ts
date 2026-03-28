@@ -16,7 +16,7 @@ export interface Evaluation {
   campaign: Campaign;
   user: UserClass;
   evaluation_answers: EvaluationAnswer[];
-  visited_zones: string[];
+  visited_zones: number[];
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;

@@ -26,16 +26,21 @@ export interface BranchMetrics {
   avg_service_quality: number | null;
 }
 
+/** Matches OpenAPI `ExecutiveDashboardResponse` (date_range is loosely typed server-side). */
 export interface ExecutiveDashboardResponse {
   metrics: ExecutiveMetrics;
   branches: BranchMetrics[];
   date_range: {
-    start: string | null;
-    end: string | null;
+    start?: string | null;
+    end?: string | null;
+    [key: string]: unknown;
   };
 }
 
+/** Query params for GET `/executive/metrics` (OpenAPI: Executive Dashboard). */
 export interface DashboardFilters {
+  /** Scope metrics; OpenAPI notes: may be required for role 0 if the user has no company_id. */
+  company_id?: number | null;
   branch_id?: string;
   country?: string;
   start_date?: string;
@@ -57,11 +62,16 @@ export class ExecutiveDashboardService {
     let params = new HttpParams();
     
     if (filters) {
+      if (filters.company_id != null) {
+        params = params.set('company_id', String(filters.company_id));
+      }
       if (filters.branch_id) params = params.set('branch_id', filters.branch_id);
       if (filters.country) params = params.set('country', filters.country);
       if (filters.start_date) params = params.set('start_date', filters.start_date);
       if (filters.end_date) params = params.set('end_date', filters.end_date);
-      if (filters.interaction_type) params = params.set('interaction_type', filters.interaction_type);
+      if (filters.interaction_type) {
+        params = params.set('interaction_type', filters.interaction_type);
+      }
     }
     
     return this.http.get<ExecutiveDashboardResponse>(
