@@ -2,15 +2,20 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  inject,
   Output,
+  computed,
+  inject,
   signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
+import { AuthService } from '@core/services/auth.service';
+import { CompanyList } from '@interfaces/company';
+import { CompaniesService } from '@pages/companies/companies.service';
 import {
   TranscriptService,
   TranscriptSearchResult,
@@ -22,7 +27,6 @@ import {
   debounceTime,
   distinctUntilChanged,
   map,
-  of,
   Subject,
   switchMap,
 } from 'rxjs';
@@ -44,6 +48,8 @@ export class TranscriptSearchComponent {
   private transcriptService = inject(TranscriptService);
   private router = inject(Router);
   private toastService = inject(ShareToasterService);
+  private authService = inject(AuthService);
+  private companiesService = inject(CompaniesService);
 
   @Output() resultSelected = new EventEmitter<TranscriptSearchResult>();
 
@@ -53,7 +59,52 @@ export class TranscriptSearchComponent {
   results = signal<TranscriptSearchResult[]>([]);
   hasSearched = signal<boolean>(false);
 
+  /** Admin sin `company_id` en el token: debe elegir empresa (misma regla que el API). */
+  selectedCompanyId = signal<number | undefined>(undefined);
+
   searchSubject = new Subject<string>();
+
+  pickerNeeded = computed(() => {
+    try {
+      const u = this.authService.getCurrentUser();
+      return u.role === 0 && !(u.company_id != null && u.company_id > 0);
+    } catch {
+      return false;
+    }
+  });
+
+  searchScoped = computed(() => {
+    try {
+      const u = this.authService.getCurrentUser();
+      if (u.role !== 0) {
+        return true;
+      }
+      if (u.company_id != null && u.company_id > 0) {
+        return true;
+      }
+      const id = this.selectedCompanyId();
+      return id != null && id > 0;
+    } catch {
+      return false;
+    }
+  });
+
+  awaitingCompanySelection = computed(
+    () => this.pickerNeeded() && !this.searchScoped()
+  );
+
+  companySelectModel = computed(() => {
+    const id = this.selectedCompanyId();
+    return id != null && id > 0 ? String(id) : '';
+  });
+
+  companiesResource = rxResource<CompanyList, boolean>({
+    request: () => this.pickerNeeded(),
+    loader: ({ request }) =>
+      request
+        ? this.companiesService.getAll(0, 100)
+        : of({ data: [], pagination: { first: 0, rows: 0, total: 0 } }),
+  });
 
   constructor() {
     this.searchSubject
@@ -66,11 +117,15 @@ export class TranscriptSearchComponent {
           if (query.length < 2) {
             return of<SearchFlow>({ kind: 'idle' });
           }
+          if (!this.searchScoped()) {
+            return of<SearchFlow>({ kind: 'idle' });
+          }
           this.isSearching.set(true);
+          const companyId = this.getCompanyIdForSearch();
           const req =
             this.searchMode() === 'semantic'
-              ? this.transcriptService.semanticSearch(query)
-              : this.transcriptService.searchTranscripts(query);
+              ? this.transcriptService.semanticSearch(query, 20, companyId)
+              : this.transcriptService.searchTranscripts(query, undefined, 50, companyId);
           return req.pipe(
             map(
               (response): SearchFlow => ({
@@ -108,15 +163,42 @@ export class TranscriptSearchComponent {
       });
   }
 
+  /**
+   * Solo rol 0 envía `company_id` al API (explícito). Otros roles: el backend usa el token.
+   */
+  private getCompanyIdForSearch(): number | undefined {
+    try {
+      const u = this.authService.getCurrentUser();
+      if (u.role !== 0) {
+        return undefined;
+      }
+      if (u.company_id != null && u.company_id > 0) {
+        return u.company_id;
+      }
+      const id = this.selectedCompanyId();
+      return id != null && id > 0 ? id : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   private httpErrorMessage(err: HttpErrorResponse): string {
     const body = err.error;
-    if (
-      body &&
-      typeof body === 'object' &&
-      'message' in body &&
-      typeof (body as { message: unknown }).message === 'string'
-    ) {
-      return (body as { message: string }).message;
+    if (body && typeof body === 'object') {
+      const d = (body as { detail?: unknown; message?: unknown }).detail;
+      if (typeof d === 'string' && d.length > 0) {
+        return d;
+      }
+      if (Array.isArray(d) && d.length > 0) {
+        const first = d[0] as { msg?: string };
+        if (typeof first?.msg === 'string') {
+          return first.msg;
+        }
+      }
+      const m = (body as { message?: unknown }).message;
+      if (typeof m === 'string' && m.length > 0) {
+        return m;
+      }
     }
     if (typeof body === 'string' && body.length > 0) {
       return body;
@@ -140,6 +222,16 @@ export class TranscriptSearchComponent {
     }
   }
 
+  onCompanyChange(raw: string) {
+    const id = raw ? Number(raw) : NaN;
+    this.selectedCompanyId.set(
+      Number.isFinite(id) && id > 0 ? id : undefined
+    );
+    if (this.searchQuery().trim().length >= 2) {
+      this.searchSubject.next(this.searchQuery());
+    }
+  }
+
   selectResult(result: TranscriptSearchResult) {
     this.resultSelected.emit(result);
     void this.router.navigate(['/evaluations/detail', result.evaluation_id], {
@@ -151,9 +243,6 @@ export class TranscriptSearchComponent {
     return this.transcriptService.formatTime(seconds);
   }
 
-  /**
-   * Safe highlighting for keyword mode (no innerHTML from raw query).
-   */
   highlightChunks(text: string): { text: string; mark: boolean }[] {
     const query = this.searchQuery().trim();
     if (!query || this.searchMode() === 'semantic') {

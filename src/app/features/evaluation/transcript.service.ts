@@ -69,11 +69,16 @@ export class TranscriptService {
   searchTranscripts(
     query: string,
     branchId?: string,
-    limit: number = 50
+    limit: number = 50,
+    /** Required for admin users without `company_id` on the token (API scopes search). */
+    companyId?: number | null
   ): Observable<TranscriptSearchResponse> {
     let params = new HttpParams().set('q', query).set('limit', String(limit));
     if (branchId) {
       params = params.set('branch_id', branchId);
+    }
+    if (companyId != null && companyId > 0) {
+      params = params.set('company_id', String(companyId));
     }
     return this.http.get<TranscriptSearchResponse>(
       `${this.apiUrl}transcript-segments/search`,
@@ -86,9 +91,13 @@ export class TranscriptService {
    */
   semanticSearch(
     query: string,
-    limit: number = 20
+    limit: number = 20,
+    companyId?: number | null
   ): Observable<TranscriptSearchResponse> {
-    const params = new HttpParams().set('q', query).set('limit', String(limit));
+    let params = new HttpParams().set('q', query).set('limit', String(limit));
+    if (companyId != null && companyId > 0) {
+      params = params.set('company_id', String(companyId));
+    }
     return this.http.post<TranscriptSearchResponse>(
       `${this.apiUrl}transcript-segments/semantic-search`,
       null,

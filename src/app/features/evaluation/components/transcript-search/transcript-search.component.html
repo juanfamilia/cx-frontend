@@ -4,6 +4,32 @@
     <h2>Buscar en Transcripciones</h2>
     <p class="subtitle">Encuentra momentos específicos en todas las interacciones</p>
   </div>
+
+  @if (pickerNeeded()) {
+    <div class="company-scope-panel">
+      <label for="ts-company">Empresa (alcance de búsqueda)</label>
+      @if (companiesResource.isLoading()) {
+        <span class="field-hint">Cargando empresas…</span>
+      }
+      <select
+        id="ts-company"
+        class="filter-select"
+        [ngModel]="companySelectModel()"
+        (ngModelChange)="onCompanyChange($event)">
+        <option value="">Seleccione una empresa…</option>
+        @for (c of companiesResource.value()?.data ?? []; track c.id) {
+          <option [value]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </div>
+  }
+
+  @if (awaitingCompanySelection()) {
+    <div class="company-prompt">
+      <p>Seleccione una <strong>empresa</strong> para buscar en las transcripciones.</p>
+      <p class="hint">Su perfil requiere definir la compañía en el API.</p>
+    </div>
+  }
   
   <!-- Search Input -->
   <div class="search-input-wrapper">
