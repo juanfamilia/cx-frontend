@@ -62,10 +62,14 @@ export class DashboardAdminChartsComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    const data = this.analysis().map(campaign => ({
-      campaign_name: campaign.campaign_name,
-      operative_views: campaign.operative_views.map(v => JSON.parse(v)),
-    }));
+    const data = this.analysis()
+      .filter(c => c.operative_views?.length)
+      .map(campaign => ({
+        campaign_name: campaign.campaign_name,
+        operative_views: campaign.operative_views.map(v =>
+          typeof v === 'string' ? JSON.parse(v) : v
+        ),
+      }));
     this.createBarChart(data);
     this.createRadarChart(data);
     this.createLineChart(data);

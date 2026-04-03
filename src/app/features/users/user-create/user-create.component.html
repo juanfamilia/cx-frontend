@@ -2,4 +2,13 @@
   title="Registrar Usuario"
   description="Crear un nuevo usuario en el sistema" />
 
+@if (managerMissingCompany) {
+  <div
+    class="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+    role="alert">
+    Tu cuenta de gerente no tiene una empresa asignada. Pide a un administrador que vincule tu usuario
+    a la empresa correcta; hasta entonces no podrás registrar evaluadores.
+  </div>
+}
+
 <app-user-form (submitEvent)="createUser($event)" />

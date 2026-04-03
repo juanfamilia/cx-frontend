@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 import { provideIcons } from '@ng-icons/core';
 import {
@@ -22,6 +23,7 @@ import {
 } from '@ng-icons/lucide';
 import { DashboardService } from '@pages/dashboard/dashboard.service';
 import { ActionDashboard } from 'src/app/types/actionsDashboard';
+import { DashboardAdminChartsComponent } from '../charts/dashboard-admin-charts/dashboard-admin-charts.component';
 import { DashboardCardComponent } from '../dashboard-card/dashboard-card.component';
 import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashboard-quick-actions.component';
 
@@ -29,8 +31,10 @@ import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashb
   selector: 'app-dashboard-manager',
   imports: [
     SpinnerComponent,
+    RouterLink,
     DashboardQuickActionsComponent,
     DashboardCardComponent,
+    DashboardAdminChartsComponent,
   ],
   templateUrl: './dashboard-manager.component.html',
   styleUrl: './dashboard-manager.component.css',

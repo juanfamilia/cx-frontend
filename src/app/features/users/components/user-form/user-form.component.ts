@@ -1,5 +1,7 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   inject,
   input,
@@ -75,7 +77,7 @@ import { Options } from '@data/types/options';
     }),
   ],
 })
-export class UserFormComponent implements OnInit {
+export class UserFormComponent implements OnInit, AfterViewInit {
   isEdit = input<boolean>(false);
   user = input<User>();
 
@@ -85,6 +87,7 @@ export class UserFormComponent implements OnInit {
   private authService = inject(AuthService);
   private companiesService = inject(CompaniesService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   private filterSubject = new Subject<string>();
 
@@ -165,6 +168,20 @@ export class UserFormComponent implements OnInit {
         inclusivity: this.user()!.inclusivity,
         email: this.user()!.email,
         company_id: this.user()!.company_id,
+      });
+    }
+  }
+
+  ngAfterViewInit(): void {
+    // PrimeNG Select a veces no sincroniza el valor con una sola opción hasta el primer ciclo de vista.
+    if (this.currentUser.role === 2 && !this.isEdit()) {
+      queueMicrotask(() => {
+        this.userForm.patchValue({
+          role: 3,
+          company_id: this.currentUser.company_id ?? 0,
+        });
+        this.userForm.get('role')?.updateValueAndValidity({ emitEvent: true });
+        this.cdr.markForCheck();
       });
     }
   }

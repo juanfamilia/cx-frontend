@@ -2,14 +2,19 @@
   <app-spinner />
 } @else {
   <h2 class="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
-    Tu alcance operativo
+    Tu operación en campo
   </h2>
   <p class="mb-4 max-w-3xl text-sm text-gray-600 dark:text-gray-400">
-    Métricas del equipo y territorio que coordinas. Profundiza desde cada tarjeta o usa las acciones
-    rápidas.
+    Indicadores e <strong>insights</strong> acotados a <strong>tus zonas</strong> y al equipo que comparte
+    territorio contigo. Para buscar en conversaciones usa la
+    <a
+      routerLink="/transcript-search"
+      class="text-primary-600 font-medium underline-offset-2 hover:underline dark:text-primary-400"
+      >búsqueda de transcripciones</a
+    >.
   </p>
 
-  <div class="mb-8 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-6">
+  <div class="mb-8 grid grid-cols-2 gap-2 sm:gap-6 lg:grid-cols-5">
     <app-dashboard-card
       title="Zonas asignadas"
       [value]="data()?.summary?.zonas_asignadas || 0"
@@ -22,7 +27,7 @@
     <app-dashboard-card
       title="Evaluadores en tu equipo"
       [value]="data()?.summary?.evaluadores_asignados || 0"
-      hint="Personas que reportan evaluaciones"
+      hint="Personas que reportan evaluaciones en tus zonas"
       link="/users"
       linkLabel="Gestionar equipo"
       icon="lucideUsers"
@@ -31,17 +36,47 @@
     <app-dashboard-card
       title="Campañas activas"
       [value]="data()?.summary?.active_campaigns || 0"
-      hint="Iniciativas vigentes que debes vigilar"
+      hint="Iniciativas vigentes en tu compañía"
       link="/campaigns"
       linkLabel="Ver campañas"
       icon="lucideCircleCheckBig"
       iconColor="text-green-500" />
+
+    <app-dashboard-card
+      title="Evaluaciones aprobadas"
+      [value]="data()?.summary?.evaluaciones_aprobadas || 0"
+      hint="Equipo en tus zonas — cerradas y validadas"
+      link="/evaluations"
+      linkLabel="Ir a evaluaciones"
+      icon="lucideCircleCheckBig"
+      iconColor="text-green-500" />
+
+    <app-dashboard-card
+      title="Evaluaciones rechazadas"
+      [value]="data()?.summary?.evaluaciones_rechazadas || 0"
+      hint="Requieren corrección o revisión"
+      link="/evaluations"
+      linkLabel="Revisar listado"
+      icon="lucideCircleX"
+      iconColor="text-red-500" />
   </div>
 
-  <div class="grid md:grid-cols-3">
+  @if (data()?.analysis?.length) {
+    <h2 class="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+      Insights y tendencias (tus campañas en campo)
+    </h2>
+    <p class="mb-4 max-w-3xl text-sm text-gray-600 dark:text-gray-400">
+      Análisis agregados solo de campañas vinculadas a zonas que tienes asignadas.
+    </p>
+    <div class="pb-7">
+      <app-dashboard-admin-charts [analysis]="data()!.analysis!" />
+    </div>
+  }
+
+  <div class="my-4 mb-30 grid pt-5 md:mb-15 lg:grid-cols-2">
     <app-dashboard-quick-actions
       [actions]="actions()"
-      heading="Coordinación del equipo"
-      description="Prioriza dar de alta evaluadores y revisar el avance de evaluaciones." />
+      heading="Siguiente paso"
+      description="Coordinación del equipo: altas, evaluaciones, campañas y búsqueda en transcripciones." />
   </div>
 }

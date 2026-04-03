@@ -26,7 +26,9 @@ export interface DashboardManager {
     zonas_asignadas: number;
     evaluadores_asignados: number;
     active_campaigns: number;
-  },
+    evaluaciones_aprobadas: number;
+    evaluaciones_rechazadas: number;
+  };
   analysis: EvaluationAnalysisDashboard[];
 }
 
