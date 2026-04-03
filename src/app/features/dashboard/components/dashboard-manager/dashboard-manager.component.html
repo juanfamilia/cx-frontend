@@ -1,27 +1,47 @@
 @if (resourceDashboard.isLoading()) {
   <app-spinner />
 } @else {
-  <div class="mb-8 grid grid-cols-3 gap-2 sm:gap-6">
+  <h2 class="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+    Tu alcance operativo
+  </h2>
+  <p class="mb-4 max-w-3xl text-sm text-gray-600 dark:text-gray-400">
+    Métricas del equipo y territorio que coordinas. Profundiza desde cada tarjeta o usa las acciones
+    rápidas.
+  </p>
+
+  <div class="mb-8 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-6">
     <app-dashboard-card
-      title="Zonas Asignadas"
+      title="Zonas asignadas"
       [value]="data()?.summary?.zonas_asignadas || 0"
-      icon="lucideUsers"
+      hint="Ámbito geográfico bajo tu supervisión"
+      link="/campaigns/assigns/by-zones"
+      linkLabel="Ver asignación por zonas"
+      icon="lucideMapPin"
       iconColor="text-primary-500" />
 
     <app-dashboard-card
-      title="Evaluadores Totales"
+      title="Evaluadores en tu equipo"
       [value]="data()?.summary?.evaluadores_asignados || 0"
+      hint="Personas que reportan evaluaciones"
+      link="/users"
+      linkLabel="Gestionar equipo"
       icon="lucideUsers"
       iconColor="text-primary-500" />
 
     <app-dashboard-card
-      title="Campañas Activas"
+      title="Campañas activas"
       [value]="data()?.summary?.active_campaigns || 0"
+      hint="Iniciativas vigentes que debes vigilar"
+      link="/campaigns"
+      linkLabel="Ver campañas"
       icon="lucideCircleCheckBig"
       iconColor="text-green-500" />
   </div>
 
   <div class="grid md:grid-cols-3">
-    <app-dashboard-quick-actions [actions]="actions()" />
+    <app-dashboard-quick-actions
+      [actions]="actions()"
+      heading="Coordinación del equipo"
+      description="Prioriza dar de alta evaluadores y revisar el avance de evaluaciones." />
   </div>
 }

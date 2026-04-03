@@ -6,9 +6,11 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 import { provideIcons } from '@ng-icons/core';
 import {
+  lucideChartArea,
   lucideCircleCheckBig,
   lucideCircleX,
   lucideMapPin,
@@ -27,6 +29,7 @@ import { DashboardAdminChartsComponent } from '../charts/dashboard-admin-charts/
   selector: 'app-dashboard-admin',
   imports: [
     SpinnerComponent,
+    RouterLink,
     DashboardQuickActionsComponent,
     DashboardCardComponent,
     DashboardAdminChartsComponent,
@@ -36,6 +39,7 @@ import { DashboardAdminChartsComponent } from '../charts/dashboard-admin-charts/
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [
     provideIcons({
+      lucideChartArea,
       lucideUserPlus,
       lucideCircleCheckBig,
       lucideCircleX,
@@ -57,22 +61,28 @@ export class DashboardAdminComponent {
 
   actions = signal<ActionDashboard[]>([
     {
-      title: 'Registrar Usuario',
+      title: 'Abrir resumen ejecutivo CX',
+      icon: 'lucideChartArea',
+      route: '/executive-dashboard',
+      variant: 'primary',
+    },
+    {
+      title: 'Registrar usuario',
       icon: 'lucideUserPlus',
       route: '/users/create',
     },
     {
-      title: 'Crear Formulario',
+      title: 'Crear formulario',
       icon: 'lucideTextCursorInput',
       route: '/survey-forms/create',
     },
     {
-      title: 'Crear Campaña',
+      title: 'Crear campaña',
       icon: 'lucideMegaphone',
       route: '/campaigns/create',
     },
     {
-      title: 'Asignar Areas de trabajo',
+      title: 'Nueva área de trabajo',
       icon: 'lucideMapPin',
       route: '/work-areas/create',
     },

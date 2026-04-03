@@ -11,8 +11,11 @@ import { provideIcons } from '@ng-icons/core';
 import {
   lucideCircleCheckBig,
   lucideCircleX,
+  lucideFileText,
   lucideMapPin,
   lucideMegaphone,
+  lucideSearch,
+  lucideTarget,
   lucideTextCursorInput,
   lucideUserPlus,
   lucideUsers,
@@ -41,6 +44,9 @@ import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashb
       lucideTextCursorInput,
       lucideMegaphone,
       lucideMapPin,
+      lucideFileText,
+      lucideSearch,
+      lucideTarget,
     }),
   ],
 })
@@ -55,14 +61,30 @@ export class DashboardManagerComponent {
 
   actions = signal<ActionDashboard[]>([
     {
-      title: 'Registrar Evaluador',
+      title: 'Registrar evaluador',
       icon: 'lucideUserPlus',
       route: '/users/create',
+      variant: 'primary',
     },
     {
-      title: 'Asignar Campaña',
+      title: 'Ver evaluaciones del equipo',
+      icon: 'lucideFileText',
+      route: '/evaluations',
+    },
+    {
+      title: 'Asignaciones de campaña',
       icon: 'lucideMegaphone',
       route: '/campaigns/assigns',
+    },
+    {
+      title: 'Metas por evaluador',
+      icon: 'lucideTarget',
+      route: '/campaigns/goals',
+    },
+    {
+      title: 'Buscar en transcripciones',
+      icon: 'lucideSearch',
+      route: '/transcript-search',
     },
   ]);
 }

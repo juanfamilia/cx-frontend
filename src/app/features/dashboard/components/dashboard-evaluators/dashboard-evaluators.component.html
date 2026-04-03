@@ -1,32 +1,79 @@
 @if (resourceDashboard.isLoading()) {
   <app-spinner />
 } @else {
+  @if (pendingEdits() > 0) {
+    <div
+      class="mb-6 flex flex-col gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-amber-800 dark:bg-amber-950/40">
+      <div class="flex items-start gap-3">
+        <span
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-200 text-amber-900 dark:bg-amber-900 dark:text-amber-100"
+          >!</span
+        >
+        <div>
+          <p class="text-sm font-semibold text-amber-950 dark:text-amber-100">
+            Tienes {{ pendingEdits() }} evaluación(es) por editar
+          </p>
+          <p class="text-xs text-amber-900/80 dark:text-amber-200/80">
+            Completa los cambios solicitados antes de nuevos envíos.
+          </p>
+        </div>
+      </div>
+      <a
+        routerLink="/evaluations"
+        class="inline-flex shrink-0 items-center justify-center rounded-md bg-amber-800 px-4 py-2 text-sm font-medium text-white hover:bg-amber-900">
+        Ir al listado
+      </a>
+    </div>
+  }
+
+  <h2 class="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+    Estado de tus evaluaciones
+  </h2>
+  <p class="mb-4 max-w-3xl text-sm text-gray-600 dark:text-gray-400">
+    Lo primero: cerrar ediciones pendientes. Luego revisa envíos y resultados de aprobación.
+  </p>
+
   <div class="mb-8 grid grid-cols-2 gap-2 sm:gap-6 lg:grid-cols-4">
     <app-dashboard-card
-      title="Evaluaciones Enviadas"
-      [value]="data()?.summary?.enviadas || 0"
-      icon="lucideSend"
-      iconColor="text-sky-500" />
-
-    <app-dashboard-card
-      title="Evaluaciones Por Editar"
+      title="Por editar"
       [value]="data()?.summary?.ediciones_pendientes || 0"
+      hint="Requieren tu atención antes de reenviar"
+      link="/evaluations"
+      linkLabel="Abrir evaluaciones"
       icon="lucideCircleAlert"
       iconColor="text-yellow-500" />
 
     <app-dashboard-card
-      title="Evaluaciones Aprobadas"
+      title="Enviadas"
+      [value]="data()?.summary?.enviadas || 0"
+      hint="En proceso de revisión"
+      link="/evaluations"
+      linkLabel="Ver listado"
+      icon="lucideSend"
+      iconColor="text-sky-500" />
+
+    <app-dashboard-card
+      title="Aprobadas"
       [value]="data()?.summary?.aprobadas || 0"
+      hint="Validadas por tu organización"
+      link="/evaluations"
+      linkLabel="Ver aprobadas"
       icon="lucideCircleCheckBig"
       iconColor="text-green-500" />
 
     <app-dashboard-card
-      title="Evaluaciones Rechazadas"
+      title="Rechazadas"
       [value]="data()?.summary?.rechazadas || 0"
+      hint="Revisar motivo y corregir"
+      link="/evaluations"
+      linkLabel="Ver rechazadas"
       icon="lucideCircleX"
       iconColor="text-red-500" />
   </div>
 
+  <h2 class="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+    Progreso y cobertura
+  </h2>
   <div class="pb-7">
     <app-dashboard-evaluators-charts [weeklyProgress]="data()!.weekly_progress" [campaignCoverage]="data()!.coverage" />
   </div>
@@ -68,6 +115,9 @@
 -->
 
   <div class="y-4 mb-30 grid pt-5 md:mb-15 lg:grid-cols-2">
-    <app-dashboard-quick-actions [actions]="actions()" />
+    <app-dashboard-quick-actions
+      [actions]="actions()"
+      heading="Tu flujo de trabajo"
+      description="Registrar visitas y revisar el historial en un solo lugar." />
   </div>
 }

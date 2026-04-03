@@ -5,6 +5,7 @@ import {
   signal,
   OnInit,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { ButtonNotificationComponent } from '@shared/ui/buttons/button-notification/button-notification.component';
 import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { UserClass } from '@interfaces/user';
@@ -28,6 +29,7 @@ import { DashboardSuperadminComponent } from './components/dashboard-superadmin/
   imports: [
     PageHeaderComponent,
     ButtonNotificationComponent,
+    RouterLink,
     DashboardEvaluatorsComponent,
     DashboardAdminComponent,
     DashboardManagerComponent,
@@ -80,19 +82,30 @@ export class DashboardComponent implements OnInit {
   getDescription(): string {
     switch (this.currentUser().role) {
       case 0:
-        return 'Gestiona la aplicación, tus empresas y pagos';
-
+        return 'Visión global de empresas, pagos y usuarios de la plataforma.';
       case 1:
-        return 'Gestiona tus campañas, trabajadores y evaluaciones';
-
+        return 'Opera el día a día; el resumen ejecutivo CX está a un clic.';
       case 2:
-        return 'Dashboard Gerente';
-
+        return 'Coordina equipo, campañas y seguimiento de evaluaciones en tu alcance.';
       case 3:
-        return 'Aquí tienes un resumen de las actividades recientes';
-
+        return 'Prioriza envíos y ediciones; el detalle de tus evaluaciones abajo.';
       default:
         return 'Dashboard';
+    }
+  }
+
+  roleLabel(): string {
+    switch (this.currentUser().role) {
+      case 0:
+        return 'Plataforma';
+      case 1:
+        return 'Administrador empresa';
+      case 2:
+        return 'Gerente';
+      case 3:
+        return 'Evaluador';
+      default:
+        return '';
     }
   }
 }

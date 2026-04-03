@@ -55,17 +55,18 @@ export class DashboardSuperadminComponent {
 
   actions = signal<ActionDashboard[]>([
     {
-      title: 'Registrar Usuario',
+      title: 'Nueva empresa',
+      icon: 'lucideBriefcaseBusiness',
+      route: '/companies/create',
+      variant: 'primary',
+    },
+    {
+      title: 'Registrar usuario',
       icon: 'lucideUserPlus',
       route: '/users/create',
     },
     {
-      title: 'Registrar Empresa',
-      icon: 'lucideBriefcaseBusiness',
-      route: '/companies/create',
-    },
-    {
-      title: 'Registrar Pago',
+      title: 'Registrar pago',
       icon: 'lucideDollarSign',
       route: '/payments/create',
     },

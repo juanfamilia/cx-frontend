@@ -17,6 +17,10 @@ import { ActionDashboard } from 'src/app/types/actionsDashboard';
 })
 export class DashboardQuickActionsComponent {
   actions = input.required<ActionDashboard[]>();
+  /** Título de la tarjeta (ajustar por intención del rol). */
+  heading = input<string>('Acciones rápidas');
+  /** Una línea bajo el título (opcional). */
+  description = input<string>();
 
   private router = inject(Router);
 

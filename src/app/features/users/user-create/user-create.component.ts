@@ -29,11 +29,14 @@ export class UserCreateComponent {
         this.router.navigate(['/users']);
       },
       error: err => {
-        this.toastService.showToast(
-          'error',
-          'Error al crear usuario',
-          err.error.detail
-        );
+        const d = err?.error?.detail;
+        const msg =
+          typeof d === 'string'
+            ? d
+            : Array.isArray(d) && d[0]?.msg
+              ? d[0].msg
+              : 'No se pudo crear el usuario.';
+        this.toastService.showToast('error', 'Error al crear usuario', msg);
         console.error('Error creating user:', err);
       },
     });

@@ -1,33 +1,55 @@
 @if (resourceDashboard.isLoading()) {
   <app-spinner />
 } @else {
+  <h2 class="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+    Salud de la plataforma
+  </h2>
+  <p class="mb-4 max-w-3xl text-sm text-gray-600 dark:text-gray-400">
+    Indicadores globales. Desde cada tarjeta puedes ir al módulo correspondiente.
+  </p>
+
   <div class="mb-8 grid grid-cols-2 gap-2 sm:gap-6 md:grid-cols-4">
     <app-dashboard-card
-      title="Empresas Totales"
+      title="Empresas"
       [value]="data()?.total_empresas || 0"
+      hint="Clientes registrados en CX"
+      link="/companies"
+      linkLabel="Gestionar empresas"
       icon="lucideBuilding2"
       iconColor="text-primary-500" />
 
     <app-dashboard-card
-      title="Pagos Vigentes"
+      title="Pagos vigentes"
       [value]="data()?.empresas_vigentes || 0"
+      hint="Empresas con suscripción activa"
+      link="/payments"
+      linkLabel="Ver pagos"
       icon="lucideBanknote"
       iconColor="text-primary-500" />
 
     <app-dashboard-card
-      title="Pagos Caducados"
+      title="Pagos caducados"
       [value]="data()?.empresas_caducadas || 0"
+      hint="Renovación o seguimiento comercial"
+      link="/payments"
+      linkLabel="Revisar caducidades"
       icon="lucideCircleX"
-      iconColor="text-green-500" />
+      iconColor="text-amber-600" />
 
     <app-dashboard-card
-      title="Usuarios Totales"
+      title="Usuarios"
       [value]="data()?.usuarios_totales || 0"
+      hint="Cuentas en todas las empresas"
+      link="/users"
+      linkLabel="Ver usuarios"
       icon="lucideUsers"
       iconColor="text-primary-500" />
   </div>
 
   <div class="grid md:grid-cols-3">
-    <app-dashboard-quick-actions [actions]="actions()" />
+    <app-dashboard-quick-actions
+      [actions]="actions()"
+      heading="Alta en plataforma"
+      description="Prioriza dar de alta empresas; luego usuarios y pagos según el onboarding." />
   </div>
 }

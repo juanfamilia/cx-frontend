@@ -6,12 +6,14 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 import { provideIcons } from '@ng-icons/core';
 import {
   lucideCircleAlert,
   lucideCircleCheckBig,
   lucideCircleX,
+  lucideFileText,
   lucidePencil,
   lucidePlus,
   lucideSend,
@@ -27,6 +29,7 @@ import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashb
   selector: 'app-dashboard-evaluators',
   imports: [
     SpinnerComponent,
+    RouterLink,
     DashboardCardComponent,
     DashboardQuickActionsComponent,
     DashboardEvaluatorsChartsComponent,
@@ -42,6 +45,7 @@ import { DashboardQuickActionsComponent } from '../dashboard-quick-actions/dashb
       lucidePencil,
       lucideCircleX,
       lucidePlus,
+      lucideFileText,
     }),
   ],
 })
@@ -61,9 +65,19 @@ export class DashboardEvaluatorsComponent {
 
   actions = signal<ActionDashboard[]>([
     {
-      title: 'Registrar Evaluación',
+      title: 'Registrar nueva evaluación',
       icon: 'lucidePlus',
       route: '/evaluations/create',
+      variant: 'primary',
+    },
+    {
+      title: 'Ver todas mis evaluaciones',
+      icon: 'lucideFileText',
+      route: '/evaluations',
     },
   ]);
+
+  pendingEdits = computed(
+    () => this.data()?.summary?.ediciones_pendientes ?? 0
+  );
 }

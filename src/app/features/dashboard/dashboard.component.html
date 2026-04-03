@@ -7,12 +7,97 @@
     (skip)="onOnboardingSkip()" />
 
   <!-- Header -->
-  <div class="flex items-center justify-between">
-    <app-page-header
-      [title]="'¡Bienvenido, ' + currentUser().first_name + '!'"
-      [description]="getDescription()" />
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div class="flex flex-col gap-2">
+      <app-page-header
+        [title]="'¡Bienvenido, ' + currentUser().first_name + '!'"
+        [description]="getDescription()" />
+      <span
+        class="inline-flex w-fit rounded-full bg-gray-100 px-3 py-0.5 text-xs font-medium text-gray-600 dark:bg-bunker-800 dark:text-gray-300">
+        {{ roleLabel() }}
+      </span>
+    </div>
     <app-button-notification />
   </div>
+
+  <!-- Cintillo contextual por valor del rol (una sola acción prioritaria) -->
+  @switch (currentUser().role) {
+    @case (1) {
+      <a
+        routerLink="/executive-dashboard"
+        class="mt-5 flex items-center justify-between gap-4 rounded-xl border border-primary-200 bg-primary-50/90 p-4 text-left shadow-sm transition hover:border-primary-300 hover:bg-primary-50 dark:border-primary-900/40 dark:bg-primary-950/30 dark:hover:bg-primary-950/50">
+        <div>
+          <p class="text-sm font-semibold text-primary-900 dark:text-primary-100">
+            Resumen ejecutivo CX
+          </p>
+          <p class="mt-0.5 text-xs text-primary-800/80 dark:text-primary-200/80">
+            NPS, esfuerzo del cliente, tasas y sucursales — pensado para dirección.
+          </p>
+        </div>
+        <span
+          class="shrink-0 text-sm font-medium text-primary-700 dark:text-primary-300"
+          >Abrir →</span
+        >
+      </a>
+    }
+    @case (0) {
+      <a
+        routerLink="/executive-dashboard"
+        class="mt-5 flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left shadow-sm transition hover:bg-slate-100 dark:border-bunker-700 dark:bg-bunker-900/40 dark:hover:bg-bunker-900/60">
+        <div>
+          <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+            Vista ejecutiva por empresa
+          </p>
+          <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+            Elige compañía en la pantalla siguiente para ver métricas agregadas.
+          </p>
+        </div>
+        <span class="shrink-0 text-sm font-medium text-slate-700 dark:text-slate-300"
+          >Abrir →</span
+        >
+      </a>
+    }
+    @case (2) {
+      <div
+        class="mt-5 flex flex-col gap-2 rounded-xl border border-amber-200/80 bg-amber-50/90 p-4 dark:border-amber-900/40 dark:bg-amber-950/20 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-sm text-amber-950 dark:text-amber-100">
+          <span class="font-semibold">Seguimiento operativo:</span>
+          revisa evaluaciones del equipo y asignaciones de campaña.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <a
+            routerLink="/evaluations"
+            class="inline-flex items-center rounded-md bg-amber-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-800">
+            Ver evaluaciones
+          </a>
+          <a
+            routerLink="/transcript-search"
+            class="inline-flex items-center rounded-md border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-900 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100 dark:hover:bg-amber-900">
+            Buscar en transcripciones
+          </a>
+        </div>
+      </div>
+    }
+    @case (3) {
+      <a
+        routerLink="/evaluations/create"
+        class="mt-5 flex items-center justify-between gap-4 rounded-xl border border-emerald-200 bg-emerald-50/90 p-4 text-left shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30">
+        <div>
+          <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+            Acción principal: registrar evaluación
+          </p>
+          <p class="mt-0.5 text-xs text-emerald-800/80 dark:text-emerald-200/80">
+            Envía nuevas visitas o interacciones para análisis.
+          </p>
+        </div>
+        <span
+          class="shrink-0 text-sm font-medium text-emerald-800 dark:text-emerald-300"
+          >Ir →</span
+        >
+      </a>
+    }
+  }
+
   <!-- Cards -->
   <div class="mt-4">
     @switch (currentUser().role) {

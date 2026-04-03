@@ -1,39 +1,67 @@
 @if (resourceDashboard.isLoading()) {
   <app-spinner />
 } @else {
+  <h2 class="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+    Indicadores de tu empresa
+  </h2>
+  <p class="mb-4 max-w-3xl text-sm text-gray-600 dark:text-gray-400">
+    Vista operativa del día a día. Para NPS agregado y sucursales usa el
+    <a routerLink="/executive-dashboard" class="text-primary-600 font-medium underline-offset-2 hover:underline"
+      >resumen ejecutivo</a
+    >.
+  </p>
+
   <div class="mb-8 grid grid-cols-2 gap-2 sm:gap-6 lg:grid-cols-4">
     <app-dashboard-card
-      title="Gerentes Totales"
+      title="Gerentes"
       [value]="data()?.gerentes || 0"
+      hint="Perfiles de coordinación en tu compañía"
+      link="/users"
+      linkLabel="Gestionar usuarios"
       icon="lucideUsers"
       iconColor="text-primary-500" />
 
     <app-dashboard-card
-      title="Evaluadores Totales"
+      title="Evaluadores"
       [value]="data()?.evaluadores || 0"
+      hint="Quienes registran visitas o interacciones"
+      link="/users"
+      linkLabel="Ver equipo"
       icon="lucideUsers"
       iconColor="text-primary-500" />
 
     <app-dashboard-card
-      title="Evaluaciones Aprobadas"
+      title="Evaluaciones aprobadas"
       [value]="data()?.evaluaciones_aprobadas || 0"
+      hint="Cerradas y validadas"
+      link="/evaluations"
+      linkLabel="Ir a evaluaciones"
       icon="lucideCircleCheckBig"
       iconColor="text-green-500" />
 
     <app-dashboard-card
-      title="Evaluaciones Rechazadas"
+      title="Evaluaciones rechazadas"
       [value]="data()?.evaluaciones_rechazadas || 0"
+      hint="Requieren corrección o revisión"
+      link="/evaluations"
+      linkLabel="Revisar listado"
       icon="lucideCircleX"
       iconColor="text-red-500" />
   </div>
 
   @if (data()?.analysis?.length) {
+    <h2 class="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+      Tendencias
+    </h2>
     <div class="pb-7">
       <app-dashboard-admin-charts [analysis]="data()!.analysis!" />
     </div>
   }
 
   <div class="my-4 mb-30 grid pt-5 md:mb-15 lg:grid-cols-2">
-    <app-dashboard-quick-actions [actions]="actions()" />
+    <app-dashboard-quick-actions
+      [actions]="actions()"
+      heading="Siguiente paso"
+      description="Acciones frecuentes de administración. El resumen CX está destacado arriba." />
   </div>
 }

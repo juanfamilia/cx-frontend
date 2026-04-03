@@ -133,13 +133,22 @@ export class UserFormComponent implements OnInit {
 
         break;
       case 1:
+        // Default evaluador; antes se enviaba role 1 y el API rechazaba (solo permite 2 o 3).
         this.userForm.patchValue({
-          role: 1,
+          role: 3,
         });
         this.roles.set([
           { name: 'Gerente', value: 2 },
           { name: 'Evaluador', value: 3 },
         ]);
+        break;
+      case 2:
+        // Gerente: solo puede dar de alta evaluadores en su empresa (company_id la fija el API).
+        this.userForm.patchValue({
+          role: 3,
+          company_id: this.currentUser.company_id,
+        });
+        this.roles.set([{ name: 'Evaluador', value: 3 }]);
         break;
     }
 
