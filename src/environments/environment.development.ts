@@ -1,4 +1,8 @@
+import { apiBaseUrl } from './api-base';
+
 export const environment = {
   production: false,
-  apiUrl: 'https://siete-api-staging.up.railway.app/api/v1/',
+  get apiUrl() {
+    return apiBaseUrl();
+  },
 };

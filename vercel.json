@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://siete-api-staging.up.railway.app/api/:path*"
+    }
+  ]
+}
