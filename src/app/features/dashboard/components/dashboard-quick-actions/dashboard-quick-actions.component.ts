@@ -25,6 +25,11 @@ export class DashboardQuickActionsComponent {
   private router = inject(Router);
 
   goTo(route: string) {
-    this.router.navigate([route]);
+    const path = route.trim();
+    if (path.startsWith('/')) {
+      void this.router.navigateByUrl(path);
+    } else {
+      void this.router.navigate([path]);
+    }
   }
 }

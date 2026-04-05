@@ -25,13 +25,21 @@ export const authGuard: CanActivateFn = (route, state): Observable<boolean | Url
       let userRole: number | undefined = undefined;
       try {
         const user = authService.getCurrentUser();
-        userRole = (user as any).role as number | undefined;
+        const raw = (user as any)?.role;
+        if (raw !== undefined && raw !== null) {
+          const n = Number(raw);
+          userRole = Number.isNaN(n) ? undefined : n;
+        }
       } catch {
         // si falla currentUser, se trata como no logueado
         return router.createUrlTree(['/login']);
       }
 
-      if (allowedRoles && userRole != null && !allowedRoles.includes(userRole)) {
+      if (
+        allowedRoles &&
+        userRole !== undefined &&
+        !allowedRoles.includes(userRole)
+      ) {
         return router.createUrlTree(['/']);
       }
 

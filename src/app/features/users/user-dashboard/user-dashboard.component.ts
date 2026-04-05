@@ -111,11 +111,11 @@ export class UserDashboardComponent {
   });
 
   createUser() {
-    this.router.navigate(['/users/create']);
+    void this.router.navigateByUrl('/users/create');
   }
 
   updateUser(id: number) {
-    this.router.navigate(['/users/update/' + id]);
+    void this.router.navigateByUrl(`/users/update/${id}`);
   }
 
   deleteUser(id: number) {
