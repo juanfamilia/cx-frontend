@@ -102,11 +102,16 @@ export class EvaluationCreateComponent {
           void this.router.navigate(['/']);
         },
         error: err => {
-          this.toastService.showToast(
-            'error',
-            'Error al crear la evaluación',
-            err.message
-          );
+          const status = (err as { status?: number })?.status;
+          let msg =
+            (err as { error?: { detail?: string } })?.error?.detail ??
+            (err as Error)?.message ??
+            'Error desconocido';
+          if (status === 0) {
+            msg =
+              'Sin respuesta del servidor (red, CORS o timeout). Comprueba en Railway las variables CORS_EXTRA_ORIGINS / CORS_ORIGIN_REGEX y la consola del navegador (F12).';
+          }
+          this.toastService.showToast('error', 'Error al crear la evaluación', msg);
           console.error('Error creating evaluation:', err);
         },
       });
