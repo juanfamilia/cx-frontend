@@ -7,8 +7,13 @@
   [loading]="assignmentsResource.isLoading()"
   placeholder="Seleccione una campaña"
   [group]="true"
+  optionGroupLabel="label"
+  optionGroupChildren="items"
+  optionLabel="label"
+  optionValue="value"
+  appendTo="body"
   class="mx-auto mt-4 w-105"
-  (onChange)="selectCampaign($event.value); isByZone($event.value)">
+  (onChange)="onCampaignSelected($event)">
   <ng-template let-group #group>
     <div class="flex items-center">
       <span>{{ group.label }}</span>

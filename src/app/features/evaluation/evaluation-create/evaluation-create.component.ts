@@ -13,7 +13,7 @@ import { Campaign } from '@interfaces/campaign';
 import { CampaignService } from '@pages/campaign/campaign.service';
 import { EvaluationService } from '@pages/evaluation/evaluation.service';
 import { ShareToasterService } from '@core/services/toast.service';
-import { SelectModule } from 'primeng/select';
+import { SelectChangeEvent, SelectModule } from 'primeng/select';
 import { EvaluationFormComponent } from '../components/evaluation-form/evaluation-form.component';
 
 @Component({
@@ -34,22 +34,28 @@ export class EvaluationCreateComponent {
   });
 
   assignments = computed(() => {
+    const data = this.assignmentsResource.value();
     const list = [
       {
         label: '👤 Por Usuario',
         value: 'user',
-        items: this.assignmentsResource.value()?.by_user.map(assignment => ({
-          label: assignment.campaign?.name,
-          value: assignment.campaign_id,
-        })),
+        items:
+          data?.by_user?.map(assignment => ({
+            label: assignment.campaign?.name ?? '',
+            value: assignment.campaign_id,
+          })) ?? [],
       },
       {
         label: '📍 Por Zonas',
         value: 'zone',
-        items: this.assignmentsResource.value()?.by_zone.map(assignment => ({
-          label: assignment.campaign?.name + ' - ' + assignment.zone?.name,
-          value: assignment.campaign_id,
-        })),
+        items:
+          data?.by_zone?.map(assignment => ({
+            label:
+              (assignment.campaign?.name ?? '') +
+              ' - ' +
+              (assignment.zone?.name ?? ''),
+            value: assignment.campaign_id,
+          })) ?? [],
       },
     ];
     return list;
@@ -60,14 +66,22 @@ export class EvaluationCreateComponent {
 
   isLoadingSubmit = signal<boolean>(false);
 
-  isByZone(data: number) {
+  isByZone(campaignId: number) {
     const campaignResult = this.assignmentsResource
       .value()
-      ?.by_zone.find(assignment => {
-        return assignment.campaign_id === data;
-      });
+      ?.by_zone?.find(assignment => assignment.campaign_id === campaignId);
 
-    return campaignResult ? this.byZone.set(true) : this.byZone.set(false);
+    this.byZone.set(!!campaignResult);
+  }
+
+  onCampaignSelected(event: SelectChangeEvent) {
+    const raw = event.value;
+    const id = typeof raw === 'number' ? raw : Number(raw);
+    if (raw == null || !Number.isFinite(id)) {
+      return;
+    }
+    this.selectCampaign(id);
+    this.isByZone(id);
   }
 
   selectCampaign(id: number) {
