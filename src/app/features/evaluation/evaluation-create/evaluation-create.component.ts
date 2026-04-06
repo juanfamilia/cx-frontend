@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  ResourceStatus,
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -31,6 +32,22 @@ export class EvaluationCreateComponent {
 
   assignmentsResource = rxResource({
     loader: () => this.campaignService.getAssignments(),
+  });
+
+  /** Fallo al cargar GET /campaign-assignment/ (p. ej. 404 si el backend exigía zonas). */
+  assignmentsLoadFailed = computed(
+    () => this.assignmentsResource.status() === ResourceStatus.Error
+  );
+
+  /** Respuesta OK pero sin campañas asignadas al evaluador. */
+  assignmentsEmpty = computed(() => {
+    if (this.assignmentsResource.isLoading()) return false;
+    if (this.assignmentsResource.status() === ResourceStatus.Error) return false;
+    const d = this.assignmentsResource.value();
+    if (!d) return false;
+    return (
+      (d.by_user?.length ?? 0) === 0 && (d.by_zone?.length ?? 0) === 0
+    );
   });
 
   assignments = computed(() => {

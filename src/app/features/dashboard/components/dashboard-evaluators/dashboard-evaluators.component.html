@@ -75,7 +75,9 @@
     Progreso y cobertura
   </h2>
   <div class="pb-7">
-    <app-dashboard-evaluators-charts [weeklyProgress]="data()!.weekly_progress" [campaignCoverage]="data()!.coverage" />
+    <app-dashboard-evaluators-charts
+      [weeklyProgress]="data()?.weekly_progress ?? []"
+      [campaignCoverage]="data()?.coverage ?? []" />
   </div>
 <!--
   @if (resourceGoalsProgress.isLoading()) {

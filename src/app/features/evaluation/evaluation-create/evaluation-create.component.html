@@ -22,6 +22,21 @@
   </ng-template>
 </p-select>
 
+@if (assignmentsLoadFailed()) {
+  <p
+    class="mx-auto mt-3 max-w-md text-center text-sm text-red-600 dark:text-red-400">
+    No se pudieron cargar las campañas asignadas. Revisa la conexión o vuelve a
+    intentar; si el problema continúa, contacta al administrador.
+  </p>
+}
+@if (assignmentsEmpty()) {
+  <p
+    class="mx-auto mt-3 max-w-md text-center text-sm text-gray-600 dark:text-gray-400">
+    No hay campañas disponibles: no tienes asignaciones por usuario ni por zona
+    con campañas vigentes. Pide a un administrador que te asigne campaña o zonas.
+  </p>
+}
+
 @if (campaign()) {
   <app-evaluation-form
     [campaign]="campaign()!"
