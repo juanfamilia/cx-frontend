@@ -12,9 +12,10 @@
   optionLabel="label"
   optionValue="value"
   appendTo="body"
-  class="mx-auto mt-4 w-105"
+  [overlayOptions]="{ baseZIndex: 12000 }"
+  class="relative z-10 mx-auto mt-4 w-full max-w-md"
   (onChange)="onCampaignSelected($event)">
-  <ng-template let-group #group>
+  <ng-template pTemplate="group" let-group>
     <div class="flex items-center">
       <span>{{ group.label }}</span>
     </div>

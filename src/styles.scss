@@ -134,7 +134,8 @@ p-select.p-component.p-inputwrapper.p-select.w-full.ng-pristine.ng-valid.p-input
 }
 
 .p-select-overlay.p-component {
-  z-index: 1000 !important;
+  /* Por encima de sidebar, toasts y overlays de onboarding (z-50). */
+  z-index: 12000 !important;
 }
 
 .p-password-toggle-mask-icon {
