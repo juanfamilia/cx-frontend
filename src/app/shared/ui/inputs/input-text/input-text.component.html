@@ -8,6 +8,7 @@
     <p-floatlabel variant="on">
       <input
         [id]="id()"
+        [attr.autocomplete]="autocomplete() ?? null"
         [(ngModel)]="value"
         pInputText
         type="text"

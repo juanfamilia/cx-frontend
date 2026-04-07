@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -38,6 +39,14 @@ export class EvaluationCreateComponent {
   assignmentsLoadFailed = computed(
     () => this.assignmentsResource.status() === ResourceStatus.Error
   );
+
+  /** Mensaje derivado del error HTTP (402 pago, 401 token, 403 permiso, 0 red, etc.). */
+  assignmentsLoadErrorDetail = computed(() => {
+    if (this.assignmentsResource.status() !== ResourceStatus.Error) {
+      return '';
+    }
+    return formatAssignmentsLoadError(this.assignmentsResource.error());
+  });
 
   /** Respuesta OK pero sin campañas asignadas al evaluador. */
   assignmentsEmpty = computed(() => {
@@ -101,6 +110,11 @@ export class EvaluationCreateComponent {
     this.isByZone(id);
   }
 
+  /** Vuelve a pedir GET /campaign-assignment/ (distinto de campaign-goals-progress). */
+  retryLoadAssignments(): void {
+    this.assignmentsResource.reload();
+  }
+
   selectCampaign(id: number) {
     this.campaign.set(null);
     this.campaignService.getOne(id).subscribe({
@@ -147,4 +161,71 @@ export class EvaluationCreateComponent {
         },
       });
   }
+}
+
+function formatAssignmentsLoadError(err: unknown): string {
+  const fromHttp = extractHttpErrorDetail(err);
+  if (fromHttp !== null) {
+    const { status, detail, message } = fromHttp;
+    switch (status) {
+      case 401:
+        return detail || 'Sesión expirada o token inválido. Cierra sesión y vuelve a entrar.';
+      case 402:
+        return (
+          detail ||
+          'Pago o suscripción de la empresa no vigente. Un administrador debe renovar el pago.'
+        );
+      case 403:
+        return (
+          detail ||
+          'No tienes permiso para ver las campañas asignadas. Solo cuentas evaluador pueden usar esta pantalla; si deberías serlo, contacta al administrador.'
+        );
+      case 404:
+        return detail || 'El servidor respondió que el recurso no existe.';
+      case 0:
+        return (
+          detail ||
+          'Sin respuesta del servidor (red, bloqueo o CORS). Comprueba conexión y que el API esté disponible.'
+        );
+      default:
+        return detail || message || `Error del servidor (${status}).`;
+    }
+  }
+  if (err instanceof Error && err.message) {
+    return err.message;
+  }
+  return (
+    'No se pudo interpretar el error. Abre F12 → Red, busca la petición ' +
+    '"campaign-assignment" y revisa el código de estado y el cuerpo de la respuesta.'
+  );
+}
+
+/** Cubre HttpErrorResponse y objetos con forma similar (p. ej. builds donde falla instanceof). */
+function extractHttpErrorDetail(
+  err: unknown
+): { status: number; detail: string; message: string } | null {
+  const cand = err as Partial<HttpErrorResponse> & {
+    status?: number;
+    error?: { detail?: string | { msg?: string }[] };
+    message?: string;
+  };
+  const status = cand?.status;
+  if (typeof status !== 'number') {
+    return null;
+  }
+
+  let detail = '';
+  const raw = cand.error as { detail?: string | { msg?: string }[] } | undefined;
+  if (typeof raw?.detail === 'string') {
+    detail = raw.detail;
+  } else if (Array.isArray(raw?.detail)) {
+    detail = raw.detail
+      .map((x: { msg?: string }) => (typeof x?.msg === 'string' ? x.msg : ''))
+      .filter(Boolean)
+      .join('. ');
+  }
+
+  const message =
+    typeof cand.message === 'string' ? cand.message : '';
+  return { status, detail, message };
 }

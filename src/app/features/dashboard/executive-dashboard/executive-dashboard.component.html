@@ -26,6 +26,7 @@
         <select
           id="exec-company"
           class="filter-select"
+          autocomplete="organization"
           [ngModel]="companySelectModel()"
           (ngModelChange)="onCompanyChange($event)">
           <option value="">Seleccione una empresa…</option>
@@ -43,6 +44,7 @@
         type="text"
         class="filter-input"
         placeholder="Opcional"
+        autocomplete="off"
         [ngModel]="filters().branch_id ?? ''"
         (ngModelChange)="onBranchChange($event)" />
     </div>
@@ -54,6 +56,7 @@
         type="text"
         class="filter-input"
         placeholder="Ej. DO, MX"
+        autocomplete="country-name"
         [ngModel]="filters().country ?? ''"
         (ngModelChange)="onCountryChange($event)" />
     </div>
@@ -63,6 +66,7 @@
       <select
         id="exec-interaction"
         class="filter-select"
+        autocomplete="off"
         [ngModel]="filters().interaction_type ?? ''"
         (ngModelChange)="onInteractionTypeChange($event)">
         @for (opt of interactionTypeOptions; track opt.value) {

@@ -35,6 +35,8 @@ export class InputTextComponent implements ControlValueAccessor {
   label = input.required<string>();
   icon = input<string>();
   id = input<string>(`input-${Math.random().toString(36).substring(2, 9)}`);
+  /** P. ej. `username` (login), `email`, `off`; mejora autofill y auditorías. */
+  autocomplete = input<string | undefined>(undefined);
   ErrorMessage = input<boolean>(true);
 
   disabled = false;

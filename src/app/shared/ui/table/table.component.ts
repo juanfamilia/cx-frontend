@@ -65,6 +65,9 @@ import { Pagination } from '@data/types/pagination';
   ],
 })
 export class TableComponent implements OnInit {
+  /** Evita duplicar `id="search"` cuando hay varias tablas en la página. */
+  readonly globalFilterInputId = `table-global-filter-${Math.random().toString(36).slice(2, 11)}`;
+
   columnsInput = input.required<TableColumn[]>();
   data = input.required<any[]>();
   loading = input<boolean>();

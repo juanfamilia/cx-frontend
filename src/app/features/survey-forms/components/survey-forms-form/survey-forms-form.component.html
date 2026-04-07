@@ -10,6 +10,7 @@
       id="title"
       label="Titulo"
       icon="lucideType"
+      autocomplete="off"
       [ErrorMessage]="false"
       formControlName="title" />
   </div>
@@ -40,9 +41,10 @@
           [formGroupName]="$index">
           <!-- Name -->
           <app-input-text
-            id="name"
+            [id]="'survey-sec-' + sectionIndex + '-name'"
             label="Nombre de la Sección"
             icon="lucideType"
+            autocomplete="off"
             [ErrorMessage]="false"
             formControlName="name" />
           <!-- Maximum Score -->
@@ -52,7 +54,7 @@
               [showButtons]="true"
               buttonLayout="horizontal"
               spinnerMode="horizontal"
-              inputId="maximum_score"
+              [inputId]="'survey-sec-' + sectionIndex + '-max'"
               [min]="0"
               class="w-full">
               <ng-template #incrementbuttonicon>
@@ -62,7 +64,9 @@
                 <ng-icon name="lucideMinus" />
               </ng-template>
             </p-inputnumber>
-            <label for="over_label">Máximo Puntaje</label>
+            <label [attr.for]="'survey-sec-' + sectionIndex + '-max'"
+              >Máximo Puntaje</label
+            >
           </p-floatlabel>
 
           <app-button-primary
@@ -95,9 +99,16 @@
                       [formGroupName]="aspectIndex">
                       <!-- Description -->
                       <app-input-text
-                        id="description"
+                        [id]="
+                          'survey-sec-' +
+                          sectionIndex +
+                          '-asp-' +
+                          aspectIndex +
+                          '-desc'
+                        "
                         label="Descripción"
                         icon="lucideText"
+                        autocomplete="off"
                         [ErrorMessage]="false"
                         formControlName="description" />
 
@@ -110,9 +121,24 @@
                           optionLabel="label"
                           optionValue="value"
                           formControlName="type"
-                          inputId="type"
+                          [inputId]="
+                            'survey-sec-' +
+                            sectionIndex +
+                            '-asp-' +
+                            aspectIndex +
+                            '-type'
+                          "
                           class="w-full" />
-                        <label for="type">Tipo de Aspecto</label>
+                        <label
+                          [attr.for]="
+                            'survey-sec-' +
+                            sectionIndex +
+                            '-asp-' +
+                            aspectIndex +
+                            '-type'
+                          ">
+                          Tipo de Aspecto
+                        </label>
                       </p-floatlabel>
 
                       <!-- Máximo Puntaje (solo si el tipo es score) -->
@@ -126,7 +152,13 @@
                             [showButtons]="true"
                             buttonLayout="horizontal"
                             spinnerMode="horizontal"
-                            inputId="maximum_score"
+                            [inputId]="
+                              'survey-sec-' +
+                              sectionIndex +
+                              '-asp-' +
+                              aspectIndex +
+                              '-max'
+                            "
                             [min]="0"
                             class="w-full">
                             <ng-template #incrementbuttonicon>
@@ -136,7 +168,16 @@
                               <ng-icon name="lucideMinus" />
                             </ng-template>
                           </p-inputnumber>
-                          <label for="over_label">Máximo Puntaje</label>
+                          <label
+                            [attr.for]="
+                              'survey-sec-' +
+                              sectionIndex +
+                              '-asp-' +
+                              aspectIndex +
+                              '-max'
+                            ">
+                            Máximo Puntaje
+                          </label>
                         </p-floatlabel>
                       }
                     </div>

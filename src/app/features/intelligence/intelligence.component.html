@@ -37,9 +37,17 @@
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
       <div class="flex flex-wrap gap-4 items-center">
         <div>
-          <label class="text-sm text-gray-600 dark:text-gray-400 mb-1 block">Severidad</label>
-          <select [ngModel]="selectedSeverity()" (ngModelChange)="filterBySeverity($event)"
-                  class="border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-3 py-2">
+          <label
+            class="text-sm text-gray-600 dark:text-gray-400 mb-1 block"
+            for="intel-severity">
+            Severidad
+          </label>
+          <select
+            id="intel-severity"
+            autocomplete="off"
+            [ngModel]="selectedSeverity()"
+            (ngModelChange)="filterBySeverity($event)"
+            class="border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-3 py-2">
             <option value="">Todas</option>
             <option value="critical">Crítica</option>
             <option value="high">Alta</option>
@@ -48,7 +56,13 @@
           </select>
         </div>
         <div class="flex items-center gap-2">
-          <input type="checkbox" id="unreadOnly" [checked]="unreadOnly()" (change)="toggleUnreadOnly()" class="h-4 w-4">
+          <input
+            type="checkbox"
+            id="unreadOnly"
+            autocomplete="off"
+            [checked]="unreadOnly()"
+            (change)="toggleUnreadOnly()"
+            class="h-4 w-4" />
           <label for="unreadOnly" class="text-sm text-gray-600 dark:text-gray-400">Solo no leídos</label>
         </div>
       </div>

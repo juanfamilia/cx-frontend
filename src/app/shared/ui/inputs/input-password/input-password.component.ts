@@ -37,6 +37,7 @@ import { PasswordModule } from 'primeng/password';
 export class InputPasswordComponent implements ControlValueAccessor {
   label = input.required<string>();
   id = input<string>(`input-${Math.random().toString(36).substring(2, 9)}`);
+  autocomplete = input<string | undefined>(undefined);
 
   disabled = false;
   value: any = '';

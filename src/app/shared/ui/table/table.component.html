@@ -19,12 +19,13 @@
         </p-inputgroup-addon>
         <p-floatlabel variant="on">
           <input
-            id="search"
+            [id]="globalFilterInputId"
             [formControl]="searchInput"
             pInputText
-            type="text"
+            type="search"
+            autocomplete="off"
             class="py-2" />
-          <label class="font-normal" for="search">Buscar</label>
+          <label class="font-normal" [attr.for]="globalFilterInputId">Buscar</label>
         </p-floatlabel>
       </p-inputgroup>
 
