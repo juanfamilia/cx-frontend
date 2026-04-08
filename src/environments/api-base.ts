@@ -1,9 +1,11 @@
-/** Base del API en el navegador: Vercel (y cualquier host real) → mismo origen + rewrite; solo localhost → Railway directo. */
+/**
+ * Base del API en el navegador (siempre Railway en este proyecto).
+ * El rewrite `/api` → Railway en Vercel a veces no se aplica con el build de Angular;
+ * entonces `/api/v1/...` devolvía HTML del SPA y HttpClient fallaba al parsear JSON.
+ * El backend permite orígenes Vercel y localhost en CORS.
+ */
+const API_V1_BASE = 'https://siete-api-staging.up.railway.app/api/v1/';
+
 export function apiBaseUrl(): string {
-  const g = globalThis as typeof globalThis & { location?: { hostname?: string } };
-  const host = typeof g.location?.hostname === 'string' ? g.location.hostname : '';
-  if (host === 'localhost' || host === '127.0.0.1') {
-    return 'https://siete-api-staging.up.railway.app/api/v1/';
-  }
-  return '/api/v1/';
+  return API_V1_BASE;
 }

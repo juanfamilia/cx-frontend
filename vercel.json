@@ -1,5 +1,6 @@
 {
   "buildCommand": "npm run build",
+  "outputDirectory": "dist/cx-frontend/browser",
   "rewrites": [
     {
       "source": "/api/:path*",
