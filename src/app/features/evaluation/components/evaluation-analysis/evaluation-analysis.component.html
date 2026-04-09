@@ -159,18 +159,42 @@
           </p-tabs>
         </div>
       } @else {
-        <div class="flex h-96 flex-col items-center justify-center text-center">
+        <div
+          class="flex h-96 flex-col items-center justify-center px-4 text-center">
           <ng-icon
             name="lucideCircleAlert"
             size="48"
             class="mb-4 text-gray-400" />
-          <p class="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
-            Análisis no disponible
-          </p>
-          <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
-            El análisis está en proceso o no se encuentra disponible en este
-            momento
-          </p>
+          @if (aiProcessing.isLoading()) {
+            <app-spinner />
+            <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+              Comprobando estado del análisis…
+            </p>
+          } @else {
+            <p class="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
+              Análisis no disponible
+            </p>
+            <p
+              class="mb-4 max-w-md text-sm text-gray-500 dark:text-gray-400">
+              {{
+                aiProcessing.value()?.user_message_es ??
+                  'El análisis está en proceso o no se encuentra disponible en este momento.'
+              }}
+            </p>
+            @if (aiProcessing.value()?.status === 'pending') {
+              <p class="mb-6 text-xs text-gray-400 dark:text-gray-500">
+                El procesamiento de IA puede tardar varios minutos tras subir el
+                video.
+              </p>
+            }
+            <button
+              type="button"
+              class="inline-flex cursor-pointer items-center rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-500"
+              (click)="refreshAnalysis()">
+              <ng-icon name="lucideRefreshCw" size="16" class="mr-2" />
+              Reintentar
+            </button>
+          }
         </div>
       }
     }

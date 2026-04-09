@@ -5,6 +5,7 @@ import {
 } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
+import { EvaluationAiProcessing } from '@interfaces/evaluation-ai-processing';
 import { Evaluation, EvaluationList } from '@interfaces/evaluation';
 import { Observable } from 'rxjs';
 
@@ -61,6 +62,12 @@ export class EvaluationService {
 
   getOne(id: number): Observable<Evaluation> {
     return this.http.get<Evaluation>(environment.apiUrl + 'evaluations/' + id);
+  }
+
+  getAiProcessing(id: number): Observable<EvaluationAiProcessing> {
+    return this.http.get<EvaluationAiProcessing>(
+      `${environment.apiUrl}evaluations/${id}/ai-processing`
+    );
   }
 
   create(data: FormData): Observable<Evaluation> {

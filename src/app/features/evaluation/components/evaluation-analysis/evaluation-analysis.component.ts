@@ -23,6 +23,7 @@ import {
   lucideTable,
 } from '@ng-icons/lucide';
 import { EvaluationAnalysisService } from '@pages/evaluation/evaluation-analysis.service';
+import { EvaluationService } from '@pages/evaluation/evaluation.service';
 import { MarkdownComponent } from 'ngx-markdown';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
@@ -65,6 +66,7 @@ export class EvaluationAnalysisComponent {
   evalutationId = input.required<number>();
 
   private evaluationAnalysisService = inject(EvaluationAnalysisService);
+  private evaluationService = inject(EvaluationService);
   private pdfService = inject(PdfService);
 
   visible = model(false);
@@ -73,11 +75,24 @@ export class EvaluationAnalysisComponent {
     request: () => this.evalutationId(),
     loader: () => this.evaluationAnalysisService.getOne(this.evalutationId()),
   });
+  aiProcessing = rxResource({
+    request: () => this.evalutationId(),
+    loader: () => this.evaluationService.getAiProcessing(this.evalutationId()),
+  });
   copySuccess = signal<boolean>(false);
   isJsonExpanded = signal<boolean>(true);
 
   showDialog() {
     this.visible.set(true);
+    queueMicrotask(() => {
+      this.analysis.reload();
+      this.aiProcessing.reload();
+    });
+  }
+
+  refreshAnalysis(): void {
+    this.analysis.reload();
+    this.aiProcessing.reload();
   }
 
   hiddenDialog() {
