@@ -10,7 +10,7 @@ export const evaluationRoutes: Routes = [
     path: '',
     component: EvaluationDashboardComponent,
     canActivate: [authGuard],
-    data: { role: [1, 2, 3], title: 'Encuestas' },
+    data: { role: [0, 1, 2, 3], title: 'Encuestas' },
   },
   {
     path: 'create',
@@ -28,6 +28,6 @@ export const evaluationRoutes: Routes = [
     path: 'detail/:id',
     component: EvaluationDetailComponent,
     canActivate: [authGuard],
-    data: { role: [1, 2, 3], title: 'Ver Encuesta' },
+    data: { role: [0, 1, 2, 3], title: 'Ver Encuesta' },
   },
 ];

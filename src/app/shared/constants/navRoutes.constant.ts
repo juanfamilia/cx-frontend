@@ -59,7 +59,7 @@ export const NAVROUTES: RouteData[] = [
     title: 'Evaluaciones',
     route: '/evaluations',
     icon: 'lucideFileText',
-    roles: [1, 2, 3],
+    roles: [0, 1, 2, 3],
   },
   {
     title: 'Prompts',
