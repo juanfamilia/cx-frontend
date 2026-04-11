@@ -124,7 +124,7 @@ export class EvaluationFormComponent implements OnInit {
     // Calcular puntaje máximo de la encuesta
     const max = this.campaign().survey!.sections.reduce(
       (sum, s) =>
-        sum + s.aspects.reduce((aSum, a) => aSum + a.maximum_score, 0),
+        sum + s.aspects.reduce((aSum, a) => aSum + (a.maximum_score ?? 0), 0),
       0
     );
     this.maxScore.set(max);
@@ -227,7 +227,7 @@ export class EvaluationFormComponent implements OnInit {
         if (val !== null && val !== undefined) total += val;
       } else if (aspect.type === 'boolean') {
         const val = group.get('value_boolean')?.value;
-        if (val === true) total += aspect.maximum_score;
+        if (val === true) total += aspect.maximum_score ?? 0;
       }
     });
 
