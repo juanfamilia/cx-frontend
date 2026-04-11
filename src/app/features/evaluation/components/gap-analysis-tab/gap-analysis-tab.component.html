@@ -38,10 +38,10 @@
         <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">concordancia con auditor</p>
       </div>
 
-      <!-- Compared -->
+      <!-- Aspects mapped -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow">
         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Comparados</p>
-        <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ result()!.total_aspects_compared }}</div>
+        <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ result()!.total_aspects_mapped }}</div>
         <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">aspectos evaluados</p>
       </div>
 
@@ -68,41 +68,42 @@
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Sin discrepancias detectadas</p>
-        <p class="text-xs text-gray-400 dark:text-gray-500">La IA y el auditor están en perfecta concordancia</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500">La IA y el auditor están en concordancia</p>
       </div>
     } @else {
       <div>
         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
           Discrepancias detectadas
           <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 px-2 py-0.5 rounded-full">
-            {{ sortedDiscrepancies().length }}
+            {{ result()!.discrepancies_found }}
           </span>
         </h3>
 
         <div class="space-y-2">
-          @for (d of sortedDiscrepancies(); track d.aspect_name) {
+          @for (item of sortedDiscrepancies(); track item.aspect_id) {
             <div
               class="bg-white dark:bg-gray-800 rounded-xl shadow border-l-4 p-4"
-              [ngClass]="getSeverityBorderClass(d.severity)">
+              [ngClass]="getSeverityBorderClass(item.severity)">
               <div class="flex items-start justify-between gap-3">
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 flex-wrap mb-2">
-                    <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ d.aspect_name }}</h4>
-                    @if (d.section_name) {
-                      <span class="text-xs text-gray-500 dark:text-gray-400">— {{ d.section_name }}</span>
-                    }
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      {{ item.aspect_description }}
+                    </h4>
                     <span
                       class="text-xs font-semibold px-2 py-0.5 rounded-full"
-                      [ngClass]="getSeverityBadgeClass(d.severity)">
-                      {{ d.severity }}
+                      [ngClass]="getSeverityBadgeClass(item.severity)">
+                      {{ getSeverityLabel(item.severity) }}
                     </span>
                   </div>
 
-                  <!-- Human vs AI comparison -->
-                  <div class="flex items-center gap-4 text-sm">
+                  <!-- Auditor vs AI values -->
+                  <div class="flex items-center gap-4 text-sm mb-2">
                     <div class="flex items-center gap-1.5">
                       <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Auditor:</span>
-                      <span class="font-bold text-gray-800 dark:text-gray-200">{{ formatValue(d.human_value) }}</span>
+                      <span class="font-bold text-gray-800 dark:text-gray-200">
+                        {{ formatValue(item.auditor_value) }}
+                      </span>
                     </div>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -110,21 +111,24 @@
                     <div class="flex items-center gap-1.5">
                       <span class="text-xs font-medium text-gray-500 dark:text-gray-400">IA:</span>
                       <span class="font-bold"
-                        [ngClass]="d.severity === 'CRITICAL' ? 'text-red-600 dark:text-red-400' : d.severity === 'HIGH' ? 'text-orange-500' : 'text-gray-800 dark:text-gray-200'">
-                        {{ formatValue(d.ai_value) }}
+                        [ngClass]="item.severity === 'critical' ? 'text-red-600 dark:text-red-400'
+                          : item.severity === 'high' ? 'text-orange-500 dark:text-orange-400'
+                          : 'text-gray-800 dark:text-gray-200'">
+                        {{ formatValue(item.ai_value) }}
                       </span>
                     </div>
                   </div>
 
-                  @if (d.note) {
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">{{ d.note }}</p>
+                  @if (item.note) {
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.note }}</p>
                   }
                 </div>
 
+                <!-- Confidence -->
                 <div class="flex-shrink-0 text-right">
-                  <div class="text-xs text-gray-500 dark:text-gray-400">{{ getDirectionLabel(d) }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">Confianza IA</div>
                   <div class="text-sm font-bold text-gray-700 dark:text-gray-300 mt-0.5">
-                    Δ {{ d.gap_magnitude.toFixed(1) }}
+                    {{ (item.ai_confidence * 100).toFixed(0) }}%
                   </div>
                 </div>
               </div>
@@ -133,10 +137,5 @@
         </div>
       </div>
     }
-
-    <!-- Footer timestamp -->
-    <p class="text-xs text-gray-400 dark:text-gray-500 text-right">
-      Calculado: {{ result()!.computed_at | date:'d MMM yyyy, HH:mm' }}
-    </p>
   }
 </div>

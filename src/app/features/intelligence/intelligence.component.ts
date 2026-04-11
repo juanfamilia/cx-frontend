@@ -104,15 +104,15 @@ export class IntelligenceComponent implements OnInit {
       error: () => this.topActions.set([]),
     });
 
-    this.http.get<{ data: { status: string }[]; total: number }>(`${environment.apiUrl}action-plans/?limit=200`).subscribe({
+    this.http.get<{ data: { status: string; due_date?: string | null }[]; pagination: { total: number } }>(`${environment.apiUrl}action-plans/?limit=200`).subscribe({
       next: (res) => {
         const items = res.data || [];
         const now = new Date();
         this.actionPlanSummary.set({
-          total: res.total,
+          total: res.pagination?.total ?? items.length,
           pending: items.filter(p => p.status === 'pending').length,
           in_progress: items.filter(p => p.status === 'in_progress').length,
-          overdue: items.filter((p: any) => p.status !== 'resolved' && p.due_date && new Date(p.due_date) < now).length,
+          overdue: items.filter(p => p.status !== 'resolved' && !!p.due_date && new Date(p.due_date!) < now).length,
           resolved: items.filter(p => p.status === 'resolved').length,
         });
         this.loading.set(false);

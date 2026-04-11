@@ -3,29 +3,31 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
 
-export interface GapDiscrepancy {
-  aspect_name: string;
-  section_name?: string;
-  human_value: number | string | null;
-  ai_value: number | string | null;
-  gap_magnitude: number;
-  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-  direction: 'AI_HIGHER' | 'AI_LOWER' | 'DISAGREEMENT';
-  note?: string;
+/** Mirrors backend `GapItem` exactly. */
+export interface GapItem {
+  aspect_id: number;
+  aspect_description: string;
+  ai_field: string;
+  auditor_value: boolean | number | null;
+  ai_value: boolean | number | string | null;
+  ai_confidence: number;
+  discrepancy: boolean;
+  severity: 'critical' | 'high' | 'medium' | 'low' | null;
+  note: string;
 }
 
+/** Mirrors backend `GapAnalysisResult` exactly. */
 export interface GapAnalysisResult {
   evaluation_id: number;
+  total_aspects_mapped: number;
+  discrepancies_found: number;
+  critical_count: number;
+  high_count: number;
+  medium_count: number;
+  low_count: number;
+  /** 0–100 scale (not 0–1). */
   reliability_score: number;
-  total_aspects_compared: number;
-  discrepancies: GapDiscrepancy[];
-  summary: {
-    critical: number;
-    high: number;
-    medium: number;
-    low: number;
-  };
-  computed_at: string;
+  items: GapItem[];
 }
 
 @Injectable({ providedIn: 'root' })

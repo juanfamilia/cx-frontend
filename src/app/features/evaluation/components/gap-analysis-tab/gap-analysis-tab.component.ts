@@ -8,7 +8,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GapAnalysisService, GapAnalysisResult, GapDiscrepancy } from '../../services/gap-analysis.service';
+import { GapAnalysisService, GapAnalysisResult, GapItem } from '../../services/gap-analysis.service';
 
 @Component({
   selector: 'app-gap-analysis-tab',
@@ -26,9 +26,13 @@ export class GapAnalysisTabComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
 
-  criticalCount = computed(() => this.result()?.summary.critical ?? 0);
-  highCount = computed(() => this.result()?.summary.high ?? 0);
-  reliabilityPct = computed(() => Math.round((this.result()?.reliability_score ?? 0) * 100));
+  // reliability_score is 0–100 on the backend, use directly
+  reliabilityPct = computed(() => Math.round(this.result()?.reliability_score ?? 0));
+
+  criticalCount = computed(() => this.result()?.critical_count ?? 0);
+  highCount = computed(() => this.result()?.high_count ?? 0);
+  mediumCount = computed(() => this.result()?.medium_count ?? 0);
+  lowCount = computed(() => this.result()?.low_count ?? 0);
 
   reliabilityColor = computed(() => {
     const pct = this.reliabilityPct();
@@ -44,13 +48,16 @@ export class GapAnalysisTabComponent implements OnInit {
     return 'bg-red-500';
   });
 
-  severityOrder: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+  readonly severityOrder: Record<string, number> = {
+    critical: 0, high: 1, medium: 2, low: 3,
+  };
 
+  // Only show items that have an actual discrepancy, sorted by severity
   sortedDiscrepancies = computed(() => {
-    const d = this.result()?.discrepancies ?? [];
-    return [...d].sort(
-      (a, b) => (this.severityOrder[a.severity] ?? 9) - (this.severityOrder[b.severity] ?? 9)
-    );
+    const items = this.result()?.items ?? [];
+    return items
+      .filter(i => i.discrepancy)
+      .sort((a, b) => (this.severityOrder[a.severity ?? ''] ?? 9) - (this.severityOrder[b.severity ?? ''] ?? 9));
   });
 
   ngOnInit(): void {
@@ -70,34 +77,39 @@ export class GapAnalysisTabComponent implements OnInit {
     });
   }
 
-  getSeverityBorderClass(severity: string): string {
+  getSeverityBorderClass(severity: string | null): string {
     const map: Record<string, string> = {
-      CRITICAL: 'border-l-red-500',
-      HIGH: 'border-l-orange-400',
-      MEDIUM: 'border-l-yellow-400',
-      LOW: 'border-l-blue-400',
+      critical: 'border-l-red-500',
+      high: 'border-l-orange-400',
+      medium: 'border-l-yellow-400',
+      low: 'border-l-blue-400',
     };
-    return map[severity] ?? 'border-l-gray-300';
+    return map[severity ?? ''] ?? 'border-l-gray-300';
   }
 
-  getSeverityBadgeClass(severity: string): string {
+  getSeverityBadgeClass(severity: string | null): string {
     const map: Record<string, string> = {
-      CRITICAL: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-      HIGH: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
-      MEDIUM: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
-      LOW: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+      critical: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+      high: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+      medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+      low: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
     };
-    return map[severity] ?? 'bg-gray-100 text-gray-700';
+    return map[severity ?? ''] ?? 'bg-gray-100 text-gray-700';
   }
 
-  getDirectionLabel(d: GapDiscrepancy): string {
-    if (d.direction === 'AI_HIGHER') return 'IA más alto';
-    if (d.direction === 'AI_LOWER') return 'IA más bajo';
-    return 'Discrepancia';
+  getSeverityLabel(severity: string | null): string {
+    const map: Record<string, string> = {
+      critical: 'Crítico',
+      high: 'Alto',
+      medium: 'Medio',
+      low: 'Bajo',
+    };
+    return map[severity ?? ''] ?? 'Desconocido';
   }
 
-  formatValue(val: number | string | null): string {
+  formatValue(val: boolean | number | string | null): string {
     if (val === null || val === undefined) return '—';
+    if (typeof val === 'boolean') return val ? 'Cumple' : 'No cumple';
     if (typeof val === 'number') return val.toFixed(1);
     return String(val);
   }
