@@ -15,6 +15,7 @@ import { ShareToasterService } from '@core/services/toast.service';
 import { EvaluationAnalysisComponent } from '../components/evaluation-analysis/evaluation-analysis.component';
 import { EvaluationFormComponent } from '../components/evaluation-form/evaluation-form.component';
 import { InteractionPlayerComponent } from '../components/interaction-player/interaction-player.component';
+import { GapAnalysisTabComponent } from '../components/gap-analysis-tab/gap-analysis-tab.component';
 
 @Component({
   selector: 'app-evaluation-detail',
@@ -23,6 +24,7 @@ import { InteractionPlayerComponent } from '../components/interaction-player/int
     SpinnerComponent,
     EvaluationAnalysisComponent,
     InteractionPlayerComponent,
+    GapAnalysisTabComponent,
   ],
   templateUrl: './evaluation-detail.component.html',
   styleUrl: './evaluation-detail.component.css',
@@ -37,7 +39,7 @@ export class EvaluationDetailComponent {
   id = signal<number>(0);
   evaluation = signal<Evaluation | null>(null);
   isLoading = signal<boolean>(false);
-  activeTab = signal<'analysis' | 'player'>('analysis');
+  activeTab = signal<'analysis' | 'player' | 'gap'>('analysis');
   seekFromRoute = signal<number | null>(null);
 
   constructor() {
@@ -45,6 +47,8 @@ export class EvaluationDetailComponent {
       const tab = qp.get('tab');
       if (tab === 'player') {
         this.activeTab.set('player');
+      } else if (tab === 'gap') {
+        this.activeTab.set('gap');
       } else if (tab === 'analysis') {
         this.activeTab.set('analysis');
       }
@@ -107,7 +111,7 @@ export class EvaluationDetailComponent {
     return `Error ${err.status}`;
   }
 
-  setTab(tab: 'analysis' | 'player') {
+  setTab(tab: 'analysis' | 'player' | 'gap') {
     this.activeTab.set(tab);
   }
 

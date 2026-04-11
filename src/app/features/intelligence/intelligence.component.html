@@ -1,213 +1,334 @@
-<app-page-header title="Intelligence Dashboard" subtitle="Insights automáticos generados por IA para mejorar la experiencia del cliente" />
+<app-page-header
+  title="Intelligence"
+  subtitle="Centro de inteligencia operativa — insights automáticos, planes de acción y tendencias en tiempo real" />
 
-<div class="p-6">
-  <!-- Loading -->
+<div class="px-6 pb-10 space-y-6">
+
+  <!-- ─── LOADING ─────────────────────────────────────────────── -->
   @if (loading()) {
-    <div class="flex justify-center items-center h-64">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <div class="flex flex-col items-center justify-center h-72 gap-4">
+      <div class="w-10 h-10 rounded-full border-4 border-primary-500 border-t-transparent animate-spin"></div>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Cargando inteligencia operativa…</p>
     </div>
   } @else {
-    <!-- Summary Cards -->
-    @if (summary()) {
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <div class="text-sm text-gray-600 dark:text-gray-400">Sin Leer</div>
-          <div class="text-2xl font-bold text-blue-600">{{ summary()!.total_unread }}</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <div class="text-sm text-gray-600 dark:text-gray-400">Críticos</div>
-          <div class="text-2xl font-bold text-red-600">{{ summary()!.critical }}</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <div class="text-sm text-gray-600 dark:text-gray-400">Alta Prioridad</div>
-          <div class="text-2xl font-bold text-orange-600">{{ summary()!.high }}</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <div class="text-sm text-gray-600 dark:text-gray-400">Media</div>
-          <div class="text-2xl font-bold text-yellow-600">{{ summary()!.medium }}</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <div class="text-sm text-gray-600 dark:text-gray-400">Baja</div>
-          <div class="text-2xl font-bold text-blue-500">{{ summary()!.low }}</div>
+
+  <!-- ─── KPI STRIP ─────────────────────────────────────────────── -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+
+    <!-- Sin leer -->
+    <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-4 text-white shadow-lg">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold uppercase tracking-wider opacity-80">Sin leer</span>
+        <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
         </div>
       </div>
-    }
+      <div class="text-3xl font-bold">{{ unreadCount() }}</div>
+      <div class="text-xs opacity-70 mt-1">insights nuevos</div>
+    </div>
 
-    <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
-      <div class="flex flex-wrap gap-4 items-center">
-        <div>
-          <label
-            class="text-sm text-gray-600 dark:text-gray-400 mb-1 block"
-            for="intel-severity">
-            Severidad
-          </label>
-          <select
-            id="intel-severity"
-            autocomplete="off"
-            [ngModel]="selectedSeverity()"
-            (ngModelChange)="filterBySeverity($event)"
-            class="border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-3 py-2">
-            <option value="">Todas</option>
-            <option value="critical">Crítica</option>
-            <option value="high">Alta</option>
-            <option value="medium">Media</option>
-            <option value="low">Baja</option>
-          </select>
-        </div>
-        <div class="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="unreadOnly"
-            autocomplete="off"
-            [checked]="unreadOnly()"
-            (change)="toggleUnreadOnly()"
-            class="h-4 w-4" />
-          <label for="unreadOnly" class="text-sm text-gray-600 dark:text-gray-400">Solo no leídos</label>
-        </div>
+    <!-- Críticos -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow border-l-4 border-red-500">
+      <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Críticos</div>
+      <div class="text-3xl font-bold text-red-600 dark:text-red-400">{{ summary()?.critical ?? '—' }}</div>
+      <div class="mt-2 h-1 rounded-full bg-red-100 dark:bg-red-900/30">
+        <div class="h-1 rounded-full bg-red-500" [style.width.%]="summary()?.critical ? 100 : 0"></div>
       </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Insights List (2/3) -->
-      <div class="lg:col-span-2">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
-          <div class="p-4 border-b dark:border-gray-700">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Insights Recientes</h2>
+    <!-- Alta -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow border-l-4 border-orange-400">
+      <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Alta prioridad</div>
+      <div class="text-3xl font-bold text-orange-500 dark:text-orange-400">{{ summary()?.high ?? '—' }}</div>
+      <div class="mt-2 h-1 rounded-full bg-orange-100 dark:bg-orange-900/30">
+        <div class="h-1 rounded-full bg-orange-400" [style.width.%]="summary()?.high ? 100 : 0"></div>
+      </div>
+    </div>
+
+    <!-- Media -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow border-l-4 border-yellow-400">
+      <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Media</div>
+      <div class="text-3xl font-bold text-yellow-500 dark:text-yellow-400">{{ summary()?.medium ?? '—' }}</div>
+      <div class="mt-2 h-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+        <div class="h-1 rounded-full bg-yellow-400" [style.width.%]="summary()?.medium ? 100 : 0"></div>
+      </div>
+    </div>
+
+    <!-- Planes de acción -->
+    @if (actionPlanSummary()) {
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow border-l-4 border-emerald-500">
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Planes activos</div>
+        <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+          {{ (actionPlanSummary()!.pending + actionPlanSummary()!.in_progress) }}
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          {{ actionPlanSummary()!.overdue }} vencidos
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow border-l-4 border-indigo-400">
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Resueltos</div>
+        <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ actionPlanSummary()!.resolved }}</div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">de {{ actionPlanSummary()!.total }} totales</div>
+      </div>
+    }
+  </div>
+
+  <!-- ─── FILTER BAR ─────────────────────────────────────────────── -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow px-5 py-3 flex flex-wrap items-center gap-3">
+    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por:</span>
+    @for (sev of ['critical','high','medium','low']; track sev) {
+      <button
+        (click)="setSeverityFilter(sev)"
+        class="px-3 py-1 text-xs font-semibold rounded-full border transition"
+        [ngClass]="getSeverityChipActive(sev)">
+        {{ sev === 'critical' ? 'Crítico' : sev === 'high' ? 'Alto' : sev === 'medium' ? 'Medio' : 'Bajo' }}
+      </button>
+    }
+    <div class="ml-auto flex items-center gap-2">
+      <label class="flex items-center gap-2 cursor-pointer select-none">
+        <div
+          (click)="toggleUnreadOnly()"
+          class="relative w-9 h-5 rounded-full transition-colors cursor-pointer"
+          [ngClass]="unreadOnly() ? 'bg-primary-500' : 'bg-gray-300 dark:bg-gray-600'">
+          <div
+            class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+            [ngClass]="unreadOnly() ? 'translate-x-4' : 'translate-x-0'">
           </div>
-          <div class="p-4 max-h-[600px] overflow-y-auto">
-            @if (filteredInsights().length === 0) {
-              <div class="text-center text-gray-500 dark:text-gray-400 py-8">
-                No hay insights disponibles
+        </div>
+        <span class="text-sm text-gray-600 dark:text-gray-400">Solo no leídos</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ─── MAIN GRID ─────────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- INSIGHTS FEED (2/3) -->
+    <div class="lg:col-span-2 flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold text-gray-800 dark:text-gray-100">
+          Insights recientes
+          <span class="ml-2 text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">
+            {{ filteredInsights().length }}
+          </span>
+        </h2>
+      </div>
+
+      @if (filteredInsights().length === 0) {
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow flex flex-col items-center justify-center py-16 gap-3">
+          <svg class="w-12 h-12 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+          <p class="text-sm text-gray-500 dark:text-gray-400">No hay insights con este filtro</p>
+        </div>
+      }
+
+      @for (insight of filteredInsights(); track insight.id) {
+        <div
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow border-l-4 transition hover:shadow-md"
+          [ngClass]="[getSeverityBorderClass(insight.severity), insight.is_read ? 'opacity-75' : '']">
+          <div class="p-4">
+            <div class="flex items-start gap-3">
+              <!-- Type badge -->
+              <div class="flex-shrink-0 mt-0.5">
+                <span class="text-xs font-medium px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                  {{ getTypeLabel(insight.insight_type) }}
+                </span>
               </div>
-            }
-            @for (insight of filteredInsights(); track insight.id) {
-              <div class="border-b dark:border-gray-700 last:border-b-0 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                <div class="flex items-start justify-between">
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-2">
-                      <span class="text-2xl">{{ getTypeIcon(insight.insight_type) }}</span>
-                      <span [class]="getSeverityClass(insight.severity)" class="text-xs px-2 py-1 rounded-full font-semibold">
-                        {{ insight.severity.toUpperCase() }}
-                      </span>
-                      @if (!insight.is_read) {
-                        <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">NUEVO</span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ insight.title }}</h3>
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                    [ngClass]="getSeverityBadgeClass(insight.severity)">
+                    {{ insight.severity | uppercase }}
+                  </span>
+                  @if (!insight.is_read) {
+                    <span class="inline-flex items-center gap-1 text-xs font-medium text-primary-600 dark:text-primary-400">
+                      <span class="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span>
+                      Nuevo
+                    </span>
+                  }
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3">{{ insight.description }}</p>
+
+                <!-- Actions suggested -->
+                @if (insight.suggested_actions?.length) {
+                  <div class="mb-3">
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Acciones sugeridas</p>
+                    <ul class="space-y-1">
+                      @for (action of insight.suggested_actions; track action) {
+                        <li class="flex items-start gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                          <svg class="w-3 h-3 mt-0.5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                          </svg>
+                          {{ action }}
+                        </li>
                       }
-                    </div>
-                    <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1">{{ insight.title }}</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ insight.description }}</p>
-                    @if (insight.suggested_actions?.length) {
-                      <div class="text-xs text-gray-500 dark:text-gray-400">
-                        <strong>Acciones:</strong> {{ insight.suggested_actions.join(', ') }}
-                      </div>
-                    }
-                    <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mt-2">
-                      <span>Confianza: {{ (insight.confidence_score * 100).toFixed(0) }}%</span>
-                      <span>{{ insight.created_at | date:'short' }}</span>
-                    </div>
+                    </ul>
                   </div>
-                  <div class="flex flex-col gap-2 ml-4">
+                }
+
+                <!-- Footer -->
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                  <div class="flex items-center gap-3">
+                    <!-- Confidence bar -->
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Confianza</span>
+                      <div class="w-20 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                        <div
+                          class="h-full rounded-full transition-all"
+                          [ngClass]="getConfidenceBarColor(insight.confidence_score)"
+                          [style.width.%]="insight.confidence_score * 100">
+                        </div>
+                      </div>
+                      <span class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                        {{ (insight.confidence_score * 100).toFixed(0) }}%
+                      </span>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ insight.created_at | date:'d MMM, HH:mm' }}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
                     @if (insight.evaluation_id) {
-                      <button 
-                        (click)="viewEvidence(insight)" 
-                        class="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition whitespace-nowrap"
-                      >
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z"/>
+                      <button
+                        (click)="viewEvidence(insight)"
+                        class="flex items-center gap-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4zm2 0h1V9h-1v4zm1-6V5h-1v2h1zM5 5v2H4V5h1zm0 4H4v2h1V9zm-1 4h1v2H4v-2z"/>
                         </svg>
                         Ver evidencia
                       </button>
                     }
                     @if (!insight.is_read) {
-                      <button (click)="markAsRead(insight)" class="text-blue-600 hover:text-blue-800 text-sm whitespace-nowrap">
+                      <button
+                        (click)="markAsRead(insight)"
+                        class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
                         Marcar leído
                       </button>
                     }
                   </div>
                 </div>
               </div>
-            }
+            </div>
           </div>
         </div>
-      </div>
+      }
+    </div>
 
-      <!-- Sidebar (1/3) -->
-      <div class="space-y-6">
-        <!-- Top Actions -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
-          <div class="p-4 border-b dark:border-gray-700">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Acciones Recomendadas</h2>
+    <!-- SIDEBAR (1/3) -->
+    <div class="space-y-5">
+
+      <!-- Action Plans Card -->
+      @if (actionPlanSummary()) {
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden">
+          <div class="px-5 py-4 border-b dark:border-gray-700 flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Planes de acción</h3>
+            <span class="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-medium">
+              {{ actionPlanSummary()!.total }} total
+            </span>
           </div>
-          <div class="p-4">
-            @if (topActions().length === 0) {
-              <div class="text-center text-gray-500 dark:text-gray-400 py-4">No hay acciones disponibles</div>
-            }
-            @for (action of topActions(); track action.action; let i = $index) {
-              <div class="mb-3 pb-3 border-b dark:border-gray-700 last:border-b-0">
-                <div class="flex items-start gap-2">
-                  <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold flex-shrink-0">
-                    {{ i + 1 }}
-                  </span>
-                  <div class="flex-1">
-                    <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ action.action }}</div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">Frecuencia: {{ action.frequency }}</div>
+          <div class="p-5 space-y-3">
+            @for (item of [
+              { label: 'Pendientes', count: actionPlanSummary()!.pending, color: 'bg-yellow-400', textColor: 'text-yellow-600 dark:text-yellow-400' },
+              { label: 'En progreso', count: actionPlanSummary()!.in_progress, color: 'bg-blue-400', textColor: 'text-blue-600 dark:text-blue-400' },
+              { label: 'Vencidos', count: actionPlanSummary()!.overdue, color: 'bg-red-500', textColor: 'text-red-600 dark:text-red-400' },
+              { label: 'Resueltos', count: actionPlanSummary()!.resolved, color: 'bg-emerald-500', textColor: 'text-emerald-600 dark:text-emerald-400' }
+            ]; track item.label) {
+              <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full flex-shrink-0" [ngClass]="item.color"></div>
+                <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">{{ item.label }}</span>
+                <span class="text-sm font-bold" [ngClass]="item.textColor">{{ item.count }}</span>
+                <div class="w-20 h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                  <div
+                    class="h-full rounded-full"
+                    [ngClass]="item.color"
+                    [style.width.%]="actionPlanSummary()!.total ? (item.count / actionPlanSummary()!.total * 100) : 0">
                   </div>
                 </div>
               </div>
             }
           </div>
         </div>
+      }
 
-        <!-- Trends Info -->
-        @if (trends()?.datasets?.length) {
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
-            <div class="p-4 border-b dark:border-gray-700">
-              <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Tendencias (Últimos 30 días)</h2>
-            </div>
-            <div class="p-4">
-              @for (dataset of trends()!.datasets; track dataset.label) {
-                <div class="mb-3 pb-3 border-b dark:border-gray-700 last:border-b-0">
-                  <div class="flex justify-between items-center">
-                    <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ dataset.label }}</span>
-                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ sumData(dataset.data) }} total</span>
-                  </div>
+      <!-- Top Recommended Actions -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden">
+        <div class="px-5 py-4 border-b dark:border-gray-700">
+          <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Top acciones recurrentes</h3>
+        </div>
+        <div class="p-5">
+          @if (topActions().length === 0) {
+            <p class="text-sm text-center text-gray-400 dark:text-gray-500 py-4">Sin datos disponibles</p>
+          }
+          @for (action of topActions(); track action.action; let i = $index) {
+            <div class="mb-4 last:mb-0">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-2 flex-1 min-w-0">
+                  <span class="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                    {{ i + 1 }}
+                  </span>
+                  <span class="text-xs text-gray-700 dark:text-gray-300 truncate">{{ action.action }}</span>
                 </div>
-              }
+                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">×{{ action.frequency }}</span>
+              </div>
+              <div class="h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden ml-7">
+                <div
+                  class="h-full rounded-full bg-primary-400 dark:bg-primary-500 transition-all"
+                  [style.width.%]="maxFrequency() ? (action.frequency / maxFrequency() * 100) : 0">
+                </div>
+              </div>
             </div>
-          </div>
-        }
+          }
+        </div>
       </div>
+
+      <!-- Trends Summary -->
+      @if (trends()?.datasets?.length) {
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden">
+          <div class="px-5 py-4 border-b dark:border-gray-700">
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Tendencias · 30 días</h3>
+          </div>
+          <div class="p-5 space-y-3">
+            @for (dataset of trends()!.datasets; track dataset.label) {
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-700 dark:text-gray-300">{{ dataset.label }}</span>
+                <span class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ sumData(dataset.data) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
     </div>
+  </div>
   }
 </div>
 
-<!-- Evidence Panel (Slide-over) -->
+<!-- ─── EVIDENCE SLIDE-OVER ─────────────────────────────────────────────── -->
 @if (showEvidencePanel()) {
   <div class="fixed inset-0 z-40 flex justify-end">
-    <!-- Backdrop -->
-    <div 
-      class="fixed inset-0 bg-black/50 transition-opacity"
-      (click)="closeEvidencePanel()"
-    ></div>
-    
-    <!-- Panel -->
-    <div class="relative w-full max-w-2xl bg-white dark:bg-gray-900 shadow-xl">
-      <!-- Header -->
-      <div class="flex items-center justify-between p-4 border-b dark:border-gray-700">
-        <h2 class="text-lg font-bold text-gray-900 dark:text-white">Evidence Engine</h2>
-        <button 
+    <div
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm"
+      (click)="closeEvidencePanel()">
+    </div>
+    <div class="relative w-full max-w-2xl bg-white dark:bg-gray-900 shadow-2xl flex flex-col">
+      <div class="flex items-center justify-between px-5 py-4 border-b dark:border-gray-700">
+        <div>
+          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Evidencia vinculada</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Evaluación #{{ selectedEvaluationId() }}</p>
+        </div>
+        <button
           (click)="closeEvidencePanel()"
-          class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition"
-        >
-          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-500">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
-      
-      <!-- Content -->
-      <div class="p-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+      <div class="flex-1 overflow-y-auto p-5">
         <app-executive-evidence [evaluationId]="selectedEvaluationId()" />
       </div>
     </div>

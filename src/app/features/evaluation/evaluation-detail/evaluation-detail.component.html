@@ -2,19 +2,26 @@
   <app-spinner />
 } @else {
   @if (evaluation(); as ev) {
+
   <!-- Tab Navigation -->
   <div class="tab-navigation">
-    <button 
+    <button
       class="tab-btn"
       [class.active]="activeTab() === 'analysis'"
       (click)="setTab('analysis')">
       Análisis
     </button>
-    <button 
+    <button
       class="tab-btn"
       [class.active]="activeTab() === 'player'"
       (click)="setTab('player')">
       Video + Transcripción
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === 'gap'"
+      (click)="setTab('gap')">
+      Gap IA / Auditor
     </button>
   </div>
 
@@ -23,20 +30,19 @@
     <app-evaluation-analysis [evalutationId]="ev.id" />
     <app-evaluation-form
       [isEditing]="true"
-      [byZone]="
-        ev.location === null || ev.location === 'null'
-          ? false
-          : true
-      "
+      [byZone]="ev.location === null || ev.location === 'null' ? false : true"
       [disabled]="true"
       [campaign]="ev.campaign"
       [evaluation]="ev" />
-  } @else {
-    <app-interaction-player 
+  } @else if (activeTab() === 'player') {
+    <app-interaction-player
       [evaluationId]="ev.id"
       [videoUrl]="ev.video?.url || null"
       [initialSeekSeconds]="seekFromRoute()" />
+  } @else if (activeTab() === 'gap') {
+    <app-gap-analysis-tab [evaluationId]="ev.id" />
   }
+
   } @else {
   <div class="detail-error-state">
     <p>No se pudo cargar esta evaluación.</p>

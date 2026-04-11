@@ -11,10 +11,20 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { finalize, of } from 'rxjs';
 import { TranscriptService, TranscriptSegment } from '../../transcript.service';
 import { ShareToasterService } from '@core/services/toast.service';
+import { environment } from '@env/environment';
+
+export interface InteractionPhase {
+  phase: string;
+  label: string;
+  start_seconds: number;
+  end_seconds: number;
+  summary: string;
+}
 
 @Component({
   selector: 'app-interaction-player',
@@ -27,6 +37,7 @@ import { ShareToasterService } from '@core/services/toast.service';
 export class InteractionPlayerComponent implements OnDestroy {
   private transcriptService = inject(TranscriptService);
   private toastService = inject(ShareToasterService);
+  private http = inject(HttpClient);
 
   evaluationId = input.required<number>();
   videoUrl = input<string | null>(null);
@@ -42,6 +53,8 @@ export class InteractionPlayerComponent implements OnDestroy {
 
   activeSegmentId = signal<number | null>(null);
   autoScroll = signal<boolean>(true);
+  phases = signal<InteractionPhase[]>([]);
+  activePhase = signal<InteractionPhase | null>(null);
 
   embeddingsLoading = signal<boolean>(false);
 
@@ -54,6 +67,7 @@ export class InteractionPlayerComponent implements OnDestroy {
       if (request == null || !Number.isFinite(request) || request <= 0) {
         return of([]);
       }
+      this.loadPhases(request);
       return this.transcriptService.getEvaluationSegments(request);
     },
   });
@@ -66,6 +80,16 @@ export class InteractionPlayerComponent implements OnDestroy {
       ...seg,
       isActive: currentT >= seg.start_time && currentT < seg.end_time,
       formattedTime: this.transcriptService.formatTime(seg.start_time),
+    }));
+  });
+
+  phaseMarkers = computed(() => {
+    const dur = this.duration();
+    if (!dur) return [];
+    return this.phases().map(p => ({
+      ...p,
+      leftPct: (p.start_seconds / dur) * 100,
+      widthPct: ((p.end_seconds - p.start_seconds) / dur) * 100,
     }));
   });
 
@@ -87,6 +111,24 @@ export class InteractionPlayerComponent implements OnDestroy {
       const t = this.initialSeekSeconds();
       const evId = this.evaluationId();
       queueMicrotask(() => this.trySeekFromRoute(t, evId));
+    });
+
+    effect(() => {
+      const t = this.currentTime();
+      const phases = this.phases();
+      const current = phases.find(p => t >= p.start_seconds && t < p.end_seconds) ?? null;
+      if (current?.phase !== this.activePhase()?.phase) {
+        this.activePhase.set(current);
+      }
+    });
+  }
+
+  loadPhases(evaluationId: number): void {
+    this.http.get<{ phases: InteractionPhase[] }>(
+      `${environment.apiUrl}interaction-phases/evaluation/${evaluationId}`
+    ).subscribe({
+      next: (res) => this.phases.set(res.phases ?? []),
+      error: () => this.phases.set([]),
     });
   }
 
@@ -164,6 +206,34 @@ export class InteractionPlayerComponent implements OnDestroy {
 
   formatTime(seconds: number): string {
     return this.transcriptService.formatTime(seconds);
+  }
+
+  getSpeakerClass(speaker: string | null | undefined): string {
+    if (!speaker) return '';
+    const map: Record<string, string> = {
+      AGENT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+      CLIENT: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+      UNKNOWN: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+    };
+    return map[speaker.toUpperCase()] ?? 'bg-gray-100 text-gray-600';
+  }
+
+  getPhaseColor(phase: string): string {
+    const map: Record<string, string> = {
+      ENTRY: 'bg-indigo-500',
+      ATTENTION: 'bg-primary-500',
+      CLOSURE: 'bg-emerald-500',
+    };
+    return map[phase.toUpperCase()] ?? 'bg-gray-400';
+  }
+
+  getPhaseTextColor(phase: string): string {
+    const map: Record<string, string> = {
+      ENTRY: 'text-indigo-600 dark:text-indigo-400',
+      ATTENTION: 'text-primary-600 dark:text-primary-400',
+      CLOSURE: 'text-emerald-600 dark:text-emerald-400',
+    };
+    return map[phase.toUpperCase()] ?? 'text-gray-600';
   }
 
   generateEmbeddings() {

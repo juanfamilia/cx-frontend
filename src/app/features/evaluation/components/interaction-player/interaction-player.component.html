@@ -1,5 +1,6 @@
 <div class="interaction-player-container">
-  <!-- Video Section -->
+
+  <!-- ─── VIDEO SECTION ──────────────────────────────────────────── -->
   <div class="video-section">
     @if (videoUrl()) {
       <video
@@ -21,18 +22,43 @@
         <p>Video no disponible</p>
       </div>
     }
-    
-    <!-- Video Controls Bar -->
+
+    <!-- Video info bar -->
     <div class="video-info-bar">
       <span class="current-time">{{ formatTime(currentTime()) }}</span>
       <span class="duration">/ {{ formatTime(duration()) }}</span>
       @if (isPlaying()) {
         <span class="status playing">Reproduciendo</span>
       }
+      @if (activePhase()) {
+        <span
+          class="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-800/80 text-white">
+          <span class="w-2 h-2 rounded-full" [ngClass]="getPhaseColor(activePhase()!.phase)"></span>
+          {{ activePhase()!.label }}
+        </span>
+      }
     </div>
+
+    <!-- Phase Timeline Bar -->
+    @if (phaseMarkers().length > 0 && duration() > 0) {
+      <div class="relative w-full h-6 flex items-center px-0 bg-gray-900/60 rounded-b overflow-hidden">
+        @for (marker of phaseMarkers(); track marker.phase) {
+          <div
+            class="absolute h-full flex items-center justify-center overflow-hidden cursor-pointer transition-opacity hover:opacity-90"
+            [style.left.%]="marker.leftPct"
+            [style.width.%]="marker.widthPct"
+            [ngClass]="getPhaseColor(marker.phase)"
+            [title]="marker.label + ': ' + marker.summary"
+            (click)="seekTo(marker.start_seconds)"
+            style="opacity: 0.75">
+            <span class="text-white text-xs font-semibold truncate px-1 select-none">{{ marker.label }}</span>
+          </div>
+        }
+      </div>
+    }
   </div>
-  
-  <!-- Transcript Section -->
+
+  <!-- ─── TRANSCRIPT SECTION ──────────────────────────────────────── -->
   <div class="transcript-section">
     <div class="transcript-header">
       <h3>Transcripción</h3>
@@ -48,7 +74,7 @@
           }
           Embeddings
         </button>
-        <button 
+        <button
           class="auto-scroll-btn"
           [class.active]="autoScroll()"
           (click)="toggleAutoScroll()"
@@ -63,7 +89,16 @@
         </span>
       </div>
     </div>
-    
+
+    <!-- Speaker legend (show only if diarization data exists) -->
+    @if ((transcriptResource.value() || []).some(s => s.speaker)) {
+      <div class="flex items-center gap-3 px-4 py-2 border-b border-gray-100 dark:border-gray-700 text-xs">
+        <span class="text-gray-500 dark:text-gray-400 font-medium">Hablantes:</span>
+        <span class="px-2 py-0.5 rounded-md font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Agente</span>
+        <span class="px-2 py-0.5 rounded-md font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">Cliente</span>
+      </div>
+    }
+
     <div #transcriptContainer class="transcript-container">
       @if (transcriptResource.isLoading()) {
         <div class="loading-state">
@@ -88,7 +123,7 @@
       } @else {
         <div class="transcript-list">
           @for (segment of segments(); track segment.id) {
-            <div 
+            <div
               class="transcript-segment"
               [class.active]="segment.isActive"
               [attr.data-segment-id]="segment.id"
@@ -97,7 +132,18 @@
               tabindex="0"
               (keydown.enter)="seekTo(segment.start_time)"
               (keydown.space)="seekTo(segment.start_time); $event.preventDefault()">
-              <span class="timestamp">{{ segment.formattedTime }}</span>
+
+              <!-- Timestamp + speaker badge -->
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <span class="timestamp">{{ segment.formattedTime }}</span>
+                @if (segment.speaker) {
+                  <span
+                    class="inline-block text-xs font-semibold px-1.5 py-0.5 rounded"
+                    [ngClass]="getSpeakerClass(segment.speaker)">
+                    {{ segment.speaker === 'AGENT' ? 'Ag.' : segment.speaker === 'CLIENT' ? 'Cl.' : '?' }}
+                  </span>
+                }
+              </div>
               <span class="text">{{ segment.text }}</span>
             </div>
           }
