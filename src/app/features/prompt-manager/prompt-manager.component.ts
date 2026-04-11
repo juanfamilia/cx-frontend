@@ -45,6 +45,34 @@ export class PromptManagerComponent implements OnInit {
 
   categories = ['general', 'greeting', 'followup', 'evaluation', 'notification', 'analysis', 'report'];
 
+  readonly categoryLabels: Record<string, string> = {
+    general: 'General',
+    greeting: 'Saludo y apertura',
+    followup: 'Seguimiento',
+    evaluation: 'Evaluación de servicio',
+    notification: 'Notificaciones',
+    analysis: 'Análisis de conversación',
+    report: 'Reportes ejecutivos',
+  };
+
+  readonly categoryDescriptions: Record<string, string> = {
+    general: 'Instrucciones generales para la IA',
+    greeting: 'Cómo detectar y evaluar el saludo inicial del agente',
+    followup: 'Qué revisar en el seguimiento post-atención',
+    evaluation: 'Criterios de calidad para evaluar la interacción completa',
+    notification: 'Cómo redactar alertas y notificaciones automáticas',
+    analysis: 'Qué analizar en cada conversación transcrita',
+    report: 'Formato y contenido de reportes para gerencia',
+  };
+
+  getCategoryLabel(cat: string): string {
+    return this.categoryLabels[cat] ?? cat;
+  }
+
+  getCategoryDescription(cat: string): string {
+    return this.categoryDescriptions[cat] ?? '';
+  }
+
   ngOnInit(): void {
     this.loadPrompts();
   }

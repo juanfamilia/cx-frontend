@@ -45,6 +45,14 @@ export class IntelligenceComponent implements OnInit {
   selectedEvaluationId = signal<number | null>(null);
   showEvidencePanel = signal(false);
 
+  readonly urgencyFilters = [
+    { value: '', label: 'Todo', activeClass: 'bg-gray-800 text-white border-gray-800 dark:bg-gray-200 dark:text-gray-900' },
+    { value: 'critical', label: 'Urgente', activeClass: 'bg-red-500 text-white border-red-500' },
+    { value: 'high', label: 'Importante', activeClass: 'bg-orange-500 text-white border-orange-500' },
+    { value: 'medium', label: 'En seguimiento', activeClass: 'bg-yellow-400 text-gray-900 border-yellow-400' },
+    { value: 'low', label: 'Informativo', activeClass: 'bg-blue-500 text-white border-blue-500' },
+  ];
+
   filteredInsights = computed(() => {
     let filtered = this.insights();
     if (this.selectedSeverity()) {
@@ -57,6 +65,17 @@ export class IntelligenceComponent implements OnInit {
   });
 
   unreadCount = computed(() => this.insights().filter(i => !i.is_read).length);
+
+  planStatusItems = computed(() => {
+    const s = this.actionPlanSummary();
+    if (!s) return [];
+    return [
+      { label: 'Pendientes de inicio', count: s.pending, dot: 'bg-yellow-400', textColor: 'text-yellow-600 dark:text-yellow-400' },
+      { label: 'En proceso', count: s.in_progress, dot: 'bg-blue-400', textColor: 'text-blue-600 dark:text-blue-400' },
+      { label: 'Vencidos sin resolver', count: s.overdue, dot: 'bg-red-500', textColor: 'text-red-600 dark:text-red-400' },
+      { label: 'Completados', count: s.resolved, dot: 'bg-emerald-500', textColor: 'text-emerald-600 dark:text-emerald-400' },
+    ];
+  });
 
   ngOnInit(): void {
     this.loadData();
@@ -124,60 +143,36 @@ export class IntelligenceComponent implements OnInit {
     });
   }
 
-  getSeverityBorderClass(severity: string): string {
+  getUrgencyLabel(severity: string): string {
     const map: Record<string, string> = {
-      critical: 'border-l-red-500',
-      high: 'border-l-orange-400',
-      medium: 'border-l-yellow-400',
-      low: 'border-l-blue-400',
+      critical: 'Urgente — actúa hoy',
+      high: 'Importante',
+      medium: 'En seguimiento',
+      low: 'Para tu información',
     };
-    return map[severity] || 'border-l-gray-300';
+    return map[severity] ?? severity;
   }
 
-  getSeverityBadgeClass(severity: string): string {
+  getUrgencyBannerClass(severity: string): string {
     const map: Record<string, string> = {
-      critical: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-      high: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
-      medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+      critical: 'bg-red-500 text-white',
+      high: 'bg-orange-400 text-white',
+      medium: 'bg-yellow-400 text-yellow-900',
       low: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
     };
-    return map[severity] || 'bg-gray-100 text-gray-700';
-  }
-
-  getSeverityChipActive(severity: string): string {
-    const active: Record<string, string> = {
-      critical: 'bg-red-500 text-white border-red-500',
-      high: 'bg-orange-500 text-white border-orange-500',
-      medium: 'bg-yellow-400 text-gray-900 border-yellow-400',
-      low: 'bg-blue-500 text-white border-blue-500',
-    };
-    const inactive: Record<string, string> = {
-      critical: 'border-red-300 text-red-600 dark:border-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20',
-      high: 'border-orange-300 text-orange-600 dark:border-orange-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20',
-      medium: 'border-yellow-300 text-yellow-600 dark:border-yellow-700 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20',
-      low: 'border-blue-300 text-blue-600 dark:border-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20',
-    };
-    return this.selectedSeverity() === severity
-      ? (active[severity] || 'bg-gray-500 text-white border-gray-500')
-      : (inactive[severity] || 'border-gray-300 text-gray-600');
+    return map[severity] ?? 'bg-gray-100 text-gray-700';
   }
 
   getTypeLabel(type: string): string {
     const map: Record<string, string> = {
-      trend: 'Tendencia',
-      alert: 'Alerta',
-      recommendation: 'Recomendación',
-      anomaly: 'Anomalía',
-      performance: 'Rendimiento',
-      quality: 'Calidad',
+      trend: 'Tendencia detectada',
+      alert: 'Alerta activa',
+      recommendation: 'Recomendación de la IA',
+      anomaly: 'Comportamiento inusual',
+      performance: 'Rendimiento del equipo',
+      quality: 'Calidad de servicio',
     };
-    return map[type] || type;
-  }
-
-  getConfidenceBarColor(score: number): string {
-    if (score >= 0.8) return 'bg-emerald-500';
-    if (score >= 0.6) return 'bg-yellow-400';
-    return 'bg-red-400';
+    return map[type] ?? 'Situación detectada';
   }
 
   sumData(data: number[]): number {
