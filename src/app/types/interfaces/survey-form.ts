@@ -14,18 +14,23 @@ export interface SurveyFormCreate {
   sections: SurveyFormSectionCreate[];
 }
 
+export type AspectType = 'number' | 'boolean' | 'likert' | 'compliance' | 'media';
+
 export interface SurveyFormSectionCreate {
   name: string;
   maximum_score: number;
   order: number;
+  weight: number | null;
   aspects: SurveyFormAspectCreate[];
 }
 
 export interface SurveyFormAspectCreate {
   description: string;
-  type: string;
-  maximum_score: number;
+  type: AspectType;
+  maximum_score: number | null;
   order: number;
+  weight: number | null;
+  requires_evidence: boolean;
 }
 
 export interface SurveyFormSection {
@@ -33,15 +38,18 @@ export interface SurveyFormSection {
   name: string;
   maximum_score: number;
   order: number;
+  weight: number | null;
   aspects: SurveyFormAspect[];
 }
 
 export interface SurveyFormAspect {
   id: number;
   description: string;
-  type: string;
-  maximum_score: number;
+  type: AspectType;
+  maximum_score: number | null;
   order: number;
+  weight: number | null;
+  requires_evidence: boolean;
 }
 
 export interface SurveyFormDetail extends SurveyForm {
