@@ -14,22 +14,28 @@
       formControlName="title" />
   </div>
 
-  <!-- Indicador de ponderación de secciones -->
+  <!-- Indicador global de ponderación de secciones -->
   @if (sections.controls.length > 0) {
-    <div class="flex items-center gap-3 rounded-lg border px-4 py-2 text-sm"
-      [class.border-green-300]="sectionWeightSumOk()"
+    <div
+      class="flex items-center gap-3 rounded-lg border px-4 py-2 text-sm transition-colors"
+      [class.border-green-400]="sectionWeightSumOk()"
       [class.bg-green-50]="sectionWeightSumOk()"
-      [class.border-amber-300]="!sectionWeightSumOk()"
-      [class.bg-amber-50]="!sectionWeightSumOk()">
-      <ng-icon name="lucideProportions" class="text-base" />
-      <span class="font-medium">Ponderación de secciones:</span>
-      <span [class.text-green-700]="sectionWeightSumOk()" [class.text-amber-700]="!sectionWeightSumOk()">
-        {{ sectionWeightSum() }}% de 100%
-      </span>
+      [class.dark:bg-green-950]="sectionWeightSumOk()"
+      [class.dark:border-green-700]="sectionWeightSumOk()"
+      [class.text-green-700]="sectionWeightSumOk()"
+      [class.dark:text-green-400]="sectionWeightSumOk()"
+      [class.border-amber-400]="!sectionWeightSumOk()"
+      [class.bg-amber-50]="!sectionWeightSumOk()"
+      [class.dark:bg-amber-950]="!sectionWeightSumOk()"
+      [class.dark:border-amber-700]="!sectionWeightSumOk()"
+      [class.text-amber-700]="!sectionWeightSumOk()"
+      [class.dark:text-amber-400]="!sectionWeightSumOk()">
+      <ng-icon name="lucideProportions" class="shrink-0" />
+      <span>Ponderación de secciones: <strong>{{ sectionWeightSum() }}%</strong> de 100%</span>
       @if (sectionWeightSumOk()) {
-        <ng-icon name="lucideCheck" class="ml-auto text-green-600" />
+        <ng-icon name="lucideCheck" class="ml-auto shrink-0" />
       } @else {
-        <span class="ml-auto text-amber-700">Ajusta los pesos para que sumen 100%</span>
+        <span class="ml-auto text-xs">Ajusta los pesos para que sumen 100%</span>
       }
     </div>
   }
@@ -39,36 +45,34 @@
     icon="lucideLayoutTemplate"
     (event)="addSection()" />
 
-  <!-- Secciones -->
-  <div class="mt-1 flex flex-col gap-4" formArrayName="sections">
+  <!-- ── Secciones ── -->
+  <div class="flex flex-col gap-4" formArrayName="sections">
     @for (section of sections.controls; track $index; let sectionIndex = $index) {
-      <div class="dark:bg-bunker-900/50 space-y-4 rounded-lg bg-white p-5 shadow-sm border border-gray-100">
+      <div
+        class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-bunker-700 dark:bg-bunker-900"
+        [formGroupName]="$index">
 
         <!-- Header sección -->
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold">Sección {{ $index + 1 }}</h2>
-          <button
-            class="cursor-pointer px-2 text-red-500 hover:text-red-700"
-            type="button"
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="font-semibold">Sección {{ $index + 1 }}</h2>
+          <button type="button" class="cursor-pointer text-red-400 hover:text-red-600 transition-colors"
             (click)="removeSection($index)">
-            <ng-icon name="lucideTrash" class="text-xl" />
+            <ng-icon name="lucideTrash" class="text-lg" />
           </button>
         </div>
 
-        <!-- Campos de la sección -->
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3" [formGroupName]="$index">
-
-          <!-- Nombre -->
+        <!-- Campos sección: nombre | puntaje | peso -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <app-input-text
             [id]="'sec-' + sectionIndex + '-name'"
-            label="Nombre de la sección"
+            label="Nombre"
             icon="lucideType"
             autocomplete="off"
             [ErrorMessage]="false"
             formControlName="name" />
 
           <!-- Puntaje máximo -->
-          <p-floatlabel variant="on">
+          <p-floatlabel variant="on" class="w-full">
             <p-inputnumber
               formControlName="maximum_score"
               [showButtons]="true"
@@ -83,8 +87,9 @@
             <label [attr.for]="'sec-' + sectionIndex + '-max'">Puntaje máximo</label>
           </p-floatlabel>
 
-          <!-- Ponderación de la sección -->
-          <p-floatlabel variant="on">
+          <!-- Ponderación sección — label explícito arriba evita solapamiento -->
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Ponderación (%)</span>
             <p-inputnumber
               formControlName="weight"
               [inputId]="'sec-' + sectionIndex + '-weight'"
@@ -93,143 +98,146 @@
               [minFractionDigits]="0"
               [maxFractionDigits]="1"
               suffix="%"
-              placeholder="Ej: 40%"
+              [placeholder]="'Ej: 40'"
               class="w-full" />
-            <label [attr.for]="'sec-' + sectionIndex + '-weight'">Ponderación (%)</label>
-          </p-floatlabel>
-
-          <!-- Indicador ponderación aspectos -->
-          @if (getAspects(sectionIndex).controls.length > 0) {
-            <div
-              class="md:col-span-3 flex items-center gap-2 rounded border px-3 py-1.5 text-xs"
-              [class.border-green-300]="aspectWeightSumOk(sectionIndex)"
-              [class.bg-green-50]="aspectWeightSumOk(sectionIndex)"
-              [class.text-green-700]="aspectWeightSumOk(sectionIndex)"
-              [class.border-amber-300]="!aspectWeightSumOk(sectionIndex)"
-              [class.bg-amber-50]="!aspectWeightSumOk(sectionIndex)"
-              [class.text-amber-700]="!aspectWeightSumOk(sectionIndex)">
-              <ng-icon name="lucideProportions" />
-              <span>Ponderación de aspectos: {{ aspectWeightSum(sectionIndex) }}% de 100%</span>
-              @if (!aspectWeightSumOk(sectionIndex)) {
-                <span class="ml-auto">Ajusta los pesos de los aspectos</span>
-              }
-            </div>
-          }
-
-          <!-- Botón añadir aspecto -->
-          <div class="md:col-span-3">
-            <app-button-primary
-              title="Añadir Aspecto"
-              icon="lucideLayoutTemplate"
-              (event)="addAspect(sectionIndex)" />
           </div>
+        </div>
 
-          <!-- Aspectos -->
-          @if (getAspects(sectionIndex).controls.length > 0) {
-            <div class="md:col-span-3" formArrayName="aspects">
-              <div class="flex flex-col gap-4">
-                @for (aspect of getAspects(sectionIndex).controls; track $index; let aspectIndex = $index) {
-                  <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:bg-bunker-800/50" [formGroupName]="aspectIndex">
-                    <!-- Header aspecto -->
-                    <div class="mb-3 flex items-center justify-between">
-                      <span class="text-sm font-medium text-gray-600">Aspecto {{ aspectIndex + 1 }}</span>
-                      <button
-                        class="cursor-pointer px-2 text-red-400 hover:text-red-600"
-                        type="button"
-                        (click)="removeAspect(sectionIndex, aspectIndex)">
-                        <ng-icon name="lucideTrash" />
-                      </button>
+        <!-- Indicador de ponderación de aspectos -->
+        @if (getAspects(sectionIndex).controls.length > 0) {
+          <div
+            class="mt-4 flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs transition-colors"
+            [class.border-green-400]="aspectWeightSumOk(sectionIndex)"
+            [class.bg-green-50]="aspectWeightSumOk(sectionIndex)"
+            [class.dark:bg-green-950]="aspectWeightSumOk(sectionIndex)"
+            [class.dark:border-green-700]="aspectWeightSumOk(sectionIndex)"
+            [class.text-green-700]="aspectWeightSumOk(sectionIndex)"
+            [class.dark:text-green-400]="aspectWeightSumOk(sectionIndex)"
+            [class.border-amber-400]="!aspectWeightSumOk(sectionIndex)"
+            [class.bg-amber-50]="!aspectWeightSumOk(sectionIndex)"
+            [class.dark:bg-amber-950]="!aspectWeightSumOk(sectionIndex)"
+            [class.dark:border-amber-700]="!aspectWeightSumOk(sectionIndex)"
+            [class.text-amber-700]="!aspectWeightSumOk(sectionIndex)"
+            [class.dark:text-amber-400]="!aspectWeightSumOk(sectionIndex)">
+            <ng-icon name="lucideProportions" class="shrink-0" />
+            <span>Aspectos: <strong>{{ aspectWeightSum(sectionIndex) }}%</strong> de 100%</span>
+            @if (!aspectWeightSumOk(sectionIndex)) {
+              <span class="ml-auto">Suma incompleta</span>
+            }
+          </div>
+        }
+
+        <!-- Botón añadir aspecto -->
+        <div class="mt-4">
+          <app-button-primary
+            title="Añadir Aspecto"
+            icon="lucideLayoutTemplate"
+            (event)="addAspect(sectionIndex)" />
+        </div>
+
+        <!-- ── Aspectos ── -->
+        @if (getAspects(sectionIndex).controls.length > 0) {
+          <div class="mt-4 flex flex-col gap-3" formArrayName="aspects">
+            @for (aspect of getAspects(sectionIndex).controls; track $index; let aspectIndex = $index) {
+              <div
+                class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-bunker-700 dark:bg-bunker-800"
+                [formGroupName]="aspectIndex">
+
+                <!-- Header aspecto -->
+                <div class="mb-3 flex items-center justify-between">
+                  <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    Aspecto {{ aspectIndex + 1 }}
+                  </span>
+                  <button type="button"
+                    class="cursor-pointer text-red-400 hover:text-red-600 transition-colors"
+                    (click)="removeAspect(sectionIndex, aspectIndex)">
+                    <ng-icon name="lucideTrash" class="text-base" />
+                  </button>
+                </div>
+
+                <div class="flex flex-col gap-4">
+
+                  <!-- Fila 1: Descripción (ancho completo) -->
+                  <app-input-text
+                    [id]="'asp-' + sectionIndex + '-' + aspectIndex + '-desc'"
+                    label="Descripción"
+                    icon="lucideText"
+                    autocomplete="off"
+                    [ErrorMessage]="false"
+                    formControlName="description" />
+
+                  <!-- Fila 2: Tipo | Ponderación -->
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                    <!-- Tipo de evaluación — label explícito arriba -->
+                    <div class="flex flex-col gap-1">
+                      <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Escala de evaluación</span>
+                      <p-select
+                        [options]="aspectTypes"
+                        optionLabel="label"
+                        optionValue="value"
+                        formControlName="type"
+                        [inputId]="'asp-' + sectionIndex + '-' + aspectIndex + '-type'"
+                        class="w-full" />
                     </div>
 
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-                      <!-- Descripción (ocupa ancho completo) -->
-                      <div class="md:col-span-2">
-                        <app-input-text
-                          [id]="'sec-' + sectionIndex + '-asp-' + aspectIndex + '-desc'"
-                          label="Descripción del aspecto"
-                          icon="lucideText"
-                          autocomplete="off"
-                          [ErrorMessage]="false"
-                          formControlName="description" />
-                      </div>
-
-                      <!-- Tipo de respuesta -->
-                      <p-floatlabel>
-                        <p-select
-                          [options]="aspectTypes"
-                          optionLabel="label"
-                          optionValue="value"
-                          formControlName="type"
-                          [inputId]="'sec-' + sectionIndex + '-asp-' + aspectIndex + '-type'"
-                          class="w-full" />
-                        <label [attr.for]="'sec-' + sectionIndex + '-asp-' + aspectIndex + '-type'">
-                          Escala de evaluación
-                        </label>
-                      </p-floatlabel>
-
-                      <!-- Ponderación del aspecto -->
-                      <p-floatlabel variant="on">
-                        <p-inputnumber
-                          formControlName="weight"
-                          [inputId]="'sec-' + sectionIndex + '-asp-' + aspectIndex + '-weight'"
-                          [min]="0"
-                          [max]="100"
-                          [minFractionDigits]="0"
-                          [maxFractionDigits]="1"
-                          suffix="%"
-                          placeholder="Ej: 25%"
-                          class="w-full" />
-                        <label [attr.for]="'sec-' + sectionIndex + '-asp-' + aspectIndex + '-weight'">
-                          Ponderación (%)
-                        </label>
-                      </p-floatlabel>
-
-                      <!-- Puntaje máximo (solo para numérico) -->
-                      @if (needsMaxScore(sectionIndex, aspectIndex)) {
-                        <p-floatlabel variant="on">
-                          <p-inputnumber
-                            formControlName="maximum_score"
-                            [showButtons]="true"
-                            buttonLayout="horizontal"
-                            spinnerMode="horizontal"
-                            [inputId]="'sec-' + sectionIndex + '-asp-' + aspectIndex + '-max'"
-                            [min]="0"
-                            class="w-full">
-                            <ng-template #incrementbuttonicon><ng-icon name="lucidePlus" /></ng-template>
-                            <ng-template #decrementbuttonicon><ng-icon name="lucideMinus" /></ng-template>
-                          </p-inputnumber>
-                          <label [attr.for]="'sec-' + sectionIndex + '-asp-' + aspectIndex + '-max'">
-                            Puntaje máximo
-                          </label>
-                        </p-floatlabel>
-                      }
-
-                      <!-- Requiere evidencia -->
-                      <div class="flex items-center gap-3 rounded border border-gray-200 bg-white px-3 py-2">
-                        <p-toggleswitch
-                          formControlName="requires_evidence"
-                          [inputId]="'sec-' + sectionIndex + '-asp-' + aspectIndex + '-evidence'" />
-                        <label
-                          [attr.for]="'sec-' + sectionIndex + '-asp-' + aspectIndex + '-evidence'"
-                          class="cursor-pointer text-sm">
-                          Requiere evidencia (foto / clip)
-                        </label>
-                      </div>
-
-                      <!-- Hint del tipo seleccionado -->
-                      @if (getAspectTypeHint(sectionIndex, aspectIndex)) {
-                        <p class="md:col-span-2 text-xs text-gray-500 italic">
-                          {{ getAspectTypeHint(sectionIndex, aspectIndex) }}
-                        </p>
-                      }
+                    <!-- Ponderación aspecto — label explícito arriba -->
+                    <div class="flex flex-col gap-1">
+                      <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Ponderación (%)</span>
+                      <p-inputnumber
+                        formControlName="weight"
+                        [inputId]="'asp-' + sectionIndex + '-' + aspectIndex + '-weight'"
+                        [min]="0"
+                        [max]="100"
+                        [minFractionDigits]="0"
+                        [maxFractionDigits]="1"
+                        suffix="%"
+                        [placeholder]="'Ej: 25'"
+                        class="w-full" />
                     </div>
                   </div>
-                }
+
+                  <!-- Fila 3 (condicional): Puntaje máximo para tipo numérico -->
+                  @if (needsMaxScore(sectionIndex, aspectIndex)) {
+                    <div class="flex flex-col gap-1">
+                      <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Puntaje máximo</span>
+                      <p-inputnumber
+                        formControlName="maximum_score"
+                        [showButtons]="true"
+                        buttonLayout="horizontal"
+                        spinnerMode="horizontal"
+                        [inputId]="'asp-' + sectionIndex + '-' + aspectIndex + '-max'"
+                        [min]="0"
+                        class="w-full">
+                        <ng-template #incrementbuttonicon><ng-icon name="lucidePlus" /></ng-template>
+                        <ng-template #decrementbuttonicon><ng-icon name="lucideMinus" /></ng-template>
+                      </p-inputnumber>
+                    </div>
+                  }
+
+                  <!-- Fila 4: Requiere evidencia — sin fondo hardcodeado -->
+                  <label
+                    class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-2.5 transition-colors hover:bg-gray-100 dark:border-bunker-600 dark:hover:bg-bunker-700"
+                    [attr.for]="'asp-' + sectionIndex + '-' + aspectIndex + '-evidence'">
+                    <p-toggleswitch
+                      formControlName="requires_evidence"
+                      [inputId]="'asp-' + sectionIndex + '-' + aspectIndex + '-evidence'" />
+                    <span class="text-sm">Requiere evidencia (foto / clip)</span>
+                  </label>
+
+                  <!-- Hint del tipo seleccionado -->
+                  @if (getAspectTypeHint(sectionIndex, aspectIndex)) {
+                    <p class="text-xs italic text-gray-400 dark:text-gray-500">
+                      {{ getAspectTypeHint(sectionIndex, aspectIndex) }}
+                    </p>
+                  }
+
+                </div>
               </div>
-            </div>
-          }
-        </div>
+            }
+          </div>
+        }
+
       </div>
     }
   </div>
