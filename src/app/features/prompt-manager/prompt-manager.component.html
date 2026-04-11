@@ -9,8 +9,9 @@
       <div class="w-10 h-10 rounded-full border-4 border-primary-500 border-t-transparent animate-spin"></div>
       <p class="text-sm text-gray-500 dark:text-gray-400">Cargando instrucciones…</p>
     </div>
-  } @else {
+  }
 
+  @if (!loading) {
   <div class="flex flex-col lg:flex-row gap-5" style="min-height: calc(100vh - 160px)">
 
     <!-- ─── LISTA IZQUIERDA ──────────────────────────────────── -->
@@ -43,19 +44,19 @@
         <button
           (click)="filterActive = ''; applyFilters()"
           class="flex-1 py-1.5 text-sm font-medium rounded-lg transition"
-          [ngClass]="filterActive === '' ? 'bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'">
+          [ngClass]="filterActive === '' ? 'bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'">
           Todas
         </button>
         <button
           (click)="filterActive = 'true'; applyFilters()"
           class="flex-1 py-1.5 text-sm font-medium rounded-lg transition"
-          [ngClass]="filterActive === 'true' ? 'bg-emerald-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'">
+          [ngClass]="filterActive === 'true' ? 'bg-emerald-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'">
           Activas
         </button>
         <button
           (click)="filterActive = 'false'; applyFilters()"
           class="flex-1 py-1.5 text-sm font-medium rounded-lg transition"
-          [ngClass]="filterActive === 'false' ? 'bg-gray-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'">
+          [ngClass]="filterActive === 'false' ? 'bg-gray-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'">
           Inactivas
         </button>
       </div>
@@ -131,7 +132,7 @@
       @if (!isCreating && !isEditing && selectedPrompt) {
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden">
 
-          <!-- Header con nombre y tipo -->
+          <!-- Header -->
           <div class="px-6 py-5 border-b dark:border-gray-700">
             <div class="flex items-start justify-between gap-4">
               <div>
@@ -168,8 +169,8 @@
             </div>
           </div>
 
-          <!-- Instrucciones (el "template") en lenguaje natural -->
           <div class="p-6 space-y-5">
+            <!-- Instrucciones legibles -->
             <div>
               <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
                 Lo que le dices a la IA:
@@ -179,7 +180,7 @@
               </div>
             </div>
 
-            <!-- Variables explicadas en lenguaje natural -->
+            <!-- Variables en lenguaje natural -->
             @if (selectedPrompt.variables?.length) {
               <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-4">
                 <div class="flex items-start gap-3">
@@ -188,18 +189,17 @@
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
                   <div>
-                    <p class="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-1">
+                    <p class="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
                       El sistema completará automáticamente:
                     </p>
-                    <div class="flex flex-wrap gap-2 mt-2">
-                      @for (variable of selectedPrompt.variables; track variable) {
-                        <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-white dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
-                          {{ variable }}
-                        </span>
-                      }
+                    <div class="flex flex-wrap gap-2">
+                      <span *ngFor="let v of selectedPrompt.variables"
+                        class="text-xs font-mono px-2.5 py-1 rounded-lg bg-white dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                        {{ '{' }}{{ v }}{{ '}' }}
+                      </span>
                     </div>
                     <p class="text-xs text-blue-600 dark:text-blue-400 mt-2 opacity-75">
-                      Estos valores son reemplazados automáticamente cuando la IA procesa cada evaluación.
+                      Estos valores son reemplazados automáticamente al procesar cada evaluación.
                     </p>
                   </div>
                 </div>
@@ -237,7 +237,7 @@
 
           <form (ngSubmit)="savePrompt()" class="p-6 space-y-5">
 
-            <!-- Nombre del prompt -->
+            <!-- Nombre -->
             <div>
               <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">
                 Nombre de esta instrucción <span class="text-red-500">*</span>
@@ -281,16 +281,15 @@
               }
             </div>
 
-            <!-- Instrucciones para la IA -->
+            <!-- Instrucciones -->
             <div>
-              <div class="flex items-center justify-between mb-1.5">
-                <label class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Instrucciones para la IA <span class="text-red-500">*</span>
-                </label>
-              </div>
+              <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">
+                Instrucciones para la IA <span class="text-red-500">*</span>
+              </label>
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 leading-relaxed">
-                Escribe en español qué quieres que analice o responda la IA.
-                Si necesitas incluir un dato variable (como el nombre del agente), escríbelo entre llaves: <span class="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded">{nombre_agente}</span>
+                Escribe en español qué quieres que analice la IA. Para incluir un dato variable como el nombre del agente,
+                escríbelo entre llaves, por ejemplo
+                <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded font-mono">{{ '{' }}nombre_agente{{ '}' }}</code>
               </p>
               <textarea
                 [(ngModel)]="form.template"
@@ -298,7 +297,7 @@
                 (ngModelChange)="extractVariables()"
                 required
                 rows="10"
-                placeholder="Ejemplo:&#10;&#10;Analiza la siguiente transcripción y determina si el agente {nombre_agente} cumplió con el protocolo de saludo. Verifica si:&#10;1. Se presentó con su nombre completo&#10;2. Mencionó el nombre de la empresa&#10;3. Ofreció su ayuda de forma cordial&#10;&#10;Responde indicando: Cumple / No cumple / Cumple parcialmente, con una explicación breve."
+                [placeholder]="templatePlaceholder"
                 class="w-full text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/40 resize-y leading-relaxed">
               </textarea>
             </div>
@@ -316,11 +315,10 @@
                       El sistema completará automáticamente estos valores:
                     </p>
                     <div class="flex flex-wrap gap-2">
-                      @for (variable of form.variables; track variable) {
-                        <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-white dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
-                          {{ variable }}
-                        </span>
-                      }
+                      <span *ngFor="let v of form.variables"
+                        class="text-xs font-mono px-2.5 py-1 rounded-lg bg-white dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                        {{ '{' }}{{ v }}{{ '}' }}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -369,7 +367,9 @@
           </form>
         </div>
       }
+
     </div>
   </div>
   }
+
 </div>

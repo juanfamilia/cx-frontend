@@ -73,6 +73,14 @@ export class PromptManagerComponent implements OnInit {
     return this.categoryDescriptions[cat] ?? '';
   }
 
+  readonly templatePlaceholder =
+    'Ejemplo:\n\nAnaliza la siguiente transcripción y determina si el agente ' +
+    '{nombre_agente} cumplió con el protocolo de saludo. Verifica si:\n' +
+    '1. Se presentó con su nombre completo\n' +
+    '2. Mencionó el nombre de la empresa\n' +
+    '3. Ofreció su ayuda de forma cordial\n\n' +
+    'Responde indicando: Cumple / No cumple / Cumple parcialmente, con una explicación breve.';
+
   ngOnInit(): void {
     this.loadPrompts();
   }

@@ -93,6 +93,10 @@ export class InteractionPlayerComponent implements OnDestroy {
     }));
   });
 
+  hasSpeakerData = computed(() =>
+    (this.transcriptResource.value() ?? []).some(s => !!s.speaker)
+  );
+
   constructor() {
     effect(() => {
       const segs = this.segments();
