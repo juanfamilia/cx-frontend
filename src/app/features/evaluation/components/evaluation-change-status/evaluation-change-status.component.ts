@@ -25,7 +25,7 @@ import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ShareToasterService } from '@core/services/toast.service';
-import { STATUS } from 'src/app/shared/constants/evaluationStatus.constants';
+import { STATUS } from '../../../../shared/constants/evaluationStatus.constants';
 
 const REJECTION_TYPES = [
   { name: 'Descartar — no requiere acción', value: 'descartado' },
