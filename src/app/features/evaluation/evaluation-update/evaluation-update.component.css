@@ -1,0 +1,72 @@
+.reviewer-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  border-left: 5px solid transparent;
+  background-color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.reviewer-alert--rejected {
+  border-left-color: #e53e3e;
+  background-color: #fff5f5;
+}
+
+.reviewer-alert--edit {
+  border-left-color: #d69e2e;
+  background-color: #fffbeb;
+}
+
+.reviewer-alert__icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.reviewer-alert--rejected .reviewer-alert__icon {
+  color: #e53e3e;
+}
+
+.reviewer-alert--edit .reviewer-alert__icon {
+  color: #d69e2e;
+}
+
+.reviewer-alert__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.reviewer-alert__title {
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0 0 6px;
+  color: #1a202c;
+}
+
+.reviewer-alert__comment {
+  font-size: 14px;
+  color: #4a5568;
+  margin: 0 0 8px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.reviewer-alert__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.reviewer-alert__tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: rgba(0, 0, 0, 0.07);
+  color: #2d3748;
+}

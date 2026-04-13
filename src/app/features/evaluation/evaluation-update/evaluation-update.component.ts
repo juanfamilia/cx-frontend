@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -14,6 +15,13 @@ import { Evaluation } from '@interfaces/evaluation';
 import { EvaluationService } from '@pages/evaluation/evaluation.service';
 import { ShareToasterService } from '@core/services/toast.service';
 import { EvaluationFormComponent } from '../components/evaluation-form/evaluation-form.component';
+
+interface ReviewerFeedback {
+  type: 'rejected' | 'edit';
+  title: string;
+  comment: string | null;
+  tags: string[];
+}
 
 @Component({
   selector: 'app-evaluation-update',
@@ -32,6 +40,35 @@ export class EvaluationUpdateComponent {
   evaluation = signal<Evaluation | null>(null);
   isLoading = signal<boolean>(false);
   isLoadingSubmit = signal<boolean>(false);
+
+  reviewerFeedback = computed<ReviewerFeedback | null>(() => {
+    const ev = this.evaluation();
+    if (!ev) return null;
+    const hasComment = !!ev.status_comment;
+    if (ev.status === 'rechazado') {
+      const tags: string[] = [];
+      if (ev.rejection_type === 'descartado') tags.push('Descartado definitivamente');
+      if (ev.rejection_type === 'discrepancia') tags.push('Discrepancia — revisión pendiente');
+      if (ev.requires_revisit) tags.push('Requiere revisita');
+      if (!hasComment && tags.length === 0) return null;
+      return {
+        type: 'rejected',
+        title: 'Esta evaluación fue rechazada por el revisor',
+        comment: ev.status_comment,
+        tags,
+      };
+    }
+    if (ev.status === 'editar') {
+      if (!hasComment) return null;
+      return {
+        type: 'edit',
+        title: 'El revisor solicitó correcciones',
+        comment: ev.status_comment,
+        tags: [],
+      };
+    }
+    return null;
+  });
 
   constructor() {
     this.route.paramMap

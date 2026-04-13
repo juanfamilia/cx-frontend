@@ -12,6 +12,9 @@ export interface Evaluation {
   location: string;
   evaluated_collaborator: string;
   status: string;
+  rejection_type: string | null;
+  requires_revisit: boolean;
+  status_comment: string | null;
   video: Video;
   campaign: Campaign;
   user: UserClass;

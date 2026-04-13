@@ -5,6 +5,27 @@
 @if (isLoading()) {
   <app-spinner />
 } @else {
+  @if (reviewerFeedback(); as fb) {
+    <div class="reviewer-alert" [class]="'reviewer-alert--' + fb.type">
+      <div class="reviewer-alert__icon">
+        @if (fb.type === 'rejected') { ✖ } @else { ↩ }
+      </div>
+      <div class="reviewer-alert__body">
+        <p class="reviewer-alert__title">{{ fb.title }}</p>
+        @if (fb.comment) {
+          <p class="reviewer-alert__comment">"{{ fb.comment }}"</p>
+        }
+        @if (fb.tags.length) {
+          <div class="reviewer-alert__tags">
+            @for (tag of fb.tags; track tag) {
+              <span class="reviewer-alert__tag">{{ tag }}</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   <app-evaluation-form
     [isEditing]="true"
     [byZone]="
