@@ -146,8 +146,16 @@ export class EvaluationChangeStatusComponent implements OnInit {
         },
         error: (err) => {
           this.isSubmitting.set(false);
-          const msg = err?.error?.detail ?? 'No se pudo cambiar el estado.';
-          this.toastService.showToast('error', 'Error', msg);
+          const detail = err?.error?.detail;
+          let msg: string;
+          if (typeof detail === 'string') {
+            msg = detail;
+          } else if (Array.isArray(detail) && detail.length > 0) {
+            msg = detail.map((d: { msg?: string }) => d.msg ?? JSON.stringify(d)).join('; ');
+          } else {
+            msg = 'No se pudo cambiar el estado.';
+          }
+          this.toastService.showToast('error', 'Error al cambiar estado', msg);
         },
       });
   }
