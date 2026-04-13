@@ -1,39 +1,102 @@
 <div class="flex justify-center">
   <p-button (click)="showDialog()" label="Cambiar Estado" />
+
   <p-dialog
-    header="Cambiar Estado"
+    header="Cambiar Estado de Evaluación"
     [modal]="true"
     [(visible)]="visible"
-    [style]="{ width: '25rem' }">
-    <form
-      [formGroup]="statusForm"
-      class="mb-4 flex flex-col items-center gap-4 py-5">
+    [style]="{ width: '32rem' }">
+
+    <form [formGroup]="statusForm" class="flex flex-col gap-4 py-2">
+
+      <!-- Status selector -->
       <app-input-select
-        label="Estado"
+        label="Nueva acción"
         icon="lucideClipboardCheck"
-        placeholder="Seleccione una opción"
-        [options]="status"
+        placeholder="Seleccione una acción"
+        [options]="statusOptions"
         [clear]="false"
         class="w-full"
-        (selectChange)="setStatus($event.value)"
+        (selectChange)="onStatusChange($event.value)"
         formControlName="status" />
-      @if (showComment()) {
-        <app-input-textarea
-          label="Comentario"
-          placeholder="Escriba un comentario"
-          formControlName="comment"
-          class="w-full" />
+
+      <!-- APROBAR: confirmation hint -->
+      @if (isApproval()) {
+        <div class="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800
+                    px-4 py-3 text-sm text-green-800 dark:text-green-300">
+          ✅ Al aprobar se generarán automáticamente los planes de acción por cada NC encontrado
+          y se notificará al evaluador por correo.
+        </div>
       }
+
+      <!-- EDITAR: comment required -->
+      @if (isEdit()) {
+        <div class="flex flex-col gap-1">
+          <app-input-textarea
+            label="Indicación para el evaluador *"
+            placeholder="Ej: Por favor corregir la sección de protocolo de cortesía..."
+            formControlName="comment"
+            class="w-full" />
+          <span class="text-xs text-gray-400 dark:text-gray-500">
+            El evaluador recibirá este comentario por correo.
+          </span>
+        </div>
+      }
+
+      <!-- RECHAZAR: type + comment + revisit -->
+      @if (isRejection()) {
+        <!-- Rejection type -->
+        <app-input-select
+          label="Tipo de rechazo *"
+          icon="lucideClipboardCheck"
+          placeholder="Seleccione el motivo"
+          [options]="rejectionTypeOptions"
+          [clear]="false"
+          class="w-full"
+          (selectChange)="onRejectionTypeChange($event.value)"
+          formControlName="rejection_type" />
+
+        <!-- Requires revisit (only for discrepancy) -->
+        @if (showDiscrepancyOptions()) {
+          <div class="flex items-center gap-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20
+                      border border-yellow-200 dark:border-yellow-800 px-4 py-3">
+            <p-checkbox
+              formControlName="requires_revisit"
+              [binary]="true"
+              inputId="revisit" />
+            <label for="revisit" class="text-sm text-yellow-800 dark:text-yellow-300 cursor-pointer">
+              Requiere re-visita a la sucursal
+            </label>
+          </div>
+        }
+
+        <!-- Comment (required for rejection) -->
+        <div class="flex flex-col gap-1">
+          <app-input-textarea
+            label="Motivo del rechazo *"
+            placeholder="Explique por qué se rechaza esta evaluación..."
+            formControlName="comment"
+            class="w-full" />
+          <span class="text-xs text-gray-400 dark:text-gray-500">
+            El evaluador recibirá este motivo por correo.
+          </span>
+        </div>
+      }
+
     </form>
-    <div class="flex justify-end gap-2">
+
+    <div class="flex justify-end gap-2 mt-4">
       <p-button
         label="Cancelar"
         severity="secondary"
+        [disabled]="isSubmitting()"
         (click)="hiddenDialog()" />
       <p-button
-        label="Actualizar"
+        [label]="isSubmitting() ? 'Guardando...' : 'Confirmar'"
+        [loading]="isSubmitting()"
         (click)="onSubmit()"
-        [disabled]="statusForm.invalid" />
+        [disabled]="statusForm.invalid || isSubmitting()" />
     </div>
+
   </p-dialog>
 </div>

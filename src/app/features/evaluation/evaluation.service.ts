@@ -52,11 +52,16 @@ export class EvaluationService {
 
   updateStatus(
     id: number,
-    status: { status: string; comment?: string }
+    payload: {
+      status: string;
+      comment?: string | null;
+      rejection_type?: string | null;
+      requires_revisit?: boolean;
+    }
   ): Observable<Evaluation> {
     return this.http.put<Evaluation>(
       environment.apiUrl + 'evaluations/status/' + id,
-      status
+      payload
     );
   }
 
