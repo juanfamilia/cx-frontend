@@ -23,6 +23,17 @@
       label="Correo Electrónico"
       icon="lucideMail"
       formControlName="email" />
+
+    @if (showIndustrySelect) {
+      <div class="md:col-span-2">
+        <app-input-select
+          label="Industria (plantilla CX)"
+          icon="lucideBriefcase"
+          formControlName="industry_id"
+          placeholder="Seleccionar industria"
+          [options]="industryOptions()" />
+      </div>
+    }
   </div>
 
   <p-divider align="center" type="solid">

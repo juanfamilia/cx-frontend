@@ -8,6 +8,8 @@ export interface Company {
   address: string;
   state: string;
   country: string;
+  /** Industria sectorial (template de competencias). Solo superadmin asigna al crear/editar. */
+  industry_id?: number | null;
   created_at: string;
   updated_at: string;
   deleted_at: string;
@@ -20,6 +22,7 @@ export interface CompanyCreate {
   address: string;
   state: string;
   country: string;
+  industry_id?: number | null;
 }
 
 export interface CompanyList {
