@@ -6,9 +6,16 @@ import {
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '@core/services/auth.service';
 import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideMoon, lucideSunMedium } from '@ng-icons/lucide';
+import {
+  lucideArrowRight,
+  lucideLayers,
+  lucideMoon,
+  lucideSunMedium,
+} from '@ng-icons/lucide';
 import { ThemeServiceService } from '@services/theme-service.service';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
@@ -20,14 +27,20 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
     NgClass,
     ToggleSwitchModule,
     FormsModule,
+    RouterLink,
   ],
   templateUrl: './configuration-dashboard.component.html',
   styleUrl: './configuration-dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [provideIcons({ lucideSunMedium, lucideMoon })],
+  viewProviders: [
+    provideIcons({ lucideSunMedium, lucideMoon, lucideLayers, lucideArrowRight }),
+  ],
 })
 export class ConfigurationDashboardComponent {
   private themeService = inject(ThemeServiceService);
+  private auth = inject(AuthService);
+
+  companyAdmin = computed(() => this.auth.getCurrentUser()?.role === 1);
 
   darkMode = computed(() => this.themeService.darkMode());
 

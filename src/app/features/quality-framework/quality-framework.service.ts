@@ -2,7 +2,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import {
+  CompanyCompetencyConfig,
+  CompanyCompetencyConfigUpdateBody,
+  CompanyCompetencyConfigUpsert,
   IndustriesPublic,
+  IndustryTemplatePublic,
   SuggestedSurveyAspectsResponse,
 } from '@interfaces/quality-framework';
 import { Observable } from 'rxjs';
@@ -43,11 +47,39 @@ export class QualityFrameworkService {
     );
   }
 
-  listCompanyCompetencyConfigs(companyId: number): Observable<unknown[]> {
-    return this.http.get<unknown[]>(
-      environment.apiUrl +
-        BASE +
-        `companies/${companyId}/competency-configs`
+  listCompanyCompetencyConfigs(
+    companyId: number
+  ): Observable<CompanyCompetencyConfig[]> {
+    return this.http.get<CompanyCompetencyConfig[]>(
+      environment.apiUrl + BASE + `companies/${companyId}/competency-configs`
+    );
+  }
+
+  listIndustryTemplates(
+    industryId: number
+  ): Observable<IndustryTemplatePublic[]> {
+    return this.http.get<IndustryTemplatePublic[]>(
+      environment.apiUrl + BASE + `industries/${industryId}/template`
+    );
+  }
+
+  upsertCompanyCompetencyConfig(
+    companyId: number,
+    body: CompanyCompetencyConfigUpsert
+  ): Observable<CompanyCompetencyConfig> {
+    return this.http.post<CompanyCompetencyConfig>(
+      environment.apiUrl + BASE + `companies/${companyId}/competency-configs`,
+      body
+    );
+  }
+
+  updateCompanyCompetencyConfig(
+    configId: number,
+    body: CompanyCompetencyConfigUpdateBody
+  ): Observable<CompanyCompetencyConfig> {
+    return this.http.put<CompanyCompetencyConfig>(
+      environment.apiUrl + BASE + `competency-configs/${configId}`,
+      body
     );
   }
 }

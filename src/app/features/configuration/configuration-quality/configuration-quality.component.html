@@ -1,0 +1,155 @@
+<section class="flex flex-col gap-6">
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <app-page-header
+      title="Marco de calidad CX"
+      description="Ajuste qué competencias aplican a su empresa y el peso sugerido para formularios y evaluaciones. La vista inferior resume los aspectos que se sugerirán al crear formularios." />
+    <div class="shrink-0">
+      <app-button-secondary
+        title="Volver a configuración"
+        icon="lucideArrowLeft"
+        styleClass="py-2.5"
+        (event)="goBack()" />
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div
+      class="dark:border-bunker-900 rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-600 dark:bg-gray-900/40 dark:text-gray-300">
+      Cargando marco de calidad…
+    </div>
+  } @else if (noIndustry()) {
+    <div
+      class="dark:border-bunker-900 rounded-lg border border-amber-200 bg-amber-50 p-6 text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
+      <p class="font-medium">Sin industria asignada</p>
+      <p class="mt-1 text-sm">
+        Su empresa aún no tiene una industria sectorial asignada. Un superadministrador debe
+        configurarla en la ficha de la empresa para activar el template de competencias.
+      </p>
+    </div>
+  } @else {
+    <div
+      class="dark:bg-bunker-900/40 dark:border-bunker-900 rounded-lg border border-gray-200 bg-white p-6 shadow-xs">
+      <div class="mb-4 flex items-center gap-2">
+        <ng-icon name="lucideSlidersHorizontal" class="text-xl text-gray-500" />
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
+          Competencias del template sectorial
+        </h2>
+      </div>
+      <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        Desactive competencias que no apliquen (salvo las obligatorias). El peso propio
+        sustituye al peso sugerido del sector cuando lo indique.
+      </p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[720px] border-collapse text-left text-sm">
+          <thead>
+            <tr
+              class="border-b border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-400">
+              <th class="py-2 pr-3 font-medium">Competencia</th>
+              <th class="py-2 pr-3 font-medium">Sector (peso)</th>
+              <th class="py-2 pr-3 font-medium">Activa</th>
+              <th class="py-2 pr-3 font-medium">Peso propio</th>
+              <th class="py-2 pr-3 font-medium">Notas internas</th>
+              <th class="py-2 font-medium"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.competency_id) {
+              <tr
+                class="border-b border-gray-100 dark:border-gray-800"
+                [ngClass]="{
+                  'opacity-60': !row.is_enabled,
+                }">
+                <td class="py-3 pr-3 align-top">
+                  <div class="font-medium text-gray-900 dark:text-gray-100">
+                    {{ row.competency_name }}
+                  </div>
+                  <div class="text-xs text-gray-500">{{ row.competency_code }}</div>
+                  @if (row.is_mandatory) {
+                    <span
+                      class="mt-1 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                      Obligatoria
+                    </span>
+                  }
+                </td>
+                <td class="py-3 pr-3 align-middle text-gray-700 dark:text-gray-300">
+                  {{ row.suggested_weight }}
+                </td>
+                <td class="py-3 pr-3 align-middle">
+                  <p-toggleswitch
+                    [ngModel]="row.is_enabled"
+                    [disabled]="
+                      loading() ||
+                      rowSaving() === row.competency_id ||
+                      row.is_mandatory
+                    "
+                    (ngModelChange)="onToggleEnabled(row, $event)" />
+                </td>
+                <td class="py-3 pr-3 align-top">
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    class="dark:border-bunker-700 dark:bg-bunker-900 w-24 rounded border border-gray-300 px-2 py-1.5 text-gray-900 dark:text-gray-100"
+                    [value]="row.custom_weight ?? ''"
+                    [disabled]="rowSaving() === row.competency_id"
+                    (input)="onWeightInput(row, $event)" />
+                </td>
+                <td class="max-w-xs py-3 pr-3 align-top">
+                  <textarea
+                    rows="2"
+                    class="dark:border-bunker-700 dark:bg-bunker-900 w-full rounded border border-gray-300 px-2 py-1.5 text-gray-900 dark:text-gray-100"
+                    [value]="row.custom_notes"
+                    [disabled]="rowSaving() === row.competency_id"
+                    (input)="onNotesInput(row, $event)"></textarea>
+                </td>
+                <td class="py-3 align-top">
+                  <button
+                    type="button"
+                    class="text-primary-600 hover:text-primary-700 dark:text-primary-400 text-sm font-medium underline disabled:opacity-50"
+                    [disabled]="rowSaving() === row.competency_id"
+                    (click)="saveWeightAndNotes(row)">
+                    Guardar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div
+      class="dark:bg-bunker-900/40 dark:border-bunker-900 rounded-lg border border-gray-200 bg-white p-6 shadow-xs">
+      <div class="mb-4 flex items-center gap-2">
+        <ng-icon name="lucideClipboardList" class="text-xl text-gray-500" />
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
+          Aspectos sugeridos para formularios
+        </h2>
+      </div>
+      <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        Referencia según su configuración actual (orden y tipo sugeridos al crear preguntas).
+      </p>
+      @if (suggestedItems().length === 0) {
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Ninguna competencia activa; active al menos una competencia no obligatoria o revise el
+          template sectorial.
+        </p>
+      } @else {
+        <ol class="list-decimal space-y-3 pl-5 text-gray-800 dark:text-gray-200">
+          @for (item of suggestedItems(); track item.competency_id) {
+            <li>
+              <span class="font-medium">{{ item.name }}</span>
+              <span class="text-gray-500"> — {{ item.suggested_type }}</span>
+              <span class="text-gray-500"> · peso {{ item.weight_hint }}</span>
+              @if (item.is_mandatory) {
+                <span class="ml-1 text-xs text-gray-500">(obligatoria)</span>
+              }
+            </li>
+          }
+        </ol>
+      }
+    </div>
+  }
+</section>
