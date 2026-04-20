@@ -21,6 +21,6 @@ export const userRoutes: Routes = [
     path: 'update/:id',
     component: UserUpdateComponent,
     canActivate: [authGuard],
-    data: { role: [0, 1], title: 'Editar Usuario' },
+    data: { role: [0, 1, 2], title: 'Editar Usuario' },
   },
 ];
