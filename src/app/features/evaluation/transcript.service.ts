@@ -115,6 +115,16 @@ export class TranscriptService {
     );
   }
 
+  /** Solo Whisper + diarización; reemplaza segmentos y transcript_text (sin GPT). */
+  reprocessTranscription(
+    evaluationId: number
+  ): Observable<{ message: string; evaluation_id: number }> {
+    return this.http.post<{ message: string; evaluation_id: number }>(
+      `${this.apiUrl}transcript-segments/evaluation/${evaluationId}/reprocess-transcription`,
+      {}
+    );
+  }
+
   /**
    * Format seconds to mm:ss display
    */

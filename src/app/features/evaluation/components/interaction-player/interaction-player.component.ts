@@ -16,6 +16,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { finalize, of } from 'rxjs';
 import { TranscriptService, TranscriptSegment } from '../../transcript.service';
 import { ShareToasterService } from '@core/services/toast.service';
+import { AuthService } from '@core/services/auth.service';
 import { environment } from '@env/environment';
 
 export interface InteractionPhase {
@@ -37,6 +38,7 @@ export interface InteractionPhase {
 export class InteractionPlayerComponent implements OnDestroy {
   private transcriptService = inject(TranscriptService);
   private toastService = inject(ShareToasterService);
+  private authService = inject(AuthService);
   private http = inject(HttpClient);
 
   evaluationId = input.required<number>();
@@ -57,6 +59,17 @@ export class InteractionPlayerComponent implements OnDestroy {
   activePhase = signal<InteractionPhase | null>(null);
 
   embeddingsLoading = signal<boolean>(false);
+  reprocessLoading = signal<boolean>(false);
+
+  /** Admin, admin empresa o gerente: pueden encolar re-transcripción. */
+  canReprocessTranscription = computed(() => {
+    try {
+      const r = Number(this.authService.getCurrentUser().role);
+      return [0, 1, 2].includes(r);
+    } catch {
+      return false;
+    }
+  });
 
   private timeUpdateInterval: ReturnType<typeof setInterval> | null = null;
   private lastAppliedSeekKey: string | null = null;
@@ -264,6 +277,38 @@ export class InteractionPlayerComponent implements OnDestroy {
             'error',
             'Embeddings',
             'No se pudieron generar los embeddings. Intente de nuevo más tarde.'
+          );
+        },
+      });
+  }
+
+  reloadTranscriptSegments() {
+    this.transcriptResource.reload();
+    this.toastService.showToast('info', 'Transcripción', 'Lista actualizada.');
+  }
+
+  queueReprocessTranscription() {
+    if (this.reprocessLoading() || !this.canReprocessTranscription()) {
+      return;
+    }
+    this.reprocessLoading.set(true);
+    this.transcriptService
+      .reprocessTranscription(this.evaluationId())
+      .pipe(finalize(() => this.reprocessLoading.set(false)))
+      .subscribe({
+        next: res => {
+          this.toastService.showToast(
+            'success',
+            'Transcripción',
+            res.message ??
+              'Re-transcripción en cola. Use “Actualizar lista” pasado un minuto.'
+          );
+        },
+        error: () => {
+          this.toastService.showToast(
+            'error',
+            'Transcripción',
+            'No se pudo encolar la re-transcripción.'
           );
         },
       });
