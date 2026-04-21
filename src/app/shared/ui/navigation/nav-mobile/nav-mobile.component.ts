@@ -17,8 +17,10 @@ import {
   lucideBrain,
   lucideBriefcaseBusiness,
   lucideChartArea,
+  lucideChartLine,
   lucideFileText,
   lucideFlaskConical,
+  lucideFolderKanban,
   lucideHouse,
   lucideMapPinned,
   lucideMegaphone,
@@ -27,6 +29,7 @@ import {
   lucideTextCursorInput,
 } from '@ng-icons/lucide';
 import { AuthService } from '@core/services/auth.service';
+import { EntitlementsService } from '@core/services/entitlements.service';
 import { InsAccessService } from '@core/services/ins-access.service';
 import { NAVROUTES } from '@shared/constants/navRoutes.constant';
 import { NavLinkComponent } from '../nav-link/nav-link.component';
@@ -54,15 +57,19 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       lucideChartArea,
       lucideSearch,
       lucideFlaskConical,
+      lucideFolderKanban,
+      lucideChartLine,
     }),
   ],
 })
 export class NavMobileComponent {
   private authService = inject(AuthService);
+  private entitlements = inject(EntitlementsService);
   private insAccess = inject(InsAccessService);
 
   constructor() {
     this.insAccess.ensureLoaded().subscribe();
+    this.entitlements.ensureLoaded().subscribe();
   }
 
   currentUser = signal<User>(this.authService.getCurrentUser());
@@ -71,10 +78,14 @@ export class NavMobileComponent {
     const u = this.currentUser();
     this.insAccess.loaded();
     this.insAccess.access();
+    this.entitlements.loaded();
+    this.entitlements.me();
     return NAVROUTES.filter(
       r =>
         r.roles.includes(u.role) &&
-        (!r.requiresIns || this.insAccess.canShowInsNavLink(u))
+        (!r.requiresIns || this.insAccess.canShowInsNavLink(u)) &&
+        (!r.requiresField || this.entitlements.canShowFieldNavLink(u)) &&
+        (!r.requiresClever || this.entitlements.canShowCleverNavLink(u))
     );
   });
 

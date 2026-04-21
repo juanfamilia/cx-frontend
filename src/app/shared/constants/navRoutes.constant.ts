@@ -81,6 +81,20 @@ export const NAVROUTES: RouteData[] = [
     requiresIns: true,
   },
   {
+    title: 'Siete Field',
+    route: '/field',
+    icon: 'lucideFolderKanban',
+    roles: [0, 1, 2],
+    requiresField: true,
+  },
+  {
+    title: 'Siete Clever',
+    route: '/clever',
+    icon: 'lucideChartLine',
+    roles: [0, 1, 2],
+    requiresClever: true,
+  },
+  {
     title: 'Configuración',
     route: '/configuration',
     icon: 'heroCog6Tooth',

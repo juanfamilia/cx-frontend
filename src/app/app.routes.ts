@@ -131,6 +131,18 @@ export const routes: Routes = [
     data: { title: 'Siete InS' },
   },
   {
+    path: 'field',
+    loadChildren: () =>
+      import('./features/field/field.routes').then(r => r.fieldRoutes),
+    data: { title: 'Siete Field' },
+  },
+  {
+    path: 'clever',
+    loadChildren: () =>
+      import('./features/clever/clever.routes').then(r => r.cleverRoutes),
+    data: { title: 'Siete Clever' },
+  },
+  {
     path: '**',
     component: NotFoundComponent,
   },

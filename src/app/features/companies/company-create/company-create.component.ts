@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { CompanyCreate } from '@interfaces/company';
+import { EntitlementsService } from '@core/services/entitlements.service';
 import { CompaniesService } from '@pages/companies/companies.service';
 import { ShareToasterService } from '@core/services/toast.service';
 import { CompanyFormComponent } from '../components/company-form/company-form.component';
@@ -15,12 +16,14 @@ import { CompanyFormComponent } from '../components/company-form/company-form.co
 })
 export class CompanyCreateComponent {
   private companyService = inject(CompaniesService);
+  private entitlements = inject(EntitlementsService);
   private toastService = inject(ShareToasterService);
   private router = inject(Router);
 
   createCompany(data: CompanyCreate) {
     this.companyService.create(data).subscribe({
       next: () => {
+        this.entitlements.refresh().subscribe();
         this.toastService.showToast(
           'success',
           'Empresa creada',

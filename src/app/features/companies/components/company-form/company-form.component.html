@@ -33,6 +33,21 @@
           placeholder="Seleccionar industria"
           [options]="industryOptions()" />
       </div>
+      <div class="md:col-span-2 flex flex-col gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+        <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Productos Siete</span>
+        <label class="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
+          <p-toggleswitch formControlName="siete_ins_enabled" inputId="siete_ins" />
+          <span>Siete InS</span>
+        </label>
+        <label class="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
+          <p-toggleswitch formControlName="siete_field_enabled" inputId="siete_field" />
+          <span>Siete Field</span>
+        </label>
+        <label class="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
+          <p-toggleswitch formControlName="siete_clever_enabled" inputId="siete_clever" />
+          <span>Siete Clever</span>
+        </label>
+      </div>
     }
   </div>
 

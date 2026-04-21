@@ -9,6 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 import { Company, CompanyCreate } from '@interfaces/company';
+import { EntitlementsService } from '@core/services/entitlements.service';
 import { CompaniesService } from '@pages/companies/companies.service';
 import { ShareToasterService } from '@core/services/toast.service';
 import { CompanyFormComponent } from '../components/company-form/company-form.component';
@@ -25,6 +26,7 @@ export class CompanyUpdateComponent implements OnInit {
   private router = inject(Router);
   private toastService = inject(ShareToasterService);
   private companyService = inject(CompaniesService);
+  private entitlements = inject(EntitlementsService);
 
   id = signal<number>(0);
   company = signal<Company | null>(null);
@@ -55,6 +57,7 @@ export class CompanyUpdateComponent implements OnInit {
   updateCompany(data: CompanyCreate) {
     this.companyService.update(data, this.id()).subscribe({
       next: () => {
+        this.entitlements.refresh().subscribe();
         this.toastService.showToast(
           'success',
           'Empresa actualizada',

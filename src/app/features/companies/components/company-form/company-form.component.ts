@@ -30,6 +30,7 @@ import {
   lucideSmartphone,
 } from '@ng-icons/lucide';
 import { DividerModule } from 'primeng/divider';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
 @Component({
   selector: 'app-company-form',
@@ -42,6 +43,7 @@ import { DividerModule } from 'primeng/divider';
     InputTextareaComponent,
     ButtonSecondaryComponent,
     InputSelectComponent,
+    ToggleSwitchModule,
   ],
   templateUrl: './company-form.component.html',
   styleUrl: './company-form.component.css',
@@ -79,6 +81,9 @@ export class CompanyFormComponent implements OnInit {
     state: ['', [Validators.required]],
     address: ['', [Validators.required]],
     industry_id: [null as number | null],
+    siete_ins_enabled: [false],
+    siete_field_enabled: [false],
+    siete_clever_enabled: [false],
   });
 
   get showIndustrySelect(): boolean {
@@ -98,13 +103,17 @@ export class CompanyFormComponent implements OnInit {
       });
     }
     if (this.isEdit()) {
+      const c = this.company()!;
       this.companyForm.patchValue({
-        name: this.company()!.name,
-        phone: this.company()!.phone,
-        email: this.company()!.email,
-        state: this.company()!.state,
-        address: this.company()!.address,
-        industry_id: this.company()!.industry_id ?? null,
+        name: c.name,
+        phone: c.phone,
+        email: c.email,
+        state: c.state,
+        address: c.address,
+        industry_id: c.industry_id ?? null,
+        siete_ins_enabled: !!c.siete_ins_enabled,
+        siete_field_enabled: !!c.siete_field_enabled,
+        siete_clever_enabled: !!c.siete_clever_enabled,
       });
     }
   }
@@ -121,6 +130,11 @@ export class CompanyFormComponent implements OnInit {
         country: 'DO',
         industry_id: this.showIndustrySelect ? raw.industry_id : undefined,
       };
+      if (this.showIndustrySelect) {
+        payload.siete_ins_enabled = !!raw.siete_ins_enabled;
+        payload.siete_field_enabled = !!raw.siete_field_enabled;
+        payload.siete_clever_enabled = !!raw.siete_clever_enabled;
+      }
       this.submitEvent.emit(payload);
     }
   }

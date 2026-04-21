@@ -16,10 +16,12 @@ import {
 import {
   lucideBanknote,
   lucideChartArea,
+  lucideChartLine,
   lucideBrain,
   lucideBriefcaseBusiness,
   lucideFileText,
   lucideFlaskConical,
+  lucideFolderKanban,
   lucideHouse,
   lucideMapPinned,
   lucideMegaphone,
@@ -28,6 +30,7 @@ import {
   lucideTextCursorInput,
 } from '@ng-icons/lucide';
 import { AuthService } from '@core/services/auth.service';
+import { EntitlementsService } from '@core/services/entitlements.service';
 import { InsAccessService } from '@core/services/ins-access.service';
 import { SidebarService } from '@core/services/sidebar.service';
 import { ThemeServiceService } from '@shared/services/theme-service.service';
@@ -57,17 +60,21 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       lucideChartArea,
       lucideSearch,
       lucideFlaskConical,
+      lucideFolderKanban,
+      lucideChartLine,
     }),
   ],
 })
 export class SidebarComponent {
   private authService = inject(AuthService);
+  private entitlements = inject(EntitlementsService);
   private insAccess = inject(InsAccessService);
   private sidebarService = inject(SidebarService);
   private themeService = inject(ThemeServiceService);
 
   constructor() {
     this.insAccess.ensureLoaded().subscribe();
+    this.entitlements.ensureLoaded().subscribe();
   }
 
   isCollapsed = computed(() => this.sidebarService.isCollapsed());
@@ -79,10 +86,14 @@ export class SidebarComponent {
     const u = this.currentUser();
     this.insAccess.loaded();
     this.insAccess.access();
+    this.entitlements.loaded();
+    this.entitlements.me();
     return NAVROUTES.filter(
       r =>
         r.roles.includes(u.role) &&
-        (!r.requiresIns || this.insAccess.canShowInsNavLink(u))
+        (!r.requiresIns || this.insAccess.canShowInsNavLink(u)) &&
+        (!r.requiresField || this.entitlements.canShowFieldNavLink(u)) &&
+        (!r.requiresClever || this.entitlements.canShowCleverNavLink(u))
     );
   });
 
