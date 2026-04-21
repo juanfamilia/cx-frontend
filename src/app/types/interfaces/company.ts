@@ -12,6 +12,8 @@ export interface Company {
   industry_id?: number | null;
   /** Producto Siete InS (investigación cualitativa); lo activa el superadmin vía API. */
   siete_ins_enabled?: boolean;
+  siete_field_enabled?: boolean;
+  siete_clever_enabled?: boolean;
   created_at: string;
   updated_at: string;
   deleted_at: string;
@@ -25,6 +27,9 @@ export interface CompanyCreate {
   state: string;
   country: string;
   industry_id?: number | null;
+  siete_ins_enabled?: boolean;
+  siete_field_enabled?: boolean;
+  siete_clever_enabled?: boolean;
 }
 
 export interface CompanyList {
