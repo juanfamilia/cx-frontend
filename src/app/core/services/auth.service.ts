@@ -7,6 +7,8 @@ import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { environment } from '@env/environment';
+import { EntitlementsService } from '@core/services/entitlements.service';
+import { InsAccessService } from '@core/services/ins-access.service';
 import { Login, LoginResponse } from '@interfaces/login';
 import { User } from '@interfaces/user';
 
@@ -17,6 +19,8 @@ export class AuthService {
   private http = inject(HttpClient);
   private cookieService = inject(CookieService);
   private router = inject(Router);
+  private entitlements = inject(EntitlementsService);
+  private insAccess = inject(InsAccessService);
 
   loggedIn = signal<boolean>(false);
 
@@ -36,11 +40,15 @@ export class AuthService {
         // adapta los nombres a tu LoginResponse real
         this.setCredentials(res.access_token, res.user);
         this.loggedIn.set(true);
+        this.entitlements.refresh().subscribe();
+        this.insAccess.refresh().subscribe();
       }),
     );
   }
 
   logout() {
+    this.entitlements.reset();
+    this.insAccess.reset();
     localStorage.removeItem('currentUser');
     this.cookieService.delete('access_token');
     this.loggedIn.set(false);

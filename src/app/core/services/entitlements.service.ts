@@ -62,10 +62,15 @@ export class EntitlementsService {
     return this.me()?.products.clever === true;
   }
 
-  refresh(): Observable<void> {
+  /** Limpia caché (p. ej. logout) sin pedir red. */
+  reset(): void {
     this.load$ = undefined;
     this.loaded.set(false);
     this.me.set(null);
+  }
+
+  refresh(): Observable<void> {
+    this.reset();
     return this.ensureLoaded();
   }
 

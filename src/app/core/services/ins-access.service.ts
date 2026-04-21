@@ -43,10 +43,14 @@ export class InsAccessService {
     return this.access()?.ins_enabled === true;
   }
 
-  refresh(): Observable<void> {
+  reset(): void {
     this.load$ = undefined;
     this.loaded.set(false);
     this.access.set(null);
+  }
+
+  refresh(): Observable<void> {
+    this.reset();
     return this.ensureLoaded();
   }
 
