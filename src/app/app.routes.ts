@@ -45,6 +45,15 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'product-blocked',
+    loadComponent: () =>
+      import('./pages/product-blocked/product-blocked.component').then(
+        m => m.ProductBlockedComponent
+      ),
+    canActivate: [authGuard],
+    data: { role: [0, 1, 2, 3], title: 'Acceso al producto' },
+  },
+  {
     path: 'users',
     loadChildren: () =>
       import('./features/users/users.routes').then(r => r.userRoutes),

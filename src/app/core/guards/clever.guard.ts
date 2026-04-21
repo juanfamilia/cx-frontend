@@ -20,7 +20,11 @@ export const cleverGuard: CanActivateFn = () => {
       const user = auth.getCurrentUser();
       return ent.ensureLoaded().pipe(
         map(() =>
-          ent.canEnterCleverApp(user) ? true : router.createUrlTree(['/'])
+          ent.canEnterCleverApp(user)
+            ? true
+            : router.createUrlTree(['/product-blocked'], {
+                queryParams: { product: 'clever' },
+              })
         )
       );
     })
