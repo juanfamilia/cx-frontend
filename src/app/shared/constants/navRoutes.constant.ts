@@ -74,6 +74,13 @@ export const NAVROUTES: RouteData[] = [
     roles: [0, 1, 2],
   },
   {
+    title: 'Siete InS',
+    route: '/ins',
+    icon: 'lucideFlaskConical',
+    roles: [0, 1, 2, 3],
+    requiresIns: true,
+  },
+  {
     title: 'Configuración',
     route: '/configuration',
     icon: 'heroCog6Tooth',

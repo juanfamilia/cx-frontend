@@ -19,6 +19,7 @@ import {
   lucideBrain,
   lucideBriefcaseBusiness,
   lucideFileText,
+  lucideFlaskConical,
   lucideHouse,
   lucideMapPinned,
   lucideMegaphone,
@@ -27,6 +28,7 @@ import {
   lucideTextCursorInput,
 } from '@ng-icons/lucide';
 import { AuthService } from '@core/services/auth.service';
+import { InsAccessService } from '@core/services/ins-access.service';
 import { SidebarService } from '@core/services/sidebar.service';
 import { ThemeServiceService } from '@shared/services/theme-service.service';
 import { NAVROUTES } from '@shared/constants/navRoutes.constant';
@@ -54,20 +56,35 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       lucideBrain,
       lucideChartArea,
       lucideSearch,
+      lucideFlaskConical,
     }),
   ],
 })
 export class SidebarComponent {
   private authService = inject(AuthService);
+  private insAccess = inject(InsAccessService);
   private sidebarService = inject(SidebarService);
   private themeService = inject(ThemeServiceService);
+
+  constructor() {
+    this.insAccess.ensureLoaded().subscribe();
+  }
 
   isCollapsed = computed(() => this.sidebarService.isCollapsed());
   currentUser = signal<User>(this.authService.getCurrentUser());
 
   darkMode = computed(() => this.themeService.darkMode());
 
-  routes = NAVROUTES;
+  visibleRoutes = computed(() => {
+    const u = this.currentUser();
+    this.insAccess.loaded();
+    this.insAccess.access();
+    return NAVROUTES.filter(
+      r =>
+        r.roles.includes(u.role) &&
+        (!r.requiresIns || this.insAccess.canShowInsNavLink(u))
+    );
+  });
 
   logout() {
     this.authService.logout();

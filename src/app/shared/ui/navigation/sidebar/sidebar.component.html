@@ -29,10 +29,8 @@
     <!-- Navigation -->
     <nav class="my-2 min-w-full">
       <ul class="flex flex-col space-y-2">
-        @for (route of routes; track $index) {
-          @if (route.roles.includes(currentUser().role)) {
-            <app-nav-link [navLinkData]="route" [showTitle]="!isCollapsed()" />
-          }
+        @for (route of visibleRoutes(); track route.route) {
+          <app-nav-link [navLinkData]="route" [showTitle]="!isCollapsed()" />
         }
       </ul>
     </nav>

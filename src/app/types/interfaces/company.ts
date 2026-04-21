@@ -10,6 +10,8 @@ export interface Company {
   country: string;
   /** Industria sectorial (template de competencias). Solo superadmin asigna al crear/editar. */
   industry_id?: number | null;
+  /** Producto Siete InS (investigación cualitativa); lo activa el superadmin vía API. */
+  siete_ins_enabled?: boolean;
   created_at: string;
   updated_at: string;
   deleted_at: string;

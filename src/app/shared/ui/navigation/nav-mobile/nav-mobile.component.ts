@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -13,14 +14,20 @@ import {
 } from '@ng-icons/heroicons/outline';
 import {
   lucideBanknote,
+  lucideBrain,
   lucideBriefcaseBusiness,
+  lucideChartArea,
   lucideFileText,
+  lucideFlaskConical,
   lucideHouse,
   lucideMapPinned,
   lucideMegaphone,
+  lucideSearch,
+  lucideSparkles,
   lucideTextCursorInput,
 } from '@ng-icons/lucide';
 import { AuthService } from '@core/services/auth.service';
+import { InsAccessService } from '@core/services/ins-access.service';
 import { NAVROUTES } from '@shared/constants/navRoutes.constant';
 import { NavLinkComponent } from '../nav-link/nav-link.component';
 
@@ -42,14 +49,34 @@ import { NavLinkComponent } from '../nav-link/nav-link.component';
       lucideTextCursorInput,
       lucideMegaphone,
       lucideFileText,
+      lucideSparkles,
+      lucideBrain,
+      lucideChartArea,
+      lucideSearch,
+      lucideFlaskConical,
     }),
   ],
 })
 export class NavMobileComponent {
   private authService = inject(AuthService);
+  private insAccess = inject(InsAccessService);
 
-  routes = NAVROUTES;
+  constructor() {
+    this.insAccess.ensureLoaded().subscribe();
+  }
+
   currentUser = signal<User>(this.authService.getCurrentUser());
+
+  visibleRoutes = computed(() => {
+    const u = this.currentUser();
+    this.insAccess.loaded();
+    this.insAccess.access();
+    return NAVROUTES.filter(
+      r =>
+        r.roles.includes(u.role) &&
+        (!r.requiresIns || this.insAccess.canShowInsNavLink(u))
+    );
+  });
 
   logout() {
     this.authService.logout();

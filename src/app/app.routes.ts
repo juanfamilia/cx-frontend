@@ -125,6 +125,12 @@ export const routes: Routes = [
     data: { title: 'Intelligence Dashboard' },
   },
   {
+    path: 'ins',
+    loadChildren: () =>
+      import('./features/ins/ins.routes').then(r => r.insRoutes),
+    data: { title: 'Siete InS' },
+  },
+  {
     path: '**',
     component: NotFoundComponent,
   },

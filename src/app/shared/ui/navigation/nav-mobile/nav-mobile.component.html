@@ -2,10 +2,8 @@
   class="animate-in slide-in-from-bottom dark:bg-surface-950 dark:border-surface-800 fixed bottom-0 z-50 h-22 w-full overflow-x-auto overflow-y-hidden border-t border-gray-200 bg-white duration-300">
   <ul
     class="mx-3 flex min-w-max flex-nowrap items-center justify-around gap-2 py-4">
-    @for (route of routes; track $index) {
-      @if (route.roles.includes(currentUser().role)) {
-        <app-nav-link [navLinkData]="route" />
-      }
+    @for (route of visibleRoutes(); track route.route) {
+      <app-nav-link [navLinkData]="route" />
     }
     <div class="dark:text-bunker-400 mx-1 flex items-center text-gray-700">
       <button
