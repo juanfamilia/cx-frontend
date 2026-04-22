@@ -1,7 +1,17 @@
 <div class="mx-auto max-w-5xl px-4 py-6">
   <app-page-header
     title="Siete Field"
-    description="Proyectos de control de levantamiento (CSV 2026.1). Active el producto por empresa (superadmin)." />
+    description="Sube el listado de visitas (CSV). Aquí ves cada proyecto, cargas el archivo y abres el resumen para saber de un vistazo si los datos quedaron bien." />
+
+  <div
+    class="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-600 dark:bg-slate-900/50 dark:text-slate-200">
+    <p class="font-semibold text-slate-900 dark:text-slate-100">En pocas palabras</p>
+    <p class="mt-1 leading-relaxed text-slate-600 dark:text-slate-300">
+      Cada <strong>proyecto</strong> es un levantamiento para un <strong>cliente final</strong>. El archivo CSV trae los
+      casos de campo; el sistema los guarda y marca <strong>avisos</strong> (duplicados, datos incompletos, duración
+      rara). Use <strong>«Ver resumen»</strong> para la última carga sin revisar tablas técnicas.
+    </p>
+  </div>
 
   @if (isSuperAdmin) {
     <div class="mb-6 flex flex-wrap items-end gap-3">
@@ -86,7 +96,10 @@
   </section>
 
   <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900/40">
-    <h2 class="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Proyectos</h2>
+    <h2 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">Proyectos</h2>
+    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+      Suba el CSV en la columna «Archivo». Luego abra el resumen para ver casos guardados y avisos de la última carga.
+    </p>
     @if (loading()) {
       <p class="text-gray-500">Cargando…</p>
     } @else if (effectiveCompanyId() == null) {
@@ -100,26 +113,140 @@
             <tr class="border-b border-gray-200 dark:border-gray-700">
               <th class="py-2 pr-4">ID</th>
               <th class="py-2 pr-4">Nombre</th>
-              <th class="py-2 pr-4">Cliente</th>
+              <th class="py-2 pr-4">Cliente final</th>
               <th class="py-2 pr-4">Estado</th>
-              <th class="py-2 pr-4">CSV 2026.1</th>
+              <th class="py-2 pr-4">Archivo CSV</th>
+              <th class="py-2 pr-4">Resumen</th>
             </tr>
           </thead>
           <tbody>
             @for (p of projects(); track p.id) {
               <tr class="border-b border-gray-100 dark:border-gray-800">
-                <td class="py-2 pr-4">{{ p.id }}</td>
-                <td class="py-2 pr-4">{{ p.name }}</td>
-                <td class="py-2 pr-4">{{ p.client_id }}</td>
-                <td class="py-2 pr-4">{{ p.status }}</td>
-                <td class="py-2 pr-4">
-                  <input
-                    type="file"
-                    accept=".csv,text/csv"
-                    class="max-w-[200px] text-xs"
-                    (change)="onImport(p.id, $event)" />
+                <td class="py-2 pr-4 align-middle">{{ p.id }}</td>
+                <td class="py-2 pr-4 align-middle font-medium text-gray-900 dark:text-gray-100">{{ p.name }}</td>
+                <td class="py-2 pr-4 align-middle">{{ clientDisplayName(p.client_id) }}</td>
+                <td class="py-2 pr-4 align-middle capitalize text-gray-600 dark:text-gray-300">{{ p.status }}</td>
+                <td class="py-2 pr-4 align-middle">
+                  <label class="block cursor-pointer text-xs text-blue-600 hover:underline dark:text-blue-400">
+                    Elegir archivo…
+                    <input
+                      type="file"
+                      accept=".csv,text/csv"
+                      class="sr-only"
+                      (change)="onImport(p.id, $event)" />
+                  </label>
+                </td>
+                <td class="py-2 pr-4 align-middle">
+                  <button
+                    type="button"
+                    class="rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-800 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                    (click)="toggleImportSummary(p.id)">
+                    {{ summaryOpenFor(p.id) ? 'Cerrar' : 'Ver resumen' }}
+                  </button>
                 </td>
               </tr>
+              @if (summaryOpenFor(p.id)) {
+                <tr class="border-b border-gray-100 dark:border-gray-800">
+                  <td colspan="6" class="bg-gray-50 px-2 py-4 dark:bg-gray-950/40">
+                    @if (summaryLoading()) {
+                      <p class="text-sm text-gray-500">Cargando resumen…</p>
+                    } @else if (!summaryRun()) {
+                      <p class="text-sm text-gray-600 dark:text-gray-300">
+                        Todavía no hay ninguna importación en este proyecto. Suba un archivo CSV en la fila de arriba.
+                      </p>
+                    } @else {
+                      <div [class]="importHealthShellClass()">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                              Última carga de archivo
+                            </p>
+                            <p class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                              {{ runOutcomeLabel(summaryRun()!) }}
+                            </p>
+                            <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
+                              @if (summaryRun()!.completed_at) {
+                                Fecha:
+                                {{ summaryRun()!.completed_at | date: 'medium' }}
+                              } @else {
+                                Fecha de inicio:
+                                {{ summaryRun()!.created_at | date: 'medium' }}
+                              }
+                              · Formato {{ summaryRun()!.format_version }}
+                            </p>
+                          </div>
+                          <div class="flex flex-wrap gap-2 text-center">
+                            <div
+                              class="min-w-[7rem] rounded-md bg-white/80 px-3 py-2 shadow-sm dark:bg-slate-900/60">
+                              <p class="text-2xl font-bold text-slate-900 dark:text-slate-50">
+                                {{ summaryRun()!.row_count ?? '—' }}
+                              </p>
+                              <p class="text-xs text-slate-600 dark:text-slate-300">Casos guardados</p>
+                            </div>
+                            <div
+                              class="min-w-[7rem] rounded-md bg-white/80 px-3 py-2 shadow-sm dark:bg-slate-900/60">
+                              <p class="text-2xl font-bold text-slate-900 dark:text-slate-50">
+                                {{ summaryLinesSeen() ?? '—' }}
+                              </p>
+                              <p class="text-xs text-slate-600 dark:text-slate-300">Filas leídas en el archivo</p>
+                            </div>
+                            <div
+                              class="min-w-[7rem] rounded-md bg-white/80 px-3 py-2 shadow-sm dark:bg-slate-900/60">
+                              <p class="text-2xl font-bold text-slate-900 dark:text-slate-50">
+                                {{ summaryFindings().length }}
+                              </p>
+                              <p class="text-xs text-slate-600 dark:text-slate-300">Avisos totales</p>
+                            </div>
+                          </div>
+                        </div>
+                        @if (summaryRun()!.status === 'failed' && summaryRun()!.error_detail) {
+                          <div
+                            class="mt-4 rounded border border-red-200 bg-white/90 p-3 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-100">
+                            <p class="font-semibold">Motivo</p>
+                            <p class="mt-1 whitespace-pre-wrap">{{ summaryRun()!.error_detail }}</p>
+                          </div>
+                        }
+                        @if (summaryFindings().length > 0) {
+                          <div class="mt-4 border-t border-slate-200/80 pt-4 dark:border-slate-600/80">
+                            <p class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              Detalle de avisos ({{ findingsErrorCount() }} requieren acción,
+                              {{ findingsWarnCount() }} conviene revisar)
+                            </p>
+                            <ul class="max-h-60 space-y-2 overflow-y-auto text-sm">
+                              @for (f of summaryFindings(); track f.id) {
+                                <li
+                                  class="rounded border border-slate-200 bg-white/90 px-3 py-2 dark:border-slate-600 dark:bg-slate-900/50">
+                                  <span
+                                    class="mr-2 inline-block rounded px-1.5 py-0.5 text-xs font-medium"
+                                    [class.bg-red-100]="f.severity === 'error'"
+                                    [class.text-red-900]="f.severity === 'error'"
+                                    [class.dark:bg-red-950]="f.severity === 'error'"
+                                    [class.dark:text-red-100]="f.severity === 'error'"
+                                    [class.bg-amber-100]="f.severity === 'warn'"
+                                    [class.text-amber-900]="f.severity === 'warn'"
+                                    [class.dark:bg-amber-950]="f.severity === 'warn'"
+                                    [class.dark:text-amber-100]="f.severity === 'warn'">
+                                    {{ severityPlain(f.severity) }}
+                                  </span>
+                                  <span class="font-medium text-slate-800 dark:text-slate-100">{{
+                                    findingKindLabel(f.code)
+                                  }}</span>
+                                  <p class="mt-1 text-slate-700 dark:text-slate-200">{{ f.message }}</p>
+                                </li>
+                              }
+                            </ul>
+                          </div>
+                        } @else if (summaryRun()!.status === 'completed') {
+                          <p class="mt-4 text-sm text-emerald-800 dark:text-emerald-200">
+                            No se registraron avisos en esta carga: todos los casos del archivo cumplieron las
+                            comprobaciones automáticas.
+                          </p>
+                        }
+                      </div>
+                    }
+                  </td>
+                </tr>
+              }
             }
           </tbody>
         </table>
