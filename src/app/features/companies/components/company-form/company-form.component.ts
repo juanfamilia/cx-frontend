@@ -121,6 +121,8 @@ export class CompanyFormComponent implements OnInit {
   onSubmit() {
     if (this.companyForm.valid) {
       const raw = this.companyForm.getRawValue();
+      const industryId: number | null =
+        raw.industry_id != null && raw.industry_id > 0 ? raw.industry_id : null;
       const payload: CompanyCreate = {
         name: raw.name!,
         phone: raw.phone!,
@@ -128,7 +130,7 @@ export class CompanyFormComponent implements OnInit {
         address: raw.address!,
         state: raw.state!,
         country: 'DO',
-        industry_id: this.showIndustrySelect ? raw.industry_id : undefined,
+        industry_id: this.showIndustrySelect ? industryId : undefined,
       };
       if (this.showIndustrySelect) {
         payload.siete_ins_enabled = !!raw.siete_ins_enabled;
