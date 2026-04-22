@@ -1,6 +1,7 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import { AuthService } from '@core/services/auth.service';
@@ -27,7 +28,7 @@ const FINDING_KIND_LABEL: Record<string, string> = {
 @Component({
   selector: 'app-field-project-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageHeaderComponent],
+  imports: [CommonModule, NgClass, FormsModule, PageHeaderComponent, RouterLink],
   templateUrl: './field-project-list.component.html',
   styleUrl: './field-project-list.component.css',
 })
@@ -58,6 +59,9 @@ export class FieldProjectListComponent implements OnInit {
   readonly summaryFindings = signal<FieldFinding[]>([]);
   /** Líneas de datos leídas en el CSV (cabecera no cuenta); viene del registro de auditoría. */
   readonly summaryLinesSeen = signal<number | null>(null);
+
+  /** Paso del asistente: 1 cliente, 2 proyecto, 3 cargas y resumen. */
+  readonly activeStep = signal<1 | 2 | 3>(1);
 
   ngOnInit(): void {
     if (this.isSuperAdmin) {
@@ -245,6 +249,57 @@ export class FieldProjectListComponent implements OnInit {
   }
 
   /** Borde/fondo del panel de resumen según resultado (lectura rápida). */
+  goStep(step: number): void {
+    if (step === 1 || step === 2 || step === 3) {
+      this.activeStep.set(step as 1 | 2 | 3);
+    }
+  }
+
+  nextStep(): void {
+    const s = this.activeStep();
+    if (s < 3) {
+      this.activeStep.set((s + 1) as 1 | 2 | 3);
+    }
+  }
+
+  prevStep(): void {
+    const s = this.activeStep();
+    if (s > 1) {
+      this.activeStep.set((s - 1) as 1 | 2 | 3);
+    }
+  }
+
+  stepShortLabel(step: number): string {
+    switch (step) {
+      case 1:
+        return 'Cliente';
+      case 2:
+        return 'Proyecto';
+      case 3:
+        return 'Archivo y resumen';
+      default:
+        return '';
+    }
+  }
+
+  stepNavButtonClass(step: number): Record<string, boolean> {
+    const on = this.activeStep() === step;
+    return {
+      'flex min-w-0 items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition': true,
+      'border-blue-600 bg-blue-50 text-blue-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-100': on,
+      'border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-900/60 dark:text-gray-200': !on,
+    };
+  }
+
+  stepNavCircleClass(step: number): Record<string, boolean> {
+    const on = this.activeStep() === step;
+    return {
+      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold': true,
+      'bg-blue-600 text-white': on,
+      'bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-100': !on,
+    };
+  }
+
   importHealthShellClass(): string {
     const base = 'rounded-lg border p-4 shadow-sm ';
     const run = this.summaryRun();
@@ -278,6 +333,7 @@ export class FieldProjectListComponent implements OnInit {
         this.newClientName.set('');
         this.toast.showToast('success', 'Field', 'Cliente final creado.');
         this.reloadClientsAndProjects();
+        this.activeStep.set(2);
       },
       error: () =>
         this.toast.showToast('error', 'Field', 'No se pudo crear el cliente.'),
@@ -304,6 +360,7 @@ export class FieldProjectListComponent implements OnInit {
         this.newDescription.set('');
         this.toast.showToast('success', 'Field', 'Proyecto creado.');
         this.reloadProjects();
+        this.activeStep.set(3);
       },
       error: () =>
         this.toast.showToast('error', 'Field', 'No se pudo crear el proyecto.'),

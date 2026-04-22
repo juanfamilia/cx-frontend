@@ -1,0 +1,69 @@
+<div class="mx-auto max-w-3xl px-4 py-10">
+  <p
+    class="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+    Siete Field
+  </p>
+  <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
+    Control de levantamiento en campo
+  </h1>
+  <p class="mt-4 text-lg leading-relaxed text-gray-600 dark:text-gray-300">
+    Centralice los casos que vienen del terreno: defina el <strong>cliente final</strong>, cree un
+    <strong>proyecto</strong>, suba el <strong>CSV</strong> y revise al instante si los datos quedaron
+    bien o hay avisos que corregir.
+  </p>
+
+  <ul class="mt-8 space-y-4 text-gray-700 dark:text-gray-200">
+    <li class="flex gap-3">
+      <span
+        class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white"
+        >1</span
+      >
+      <div>
+        <p class="font-semibold text-gray-900 dark:text-gray-50">Cliente final</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Marca o cuenta para la que corre el levantamiento (sub‑cliente de su empresa).
+        </p>
+      </div>
+    </li>
+    <li class="flex gap-3">
+      <span
+        class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white"
+        >2</span
+      >
+      <div>
+        <p class="font-semibold text-gray-900 dark:text-gray-50">Proyecto</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Un contenedor por oleada o estudio; ahí se acumulan las importaciones de archivos.
+        </p>
+      </div>
+    </li>
+    <li class="flex gap-3">
+      <span
+        class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white"
+        >3</span
+      >
+      <div>
+        <p class="font-semibold text-gray-900 dark:text-gray-50">Archivo y resumen</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Sube el CSV y abre el resumen: casos guardados, filas leídas y avisos de calidad en lenguaje claro.
+        </p>
+      </div>
+    </li>
+  </ul>
+
+  <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+    <a
+      routerLink="/field/trabajo"
+      class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+      Comenzar — ir al tablero
+    </a>
+    <a
+      routerLink="/field/trabajo"
+      class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-center text-sm font-medium text-gray-800 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800">
+      Ya conozco el flujo — ir directo
+    </a>
+  </div>
+  <p class="mt-6 text-xs text-gray-500 dark:text-gray-400">
+    Formato de archivo admitido: CSV según versión indicada en el tablero (p. ej. 2026.1).
+  </p>
+</div>

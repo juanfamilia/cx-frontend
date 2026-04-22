@@ -1,17 +1,50 @@
 <div class="mx-auto max-w-5xl px-4 py-6">
-  <app-page-header
-    title="Siete Field"
-    description="Sube el listado de visitas (CSV). Aquí ves cada proyecto, cargas el archivo y abres el resumen para saber de un vistazo si los datos quedaron bien." />
+  <a
+    routerLink="/field"
+    class="mb-4 inline-flex text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+    ← Volver al inicio de Field
+  </a>
 
-  <div
-    class="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-600 dark:bg-slate-900/50 dark:text-slate-200">
-    <p class="font-semibold text-slate-900 dark:text-slate-100">En pocas palabras</p>
-    <p class="mt-1 leading-relaxed text-slate-600 dark:text-slate-300">
-      Cada <strong>proyecto</strong> es un levantamiento para un <strong>cliente final</strong>. El archivo CSV trae los
-      casos de campo; el sistema los guarda y marca <strong>avisos</strong> (duplicados, datos incompletos, duración
-      rara). Use <strong>«Ver resumen»</strong> para la última carga sin revisar tablas técnicas.
+  <app-page-header
+    title="Tablero de trabajo"
+    description="Siga los pasos: cliente final → proyecto → suba el CSV y revise el resumen. Puede saltar de paso con los números o con Siguiente / Anterior." />
+
+  <nav
+    class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900/40"
+    aria-label="Pasos del flujo Field">
+    <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+      Su posición en el flujo
     </p>
-  </div>
+    <ol class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+      @for (st of [1, 2, 3]; track st) {
+        <li class="flex items-center gap-2">
+          <button type="button" [ngClass]="stepNavButtonClass(st)" (click)="goStep(st)">
+            <span [ngClass]="stepNavCircleClass(st)">{{ st }}</span>
+            <span class="font-medium">{{ stepShortLabel(st) }}</span>
+          </button>
+          @if (st !== 3) {
+            <span class="hidden text-gray-400 sm:inline" aria-hidden="true">→</span>
+          }
+        </li>
+      }
+    </ol>
+    <div class="mt-4 flex flex-wrap justify-between gap-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+      <button
+        type="button"
+        class="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-800 disabled:opacity-40 dark:border-gray-600 dark:text-gray-200"
+        [disabled]="activeStep() === 1"
+        (click)="prevStep()">
+        Anterior
+      </button>
+      <button
+        type="button"
+        class="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-800 disabled:opacity-40 dark:border-gray-600 dark:text-gray-200"
+        [disabled]="activeStep() === 3"
+        (click)="nextStep()">
+        Siguiente
+      </button>
+    </div>
+  </nav>
 
   @if (isSuperAdmin) {
     <div class="mb-6 flex flex-wrap items-end gap-3">
@@ -34,9 +67,13 @@
     </div>
   }
 
+  @if (activeStep() === 1) {
   <section
     class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900/40">
-    <h2 class="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Cliente final</h2>
+    <h2 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">Paso 1 — Cliente final</h2>
+    <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">
+      Elija el cliente para el que es este levantamiento, o cree uno nuevo.
+    </p>
     @if (effectiveCompanyId() == null) {
       <p class="text-gray-500">Seleccione empresa (superadmin) o verifique su cuenta.</p>
     } @else {
@@ -67,10 +104,15 @@
       </div>
     }
   </section>
+  }
 
+  @if (activeStep() === 2) {
   <section
     class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900/40">
-    <h2 class="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Nuevo proyecto</h2>
+    <h2 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">Paso 2 — Nuevo proyecto</h2>
+    <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">
+      Un proyecto agrupa las importaciones de archivos para ese cliente.
+    </p>
     <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
       <label class="min-w-[200px] flex-1 text-sm text-gray-600 dark:text-gray-400">
         Nombre
@@ -94,11 +136,13 @@
       </button>
     </div>
   </section>
+  }
 
+  @if (activeStep() === 3) {
   <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900/40">
-    <h2 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">Proyectos</h2>
+    <h2 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">Paso 3 — Archivo y resumen</h2>
     <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-      Suba el CSV en la columna «Archivo». Luego abra el resumen para ver casos guardados y avisos de la última carga.
+      Suba el CSV en «Elegir archivo». Luego use «Ver resumen» para casos guardados, filas leídas y avisos.
     </p>
     @if (loading()) {
       <p class="text-gray-500">Cargando…</p>
@@ -253,4 +297,5 @@
       </div>
     }
   </section>
+  }
 </div>

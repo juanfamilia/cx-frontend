@@ -6,8 +6,15 @@ export const fieldRoutes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./field-project-list.component').then(m => m.FieldProjectListComponent),
+      import('./field-landing.component').then(m => m.FieldLandingComponent),
     canActivate: [authGuard, fieldGuard],
     data: { role: [0, 1, 2], title: 'Siete Field' },
+  },
+  {
+    path: 'trabajo',
+    loadComponent: () =>
+      import('./field-project-list.component').then(m => m.FieldProjectListComponent),
+    canActivate: [authGuard, fieldGuard],
+    data: { role: [0, 1, 2], title: 'Field — Tablero' },
   },
 ];
