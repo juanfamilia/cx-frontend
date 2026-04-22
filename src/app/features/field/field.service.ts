@@ -34,6 +34,45 @@ export interface FieldImportRun {
   completed_at: string | null;
 }
 
+export interface FieldImportRow {
+  id: number;
+  field_project_id: number;
+  field_import_run_id: number;
+  source_row_number: number;
+  case_id: string;
+  wave_id: string;
+  interviewer_id: string;
+  disposition: string;
+  started_at_text: string | null;
+  completed_at_text: string | null;
+  duration_sec: number | null;
+  extras: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface FieldFinding {
+  id: number;
+  field_project_id: number;
+  field_import_run_id: number;
+  field_import_row_id: number | null;
+  code: string;
+  severity: string;
+  case_id: string | null;
+  wave_id: string | null;
+  message: string;
+  created_at: string;
+}
+
+export interface FieldLedgerEvent {
+  id: number;
+  field_project_id: number;
+  field_import_run_id: number | null;
+  actor_user_id: number | null;
+  event_type: string;
+  payload: Record<string, unknown> | null;
+  created_at: string;
+}
+
 export interface EndClient {
   id: number;
   company_id: number;
@@ -78,6 +117,38 @@ export class FieldService {
     return this.http.post<FieldImportRun>(
       `${environment.apiUrl}field/projects/${projectId}/import`,
       fd
+    );
+  }
+
+  listImportRuns(projectId: number, limit = 50): Observable<FieldImportRun[]> {
+    return this.http.get<FieldImportRun[]>(
+      `${environment.apiUrl}field/projects/${projectId}/import-runs`,
+      { params: { limit: String(limit) } }
+    );
+  }
+
+  listImportRunRows(
+    projectId: number,
+    runId: number,
+    offset = 0,
+    limit = 100
+  ): Observable<FieldImportRow[]> {
+    return this.http.get<FieldImportRow[]>(
+      `${environment.apiUrl}field/projects/${projectId}/import-runs/${runId}/rows`,
+      { params: { offset: String(offset), limit: String(limit) } }
+    );
+  }
+
+  listImportRunFindings(projectId: number, runId: number): Observable<FieldFinding[]> {
+    return this.http.get<FieldFinding[]>(
+      `${environment.apiUrl}field/projects/${projectId}/import-runs/${runId}/findings`
+    );
+  }
+
+  listLedgerEvents(projectId: number, limit = 100): Observable<FieldLedgerEvent[]> {
+    return this.http.get<FieldLedgerEvent[]>(
+      `${environment.apiUrl}field/projects/${projectId}/ledger-events`,
+      { params: { limit: String(limit) } }
     );
   }
 
