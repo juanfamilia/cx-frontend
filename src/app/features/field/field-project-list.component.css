@@ -1,1 +1,226 @@
-/* layout vía Tailwind en template */
+:host {
+  display: block;
+}
+
+/* Contenedor de sección: jerarquía clara en claro y oscuro */
+.field-card {
+  border-radius: 1rem;
+  border: 1px solid rgb(226 232 240);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.95), rgb(248 250 252 / 0.9));
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+
+:host-context(.dark) .field-card {
+  border-color: rgb(51 65 85 / 0.65);
+  background: linear-gradient(180deg, rgb(15 23 42 / 0.55), rgb(15 23 42 / 0.35));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+}
+
+.field-card-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: rgb(15 23 42);
+}
+
+:host-context(.dark) .field-card-title {
+  color: rgb(248 250 252);
+}
+
+.field-card-desc {
+  margin: 0.5rem 0 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgb(71 85 105);
+}
+
+:host-context(.dark) .field-card-desc {
+  color: rgb(203 213 225);
+}
+
+/* Etiqueta sobre control */
+.field-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgb(51 65 85);
+}
+
+:host-context(.dark) .field-label {
+  color: rgb(226 232 240);
+}
+
+/* Inputs y selects: mismo trazo que el resto de la app Field */
+.field-control {
+  display: block;
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(203 213 225);
+  background-color: rgb(255 255 255);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: rgb(15 23 42);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+:host-context(.dark) .field-control {
+  border-color: rgb(71 85 105);
+  background-color: rgb(30 41 59 / 0.85);
+  color: rgb(241 245 249);
+}
+
+.field-control::placeholder {
+  color: rgb(148 163 184);
+}
+
+.field-control:hover {
+  border-color: rgb(165 180 198);
+}
+
+:host-context(.dark) .field-control:hover {
+  border-color: rgb(100 116 139);
+}
+
+.field-control:focus {
+  outline: none;
+  border-color: rgb(99 102 241);
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 0.25);
+}
+
+:host-context(.dark) .field-control:focus {
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 0.35);
+}
+
+select.field-control {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1.25rem;
+  padding-right: 2.25rem;
+}
+
+:host-context(.dark) select.field-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+}
+
+/* Botones reutilizables en el flujo */
+.field-btn-primary,
+.field-btn-secondary,
+.field-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.field-btn-primary {
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, rgb(79 70 229), rgb(67 56 202));
+  color: rgb(255 255 255);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12);
+}
+
+.field-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgb(99 102 241), rgb(79 70 229));
+}
+
+.field-btn-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 0.4);
+}
+
+.field-btn-secondary {
+  border: 1px solid rgb(203 213 225);
+  background: rgb(255 255 255);
+  color: rgb(51 65 85);
+}
+
+:host-context(.dark) .field-btn-secondary {
+  border-color: rgb(71 85 105);
+  background: rgb(30 41 59 / 0.6);
+  color: rgb(226 232 240);
+}
+
+.field-btn-secondary:hover:not(:disabled) {
+  border-color: rgb(165 180 198);
+  background: rgb(248 250 252);
+}
+
+:host-context(.dark) .field-btn-secondary:hover:not(:disabled) {
+  border-color: rgb(100 116 139);
+  background: rgb(51 65 85 / 0.5);
+}
+
+.field-btn-ghost {
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgb(79 70 229);
+}
+
+:host-context(.dark) .field-btn-ghost {
+  color: rgb(165 180 252);
+}
+
+.field-btn-ghost:hover:not(:disabled) {
+  background: rgb(99 102 241 / 0.1);
+}
+
+:host-context(.dark) .field-btn-ghost:hover:not(:disabled) {
+  background: rgb(99 102 241 / 0.15);
+}
+
+.field-btn-primary:disabled,
+.field-btn-secondary:disabled,
+.field-btn-ghost:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+/* “Elegir archivo” como control secundario */
+.field-file-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgb(67 56 202);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+:host-context(.dark) .field-file-link {
+  color: rgb(165 180 252);
+}
+
+.field-file-link:hover {
+  color: rgb(99 102 241);
+}
+
+/* Celda expandida del resumen: fondo sutil */
+.field-summary-cell {
+  border-top: 1px solid rgb(226 232 240 / 0.9);
+  vertical-align: top;
+}
+
+:host-context(.dark) .field-summary-cell {
+  border-top-color: rgb(51 65 85 / 0.7);
+}

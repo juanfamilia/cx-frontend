@@ -2,14 +2,18 @@ import { CommonModule, NgClass } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 
 import { AuthService } from '@core/services/auth.service';
 import { ShareToasterService } from '@core/services/toast.service';
 import { Company } from '@interfaces/company';
 import { CompaniesService } from '@pages/companies/companies.service';
-import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 
+import {
+  decisionExecutiveLine as decisionExecutiveMessage,
+  decisionRiskLine as stakeholderRiskByCode,
+} from './field-decision-briefing';
 import {
   EndClient,
   FieldFinding,
@@ -28,7 +32,7 @@ const FINDING_KIND_LABEL: Record<string, string> = {
 @Component({
   selector: 'app-field-project-list',
   standalone: true,
-  imports: [CommonModule, NgClass, FormsModule, PageHeaderComponent, RouterLink],
+  imports: [CommonModule, NgClass, FormsModule, RouterLink],
   templateUrl: './field-project-list.component.html',
   styleUrl: './field-project-list.component.css',
 })
@@ -63,9 +67,12 @@ export class FieldProjectListComponent implements OnInit {
   /** Paso del asistente: 1 cliente, 2 proyecto, 3 cargas y resumen. */
   readonly activeStep = signal<1 | 2 | 3>(1);
 
+  /** API company/ limita a 100 (FastAPI le=100). No pedir 200. */
+  private static readonly companyListLimit = 100;
+
   ngOnInit(): void {
     if (this.isSuperAdmin) {
-      this.companiesSvc.getAll(0, 200).subscribe({
+      this.companiesSvc.getAll(0, FieldProjectListComponent.companyListLimit).subscribe({
         next: res => {
           this.companies.set(res.data);
           const first = res.data[0]?.id ?? null;
@@ -74,8 +81,13 @@ export class FieldProjectListComponent implements OnInit {
             this.reloadClientsAndProjects();
           }
         },
-        error: () =>
-          this.toast.showToast('error', 'Field', 'No se pudieron cargar empresas.'),
+        error: (err: unknown) => {
+          const msg =
+            err instanceof HttpErrorResponse && err.status === 422
+              ? 'Parámetros no válidos al listar empresas (límite o offset).'
+              : 'No se pudieron cargar empresas. Compruebe sesión y API.';
+          this.toast.showToast('error', 'Field', msg);
+        },
       });
     } else {
       this.selectedCompanyId.set(this.user.company_id ?? null);
@@ -226,6 +238,16 @@ export class FieldProjectListComponent implements OnInit {
     return FINDING_KIND_LABEL[code] ?? 'Aviso de calidad de datos';
   }
 
+  /** Riesgo para dirección/operación, por código (copy fijo, no reemplaza el mensaje técnico). */
+  decisionRiskLine(finding: FieldFinding): string {
+    return stakeholderRiskByCode(finding.code);
+  }
+
+  /** Frase de resumen bajo lente de plazo, coste de corrección o defensa del levantamiento. */
+  decisionExecutiveLine(): string | null {
+    return decisionExecutiveMessage(this.summaryRun(), this.summaryFindings());
+  }
+
   severityPlain(sev: string): string {
     if (sev === 'error') {
       return 'Requiere acción';
@@ -285,18 +307,20 @@ export class FieldProjectListComponent implements OnInit {
   stepNavButtonClass(step: number): Record<string, boolean> {
     const on = this.activeStep() === step;
     return {
-      'flex min-w-0 items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition': true,
-      'border-blue-600 bg-blue-50 text-blue-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-100': on,
-      'border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-900/60 dark:text-gray-200': !on,
+      'field-step-btn flex min-w-0 items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-left text-sm transition': true,
+      'border-indigo-500 bg-indigo-50 text-indigo-950 shadow-sm dark:border-indigo-500/80 dark:bg-indigo-950/50 dark:text-indigo-100':
+        on,
+      'border-slate-200/90 bg-slate-50/80 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/40 dark:text-slate-200':
+        !on,
     };
   }
 
   stepNavCircleClass(step: number): Record<string, boolean> {
     const on = this.activeStep() === step;
     return {
-      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold': true,
-      'bg-blue-600 text-white': on,
-      'bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-100': !on,
+      'field-step-num flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold': true,
+      'bg-indigo-600 text-white shadow-md dark:bg-indigo-500': on,
+      'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100': !on,
     };
   }
 
