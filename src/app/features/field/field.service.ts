@@ -4,6 +4,9 @@ import { Observable } from 'rxjs';
 
 import { environment } from '@env/environment';
 
+/** Origen principal declarado al crear el proyecto (tablero Field). */
+export type FieldIngestMode = 'csv' | 'dooblo';
+
 export interface FieldProject {
   id: number;
   company_id: number;
@@ -12,6 +15,8 @@ export interface FieldProject {
   description: string | null;
   import_format_version: string;
   status: string;
+  /** csv: archivo; dooblo: API SurveyToGo. (Ausente = CSV en despliegues anteriores.) */
+  ingest_mode?: FieldIngestMode;
   created_at: string;
   updated_at: string;
 }
@@ -21,6 +26,7 @@ export interface FieldProjectCreateBody {
   description?: string | null;
   client_id: number;
   company_id?: number | null;
+  ingest_mode?: FieldIngestMode;
 }
 
 export interface FieldImportRun {

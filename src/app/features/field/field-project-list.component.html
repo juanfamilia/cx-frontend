@@ -15,8 +15,8 @@
       <p
         class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:text-base">
         Flujo: <strong class="text-slate-800 dark:text-slate-200">cliente</strong> →
-        <strong class="text-slate-800 dark:text-slate-200">proyecto</strong> →
-        <strong class="text-slate-800 dark:text-slate-200">carga y resumen</strong>. Cada
+        <strong class="text-slate-800 dark:text-slate-200">proyecto (origen de datos)</strong> →
+        <strong class="text-slate-800 dark:text-slate-200">carga e integración</strong>. Cada
         <strong>Ver resumen</strong> conecta datos con lo que interesa a dirección.
       </p>
     </div>
@@ -129,7 +129,33 @@
   @if (activeStep() === 2) {
     <section class="field-card mb-8">
       <h2 class="field-card-title">Paso 2 — Nuevo proyecto</h2>
-      <p class="field-card-desc">Un proyecto agrupa las importaciones y el resumen para ese cliente.</p>
+      <p class="field-card-desc">Un proyecto agrupa las importaciones y el resumen; indique el origen principal de datos (declaración de producto).</p>
+      <fieldset class="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 p-3 dark:border-slate-600/50 dark:bg-slate-800/30">
+        <legend class="px-1 text-sm font-semibold text-slate-800 dark:text-slate-200">Origen de datos</legend>
+        <p class="mb-2 text-xs text-slate-600 dark:text-slate-400">
+          Afecta el paso 3: CSV prioriza carga de archivo; API prioriza credenciales y vínculo SurveyToGo/Dooblo.
+        </p>
+        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-4">
+          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
+            <input
+              type="radio"
+              name="field-ingest-mode"
+              [value]="'csv'"
+              [ngModel]="newIngestMode()"
+              (ngModelChange)="newIngestMode.set($event)" />
+            Archivo CSV (subida 202.6.1)
+          </label>
+          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
+            <input
+              type="radio"
+              name="field-ingest-mode"
+              [value]="'dooblo'"
+              [ngModel]="newIngestMode()"
+              (ngModelChange)="newIngestMode.set($event)" />
+            SurveyToGo / Dooblo (API de campo)
+          </label>
+        </div>
+      </fieldset>
       <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <label class="field-label min-w-[200px] flex-1">
           Nombre
@@ -152,18 +178,30 @@
 
   @if (activeStep() === 3) {
     <section class="field-card">
-      <h2 class="field-card-title">Paso 3 — Archivo y resumen</h2>
+      <h2 class="field-card-title">Paso 3 — Carga, API y resumen</h2>
       <p class="field-card-desc">
-        Suba un CSV 202.6.1; cuando conecte SurveyToGo, el mismo resumen se alimentará desde la
-        <strong>capa de decisión</strong> en el backend. Use
-        <strong>Ver resumen</strong> para riesgo operativo, no solo validación de archivo.
+        En la tabla, la columna <strong>Origen</strong> refleja lo declarado al crear el proyecto. Proyectos
+        <strong>API</strong>: guarde credenciales y vincule la encuesta; el CSV queda como complemento. Proyectos
+        <strong>CSV</strong>: el archivo es el hilo principal; la API es opcional a nivel empresa. Use
+        <strong>Ver resumen</strong> para riesgo operativo y la capa de decisión.
       </p>
       @if (effectiveCompanyId() != null) {
-        <div
-          class="mb-6 rounded-xl border border-slate-200/90 bg-slate-50/60 p-4 dark:border-slate-600/50 dark:bg-slate-800/30">
+        <div [class]="doobloCredentialsPanelClass()">
           <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">
             Credenciales SurveyToGo (Dooblo) — por empresa
           </h3>
+          @if (anyProjectDooblo()) {
+            <p
+              class="mt-1 rounded-lg border border-indigo-200/80 bg-indigo-50/50 px-2 py-1.5 text-xs text-indigo-900 dark:border-indigo-800/50 dark:bg-indigo-950/30 dark:text-indigo-100/90">
+              Hay al menos un proyecto con origen <strong>API</strong>: use este bloque antes (o de forma
+              coordinada) con <strong>Ver resumen</strong> y el vínculo de encuesta en cada fila.
+            </p>
+          } @else if (projects().length > 0) {
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Si en el futuro crea un proyecto con origen API, este mismo formulario será el punto central de
+              credenciales.
+            </p>
+          }
           <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
             Cada cliente puede usar su API REST. Guarde URL (normalmente
             <code class="text-xs">https://api.dooblo.net/newapi</code>), usuario/REST key y clave. Se
@@ -221,12 +259,13 @@
         <p class="text-slate-600 dark:text-slate-300">Aún no hay proyectos. Cree uno en el paso 2.</p>
       } @else {
         <div class="overflow-x-auto rounded-xl border border-slate-200/90 dark:border-slate-600/50">
-          <table class="w-full min-w-[640px] text-left text-sm">
+          <table class="w-full min-w-[720px] text-left text-sm">
             <thead
               class="bg-slate-50/90 text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
               <tr class="border-b border-slate-200 dark:border-slate-600">
                 <th class="px-3 py-3 pr-4 font-semibold">ID</th>
                 <th class="px-3 py-3 pr-4 font-semibold">Nombre</th>
+                <th class="px-3 py-3 pr-4 font-semibold">Origen</th>
                 <th class="px-3 py-3 pr-4 font-semibold">Cliente</th>
                 <th class="px-3 py-3 pr-4 font-semibold">Estado</th>
                 <th class="px-3 py-3 pr-4 font-semibold">CSV</th>
@@ -243,6 +282,19 @@
                     class="px-3 py-3 pr-4 align-middle font-medium text-slate-900 dark:text-slate-100">
                     {{ p.name }}
                   </td>
+                  <td class="px-3 py-3 pr-4 align-middle">
+                    @if (isDoobloIngest(p)) {
+                      <span
+                        class="inline-flex rounded-md border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-900 dark:border-violet-800/60 dark:bg-violet-950/40 dark:text-violet-200">
+                        API
+                      </span>
+                    } @else {
+                      <span
+                        class="inline-flex rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800 dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-200">
+                        CSV
+                      </span>
+                    }
+                  </td>
                   <td class="px-3 py-3 pr-4 align-middle text-slate-700 dark:text-slate-200">
                     {{ clientDisplayName(p.client_id) }}
                   </td>
@@ -251,15 +303,26 @@
                     {{ p.status }}
                   </td>
                   <td class="px-3 py-3 pr-4 align-middle">
-                    <label
-                      class="field-file-link">
-                      Elegir archivo
-                      <input
-                        type="file"
-                        accept=".csv,text/csv"
-                        class="sr-only"
-                        (change)="onImport(p.id, $event)" />
-                    </label>
+                    <div
+                      [class]="
+                        isDoobloIngest(p)
+                          ? 'flex flex-col gap-0.5 text-slate-500 dark:text-slate-400'
+                          : ''
+                      ">
+                      @if (isDoobloIngest(p)) {
+                        <span class="text-[0.7rem] uppercase tracking-wide">CSV opcional</span>
+                      }
+                      <label
+                        class="field-file-link"
+                        [class.opacity-80]="isDoobloIngest(p)">
+                        Elegir archivo
+                        <input
+                          type="file"
+                          accept=".csv,text/csv"
+                          class="sr-only"
+                          (change)="onImport(p.id, $event)" />
+                      </label>
+                    </div>
                   </td>
                   <td class="px-3 py-3 pr-4 align-middle">
                     <button
@@ -272,16 +335,24 @@
                 </tr>
                 @if (summaryOpenFor(p.id)) {
                   <tr>
-                    <td colspan="6" class="field-summary-cell bg-slate-50/90 px-3 py-4 dark:bg-slate-950/50">
+                    <td colspan="7" class="field-summary-cell bg-slate-50/90 px-3 py-4 dark:bg-slate-950/50">
                     @if (summaryLoading()) {
                       <p class="text-sm text-slate-500">Cargando resumen…</p>
                     } @else {
                       <div class="space-y-6">
                     @if (!summaryRun()) {
-                      <p class="text-sm text-slate-600 dark:text-slate-300">
-                        Todavía no hay importación CSV en este proyecto. Puede vincular Dooblo abajo; para datos tabulares
-                        suba un CSV en la fila de arriba.
-                      </p>
+                      @if (isDoobloIngest(p)) {
+                        <p class="text-sm text-slate-600 dark:text-slate-300">
+                          Este proyecto declara origen <strong>API</strong>: use credenciales y el bloque SurveyToGo más
+                          abajo. Puede añadir un CSV de apoyo con <strong class="whitespace-nowrap">Elegir archivo</strong>
+                          si lo necesita.
+                        </p>
+                      } @else {
+                        <p class="text-sm text-slate-600 dark:text-slate-300">
+                          Todavía no hay importación CSV en este proyecto. Puede vincular Dooblo abajo; para datos
+                          tabulares suba un CSV en la fila de arriba.
+                        </p>
+                      }
                     } @else {
                       <div [class]="importHealthShellClass()">
                         <div class="flex flex-wrap items-start justify-between gap-3">
@@ -387,8 +458,7 @@
                         }
                       </div>
                     }
-                    <div
-                      class="rounded-xl border border-violet-200/80 bg-violet-50/40 p-4 dark:border-violet-900/50 dark:bg-violet-950/20">
+                    <div [class]="doobloSummaryPanelClass(p)">
                       <p
                         class="text-xs font-bold uppercase tracking-wide text-violet-800 dark:text-violet-200/90">
                         SurveyToGo (Dooblo)
@@ -455,9 +525,9 @@
                             Ejecutar análisis Dooblo
                           </button>
                           @if (doobloSources().length === 0) {
-                            <span class="text-xs text-amber-800 dark:text-amber-200/80"
-                              >Guarde primero un ID de encuesta.</span
-                            >
+                            <span class="text-xs text-amber-800 dark:text-amber-200/80">
+                              Guarde primero un ID de encuesta.
+                            </span>
                           }
                         </div>
                         @if (lastDoobloFieldAnalysisRun(); as dr) {

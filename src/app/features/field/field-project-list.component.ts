@@ -60,6 +60,8 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
 
   readonly newName = signal('');
   readonly newDescription = signal('');
+  /** Origen de datos del proyecto que se va a crear (paso 2). */
+  readonly newIngestMode = signal<'csv' | 'dooblo'>('csv');
   readonly newClientName = signal('');
 
   readonly isSuperAdmin = this.user.role === 0;
@@ -185,6 +187,34 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
 
   effectiveCompanyId(): number | null {
     return this.selectedCompanyId();
+  }
+
+  /** Proyecto en tabla declara encuesta por API; condiciona el tablero. */
+  isDoobloIngest(project: { ingest_mode?: string }): boolean {
+    return (project.ingest_mode ?? 'csv') === 'dooblo';
+  }
+
+  /** Hay al menos un proyecto Dooblo: el paso 3 prioriza credenciales API. */
+  anyProjectDooblo(): boolean {
+    return this.projects().some(p => (p.ingest_mode ?? 'csv') === 'dooblo');
+  }
+
+  doobloCredentialsPanelClass(): string {
+    const base =
+      'mb-6 rounded-xl border border-slate-200/90 bg-slate-50/60 p-4 dark:border-slate-600/50 dark:bg-slate-800/30';
+    if (this.anyProjectDooblo()) {
+      return `${base} ring-2 ring-indigo-400/50 dark:ring-indigo-500/40`;
+    }
+    return base;
+  }
+
+  doobloSummaryPanelClass(project: { ingest_mode?: string }): string {
+    const base =
+      'rounded-xl border border-violet-200/80 bg-violet-50/40 p-4 dark:border-violet-900/50 dark:bg-violet-950/20';
+    if (this.isDoobloIngest(project)) {
+      return `${base} ring-2 ring-violet-300/50 dark:ring-violet-600/40`;
+    }
+    return base;
   }
 
   onCompanySelect(ev: Event): void {
@@ -577,7 +607,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       case 2:
         return 'Proyecto';
       case 3:
-        return 'Archivo y resumen';
+        return 'Carga e integración';
       default:
         return '';
     }
@@ -656,11 +686,13 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       description: this.newDescription().trim() || null,
       client_id: clientId,
       company_id: this.isSuperAdmin ? cid : undefined,
+      ingest_mode: this.newIngestMode(),
     };
     this.fieldSvc.createProject(body).subscribe({
       next: () => {
         this.newName.set('');
         this.newDescription.set('');
+        this.newIngestMode.set('csv');
         this.toast.showToast('success', 'Field', 'Proyecto creado.');
         this.reloadProjects();
         this.activeStep.set(3);
