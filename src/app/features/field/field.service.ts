@@ -73,6 +73,96 @@ export interface FieldLedgerEvent {
   created_at: string;
 }
 
+/** Configuración Dooblo/ SurveyToGo por empresa (sin contraseña en lectura). */
+export interface DoobloCompanyConfig {
+  company_id: number;
+  configured: boolean;
+  dooblo_configured?: boolean;
+  source: 'company' | 'env' | 'none';
+  base_url: string;
+  api_user: string | null;
+  has_password: boolean;
+  updated_at: string | null;
+}
+
+export interface DoobloCredentialsPut {
+  base_url?: string | null;
+  api_user?: string | null;
+  password?: string | null;
+}
+
+/** Mapeo proyecto Field → SurveyToGo/Dooblo. */
+export interface FieldProjectExternalSource {
+  id: number;
+  field_project_id: number;
+  company_id: number;
+  source_type: string;
+  external_project_id: string | null;
+  external_survey_id: string | null;
+  external_customer_id: string | null;
+  wave_id: string | null;
+  is_active: boolean;
+  sync_strategy: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FieldProjectExternalSourceCreate {
+  source_type: string;
+  external_project_id?: string | null;
+  external_survey_id?: string | null;
+  external_customer_id?: string | null;
+  wave_id?: string | null;
+  is_active?: boolean;
+  sync_strategy?: string | null;
+}
+
+export interface DoobloAnalyzeBody {
+  idempotency_key: string;
+  field_project_external_source_id?: number | null;
+  field_policy_set_id?: number | null;
+}
+
+/** Corrida de capa de decisión (incl. análisis Dooblo async). */
+export interface FieldSyncRun {
+  id: number;
+  field_project_id: number;
+  company_id: number;
+  run_kind: string;
+  idempotency_key: string;
+  field_project_external_source_id: number | null;
+  field_import_run_id: number | null;
+  field_policy_set_id: number | null;
+  status: string;
+  error_summary: string | null;
+  total_records: number | null;
+  context_payload: Record<string, unknown> | null;
+  started_at: string;
+  completed_at: string | null;
+}
+
+/** Hallazgo de la capa de decisión (CSV, dooblo_analysis, …). */
+export interface FieldDecisionFinding {
+  id: number;
+  field_project_id: number;
+  field_import_run_id: number | null;
+  field_sync_run_id: number | null;
+  field_policy_set_id: number | null;
+  field_import_row_id: number | null;
+  idempotency_key: string | null;
+  source: string | null;
+  code: string;
+  severity: string;
+  case_id: string | null;
+  wave_id: string | null;
+  message: string;
+  explanation: string | null;
+  recommendation: string | null;
+  evidence: Record<string, unknown> | null;
+  approval_status: string | null;
+  created_at: string;
+}
+
 export interface EndClient {
   id: number;
   company_id: number;
@@ -162,5 +252,64 @@ export class FieldService {
 
   createEndClient(body: EndClientCreateBody): Observable<EndClient> {
     return this.http.post<EndClient>(environment.apiUrl + 'end-clients', body);
+  }
+
+  getDoobloContext(companyId: number): Observable<DoobloCompanyConfig> {
+    return this.http.get<DoobloCompanyConfig>(`${environment.apiUrl}field/dooblo/credentials`, {
+      params: { company_id: String(companyId) },
+    });
+  }
+
+  putDoobloCredentials(companyId: number, body: DoobloCredentialsPut): Observable<unknown> {
+    return this.http.put(
+      `${environment.apiUrl}field/dooblo/credentials`,
+      body,
+      { params: { company_id: String(companyId) } }
+    );
+  }
+
+  listExternalSources(projectId: number): Observable<FieldProjectExternalSource[]> {
+    return this.http.get<FieldProjectExternalSource[]>(
+      `${environment.apiUrl}field/projects/${projectId}/decision-layer/external-sources`
+    );
+  }
+
+  createExternalSource(
+    projectId: number,
+    body: FieldProjectExternalSourceCreate
+  ): Observable<FieldProjectExternalSource> {
+    return this.http.post<FieldProjectExternalSource>(
+      `${environment.apiUrl}field/projects/${projectId}/decision-layer/external-sources`,
+      body
+    );
+  }
+
+  listSyncRuns(projectId: number, limit = 20): Observable<FieldSyncRun[]> {
+    return this.http.get<FieldSyncRun[]>(
+      `${environment.apiUrl}field/projects/${projectId}/decision-layer/sync-runs`,
+      { params: { limit: String(limit) } }
+    );
+  }
+
+  postDoobloAnalyze(projectId: number, body: DoobloAnalyzeBody): Observable<FieldSyncRun> {
+    return this.http.post<FieldSyncRun>(
+      `${environment.apiUrl}field/projects/${projectId}/decision-layer/dooblo-analyze`,
+      body
+    );
+  }
+
+  listDecisionLayerFindings(
+    projectId: number,
+    source: string | null = null,
+    limit = 50
+  ): Observable<FieldDecisionFinding[]> {
+    let params: HttpParams = new HttpParams().set('limit', String(limit));
+    if (source) {
+      params = params.set('source', source);
+    }
+    return this.http.get<FieldDecisionFinding[]>(
+      `${environment.apiUrl}field/projects/${projectId}/decision-layer/findings`,
+      { params }
+    );
   }
 }

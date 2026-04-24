@@ -1,9 +1,9 @@
 import { CommonModule, NgClass } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 
 import { AuthService } from '@core/services/auth.service';
 import { ShareToasterService } from '@core/services/toast.service';
@@ -15,11 +15,15 @@ import {
   decisionRiskLine as stakeholderRiskByCode,
 } from './field-decision-briefing';
 import {
+  DoobloCompanyConfig,
   EndClient,
+  FieldDecisionFinding,
   FieldFinding,
   FieldImportRun,
   FieldProject,
+  FieldProjectExternalSource,
   FieldService,
+  FieldSyncRun,
 } from './field.service';
 
 /** Texto fijo por código técnico — lo ve el cliente sin leer el backend. */
@@ -27,6 +31,10 @@ const FINDING_KIND_LABEL: Record<string, string> = {
   ROW_INCOMPLETE: 'Fila no guardada (faltan datos clave)',
   DUPLICATE_CASE: 'Mismo caso repetido en el archivo',
   INVALID_DURATION: 'Duración del caso a revisar',
+  DOOBLO_QUOTA_SNAPSHOT: 'Cuota (SurveyToGo)',
+  DOOBLO_QUOTA_UPSTREAM: 'Cuota: error al leer en SurveyToGo',
+  DOOBLO_NO_SURVEY_ID: 'Falta ID de encuesta Dooblo',
+  QUOTA_MAX_DEVIATION: 'Posible desvío de cuota respecto a política',
 };
 
 @Component({
@@ -36,7 +44,7 @@ const FINDING_KIND_LABEL: Record<string, string> = {
   templateUrl: './field-project-list.component.html',
   styleUrl: './field-project-list.component.css',
 })
-export class FieldProjectListComponent implements OnInit {
+export class FieldProjectListComponent implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly fieldSvc = inject(FieldService);
   private readonly toast = inject(ShareToasterService);
@@ -67,8 +75,28 @@ export class FieldProjectListComponent implements OnInit {
   /** Paso del asistente: 1 cliente, 2 proyecto, 3 cargas y resumen. */
   readonly activeStep = signal<1 | 2 | 3>(1);
 
+  /** Configuración Dooblo/ SurveyToGo de la empresa activa (credenciales por cliente). */
+  readonly doobloCompanyContext = signal<DoobloCompanyConfig | null>(null);
+  readonly doobloCredentialsLoading = signal(false);
+  /** Formulario guardar credenciales API (origen, usuario, contraseña). */
+  readonly doobloFormBaseUrl = signal('');
+  readonly doobloFormApiUser = signal('');
+  readonly doobloFormPassword = signal('');
+  /** Contexto del proyecto cuyo resumen está abierto. */
+  readonly doobloExternalSources = signal<FieldProjectExternalSource[]>([]);
+  readonly doobloSyncRuns = signal<FieldSyncRun[]>([]);
+  readonly doobloDecisionFindings = signal<FieldDecisionFinding[]>([]);
+  readonly newDoobloStudioProject = signal('');
+  readonly newDoobloSurveyId = signal('');
+  readonly doobloActionBusy = signal(false);
+
   /** API company/ limita a 100 (FastAPI le=100). No pedir 200. */
   private static readonly companyListLimit = 100;
+  private doobloPollTimer: ReturnType<typeof setTimeout> | null = null;
+
+  ngOnDestroy(): void {
+    this.clearDoobloPoll();
+  }
 
   ngOnInit(): void {
     if (this.isSuperAdmin) {
@@ -93,6 +121,66 @@ export class FieldProjectListComponent implements OnInit {
       this.selectedCompanyId.set(this.user.company_id ?? null);
       this.reloadClientsAndProjects();
     }
+  }
+
+  /** Carga orígenes SurveyToGo para la empresa actual (cada cliente puede usar sus claves). */
+  private loadFieldDoobloCompanyContext(): void {
+    const cid = this.effectiveCompanyId();
+    if (cid == null) {
+      this.doobloCompanyContext.set(null);
+      return;
+    }
+    this.doobloCredentialsLoading.set(true);
+    this.fieldSvc.getDoobloContext(cid).subscribe({
+      next: c => {
+        this.doobloCompanyContext.set(c);
+        this.doobloFormBaseUrl.set(c.base_url || '');
+        this.doobloFormApiUser.set(c.api_user || '');
+        this.doobloFormPassword.set('');
+        this.doobloCredentialsLoading.set(false);
+      },
+      error: () => {
+        this.doobloCompanyContext.set(null);
+        this.doobloCredentialsLoading.set(false);
+        this.toast.showToast('error', 'Field', 'No se pudo cargar la configuración Dooblo.');
+      },
+    });
+  }
+
+  saveDoobloCompanyCredentials(): void {
+    const cid = this.effectiveCompanyId();
+    if (cid == null) {
+      return;
+    }
+    const base = this.doobloFormBaseUrl().trim();
+    const user = this.doobloFormApiUser().trim();
+    const pass = this.doobloFormPassword().trim();
+    if (!user) {
+      this.toast.showToast('warn', 'Field', 'Indique el usuario o REST_KEY de la API Dooblo.');
+      return;
+    }
+    if (!pass && !this.doobloCompanyContext()?.has_password) {
+      this.toast.showToast('warn', 'Field', 'Indique la contraseña o clave de la API (primera vez).');
+      return;
+    }
+    this.doobloActionBusy.set(true);
+    this.fieldSvc
+      .putDoobloCredentials(cid, {
+        base_url: base || null,
+        api_user: user,
+        password: pass || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.toast.showToast('success', 'Field', 'Credenciales Dooblo guardadas para esta empresa.');
+          this.loadFieldDoobloCompanyContext();
+          this.doobloActionBusy.set(false);
+        },
+        error: (err: unknown) => {
+          this.doobloActionBusy.set(false);
+          this.toast.showToast('error', 'Field', this.httpErrorDetail(err, 'No se pudieron guardar las credenciales.'));
+        },
+      });
   }
 
   effectiveCompanyId(): number | null {
@@ -129,6 +217,7 @@ export class FieldProjectListComponent implements OnInit {
         const first = rows[0]?.id ?? null;
         this.selectedClientId.set(first);
         this.reloadProjects();
+        this.loadFieldDoobloCompanyContext();
       },
       error: () =>
         this.toast.showToast('error', 'Field', 'No se pudieron cargar clientes finales.'),
@@ -158,11 +247,17 @@ export class FieldProjectListComponent implements OnInit {
   }
 
   closeImportSummary(): void {
+    this.clearDoobloPoll();
     this.summaryProjectId.set(null);
     this.summaryRun.set(null);
     this.summaryFindings.set([]);
     this.summaryLinesSeen.set(null);
     this.summaryLoading.set(false);
+    this.doobloExternalSources.set([]);
+    this.doobloSyncRuns.set([]);
+    this.doobloDecisionFindings.set([]);
+    this.newDoobloStudioProject.set('');
+    this.newDoobloSurveyId.set('');
   }
 
   toggleImportSummary(projectId: number): void {
@@ -183,12 +278,18 @@ export class FieldProjectListComponent implements OnInit {
     this.summaryRun.set(null);
     this.summaryFindings.set([]);
     this.summaryLinesSeen.set(null);
+    this.doobloExternalSources.set([]);
+    this.doobloSyncRuns.set([]);
+    this.doobloDecisionFindings.set([]);
 
     this.fieldSvc.listImportRuns(projectId, 15).subscribe({
       next: runs => {
         const run = runs[0] ?? null;
         if (!run) {
           this.summaryLoading.set(false);
+          this.loadDoobloContextOnly(projectId, () => {
+            this.summaryLoading.set(false);
+          });
           return;
         }
         this.summaryRun.set(run);
@@ -205,19 +306,194 @@ export class FieldProjectListComponent implements OnInit {
             );
             const raw = done?.payload?.['data_lines_seen'];
             this.summaryLinesSeen.set(typeof raw === 'number' ? raw : null);
-            this.summaryLoading.set(false);
+            this.loadDoobloContextOnly(projectId, () => {
+              this.summaryLoading.set(false);
+            });
           },
           error: () => {
-            this.summaryLoading.set(false);
+            this.loadDoobloContextOnly(projectId, () => {
+              this.summaryLoading.set(false);
+            });
             this.toast.showToast('error', 'Field', 'No se pudo cargar el resumen de la última importación.');
           },
         });
       },
       error: () => {
-        this.summaryLoading.set(false);
+        this.loadDoobloContextOnly(projectId, () => {
+          this.summaryLoading.set(false);
+        });
         this.toast.showToast('error', 'Field', 'No se pudieron leer las importaciones del proyecto.');
       },
     });
+  }
+
+  /** Carga mapeo Dooblo, corridas y hallazgos de análisis (no bloquea el mensaje de error CSV). */
+  private loadDoobloContextOnly(
+    projectId: number,
+    done: () => void
+  ): void {
+    forkJoin({
+      src: this.fieldSvc.listExternalSources(projectId).pipe(
+        catchError(() => of([] as FieldProjectExternalSource[]))
+      ),
+      runs: this.fieldSvc.listSyncRuns(projectId, 20).pipe(
+        catchError(() => of([] as FieldSyncRun[]))
+      ),
+      find: this.fieldSvc.listDecisionLayerFindings(projectId, 'dooblo_analysis', 50).pipe(
+        catchError(() => of([] as FieldDecisionFinding[]))
+      ),
+    }).subscribe({
+      next: ({ src, runs, find }) => {
+        this.doobloExternalSources.set(src);
+        this.doobloSyncRuns.set(runs);
+        this.doobloDecisionFindings.set(find);
+        done();
+      },
+      error: () => {
+        done();
+      },
+    });
+  }
+
+  doobloSources(): FieldProjectExternalSource[] {
+    return this.doobloExternalSources().filter(s => s.source_type === 'dooblo' && s.is_active);
+  }
+
+  lastDoobloFieldAnalysisRun(): FieldSyncRun | null {
+    return this.doobloSyncRuns().find(r => r.run_kind === 'field_analysis') ?? null;
+  }
+
+  doobloRunLabel(run: FieldSyncRun | null): string {
+    if (!run) {
+      return 'Aún no hay análisis Dooblo en este proyecto.';
+    }
+    switch (run.status) {
+      case 'completed':
+        return 'Último análisis Dooblo: completado';
+      case 'failed':
+        return 'Último análisis Dooblo: falló';
+      case 'processing':
+        return 'Analizando con SurveyToGo…';
+      case 'pending':
+        return 'Análisis Dooblo en cola…';
+      default:
+        return `Estado: ${run.status}`;
+    }
+  }
+
+  saveDoobloSource(projectId: number): void {
+    const survey = this.newDoobloSurveyId().trim();
+    if (!survey) {
+      this.toast.showToast('warn', 'Field', 'Indique el ID de encuesta en SurveyToGo/Dooblo.');
+      return;
+    }
+    const extProj = this.newDoobloStudioProject().trim() || null;
+    this.doobloActionBusy.set(true);
+    this.fieldSvc
+      .createExternalSource(projectId, {
+        source_type: 'dooblo',
+        external_survey_id: survey,
+        external_project_id: extProj,
+        is_active: true,
+      })
+      .subscribe({
+        next: () => {
+          this.newDoobloStudioProject.set('');
+          this.newDoobloSurveyId.set('');
+          this.toast.showToast('success', 'Field', 'Vínculo Dooblo guardado.');
+          this.loadDoobloContextOnly(projectId, () => {
+            this.doobloActionBusy.set(false);
+          });
+        },
+        error: (err: unknown) => {
+          this.doobloActionBusy.set(false);
+          this.toast.showToast('error', 'Field', this.httpErrorDetail(err, 'No se pudo guardar el vínculo Dooblo.'));
+        },
+      });
+  }
+
+  runDoobloAnalysis(projectId: number): void {
+    const ikey = `field-dooblo-${projectId}-${Date.now()}`;
+    const first = this.doobloSources()[0];
+    this.doobloActionBusy.set(true);
+    this.fieldSvc
+      .postDoobloAnalyze(projectId, {
+        idempotency_key: ikey,
+        field_project_external_source_id: first?.id ?? null,
+      })
+      .subscribe({
+        next: run => {
+          this.toast.showToast('success', 'Field', 'Análisis Dooblo encolado.');
+          this.loadDoobloContextOnly(projectId, () => {
+            this.doobloActionBusy.set(false);
+            this.scheduleDoobloPoll(projectId, run.id);
+          });
+        },
+        error: (err: unknown) => {
+          this.doobloActionBusy.set(false);
+          this.toast.showToast('error', 'Field', this.httpErrorDetail(err, 'No se pudo encolar el análisis Dooblo.'));
+        },
+      });
+  }
+
+  private httpErrorDetail(err: unknown, fallback: string): string {
+    if (err instanceof HttpErrorResponse) {
+      const b = err.error;
+      if (b && typeof b === 'object' && 'detail' in b && b['detail'] != null) {
+        return String(b['detail']);
+      }
+    }
+    return fallback;
+  }
+
+  private clearDoobloPoll(): void {
+    if (this.doobloPollTimer != null) {
+      clearTimeout(this.doobloPollTimer);
+      this.doobloPollTimer = null;
+    }
+  }
+
+  /** Refresca estado hasta que la corrida termine o alcanzamos reintentos. */
+  private scheduleDoobloPoll(projectId: number, syncRunId: number, attempt = 0): void {
+    this.clearDoobloPoll();
+    if (attempt > 30) {
+      return;
+    }
+    this.doobloPollTimer = setTimeout(() => {
+      this.fieldSvc.listSyncRuns(projectId, 15).subscribe({
+        next: runs => {
+          this.doobloSyncRuns.set(runs);
+          const r = runs.find(x => x.id === syncRunId);
+          this.fieldSvc
+            .listDecisionLayerFindings(projectId, 'dooblo_analysis', 50)
+            .pipe(catchError(() => of([] as FieldDecisionFinding[])))
+            .subscribe(f => this.doobloDecisionFindings.set(f));
+          if (r == null) {
+            this.scheduleDoobloPoll(projectId, syncRunId, attempt + 1);
+            return;
+          }
+          if (r.status === 'pending' || r.status === 'processing') {
+            this.scheduleDoobloPoll(projectId, syncRunId, attempt + 1);
+          }
+        },
+        error: () => this.scheduleDoobloPoll(projectId, syncRunId, attempt + 1),
+      });
+    }, 1500);
+  }
+
+  doobloFindingKindLabel(code: string): string {
+    return FINDING_KIND_LABEL[code] ?? 'Señal de la capa de decisión (Dooblo)';
+  }
+
+  doobloSourceLabel(): string {
+    const s = this.doobloCompanyContext()?.source;
+    if (s === 'company') {
+      return 'Claves propias (guardadas en Siete para esta empresa).';
+    }
+    if (s === 'env') {
+      return 'Usando credenciales globales del servidor (p. ej. variables en Railway).';
+    }
+    return 'Sin conexión configurada: guarde credenciales aquí o pida las variables en el hosting.';
   }
 
   /** Título corto del estado de la corrida (lenguaje natural). */
@@ -254,6 +530,9 @@ export class FieldProjectListComponent implements OnInit {
     }
     if (sev === 'warn') {
       return 'Conviene revisar';
+    }
+    if (sev === 'info') {
+      return 'Informativo';
     }
     return sev;
   }
