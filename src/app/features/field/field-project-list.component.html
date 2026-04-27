@@ -340,6 +340,102 @@
                       <p class="text-sm text-slate-500">Cargando resumen…</p>
                     } @else {
                       <div class="space-y-6">
+                    @if (!summaryLoading() && hasAnyFindingsForSummary()) {
+                      @if (focusedFindingForProject(p.id) == null) {
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                          Pulse un aviso en las listas para fijar la decisión, la nota de auditoría o el historial.
+                        </p>
+                      }
+                      @if (focusedFindingForProject(p.id); as ff) {
+                        <div
+                          class="rounded-xl border border-indigo-200/90 bg-indigo-50/50 p-3 shadow-sm dark:border-indigo-800/50 dark:bg-indigo-950/30">
+                          <p class="text-xs font-semibold text-indigo-950 dark:text-indigo-100">
+                            Decidir sobre: {{ decisionPanelKindLabel(ff) }}
+                          </p>
+                          <p class="mt-0.5 line-clamp-2 text-xs text-slate-700 dark:text-slate-300">
+                            {{ ff.message }}
+                          </p>
+                          <p class="mt-1.5 text-xs text-slate-600 dark:text-slate-400">
+                            Estado:
+                            <span class="font-medium text-slate-800 dark:text-slate-200">{{
+                              approvalStatusLabel(ff.approval_status)
+                            }}</span>
+                          </p>
+                          <div class="mt-2 flex flex-wrap gap-1.5">
+                            <button
+                              type="button"
+                              class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700/80"
+                              [disabled]="isPatchingFinding(ff.id)"
+                              (click)="setFindingApproval(p.id, ff, 'approved')">
+                              Aprobar
+                            </button>
+                            <button
+                              type="button"
+                              class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700/80"
+                              [disabled]="isPatchingFinding(ff.id)"
+                              (click)="setFindingApproval(p.id, ff, 'rejected')">
+                              Rechazar
+                            </button>
+                            <button
+                              type="button"
+                              class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700/80"
+                              [disabled]="isPatchingFinding(ff.id)"
+                              (click)="setFindingApproval(p.id, ff, 'pending')">
+                              Pendiente
+                            </button>
+                            <button
+                              type="button"
+                              class="rounded-lg border border-indigo-300 bg-indigo-100/80 px-2.5 py-1 text-xs font-medium text-indigo-900 hover:bg-indigo-200/60 disabled:opacity-50 dark:border-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-100 dark:hover:bg-indigo-900/60"
+                              [disabled]="decisionLogLoading() && isDecisionLogOpen(ff.id)"
+                              (click)="toggleFindingDecisionLog(p.id, ff.id)">
+                              {{ isDecisionLogOpen(ff.id) ? 'Ocultar historial' : 'Historial' }}
+                            </button>
+                          </div>
+                          <label class="mt-2 block text-xs text-slate-600 dark:text-slate-400">
+                            Nota de auditoría (opcional)
+                            <textarea
+                              class="field-control mt-1 w-full resize-y text-xs"
+                              rows="2"
+                              [ngModel]="getDecisionNote(ff.id)"
+                              (ngModelChange)="setDecisionNote(ff.id, $event)"
+                              placeholder="Motivo, acuerdo con cliente, ticket…"></textarea>
+                          </label>
+                          @if (isDecisionLogOpen(ff.id)) {
+                            <div
+                              class="mt-2 max-h-44 overflow-y-auto rounded-lg border border-slate-200/90 bg-white/90 p-2 text-xs dark:border-slate-600 dark:bg-slate-900/50">
+                              @if (decisionLogLoading()) {
+                                <p class="text-slate-500">Cargando…</p>
+                              } @else if (decisionLogItems().length === 0) {
+                                <p class="text-slate-500">Aún no hay entradas en el historial.</p>
+                              } @else {
+                                <ul class="space-y-1.5">
+                                  @for (e of decisionLogItems(); track e.id) {
+                                    <li
+                                      class="border-b border-slate-200/80 pb-1.5 last:border-0 last:pb-0 dark:border-slate-600/80">
+                                      <p class="text-[0.7rem] text-slate-500">
+                                        {{ e.created_at | date: 'short' }} ·
+                                        <span class="text-slate-700 dark:text-slate-200">{{
+                                          decisionLogActorLabel(e)
+                                        }}</span>
+                                      </p>
+                                      <p class="mt-0.5 font-medium text-slate-800 dark:text-slate-100">
+                                        {{ logTransitionText(e) }}
+                                      </p>
+                                      @if (e.note) {
+                                        <p
+                                          class="mt-0.5 whitespace-pre-wrap text-slate-600 dark:text-slate-300">
+                                          {{ e.note }}
+                                        </p>
+                                      }
+                                    </li>
+                                  }
+                                </ul>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    }
                     @if (!summaryRun()) {
                       @if (isDoobloIngest(p)) {
                         <p class="text-sm text-slate-600 dark:text-slate-300">
@@ -426,7 +522,16 @@
                             <ul class="max-h-60 space-y-2 overflow-y-auto text-sm">
                               @for (f of summaryFindings(); track f.id) {
                                 <li
-                                  class="rounded-lg border border-slate-200 bg-white/90 px-3 py-2 dark:border-slate-600 dark:bg-slate-900/50">
+                                  role="button"
+                                  tabindex="0"
+                                  (click)="selectFindingForDecision(f.id)"
+                                  (keydown.enter)="selectFindingForDecision(f.id)"
+                                  [class]="
+                                    'cursor-pointer rounded-lg border bg-white/90 px-3 py-2 transition dark:bg-slate-900/50 ' +
+                                    (isFindingFocused(f.id)
+                                      ? 'border-indigo-400 ring-2 ring-indigo-300/50 dark:border-indigo-500 dark:ring-indigo-500/30'
+                                      : 'border-slate-200 dark:border-slate-600')
+                                  ">
                                   <span
                                     class="mr-2 inline-block rounded px-1.5 py-0.5 text-xs font-medium"
                                     [class.bg-red-100]="f.severity === 'error'"
@@ -446,6 +551,10 @@
                                   <p
                                     class="mt-2 border-t border-slate-100 pt-2 text-xs leading-snug text-slate-500 dark:border-slate-600 dark:text-slate-400">
                                     {{ decisionRiskLine(f) }}
+                                  </p>
+                                  <p class="mt-1.5 text-xs text-slate-600 dark:text-slate-300">
+                                    <span class="font-medium text-slate-700 dark:text-slate-200">Decisión:</span>
+                                    {{ approvalStatusLabel(f.approval_status) }}
                                   </p>
                                 </li>
                               }
@@ -557,7 +666,16 @@
                             <ul class="max-h-52 space-y-2 overflow-y-auto text-sm">
                               @for (f of doobloDecisionFindings(); track f.id) {
                                 <li
-                                  class="rounded-lg border border-slate-200 bg-white/80 px-3 py-2 dark:border-slate-600 dark:bg-slate-900/40">
+                                  role="button"
+                                  tabindex="0"
+                                  (click)="selectFindingForDecision(f.id)"
+                                  (keydown.enter)="selectFindingForDecision(f.id)"
+                                  [class]="
+                                    'cursor-pointer rounded-lg border bg-white/80 px-3 py-2 transition dark:bg-slate-900/40 ' +
+                                    (isFindingFocused(f.id)
+                                      ? 'border-indigo-400 ring-2 ring-indigo-300/50 dark:border-indigo-500 dark:ring-indigo-500/30'
+                                      : 'border-slate-200 dark:border-slate-600')
+                                  ">
                                   <span
                                     class="mr-2 inline-block rounded px-1.5 py-0.5 text-xs font-medium"
                                     [class.bg-red-100]="f.severity === 'error'"
@@ -581,6 +699,10 @@
                                   @if (f.explanation) {
                                     <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ f.explanation }}</p>
                                   }
+                                  <p class="mt-1.5 text-xs text-slate-600 dark:text-slate-300">
+                                    <span class="font-medium text-slate-700 dark:text-slate-200">Decisión:</span>
+                                    {{ approvalStatusLabel(f.approval_status) }}
+                                  </p>
                                 </li>
                               }
                             </ul>

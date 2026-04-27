@@ -17,8 +17,8 @@ import {
 import {
   DoobloCompanyConfig,
   EndClient,
-  FieldDecisionFinding,
   FieldFinding,
+  FieldFindingDecisionLog,
   FieldImportRun,
   FieldProject,
   FieldProjectExternalSource,
@@ -87,8 +87,16 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   /** Contexto del proyecto cuyo resumen está abierto. */
   readonly doobloExternalSources = signal<FieldProjectExternalSource[]>([]);
   readonly doobloSyncRuns = signal<FieldSyncRun[]>([]);
-  readonly doobloDecisionFindings = signal<FieldDecisionFinding[]>([]);
+  readonly doobloDecisionFindings = signal<FieldFinding[]>([]);
   readonly newDoobloStudioProject = signal('');
+  /** Nota opcional en auditoría al cambiar estado (clave = id de hallazgo). */
+  readonly decisionNoteByFindingId = signal<Record<string, string>>({});
+  readonly decisionLogFindingId = signal<number | null>(null);
+  readonly decisionLogItems = signal<FieldFindingDecisionLog[]>([]);
+  readonly decisionLogLoading = signal(false);
+  readonly patchingFindingId = signal<number | null>(null);
+  /** Hallazgo activo en el panel único de decisión / nota / historial. */
+  readonly decisionFocusFindingId = signal<number | null>(null);
   readonly newDoobloSurveyId = signal('');
   readonly doobloActionBusy = signal(false);
 
@@ -288,6 +296,12 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     this.doobloDecisionFindings.set([]);
     this.newDoobloStudioProject.set('');
     this.newDoobloSurveyId.set('');
+    this.decisionNoteByFindingId.set({});
+    this.decisionLogFindingId.set(null);
+    this.decisionLogItems.set([]);
+    this.decisionLogLoading.set(false);
+    this.patchingFindingId.set(null);
+    this.decisionFocusFindingId.set(null);
   }
 
   toggleImportSummary(projectId: number): void {
@@ -370,7 +384,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         catchError(() => of([] as FieldSyncRun[]))
       ),
       find: this.fieldSvc.listDecisionLayerFindings(projectId, 'dooblo_analysis', 50).pipe(
-        catchError(() => of([] as FieldDecisionFinding[]))
+        catchError(() => of([] as FieldFinding[]))
       ),
     }).subscribe({
       next: ({ src, runs, find }) => {
@@ -496,7 +510,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
           const r = runs.find(x => x.id === syncRunId);
           this.fieldSvc
             .listDecisionLayerFindings(projectId, 'dooblo_analysis', 50)
-            .pipe(catchError(() => of([] as FieldDecisionFinding[])))
+            .pipe(catchError(() => of([] as FieldFinding[])))
             .subscribe(f => this.doobloDecisionFindings.set(f));
           if (r == null) {
             this.scheduleDoobloPoll(projectId, syncRunId, attempt + 1);
@@ -513,6 +527,14 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
 
   doobloFindingKindLabel(code: string): string {
     return FINDING_KIND_LABEL[code] ?? 'Señal de la capa de decisión (Dooblo)';
+  }
+
+  /** Título corto en el panel de decisión según origen del hallazgo. */
+  decisionPanelKindLabel(f: FieldFinding): string {
+    if ((f.source || '').toLowerCase() === 'dooblo_analysis') {
+      return this.doobloFindingKindLabel(f.code);
+    }
+    return this.findingKindLabel(f.code);
   }
 
   doobloSourceLabel(): string {
@@ -649,6 +671,165 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       return base + 'border-sky-300 bg-sky-50 dark:border-sky-800 dark:bg-sky-950/25';
     }
     return base + 'border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/25';
+  }
+
+  getDecisionNote(findingId: number): string {
+    return this.decisionNoteByFindingId()[String(findingId)] ?? '';
+  }
+
+  setDecisionNote(findingId: number, value: string): void {
+    const k = String(findingId);
+    this.decisionNoteByFindingId.update(m => ({ ...m, [k]: value }));
+  }
+
+  /** Etiqueta breve del estado de gobernanza (auditoría). */
+  approvalStatusLabel(status: string | null | undefined): string {
+    if (status == null || status === '') {
+      return 'Sin decisión';
+    }
+    if (status === 'approved') {
+      return 'Aprobado';
+    }
+    if (status === 'rejected') {
+      return 'Rechazado';
+    }
+    if (status === 'pending') {
+      return 'Pendiente';
+    }
+    return status;
+  }
+
+  logTransitionText(entry: FieldFindingDecisionLog): string {
+    const from = entry.from_status == null || entry.from_status === '' ? '—' : this.approvalStatusLabel(entry.from_status);
+    const to = this.approvalStatusLabel(entry.to_status);
+    return `${from} → ${to}`;
+  }
+
+  isPatchingFinding(findingId: number): boolean {
+    return this.patchingFindingId() === findingId;
+  }
+
+  isDecisionLogOpen(findingId: number): boolean {
+    return this.decisionLogFindingId() === findingId;
+  }
+
+  focusedFindingForProject(projectId: number): FieldFinding | null {
+    if (this.summaryProjectId() !== projectId) {
+      return null;
+    }
+    const id = this.decisionFocusFindingId();
+    if (id == null) {
+      return null;
+    }
+    return (
+      this.summaryFindings().find(f => f.id === id) ??
+      this.doobloDecisionFindings().find(f => f.id === id) ??
+      null
+    );
+  }
+
+  hasAnyFindingsForSummary(): boolean {
+    return this.summaryFindings().length + this.doobloDecisionFindings().length > 0;
+  }
+
+  /** Selección del panel de decisión; segundo clic en la misma fila deselecciona. */
+  selectFindingForDecision(findingId: number): void {
+    if (this.decisionFocusFindingId() === findingId) {
+      this.decisionFocusFindingId.set(null);
+      this.decisionLogFindingId.set(null);
+      this.decisionLogItems.set([]);
+      this.decisionLogLoading.set(false);
+      return;
+    }
+    this.decisionFocusFindingId.set(findingId);
+    this.decisionLogFindingId.set(null);
+    this.decisionLogItems.set([]);
+    this.decisionLogLoading.set(false);
+  }
+
+  isFindingFocused(findingId: number): boolean {
+    return this.decisionFocusFindingId() === findingId;
+  }
+
+  decisionLogActorLabel(entry: FieldFindingDecisionLog): string {
+    const d = entry.actor_display?.trim();
+    if (d) {
+      return d;
+    }
+    return `Usuario #${entry.actor_user_id}`;
+  }
+
+  toggleFindingDecisionLog(projectId: number, findingId: number): void {
+    if (this.decisionLogFindingId() === findingId) {
+      this.decisionLogFindingId.set(null);
+      this.decisionLogItems.set([]);
+      this.decisionLogLoading.set(false);
+      return;
+    }
+    this.decisionLogFindingId.set(findingId);
+    this.decisionLogItems.set([]);
+    this.decisionLogLoading.set(true);
+    this.fieldSvc.listFindingDecisionLog(projectId, findingId, 100).subscribe({
+      next: rows => {
+        this.decisionLogItems.set(rows);
+        this.decisionLogLoading.set(false);
+      },
+      error: (err: unknown) => {
+        this.decisionLogLoading.set(false);
+        this.toast.showToast('error', 'Field', this.httpErrorDetail(err, 'No se pudo cargar el historial de decisiones.'));
+      },
+    });
+  }
+
+  setFindingApproval(
+    projectId: number,
+    finding: FieldFinding,
+    status: 'approved' | 'rejected' | 'pending'
+  ): void {
+    const noteRaw = this.getDecisionNote(finding.id).trim();
+    this.patchingFindingId.set(finding.id);
+    this.fieldSvc
+      .patchFindingApproval(projectId, finding.id, {
+        status,
+        note: noteRaw || null,
+      })
+      .subscribe({
+        next: updated => {
+          this.applyPatchedFinding(updated);
+          this.patchingFindingId.set(null);
+          this.toast.showToast('success', 'Field', 'Decisión guardada; queda trazable en el historial.');
+          if (this.decisionLogFindingId() === finding.id) {
+            this.reloadOpenDecisionLog(projectId, finding.id);
+          }
+        },
+        error: (err: unknown) => {
+          this.patchingFindingId.set(null);
+          this.toast.showToast('error', 'Field', this.httpErrorDetail(err, 'No se pudo actualizar el estado del hallazgo.'));
+        },
+      });
+  }
+
+  private applyPatchedFinding(updated: FieldFinding): void {
+    this.summaryFindings.set(
+      this.summaryFindings().map(f => (f.id === updated.id ? { ...f, ...updated } : f))
+    );
+    this.doobloDecisionFindings.set(
+      this.doobloDecisionFindings().map(f => (f.id === updated.id ? { ...f, ...updated } : f))
+    );
+  }
+
+  private reloadOpenDecisionLog(projectId: number, findingId: number): void {
+    this.decisionLogLoading.set(true);
+    this.fieldSvc.listFindingDecisionLog(projectId, findingId, 100).subscribe({
+      next: rows => {
+        this.decisionLogItems.set(rows);
+        this.decisionLogLoading.set(false);
+      },
+      error: (err: unknown) => {
+        this.decisionLogLoading.set(false);
+        this.toast.showToast('error', 'Field', this.httpErrorDetail(err, 'No se pudo refrescar el historial.'));
+      },
+    });
   }
 
   createClient(): void {

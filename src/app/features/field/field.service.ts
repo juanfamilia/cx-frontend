@@ -56,17 +56,51 @@ export interface FieldImportRow {
   created_at: string;
 }
 
+/**
+ * Hallazgo Field (import / capa de decisión), alineado con FieldFindingPublic en la API.
+ */
 export interface FieldFinding {
   id: number;
   field_project_id: number;
-  field_import_run_id: number;
+  field_import_run_id: number | null;
+  field_sync_run_id: number | null;
+  field_policy_set_id: number | null;
   field_import_row_id: number | null;
+  idempotency_key: string | null;
+  source: string | null;
   code: string;
   severity: string;
   case_id: string | null;
   wave_id: string | null;
   message: string;
+  explanation: string | null;
+  recommendation: string | null;
+  evidence: Record<string, unknown> | null;
+  approval_status: string | null;
+  reviewed_by_user_id: number | null;
+  reviewed_at: string | null;
   created_at: string;
+}
+
+export type FieldDecisionFinding = FieldFinding;
+
+export interface FieldFindingApprovalBody {
+  status: 'approved' | 'rejected' | 'pending';
+  note?: string | null;
+}
+
+export interface FieldFindingDecisionLog {
+  id: number;
+  company_id: number;
+  field_project_id: number;
+  field_finding_id: number;
+  actor_user_id: number;
+  from_status: string | null;
+  to_status: string;
+  note: string | null;
+  created_at: string;
+  /** Nombre + apellido o email del actor (si la API lo envía). */
+  actor_display?: string | null;
 }
 
 export interface FieldLedgerEvent {
@@ -145,28 +179,6 @@ export interface FieldSyncRun {
   context_payload: Record<string, unknown> | null;
   started_at: string;
   completed_at: string | null;
-}
-
-/** Hallazgo de la capa de decisión (CSV, dooblo_analysis, …). */
-export interface FieldDecisionFinding {
-  id: number;
-  field_project_id: number;
-  field_import_run_id: number | null;
-  field_sync_run_id: number | null;
-  field_policy_set_id: number | null;
-  field_import_row_id: number | null;
-  idempotency_key: string | null;
-  source: string | null;
-  code: string;
-  severity: string;
-  case_id: string | null;
-  wave_id: string | null;
-  message: string;
-  explanation: string | null;
-  recommendation: string | null;
-  evidence: Record<string, unknown> | null;
-  approval_status: string | null;
-  created_at: string;
 }
 
 export interface EndClient {
@@ -308,14 +320,36 @@ export class FieldService {
     projectId: number,
     source: string | null = null,
     limit = 50
-  ): Observable<FieldDecisionFinding[]> {
+  ): Observable<FieldFinding[]> {
     let params: HttpParams = new HttpParams().set('limit', String(limit));
     if (source) {
       params = params.set('source', source);
     }
-    return this.http.get<FieldDecisionFinding[]>(
+    return this.http.get<FieldFinding[]>(
       `${environment.apiUrl}field/projects/${projectId}/decision-layer/findings`,
       { params }
+    );
+  }
+
+  listFindingDecisionLog(
+    projectId: number,
+    findingId: number,
+    limit = 100
+  ): Observable<FieldFindingDecisionLog[]> {
+    return this.http.get<FieldFindingDecisionLog[]>(
+      `${environment.apiUrl}field/projects/${projectId}/decision-layer/findings/${findingId}/decision-log`,
+      { params: { limit: String(limit) } }
+    );
+  }
+
+  patchFindingApproval(
+    projectId: number,
+    findingId: number,
+    body: FieldFindingApprovalBody
+  ): Observable<FieldFinding> {
+    return this.http.patch<FieldFinding>(
+      `${environment.apiUrl}field/projects/${projectId}/decision-layer/findings/${findingId}/approval`,
+      body
     );
   }
 }
