@@ -8,6 +8,8 @@
 
 **7Field — plan de arquitectura, alcance y tracción (arranque código):** `docs/7FIELD_ARCHITECTURE_SCOPE_AND_TRACTION_V1.md` en **cx-backend**.
 
+**7Field — decisiones estructurales cerradas (motor reglas, Study, Auto QA v1, Readiness, Clever):** `docs/7FIELD_STRUCTURAL_DECISIONS_V1.md` en **cx-backend**.
+
 - **Entitlements**: `EntitlementsService.getMe(companyId?)` → `GET /api/v1/entitlements/me`.
 - **Company**: tipos con `siete_field_enabled` y `siete_clever_enabled` para formularios de empresa (superadmin).
 
