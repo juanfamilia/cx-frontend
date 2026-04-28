@@ -23,6 +23,7 @@ import {
   FieldProject,
   FieldProjectExternalSource,
   FieldService,
+  FieldStudy,
   FieldSyncRun,
 } from './field.service';
 
@@ -52,6 +53,10 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
 
   readonly user = this.auth.getCurrentUser();
   readonly projects = signal<FieldProject[]>([]);
+  /** Estudios del cliente actual (selector paso 2). */
+  readonly studies = signal<FieldStudy[]>([]);
+  /** Todos los estudios de la empresa (para etiquetas en la tabla multi-cliente). */
+  readonly studyCatalog = signal<FieldStudy[]>([]);
   readonly clients = signal<EndClient[]>([]);
   readonly loading = signal(false);
   readonly companies = signal<Company[]>([]);
@@ -63,6 +68,10 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   /** Origen de datos del proyecto que se va a crear (paso 2). */
   readonly newIngestMode = signal<'csv' | 'dooblo'>('csv');
   readonly newClientName = signal('');
+  readonly newStudyName = signal('');
+  readonly newStudyDescription = signal('');
+  /** Estudio vinculado al proyecto nuevo (opcional). */
+  readonly selectedStudyId = signal<number | null>(null);
 
   readonly isSuperAdmin = this.user.role === 0;
 
@@ -95,6 +104,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   readonly decisionLogItems = signal<FieldFindingDecisionLog[]>([]);
   readonly decisionLogLoading = signal(false);
   readonly patchingFindingId = signal<number | null>(null);
+  readonly patchingProjectStudyId = signal<number | null>(null);
   /** Hallazgo activo en el panel único de decisión / nota / historial. */
   readonly decisionFocusFindingId = signal<number | null>(null);
   readonly newDoobloSurveyId = signal('');
@@ -239,9 +249,48 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     const v = Number((ev.target as HTMLSelectElement).value);
     if (Number.isFinite(v) && v > 0) {
       this.selectedClientId.set(v);
+      this.selectedStudyId.set(null);
+      this.reloadStudies();
     } else {
       this.selectedClientId.set(null);
+      this.studies.set([]);
+      this.selectedStudyId.set(null);
     }
+  }
+
+  reloadStudies(): void {
+    const cid = this.effectiveCompanyId();
+    const clientId = this.selectedClientId();
+    if (cid == null || clientId == null) {
+      this.studies.set([]);
+      return;
+    }
+    this.fieldSvc.listStudies(cid, clientId).subscribe({
+      next: rows => {
+        this.studies.set(rows);
+        const cur = this.selectedStudyId();
+        if (cur != null && !rows.some(s => s.id === cur)) {
+          this.selectedStudyId.set(null);
+        }
+      },
+      error: () => {
+        this.studies.set([]);
+        this.toast.showToast('warn', 'Field', 'No se pudieron cargar los estudios.');
+      },
+    });
+  }
+
+  /** Catálogo empresa para mostrar nombres cuando la tabla mezcla varios clientes. */
+  reloadStudyCatalog(): void {
+    const cid = this.effectiveCompanyId();
+    if (cid == null) {
+      this.studyCatalog.set([]);
+      return;
+    }
+    this.fieldSvc.listStudies(cid, null).subscribe({
+      next: rows => this.studyCatalog.set(rows),
+      error: () => this.studyCatalog.set([]),
+    });
   }
 
   reloadClientsAndProjects(): void {
@@ -254,6 +303,8 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         this.clients.set(rows);
         const first = rows[0]?.id ?? null;
         this.selectedClientId.set(first);
+        this.reloadStudies();
+        this.reloadStudyCatalog();
         this.reloadProjects();
         this.loadFieldDoobloCompanyContext();
       },
@@ -271,6 +322,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     this.fieldSvc.listProjects(cid, null).subscribe({
       next: rows => {
         this.projects.set(rows);
+        this.reloadStudyCatalog();
         this.loading.set(false);
         const open = this.summaryProjectId();
         if (open != null && !rows.some(p => p.id === open)) {
@@ -601,17 +653,66 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     return this.clients().find(c => c.id === clientId)?.name ?? `Cliente #${clientId}`;
   }
 
+  /** Etiqueta corta del estudio enlazado al proyecto (tabla). */
+  studyLabel(project: FieldProject): string {
+    const sid = project.study_id;
+    if (sid == null) {
+      return '—';
+    }
+    const s =
+      this.studyCatalog().find(x => x.id === sid) ??
+      this.studies().find(x => x.id === sid);
+    return s ? s.name : `#${sid}`;
+  }
+
+  studiesForClient(clientId: number): FieldStudy[] {
+    return this.studyCatalog().filter(s => s.client_id === clientId);
+  }
+
+  patchProjectStudy(project: FieldProject, studyId: number | null): void {
+    const prev = project.study_id ?? null;
+    if (prev === studyId) {
+      return;
+    }
+    this.patchingProjectStudyId.set(project.id);
+    this.fieldSvc.patchProject(project.id, { study_id: studyId }).subscribe({
+      next: updated => {
+        this.projects.update(list =>
+          list.map(x => (x.id === project.id ? { ...x, ...updated } : x))
+        );
+        this.reloadStudyCatalog();
+        this.patchingProjectStudyId.set(null);
+        this.toast.showToast('success', 'Field', 'Estudio del proyecto actualizado.');
+      },
+      error: (err: unknown) => {
+        this.patchingProjectStudyId.set(null);
+        this.toast.showToast(
+          'error',
+          'Field',
+          this.httpErrorDetail(err, 'No se pudo actualizar el vínculo al estudio.')
+        );
+      },
+    });
+  }
+
   /** Borde/fondo del panel de resumen según resultado (lectura rápida). */
   goStep(step: number): void {
     if (step === 1 || step === 2 || step === 3) {
       this.activeStep.set(step as 1 | 2 | 3);
+      if (step === 2) {
+        this.reloadStudies();
+      }
     }
   }
 
   nextStep(): void {
     const s = this.activeStep();
     if (s < 3) {
-      this.activeStep.set((s + 1) as 1 | 2 | 3);
+      const next = (s + 1) as 1 | 2 | 3;
+      this.activeStep.set(next);
+      if (next === 2) {
+        this.reloadStudies();
+      }
     }
   }
 
@@ -854,6 +955,34 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     });
   }
 
+  createStudy(): void {
+    const cid = this.effectiveCompanyId();
+    const clientId = this.selectedClientId();
+    const name = this.newStudyName().trim();
+    if (cid == null || clientId == null || !name) {
+      this.toast.showToast('warn', 'Field', 'Cliente y nombre de estudio son obligatorios.');
+      return;
+    }
+    const body = {
+      name,
+      description: this.newStudyDescription().trim() || null,
+      client_id: clientId,
+      company_id: this.isSuperAdmin ? cid : undefined,
+    };
+    this.fieldSvc.createStudy(body).subscribe({
+      next: created => {
+        this.newStudyName.set('');
+        this.newStudyDescription.set('');
+        this.selectedStudyId.set(created.id);
+        this.toast.showToast('success', 'Field', 'Estudio creado; quedará vinculado al proyecto si lo crea a continuación.');
+        this.reloadStudies();
+        this.reloadStudyCatalog();
+      },
+      error: () =>
+        this.toast.showToast('error', 'Field', 'No se pudo crear el estudio.'),
+    });
+  }
+
   createProject(): void {
     const cid = this.effectiveCompanyId();
     const clientId = this.selectedClientId();
@@ -862,12 +991,14 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       this.toast.showToast('warn', 'Field', 'Nombre y cliente final son obligatorios.');
       return;
     }
+    const sid = this.selectedStudyId();
     const body = {
       name,
       description: this.newDescription().trim() || null,
       client_id: clientId,
       company_id: this.isSuperAdmin ? cid : undefined,
       ingest_mode: this.newIngestMode(),
+      ...(sid != null ? { study_id: sid } : {}),
     };
     this.fieldSvc.createProject(body).subscribe({
       next: () => {
@@ -876,6 +1007,8 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         this.newIngestMode.set('csv');
         this.toast.showToast('success', 'Field', 'Proyecto creado.');
         this.reloadProjects();
+        this.reloadStudies();
+        this.reloadStudyCatalog();
         this.activeStep.set(3);
       },
       error: () =>

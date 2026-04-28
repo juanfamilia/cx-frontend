@@ -129,7 +129,9 @@
   @if (activeStep() === 2) {
     <section class="field-card mb-8">
       <h2 class="field-card-title">Paso 2 — Nuevo proyecto</h2>
-      <p class="field-card-desc">Un proyecto agrupa las importaciones y el resumen; indique el origen principal de datos (declaración de producto).</p>
+      <p class="field-card-desc">
+        Un proyecto agrupa importaciones y resumen. Opcionalmente enlace un <strong>estudio canónico</strong> (mismo cliente). Indique el origen principal de datos.
+      </p>
       <fieldset class="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 p-3 dark:border-slate-600/50 dark:bg-slate-800/30">
         <legend class="px-1 text-sm font-semibold text-slate-800 dark:text-slate-200">Origen de datos</legend>
         <p class="mb-2 text-xs text-slate-600 dark:text-slate-400">
@@ -156,6 +158,41 @@
           </label>
         </div>
       </fieldset>
+      <fieldset class="mb-4 rounded-xl border border-indigo-200/70 bg-indigo-50/35 p-3 dark:border-indigo-900/45 dark:bg-indigo-950/25">
+        <legend class="px-1 text-sm font-semibold text-indigo-950 dark:text-indigo-100">Estudio canónico</legend>
+        <p class="mb-2 text-xs text-slate-600 dark:text-slate-400">
+          Cadena <strong>Study → proyecto</strong>. Opcional en migración; recomendado en nuevos levantamientos. Debe coincidir con el cliente del paso 1.
+        </p>
+        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          <label class="field-label min-w-[220px] flex-1">
+            Vincular proyecto a estudio
+            <select
+              class="field-control mt-1.5 w-full"
+              [ngModel]="selectedStudyId()"
+              (ngModelChange)="selectedStudyId.set($event == null ? null : +$event)">
+              <option [ngValue]="null">Sin estudio (legacy)</option>
+              @for (st of studies(); track st.id) {
+                <option [ngValue]="st.id">{{ st.name }}</option>
+              }
+            </select>
+          </label>
+          <label class="field-label min-w-[180px] flex-1">
+            O crear estudio (nombre)
+            <input
+              class="field-control mt-1.5 w-full"
+              [ngModel]="newStudyName()"
+              (ngModelChange)="newStudyName.set($event)" />
+          </label>
+          <label class="field-label min-w-[200px] flex-[2]">
+            Descripción del estudio (opcional)
+            <input
+              class="field-control mt-1.5 w-full"
+              [ngModel]="newStudyDescription()"
+              (ngModelChange)="newStudyDescription.set($event)" />
+          </label>
+          <button type="button" class="field-btn-secondary shrink-0" (click)="createStudy()">Crear estudio</button>
+        </div>
+      </fieldset>
       <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <label class="field-label min-w-[200px] flex-1">
           Nombre
@@ -180,8 +217,9 @@
     <section class="field-card">
       <h2 class="field-card-title">Paso 3 — Carga, API y resumen</h2>
       <p class="field-card-desc">
-        En la tabla, la columna <strong>Origen</strong> refleja lo declarado al crear el proyecto. Proyectos
-        <strong>API</strong>: guarde credenciales y vincule la encuesta; el CSV queda como complemento. Proyectos
+        En la tabla, las columnas <strong>Origen</strong> y <strong>Estudio</strong> reflejan lo declarado al crear el
+        proyecto (cadena Study cuando existe).
+        Proyectos <strong>API</strong>: guarde credenciales y vincule la encuesta; el CSV queda como complemento. Proyectos
         <strong>CSV</strong>: el archivo es el hilo principal; la API es opcional a nivel empresa. Use
         <strong>Ver resumen</strong> para riesgo operativo y la capa de decisión.
       </p>
@@ -259,7 +297,7 @@
         <p class="text-slate-600 dark:text-slate-300">Aún no hay proyectos. Cree uno en el paso 2.</p>
       } @else {
         <div class="overflow-x-auto rounded-xl border border-slate-200/90 dark:border-slate-600/50">
-          <table class="w-full min-w-[720px] text-left text-sm">
+          <table class="w-full min-w-[820px] text-left text-sm">
             <thead
               class="bg-slate-50/90 text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
               <tr class="border-b border-slate-200 dark:border-slate-600">
@@ -267,6 +305,7 @@
                 <th class="px-3 py-3 pr-4 font-semibold">Nombre</th>
                 <th class="px-3 py-3 pr-4 font-semibold">Origen</th>
                 <th class="px-3 py-3 pr-4 font-semibold">Cliente</th>
+                <th class="px-3 py-3 pr-4 font-semibold">Estudio</th>
                 <th class="px-3 py-3 pr-4 font-semibold">Estado</th>
                 <th class="px-3 py-3 pr-4 font-semibold">CSV</th>
                 <th class="px-3 py-3 pr-4 font-semibold">Resumen</th>
@@ -297,6 +336,18 @@
                   </td>
                   <td class="px-3 py-3 pr-4 align-middle text-slate-700 dark:text-slate-200">
                     {{ clientDisplayName(p.client_id) }}
+                  </td>
+                  <td class="px-3 py-3 pr-4 align-middle">
+                    <select
+                      class="field-control max-w-[min(220px,45vw)] py-1 text-xs"
+                      [disabled]="patchingProjectStudyId() === p.id"
+                      [ngModel]="p.study_id ?? null"
+                      (ngModelChange)="patchProjectStudy(p, $event)">
+                      <option [ngValue]="null">Sin estudio</option>
+                      @for (st of studiesForClient(p.client_id); track st.id) {
+                        <option [ngValue]="st.id">{{ st.name }}</option>
+                      }
+                    </select>
                   </td>
                   <td
                     class="px-3 py-3 pr-4 align-middle capitalize text-slate-600 dark:text-slate-300">
@@ -335,7 +386,7 @@
                 </tr>
                 @if (summaryOpenFor(p.id)) {
                   <tr>
-                    <td colspan="7" class="field-summary-cell bg-slate-50/90 px-3 py-4 dark:bg-slate-950/50">
+                    <td colspan="8" class="field-summary-cell bg-slate-50/90 px-3 py-4 dark:bg-slate-950/50">
                     @if (summaryLoading()) {
                       <p class="text-sm text-slate-500">Cargando resumen…</p>
                     } @else {

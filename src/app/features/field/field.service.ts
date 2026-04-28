@@ -11,6 +11,8 @@ export interface FieldProject {
   id: number;
   company_id: number;
   client_id: number;
+  /** Estudio canónico (cadena Study → proyecto); opcional en proyectos legacy. */
+  study_id?: number | null;
   name: string;
   description: string | null;
   import_format_version: string;
@@ -27,6 +29,32 @@ export interface FieldProjectCreateBody {
   client_id: number;
   company_id?: number | null;
   ingest_mode?: FieldIngestMode;
+  /** field_studies.id misma empresa y mismo client_id que el proyecto. */
+  study_id?: number | null;
+}
+
+/** PATCH parcial (solo campos enviados). */
+export interface FieldProjectPatchBody {
+  study_id?: number | null;
+}
+
+/** Estudio canónico 7Field (tenant-scoped). */
+export interface FieldStudy {
+  id: number;
+  company_id: number;
+  client_id: number;
+  name: string;
+  description: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FieldStudyCreateBody {
+  name: string;
+  description?: string | null;
+  client_id: number;
+  company_id?: number | null;
 }
 
 export interface FieldImportRun {
@@ -79,6 +107,9 @@ export interface FieldFinding {
   approval_status: string | null;
   reviewed_by_user_id: number | null;
   reviewed_at: string | null;
+  operational_criticality?: string | null;
+  operational_gate?: string | null;
+  rule_configuration_version_id?: number | null;
   created_at: string;
 }
 
@@ -217,6 +248,28 @@ export class FieldService {
 
   createProject(body: FieldProjectCreateBody): Observable<FieldProject> {
     return this.http.post<FieldProject>(environment.apiUrl + 'field/projects', body);
+  }
+
+  patchProject(projectId: number, body: FieldProjectPatchBody): Observable<FieldProject> {
+    return this.http.patch<FieldProject>(
+      `${environment.apiUrl}field/projects/${projectId}`,
+      body
+    );
+  }
+
+  listStudies(companyId?: number | null, clientId?: number | null): Observable<FieldStudy[]> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    if (clientId != null && Number.isFinite(clientId)) {
+      params = params.set('client_id', String(clientId));
+    }
+    return this.http.get<FieldStudy[]>(environment.apiUrl + 'field/studies', { params });
+  }
+
+  createStudy(body: FieldStudyCreateBody): Observable<FieldStudy> {
+    return this.http.post<FieldStudy>(environment.apiUrl + 'field/studies', body);
   }
 
   importCsv(projectId: number, file: File): Observable<FieldImportRun> {
