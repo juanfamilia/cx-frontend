@@ -6,6 +6,8 @@
 
 **7Field — prioridades comerciales (Auto QA, Backcheck Intelligence, Cost of Error, narrativa inevitable):** `docs/7FIELD_COMMERCIAL_STRATEGY_V1.md` en **cx-backend**.
 
+**7Field — plan de arquitectura, alcance y tracción (arranque código):** `docs/7FIELD_ARCHITECTURE_SCOPE_AND_TRACTION_V1.md` en **cx-backend**.
+
 - **Entitlements**: `EntitlementsService.getMe(companyId?)` → `GET /api/v1/entitlements/me`.
 - **Company**: tipos con `siete_field_enabled` y `siete_clever_enabled` para formularios de empresa (superadmin).
 
