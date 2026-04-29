@@ -117,6 +117,11 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   readonly doobloCustomersCatalogBusy = signal(false);
   readonly doobloCustomersCatalogQ = signal('');
 
+  /** Catálogo org-wide: proyectos Studio (Customers × CustomerProjects). */
+  readonly doobloOrgStudioProjectsCatalog = signal<RemoteFieldCatalogPage | null>(null);
+  readonly doobloOrgStudioProjectsCatalogBusy = signal(false);
+  readonly doobloOrgStudioProjectsCatalogQ = signal('');
+
   /** Picker CustomerProjects (lista paginada + búsqueda). */
   readonly doobloCustomerProjectsCatalog = signal<RemoteFieldCatalogPage | null>(null);
   readonly doobloCustomerProjectsCatalogBusy = signal(false);
@@ -535,6 +540,40 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       });
   }
 
+  /** Proyectos Studio de todos los clientes visibles para el usuario API (típico en MR). */
+  fetchDoobloOrganizationStudioProjectsCatalog(page: number): void {
+    const cid = this.effectiveCompanyId();
+    if (cid == null) {
+      return;
+    }
+    if (!this.doobloCompanyContext()?.configured) {
+      this.toast.showToast('warn', 'Field', 'Configure primero las credenciales Dooblo.');
+      return;
+    }
+    this.doobloOrgStudioProjectsCatalogBusy.set(true);
+    const q = this.doobloOrgStudioProjectsCatalogQ().trim();
+    this.fieldSvc
+      .listDoobloOrganizationStudioProjectsCatalog(cid, {
+        page,
+        page_size: 25,
+        q: q || undefined,
+      })
+      .subscribe({
+        next: data => {
+          this.doobloOrgStudioProjectsCatalog.set(data);
+          this.doobloOrgStudioProjectsCatalogBusy.set(false);
+        },
+        error: (err: unknown) => {
+          this.doobloOrgStudioProjectsCatalogBusy.set(false);
+          this.toast.showToast(
+            'error',
+            'Field',
+            this.httpErrorDetail(err, 'No se pudieron listar los proyectos de la organización en SurveyToGo.')
+          );
+        },
+      });
+  }
+
   /** Catálogo Customers (SurveyToGo); opcionalmente use «Usar cliente» para rellenar Customer ID. */
   fetchDoobloCustomersCatalog(page: number): void {
     const cid = this.effectiveCompanyId();
@@ -575,6 +614,32 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     this.doobloCustomerProjectsCatalogQ.set('');
   }
 
+  /** Error habitual: pegar correo o usuario REST API completo en el campo Customer ID. */
+  private looksLikeStandaloneEmailAsCustomerId(raw: string): boolean {
+    const t = raw.trim();
+    if (t.includes('/')) {
+      return false;
+    }
+    if (!t.includes('@')) {
+      return false;
+    }
+    const i = t.indexOf('@');
+    const domain = t.slice(i + 1);
+    return domain.includes('.');
+  }
+
+  /** Formato SurveyToGo: REST_API_KEY/usuario — va en credenciales, no en Customer ID. */
+  private looksLikeRestApiUsernameAsCustomerId(raw: string): boolean {
+    const t = raw.trim();
+    const slash = t.indexOf('/');
+    if (slash <= 0) {
+      return false;
+    }
+    const left = t.slice(0, slash).trim();
+    const right = t.slice(slash + 1).trim();
+    return left.includes('-') && left.length >= 12 && right.length > 0;
+  }
+
   /** Catálogo CustomerProjects para el Customer ID indicado (SurveyToGo). */
   fetchDoobloCustomerProjectsCatalog(page: number): void {
     const cid = this.effectiveCompanyId();
@@ -587,6 +652,22 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         'warn',
         'Field',
         'Indique el Customer ID de SurveyToGo (manual o «Usar cliente» en la tabla de clientes).'
+      );
+      return;
+    }
+    if (this.looksLikeRestApiUsernameAsCustomerId(customerId)) {
+      this.toast.showToast(
+        'warn',
+        'Field',
+        'Eso parece el usuario API completo (REST_API_KEY/usuario). Va en «Usuario / REST key» arriba, guardado en credenciales. Aquí solo el Customer ID del cliente en SurveyToGo.'
+      );
+      return;
+    }
+    if (this.looksLikeStandaloneEmailAsCustomerId(customerId)) {
+      this.toast.showToast(
+        'warn',
+        'Field',
+        'Eso parece solo un correo. Customer ID es el identificador del cliente en SurveyToGo (lista «Cargar clientes»), no el email.'
       );
       return;
     }
@@ -618,8 +699,12 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       });
   }
 
-  applyDoobloCatalogStudioProject(externalId: string): void {
+  applyDoobloCatalogStudioProject(externalId: string, studioCustomerId?: string | null): void {
     this.newDoobloStudioProject.set(externalId);
+    const sid = studioCustomerId?.trim();
+    if (sid) {
+      this.doobloSurveyToGoCustomerId.set(sid);
+    }
     this.doobloProjectSurveysCatalog.set(null);
     this.doobloProjectSurveysCatalogQ.set('');
   }
@@ -676,6 +761,13 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       return 1;
     }
     return Math.ceil(cat.total / cat.page_size);
+  }
+
+  /** Filas org-wide pueden incluir cliente SurveyToGo (merge Customers × CustomerProjects). */
+  doobloOrgCatalogHasCustomerInfo(cat: RemoteFieldCatalogPage): boolean {
+    return cat.items.some(
+      r => !!(r.studio_customer_id?.trim() || r.studio_customer_name?.trim())
+    );
   }
 
   runDoobloAnalysis(projectId: number): void {

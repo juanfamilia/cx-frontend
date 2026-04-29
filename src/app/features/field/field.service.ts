@@ -167,6 +167,9 @@ export interface RemoteFieldCatalogItem {
   external_id: string;
   title: string;
   kind: string;
+  /** Presente cuando el ítem viene de agregación org-wide (SurveyToGo). */
+  studio_customer_id?: string | null;
+  studio_customer_name?: string | null;
 }
 
 export interface RemoteFieldCatalogPage {
@@ -353,6 +356,26 @@ export class FieldService {
       `${environment.apiUrl}field/dooblo/credentials`,
       body,
       { params: { company_id: String(companyId) } }
+    );
+  }
+
+  /** Customers × CustomerProjects: proyectos Studio visibles para el usuario API (toda la organización permitida). */
+  listDoobloOrganizationStudioProjectsCatalog(
+    companyId: number,
+    opts?: { page?: number; page_size?: number; q?: string; max_customers?: number }
+  ): Observable<RemoteFieldCatalogPage> {
+    let params = new HttpParams()
+      .set('company_id', String(companyId))
+      .set('page', String(opts?.page ?? 1))
+      .set('page_size', String(opts?.page_size ?? 25))
+      .set('max_customers', String(opts?.max_customers ?? 120));
+    const q = opts?.q?.trim();
+    if (q) {
+      params = params.set('q', q);
+    }
+    return this.http.get<RemoteFieldCatalogPage>(
+      `${environment.apiUrl}field/dooblo/catalog/organization-studio-projects`,
+      { params }
     );
   }
 

@@ -308,13 +308,16 @@
                 autocomplete="off" />
             </label>
             <label class="field-label min-w-[200px] flex-1">
-              Usuario / REST key
+              Usuario / REST key (SurveyToGo)
               <input
                 class="field-control mt-1.5 w-full"
                 [ngModel]="doobloFormApiUser()"
                 (ngModelChange)="doobloFormApiUser.set($event)"
-                placeholder="como en SurveyToGo"
+                placeholder="Ej.: GUID-del-org/rest-of-login"
                 autocomplete="off" />
+              <span class="mt-1 block text-[11px] text-slate-500 dark:text-slate-400">
+                Suele ser <code class="text-[11px]">REST_API_KEY/usuario</code> según Studio; la parte derecha puede llevar «&#64;». Va aquí en credenciales, no en Customer ID de abajo.
+              </span>
             </label>
             <label class="field-label min-w-[200px] flex-1">
               Contraseña
@@ -347,9 +350,112 @@
             Traer listas desde SurveyToGo (tras guardar credenciales)
           </h3>
           <p class="mt-1 text-xs text-emerald-900/90 dark:text-emerald-100/85">
-            Cuando las credenciales están bien, puede pedir aquí la lista de <strong>clientes</strong> y de
-            <strong>proyectos Studio</strong>. Para proyectos hace falta el <strong>Customer ID</strong> de SurveyToGo
-            (puede cargar clientes abajo y usar «Usar cliente» en la tabla del resumen del proyecto).
+            En investigación de mercado suele bastar el <strong>usuario API</strong>: puede listar
+            <strong>todos los proyectos Studio</strong> visibles para ese usuario (varios clientes). La sección de abajo
+            sirve si solo quiere trabajar con un <strong>Customer ID</strong> concreto.
+          </p>
+
+          <div
+            class="mt-3 rounded-xl border border-emerald-200/90 bg-white/70 p-3 shadow-sm dark:border-emerald-900/50 dark:bg-slate-900/45">
+            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-900 dark:text-emerald-100/90">
+              Proyectos Studio — toda la organización
+            </p>
+            <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              Recorre los clientes permitidos y fusiona proyectos (puede tardar unos segundos).
+            </p>
+            <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+              <label class="field-label min-w-[180px] flex-1">
+                Buscar (q)
+                <input
+                  class="field-control mt-1.5 w-full"
+                  [ngModel]="doobloOrgStudioProjectsCatalogQ()"
+                  (ngModelChange)="doobloOrgStudioProjectsCatalogQ.set($event)"
+                  placeholder="Proyecto, ID o cliente" />
+              </label>
+              <button
+                type="button"
+                class="field-btn-primary text-sm"
+                [disabled]="doobloOrgStudioProjectsCatalogBusy()"
+                (click)="fetchDoobloOrganizationStudioProjectsCatalog(1)">
+                Listar proyectos de la organización
+              </button>
+            </div>
+            @if (doobloOrgStudioProjectsCatalogBusy()) {
+              <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">Consultando SurveyToGo…</p>
+            } @else {
+              @if (doobloOrgStudioProjectsCatalog(); as org) {
+                <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                  {{ org.total }} resultado(s) · página {{ org.page }} /
+                  {{ doobloCatalogTotalPages(org) }}
+                  @if (org.query_applied) {
+                    · filtro «{{ org.query_applied }}»
+                  }
+                </p>
+                @if (org.items.length === 0) {
+                  <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    Sin proyectos o sin coincidencias. Revise permisos del usuario API en SurveyToGo Studio.
+                  </p>
+                } @else {
+                  <div class="mt-2 max-h-52 overflow-auto rounded border border-slate-200/80 dark:border-slate-700/80">
+                    <table class="w-full text-left text-xs">
+                      <thead class="sticky top-0 bg-slate-100/95 dark:bg-slate-800/95">
+                        <tr>
+                          <th class="px-2 py-1.5 font-semibold">ID</th>
+                          <th class="px-2 py-1.5 font-semibold">Nombre</th>
+                          @if (doobloOrgCatalogHasCustomerInfo(org)) {
+                            <th class="px-2 py-1.5 font-semibold">Cliente STG</th>
+                          }
+                          <th class="px-2 py-1.5 font-semibold"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of org.items; track row.external_id) {
+                          <tr class="border-t border-slate-200/70 dark:border-slate-700/70">
+                            <td class="px-2 py-1.5 font-mono text-[11px]">{{ row.external_id }}</td>
+                            <td class="px-2 py-1.5">{{ row.title }}</td>
+                            @if (doobloOrgCatalogHasCustomerInfo(org)) {
+                              <td class="px-2 py-1.5 text-slate-700 dark:text-slate-300">
+                                {{ row.studio_customer_name || row.studio_customer_id || '—' }}
+                              </td>
+                            }
+                            <td class="px-2 py-1.5 whitespace-nowrap">
+                              <button
+                                type="button"
+                                class="text-emerald-800 underline hover:no-underline dark:text-emerald-300"
+                                (click)="applyDoobloCatalogStudioProject(row.external_id, row.studio_customer_id)">
+                                Usar proyecto
+                              </button>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      class="field-btn-secondary text-xs"
+                      [disabled]="org.page <= 1 || doobloOrgStudioProjectsCatalogBusy()"
+                      (click)="fetchDoobloOrganizationStudioProjectsCatalog(org.page - 1)">
+                      Anterior
+                    </button>
+                    <button
+                      type="button"
+                      class="field-btn-secondary text-xs"
+                      [disabled]="!org.has_more || doobloOrgStudioProjectsCatalogBusy()"
+                      (click)="fetchDoobloOrganizationStudioProjectsCatalog(org.page + 1)">
+                      Siguiente
+                    </button>
+                  </div>
+                }
+              }
+            }
+          </div>
+
+          <p class="mt-4 text-xs font-semibold text-emerald-900 dark:text-emerald-100">Por cliente SurveyToGo (opcional)</p>
+          <p class="mt-1 text-xs text-emerald-900/90 dark:text-emerald-100/85">
+            Si ya conoce el <strong>Customer ID</strong>, puede pedir solo los proyectos de ese cliente. El usuario API (REST key)
+            sigue siendo el de arriba.
           </p>
           <label class="field-label mt-3 block max-w-md">
             Customer ID (SurveyToGo)
@@ -357,7 +463,7 @@
               class="field-control mt-1.5 w-full"
               [ngModel]="doobloSurveyToGoCustomerId()"
               (ngModelChange)="doobloSurveyToGoCustomerId.set($event)"
-              placeholder="El mismo que usará en el panel detallado"
+              placeholder="Solo el ID del cliente (lista «Cargar clientes»)"
               autocomplete="off" />
           </label>
           <div class="mt-3 flex flex-wrap gap-2">
@@ -370,19 +476,19 @@
             </button>
             <button
               type="button"
-              class="field-btn-primary text-sm"
+              class="field-btn-secondary text-sm"
               [disabled]="
                 !doobloSurveyToGoCustomerId().trim() ||
                 doobloCustomerProjectsCatalogBusy()
               "
               (click)="fetchDoobloCustomerProjectsCatalog(1)">
-              Traer proyectos desde SurveyToGo
+              Traer proyectos del cliente (Customer ID)
             </button>
           </div>
           @if (!doobloSurveyToGoCustomerId().trim()) {
             <p class="mt-2 text-xs text-amber-900 dark:text-amber-100/90">
-              Escriba un Customer ID para habilitar «Traer proyectos», o cargue clientes y copie el ID desde SurveyToGo
-              Studio.
+              Opcional: escriba un Customer ID para filtrar solo ese cliente, o cargue clientes y use «Usar cliente» en
+              <strong>Ver resumen</strong>.
             </p>
           }
           @if (doobloCustomersCatalog(); as ccBanner) {
@@ -391,9 +497,14 @@
               abra <strong>Ver resumen</strong> en un proyecto API; los mismos datos están disponibles allí.
             </p>
           }
+          @if (doobloOrgStudioProjectsCatalog(); as orgBanner) {
+            <p class="mt-2 text-xs text-emerald-800 dark:text-emerald-100/90">
+              Lista org. cargada: <strong>{{ orgBanner.total }}</strong> proyecto(s) Studio (todas las páginas suman el total).
+            </p>
+          }
           @if (doobloCustomerProjectsCatalog(); as cpBanner) {
             <p class="mt-2 text-xs text-emerald-800 dark:text-emerald-100/90">
-              Lista de proyectos Studio cargada: <strong>{{ cpBanner.total }}</strong> resultado(s). Ábralos arriba con
+              Lista de proyectos por cliente cargada: <strong>{{ cpBanner.total }}</strong> resultado(s). Ábralos arriba con
               <strong>Ver resumen</strong> para rellenar vínculos encuesta/proyecto.
             </p>
           }
@@ -744,21 +855,118 @@
                       } @else if (doobloCompanyContext()?.configured) {
                         <p class="mt-2 text-sm text-slate-700 dark:text-slate-200">
                           Los datos remotos dependen del <strong>usuario API / REST key</strong> guardado arriba (no del
-                          nombre «empresa» en Siete: eso solo define dónde se almacenan las claves). Primero elija un
-                          <strong>cliente SurveyToGo</strong>
-                          (<code class="text-xs">Customers</code>), luego los <strong>proyectos Studio</strong> de ese
-                          cliente (<code class="text-xs">CustomerProjects</code>), encuestas y vínculo.
+                          nombre «empresa» en Siete: eso solo define dónde se almacenan las claves). Para ver
+                          <strong>todos los proyectos Studio</strong> visibles para ese usuario use el bloque siguiente;
+                          si solo necesita un cliente, indique <strong>Customer ID</strong> y cargue la tabla de proyectos del
+                          cliente.
                         </p>
+                        <div
+                          class="mt-4 rounded-lg border border-teal-200/80 bg-teal-50/40 p-3 dark:border-teal-900/50 dark:bg-teal-950/20">
+                          <p class="text-xs font-semibold uppercase tracking-wide text-teal-900 dark:text-teal-100/90">
+                            Proyectos Studio — organización
+                          </p>
+                          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                            Customers × CustomerProjects (varias llamadas a SurveyToGo; puede tardar).
+                          </p>
+                          <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+                            <label class="field-label min-w-[180px] flex-1">
+                              Buscar (q)
+                              <input
+                                class="field-control mt-1.5 w-full"
+                                [ngModel]="doobloOrgStudioProjectsCatalogQ()"
+                                (ngModelChange)="doobloOrgStudioProjectsCatalogQ.set($event)"
+                                placeholder="Proyecto, ID o cliente" />
+                            </label>
+                            <button
+                              type="button"
+                              class="field-btn-primary text-sm"
+                              [disabled]="doobloOrgStudioProjectsCatalogBusy()"
+                              (click)="fetchDoobloOrganizationStudioProjectsCatalog(1)">
+                              Listar proyectos de la organización
+                            </button>
+                          </div>
+                          @if (doobloOrgStudioProjectsCatalogBusy()) {
+                            <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">Consultando SurveyToGo…</p>
+                          } @else {
+                            @if (doobloOrgStudioProjectsCatalog(); as org) {
+                              <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                                {{ org.total }} resultado(s) · página {{ org.page }} /
+                                {{ doobloCatalogTotalPages(org) }}
+                                @if (org.query_applied) {
+                                  · filtro «{{ org.query_applied }}»
+                                }
+                              </p>
+                              @if (org.items.length === 0) {
+                                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                                  Sin proyectos o sin coincidencias.
+                                </p>
+                              } @else {
+                                <div class="mt-2 max-h-52 overflow-auto rounded border border-slate-200/80 dark:border-slate-700/80">
+                                  <table class="w-full text-left text-xs">
+                                    <thead class="sticky top-0 bg-slate-100/95 dark:bg-slate-800/95">
+                                      <tr>
+                                        <th class="px-2 py-1.5 font-semibold">ID</th>
+                                        <th class="px-2 py-1.5 font-semibold">Nombre</th>
+                                        @if (doobloOrgCatalogHasCustomerInfo(org)) {
+                                          <th class="px-2 py-1.5 font-semibold">Cliente STG</th>
+                                        }
+                                        <th class="px-2 py-1.5 font-semibold"></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      @for (row of org.items; track row.external_id) {
+                                        <tr class="border-t border-slate-200/70 dark:border-slate-700/70">
+                                          <td class="px-2 py-1.5 font-mono text-[11px]">{{ row.external_id }}</td>
+                                          <td class="px-2 py-1.5">{{ row.title }}</td>
+                                          @if (doobloOrgCatalogHasCustomerInfo(org)) {
+                                            <td class="px-2 py-1.5 text-slate-700 dark:text-slate-300">
+                                              {{ row.studio_customer_name || row.studio_customer_id || '—' }}
+                                            </td>
+                                          }
+                                          <td class="px-2 py-1.5 whitespace-nowrap">
+                                            <button
+                                              type="button"
+                                              class="text-teal-800 underline hover:no-underline dark:text-teal-300"
+                                              (click)="applyDoobloCatalogStudioProject(row.external_id, row.studio_customer_id)">
+                                              Usar proyecto
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      }
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    class="field-btn-secondary text-xs"
+                                    [disabled]="org.page <= 1 || doobloOrgStudioProjectsCatalogBusy()"
+                                    (click)="fetchDoobloOrganizationStudioProjectsCatalog(org.page - 1)">
+                                    Anterior
+                                  </button>
+                                  <button
+                                    type="button"
+                                    class="field-btn-secondary text-xs"
+                                    [disabled]="!org.has_more || doobloOrgStudioProjectsCatalogBusy()"
+                                    (click)="fetchDoobloOrganizationStudioProjectsCatalog(org.page + 1)">
+                                    Siguiente
+                                  </button>
+                                </div>
+                              }
+                            }
+                          }
+                        </div>
                         <label class="field-label mt-4 block max-w-md">
-                          Cliente SurveyToGo — Customer ID
+                          Cliente SurveyToGo — Customer ID (opcional si ya usó la lista org.)
                           <input
                             class="field-control mt-1.5 w-full"
                             [ngModel]="doobloSurveyToGoCustomerId()"
                             (ngModelChange)="doobloSurveyToGoCustomerId.set($event)"
-                            placeholder="ID numérico o GUID según SurveyToGo"
+                            placeholder="ID que sale en «Cargar clientes» (no correo)"
                             autocomplete="off" />
                           <span class="mt-1 block text-[11px] text-slate-500 dark:text-slate-400">
-                            Obligatorio para cargar proyectos. Puede escribirlo a mano o usar «Usar cliente» en la tabla.
+                            Para la tabla «Proyectos Studio del cliente». También puede elegir cliente desde la lista o
+                            rellenarlo al pulsar «Usar proyecto» en un resultado org. con columna de cliente.
                           </span>
                         </label>
                         <div
