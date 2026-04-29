@@ -716,13 +716,26 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   }
 
   applyDoobloCatalogStudioProject(externalId: string, studioCustomerId?: string | null): void {
-    this.newDoobloStudioProject.set(externalId);
+    const pid = (externalId ?? '').trim();
+    if (!pid) {
+      this.toast.showToast('warn', 'Field', 'Esta fila no trae ID de proyecto Studio.');
+      return;
+    }
+    this.newDoobloStudioProject.set(pid);
     const sid = studioCustomerId?.trim();
     if (sid) {
       this.doobloSurveyToGoCustomerId.set(sid);
     }
     this.doobloProjectSurveysCatalog.set(null);
     this.doobloProjectSurveysCatalogQ.set('');
+    const tail = sid
+      ? ` También quedó aplicado el Customer ID (${sid}).`
+      : '';
+    this.toast.showToast(
+      'success',
+      'Field',
+      `Proyecto Studio aplicado: ${pid}.${tail} Revise el recuadro «Proyecto Studio elegido» debajo o abra «Ver resumen» en un proyecto API para listar encuestas y guardar el vínculo.`
+    );
   }
 
   /** Catálogo ProjectSurveys para el Project Studio indicado en «Proyecto Studio». */
