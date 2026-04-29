@@ -11,7 +11,7 @@ export interface FieldProject {
   id: number;
   company_id: number;
   client_id: number;
-  /** Estudio canónico (cadena Study → proyecto); opcional en proyectos legacy. */
+  /** Estudio asociado al proyecto (opcional en proyectos antiguos sin estudio). */
   study_id?: number | null;
   name: string;
   description: string | null;

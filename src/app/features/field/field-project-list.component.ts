@@ -908,13 +908,13 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   wizardInstruction(): string {
     switch (this.activeStep()) {
       case 1:
-        return 'Seleccione o cree el cliente final para este levantamiento.';
+        return 'Elija el cliente final del levantamiento (o cree uno nuevo).';
       case 2:
-        return 'Opcional: vincule o cree un estudio canónico (cadena Study → proyecto).';
+        return 'Opcional: puede elegir o crear un «estudio» para agrupar el proyecto bajo un mismo nombre. También puede saltar este paso.';
       case 3:
-        return 'Nombre del proyecto y origen de datos: CSV en archivo o API SurveyToGo / Dooblo.';
+        return 'Ponga nombre al proyecto y diga si los datos vendrán de un CSV o de SurveyToGo / Dooblo.';
       case 4:
-        return 'Importación, credenciales por empresa y resumen operativo por proyecto.';
+        return 'Aquí carga archivos, conecta SurveyToGo con usuario y clave, y revisa el estado de cada proyecto.';
       default:
         return '';
     }

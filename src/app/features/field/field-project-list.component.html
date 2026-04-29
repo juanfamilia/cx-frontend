@@ -165,20 +165,21 @@
 
   @if (activeStep() === 2) {
     <section class="field-card mb-8">
-      <h2 class="field-card-title">Paso 2 — Estudio canónico</h2>
+      <h2 class="field-card-title">Paso 2 — Estudio (opcional)</h2>
       <p class="field-card-desc">
-        Paso opcional. Enlace o cree un estudio para la cadena <strong>Study → proyecto</strong> (mismo cliente que en el paso 1).
+        Si lo usa, el proyecto quedará etiquetado con ese estudio (mismo cliente que eligió en el paso 1). Si no lo necesita,
+        siga al paso 3 sin cambiar nada aquí.
       </p>
       <fieldset class="rounded-xl border border-indigo-200/70 bg-indigo-50/35 p-4 dark:border-indigo-900/45 dark:bg-indigo-950/25">
         <legend class="px-1 text-sm font-semibold text-indigo-950 dark:text-indigo-100">Estudio</legend>
         <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           <label class="field-label min-w-[220px] flex-1">
-            Vincular el próximo proyecto a un estudio
+            Enlazar el próximo proyecto a un estudio ya creado
             <select
               class="field-control mt-1.5 w-full"
               [ngModel]="selectedStudyId()"
               (ngModelChange)="selectedStudyId.set($event == null ? null : +$event)">
-              <option [ngValue]="null">Sin estudio (legacy)</option>
+              <option [ngValue]="null">Sin estudio</option>
               @for (st of studies(); track st.id) {
                 <option [ngValue]="st.id">{{ st.name }}</option>
               }
@@ -263,11 +264,9 @@
     <section class="field-card">
       <h2 class="field-card-title">Paso 4 — Carga, API y resumen</h2>
       <p class="field-card-desc">
-        En la tabla, las columnas <strong>Origen</strong> y <strong>Estudio</strong> reflejan lo declarado al crear el
-        proyecto (cadena Study cuando existe).
-        Proyectos <strong>API</strong>: guarde credenciales y vincule la encuesta; el CSV queda como complemento. Proyectos
-        <strong>CSV</strong>: el archivo es el hilo principal; la API es opcional a nivel empresa. Use
-        <strong>Ver resumen</strong> para riesgo operativo y la capa de decisión.
+        La tabla muestra si cada proyecto usa <strong>CSV</strong> o <strong>API</strong> y, si aplicó, el estudio
+        elegido antes. Para SurveyToGo: guarde usuario y clave, luego use los botones de carga o abra
+        <strong>Ver resumen</strong> en una fila para enlazar encuesta y ver alertas.
       </p>
       @if (effectiveCompanyId() != null) {
         <div [class]="doobloCredentialsPanelClass()">
@@ -337,12 +336,75 @@
           </div>
         </div>
       }
+      @if (
+        effectiveCompanyId() != null &&
+        doobloCompanyContext()?.configured &&
+        !doobloCredentialsLoading()
+      ) {
+        <div
+          class="field-card mb-6 rounded-2xl border border-emerald-300/70 bg-emerald-50/50 p-4 shadow-sm dark:border-emerald-800/50 dark:bg-emerald-950/25">
+          <h3 class="text-sm font-semibold text-emerald-950 dark:text-emerald-100">
+            Traer listas desde SurveyToGo (tras guardar credenciales)
+          </h3>
+          <p class="mt-1 text-xs text-emerald-900/90 dark:text-emerald-100/85">
+            Cuando las credenciales están bien, puede pedir aquí la lista de <strong>clientes</strong> y de
+            <strong>proyectos Studio</strong>. Para proyectos hace falta el <strong>Customer ID</strong> de SurveyToGo
+            (puede cargar clientes abajo y usar «Usar cliente» en la tabla del resumen del proyecto).
+          </p>
+          <label class="field-label mt-3 block max-w-md">
+            Customer ID (SurveyToGo)
+            <input
+              class="field-control mt-1.5 w-full"
+              [ngModel]="doobloSurveyToGoCustomerId()"
+              (ngModelChange)="doobloSurveyToGoCustomerId.set($event)"
+              placeholder="El mismo que usará en el panel detallado"
+              autocomplete="off" />
+          </label>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              class="field-btn-secondary text-sm"
+              [disabled]="doobloCustomersCatalogBusy()"
+              (click)="fetchDoobloCustomersCatalog(1)">
+              Cargar clientes desde SurveyToGo
+            </button>
+            <button
+              type="button"
+              class="field-btn-primary text-sm"
+              [disabled]="
+                !doobloSurveyToGoCustomerId().trim() ||
+                doobloCustomerProjectsCatalogBusy()
+              "
+              (click)="fetchDoobloCustomerProjectsCatalog(1)">
+              Traer proyectos desde SurveyToGo
+            </button>
+          </div>
+          @if (!doobloSurveyToGoCustomerId().trim()) {
+            <p class="mt-2 text-xs text-amber-900 dark:text-amber-100/90">
+              Escriba un Customer ID para habilitar «Traer proyectos», o cargue clientes y copie el ID desde SurveyToGo
+              Studio.
+            </p>
+          }
+          @if (doobloCustomersCatalog(); as ccBanner) {
+            <p class="mt-3 text-xs text-emerald-800 dark:text-emerald-100/90">
+              Lista de clientes cargada: <strong>{{ ccBanner.total }}</strong> resultado(s). Para elegir uno desde una fila,
+              abra <strong>Ver resumen</strong> en un proyecto API; los mismos datos están disponibles allí.
+            </p>
+          }
+          @if (doobloCustomerProjectsCatalog(); as cpBanner) {
+            <p class="mt-2 text-xs text-emerald-800 dark:text-emerald-100/90">
+              Lista de proyectos Studio cargada: <strong>{{ cpBanner.total }}</strong> resultado(s). Ábralos arriba con
+              <strong>Ver resumen</strong> para rellenar vínculos encuesta/proyecto.
+            </p>
+          }
+        </div>
+      }
       @if (loading()) {
         <p class="text-slate-500">Cargando…</p>
       } @else if (effectiveCompanyId() == null) {
         <p class="text-amber-800 dark:text-amber-200/90">Seleccione empresa o verifique su cuenta.</p>
       } @else if (projects().length === 0) {
-        <p class="text-slate-600 dark:text-slate-300">Aún no hay proyectos. Cree uno en el paso 2.</p>
+        <p class="text-slate-600 dark:text-slate-300">Aún no hay proyectos. Cree uno en el paso 3.</p>
       } @else {
         <div class="overflow-x-auto rounded-xl border border-slate-200/90 dark:border-slate-600/50">
           <table class="w-full min-w-[820px] text-left text-sm">
@@ -807,7 +869,7 @@
                             </label>
                             <button
                               type="button"
-                              class="field-btn-secondary text-sm"
+                              class="field-btn-primary text-sm"
                               [disabled]="doobloCustomerProjectsCatalogBusy()"
                               (click)="fetchDoobloCustomerProjectsCatalog(1)">
                               Cargar proyectos del cliente
