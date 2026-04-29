@@ -368,7 +368,7 @@ export class FieldService {
       .set('company_id', String(companyId))
       .set('page', String(opts?.page ?? 1))
       .set('page_size', String(opts?.page_size ?? 25))
-      .set('max_customers', String(opts?.max_customers ?? 120));
+      .set('max_customers', String(opts?.max_customers ?? 50));
     const q = opts?.q?.trim();
     if (q) {
       params = params.set('q', q);
