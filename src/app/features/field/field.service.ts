@@ -162,6 +162,23 @@ export interface DoobloCredentialsPut {
   password?: string | null;
 }
 
+/** Ítem del catálogo remoto (picker Dooblo / futuros conectores). */
+export interface RemoteFieldCatalogItem {
+  external_id: string;
+  title: string;
+  kind: string;
+}
+
+export interface RemoteFieldCatalogPage {
+  provider: string;
+  items: RemoteFieldCatalogItem[];
+  total: number;
+  page: number;
+  page_size: number;
+  has_more: boolean;
+  query_applied: string | null;
+}
+
 /** Mapeo proyecto Field → SurveyToGo/Dooblo. */
 export interface FieldProjectExternalSource {
   id: number;
@@ -336,6 +353,64 @@ export class FieldService {
       `${environment.apiUrl}field/dooblo/credentials`,
       body,
       { params: { company_id: String(companyId) } }
+    );
+  }
+
+  listDoobloCustomersCatalog(
+    companyId: number,
+    opts?: { page?: number; page_size?: number; q?: string }
+  ): Observable<RemoteFieldCatalogPage> {
+    let params = new HttpParams()
+      .set('company_id', String(companyId))
+      .set('page', String(opts?.page ?? 1))
+      .set('page_size', String(opts?.page_size ?? 25));
+    const q = opts?.q?.trim();
+    if (q) {
+      params = params.set('q', q);
+    }
+    return this.http.get<RemoteFieldCatalogPage>(
+      `${environment.apiUrl}field/dooblo/catalog/customers`,
+      { params }
+    );
+  }
+
+  listDoobloCustomerProjectsCatalog(
+    companyId: number,
+    customerId: string,
+    opts?: { page?: number; page_size?: number; q?: string }
+  ): Observable<RemoteFieldCatalogPage> {
+    let params = new HttpParams()
+      .set('company_id', String(companyId))
+      .set('customer_id', customerId.trim())
+      .set('page', String(opts?.page ?? 1))
+      .set('page_size', String(opts?.page_size ?? 25));
+    const q = opts?.q?.trim();
+    if (q) {
+      params = params.set('q', q);
+    }
+    return this.http.get<RemoteFieldCatalogPage>(
+      `${environment.apiUrl}field/dooblo/catalog/customer-projects`,
+      { params }
+    );
+  }
+
+  listDoobloProjectSurveysCatalog(
+    companyId: number,
+    projectId: string,
+    opts?: { page?: number; page_size?: number; q?: string }
+  ): Observable<RemoteFieldCatalogPage> {
+    let params = new HttpParams()
+      .set('company_id', String(companyId))
+      .set('project_id', projectId.trim())
+      .set('page', String(opts?.page ?? 1))
+      .set('page_size', String(opts?.page_size ?? 25));
+    const q = opts?.q?.trim();
+    if (q) {
+      params = params.set('q', q);
+    }
+    return this.http.get<RemoteFieldCatalogPage>(
+      `${environment.apiUrl}field/dooblo/catalog/project-surveys`,
+      { params }
     );
   }
 

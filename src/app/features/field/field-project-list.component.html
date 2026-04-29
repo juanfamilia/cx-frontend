@@ -14,37 +14,74 @@
       <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">Tablero de trabajo</h1>
       <p
         class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:text-base">
-        Flujo: <strong class="text-slate-800 dark:text-slate-200">cliente</strong> →
-        <strong class="text-slate-800 dark:text-slate-200">proyecto (origen de datos)</strong> →
-        <strong class="text-slate-800 dark:text-slate-200">carga e integración</strong>. Cada
-        <strong>Ver resumen</strong> conecta datos con lo que interesa a dirección.
+        Flujo en cuatro pasos: <strong class="text-slate-800 dark:text-slate-200">cliente</strong> →
+        <strong class="text-slate-800 dark:text-slate-200">estudio</strong> →
+        <strong class="text-slate-800 dark:text-slate-200">proyecto</strong> →
+        <strong class="text-slate-800 dark:text-slate-200">carga</strong>. Use
+        <strong>Ver resumen</strong> para el riesgo operativo y la capa de decisión.
       </p>
     </div>
   </div>
 
-  <!-- Stepper -->
+  <!-- Asistente (wizard) -->
   <nav
-    class="mb-8 rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600/50 dark:bg-slate-800/50 dark:ring-white/5"
-    aria-label="Pasos del flujo Field">
-    <p
-      class="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-      Su posición en el flujo
-    </p>
-    <ol class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-1">
-      @for (st of [1, 2, 3]; track st) {
-        <li class="flex items-center gap-2">
-          <button type="button" [ngClass]="stepNavButtonClass(st)" (click)="goStep(st)">
-            <span [ngClass]="stepNavCircleClass(st)">{{ st }}</span>
-            <span class="font-semibold tracking-tight">{{ stepShortLabel(st) }}</span>
+    class="field-wizard-shell mb-8 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600/50 dark:bg-slate-800/60 dark:ring-white/5 md:p-6"
+    aria-label="Asistente Field">
+    <div class="flex flex-col gap-1 border-b border-slate-100 pb-3 dark:border-slate-600/50 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
+          Asistente Field
+        </p>
+        <p class="mt-0.5 text-sm font-semibold text-slate-800 dark:text-slate-100">Export / configuración guiada</p>
+      </div>
+    </div>
+
+    <div class="field-wizard-track-wrap mt-4 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
+      <div class="field-wizard-track flex min-w-[min(100%,720px)] items-center gap-0 sm:min-w-full">
+        @for (st of [1, 2, 3, 4]; track st) {
+          <button
+            type="button"
+            [ngClass]="stepWizardStepBtnClass(st)"
+            (click)="goStep(st)">
+            <span [ngClass]="stepWizardCircleClass(st)">
+              @if (isStepCompleted(st)) {
+                <svg
+                  class="h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true">
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                    clip-rule="evenodd" />
+                </svg>
+              } @else {
+                <span class="tabular-nums">{{ st }}</span>
+              }
+            </span>
+            <span class="max-w-[5.5rem] text-[0.7rem] font-semibold leading-tight sm:max-w-none sm:text-sm">{{
+              stepShortLabel(st)
+            }}</span>
           </button>
-          @if (st !== 3) {
-            <span class="hidden text-slate-300 dark:text-slate-500 sm:inline" aria-hidden="true">→</span>
+          @if (st < 4) {
+            <div
+              class="field-wizard-bar mx-0.5 hidden min-h-[4px] min-w-[0.75rem] flex-1 rounded-full sm:block"
+              [class.bg-emerald-500]="isStepCompleted(st)"
+              [class.dark:bg-emerald-600]="isStepCompleted(st)"
+              [class.bg-slate-200]="!isStepCompleted(st)"
+              [class.dark:bg-slate-600]="!isStepCompleted(st)"></div>
           }
-        </li>
-      }
-    </ol>
-    <div
-      class="mt-5 flex flex-wrap justify-between gap-2 border-t border-slate-100 pt-4 dark:border-slate-600/50">
+        }
+      </div>
+    </div>
+
+    <p
+      class="field-wizard-instruction mt-4 border-t border-slate-100 pt-4 text-center text-sm leading-snug text-slate-600 dark:border-slate-600/50 dark:text-slate-300">
+      {{ wizardInstruction() }}
+    </p>
+
+    <div class="mt-4 flex flex-wrap justify-between gap-2">
       <button
         type="button"
         class="field-btn-secondary"
@@ -55,7 +92,7 @@
       <button
         type="button"
         class="field-btn-secondary"
-        [disabled]="activeStep() === 3"
+        [disabled]="activeStep() === 4"
         (click)="nextStep()">
         Siguiente
       </button>
@@ -128,44 +165,15 @@
 
   @if (activeStep() === 2) {
     <section class="field-card mb-8">
-      <h2 class="field-card-title">Paso 2 — Nuevo proyecto</h2>
+      <h2 class="field-card-title">Paso 2 — Estudio canónico</h2>
       <p class="field-card-desc">
-        Un proyecto agrupa importaciones y resumen. Opcionalmente enlace un <strong>estudio canónico</strong> (mismo cliente). Indique el origen principal de datos.
+        Paso opcional. Enlace o cree un estudio para la cadena <strong>Study → proyecto</strong> (mismo cliente que en el paso 1).
       </p>
-      <fieldset class="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 p-3 dark:border-slate-600/50 dark:bg-slate-800/30">
-        <legend class="px-1 text-sm font-semibold text-slate-800 dark:text-slate-200">Origen de datos</legend>
-        <p class="mb-2 text-xs text-slate-600 dark:text-slate-400">
-          Afecta el paso 3: CSV prioriza carga de archivo; API prioriza credenciales y vínculo SurveyToGo/Dooblo.
-        </p>
-        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-4">
-          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
-            <input
-              type="radio"
-              name="field-ingest-mode"
-              [value]="'csv'"
-              [ngModel]="newIngestMode()"
-              (ngModelChange)="newIngestMode.set($event)" />
-            Archivo CSV (subida 202.6.1)
-          </label>
-          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
-            <input
-              type="radio"
-              name="field-ingest-mode"
-              [value]="'dooblo'"
-              [ngModel]="newIngestMode()"
-              (ngModelChange)="newIngestMode.set($event)" />
-            SurveyToGo / Dooblo (API de campo)
-          </label>
-        </div>
-      </fieldset>
-      <fieldset class="mb-4 rounded-xl border border-indigo-200/70 bg-indigo-50/35 p-3 dark:border-indigo-900/45 dark:bg-indigo-950/25">
-        <legend class="px-1 text-sm font-semibold text-indigo-950 dark:text-indigo-100">Estudio canónico</legend>
-        <p class="mb-2 text-xs text-slate-600 dark:text-slate-400">
-          Cadena <strong>Study → proyecto</strong>. Opcional en migración; recomendado en nuevos levantamientos. Debe coincidir con el cliente del paso 1.
-        </p>
+      <fieldset class="rounded-xl border border-indigo-200/70 bg-indigo-50/35 p-4 dark:border-indigo-900/45 dark:bg-indigo-950/25">
+        <legend class="px-1 text-sm font-semibold text-indigo-950 dark:text-indigo-100">Estudio</legend>
         <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           <label class="field-label min-w-[220px] flex-1">
-            Vincular proyecto a estudio
+            Vincular el próximo proyecto a un estudio
             <select
               class="field-control mt-1.5 w-full"
               [ngModel]="selectedStudyId()"
@@ -193,9 +201,47 @@
           <button type="button" class="field-btn-secondary shrink-0" (click)="createStudy()">Crear estudio</button>
         </div>
       </fieldset>
+      <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">
+        Pulse <strong>Siguiente</strong> para definir nombre del proyecto y origen de datos, o vaya al paso 3 desde la barra superior.
+      </p>
+    </section>
+  }
+
+  @if (activeStep() === 3) {
+    <section class="field-card mb-8">
+      <h2 class="field-card-title">Paso 3 — Nuevo proyecto</h2>
+      <p class="field-card-desc">
+        Un proyecto agrupa importaciones y el tablero; aquí elija el <strong>origen declarado</strong> de datos y el nombre del proyecto.
+      </p>
+      <fieldset class="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 p-3 dark:border-slate-600/50 dark:bg-slate-800/30">
+        <legend class="px-1 text-sm font-semibold text-slate-800 dark:text-slate-200">Origen de datos</legend>
+        <p class="mb-2 text-xs text-slate-600 dark:text-slate-400">
+          En el paso siguiente podrá cargar CSV o configurar API según lo que elija aquí.
+        </p>
+        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-4">
+          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
+            <input
+              type="radio"
+              name="field-ingest-mode"
+              [value]="'csv'"
+              [ngModel]="newIngestMode()"
+              (ngModelChange)="newIngestMode.set($event)" />
+            Archivo CSV (layout 2026.1)
+          </label>
+          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
+            <input
+              type="radio"
+              name="field-ingest-mode"
+              [value]="'dooblo'"
+              [ngModel]="newIngestMode()"
+              (ngModelChange)="newIngestMode.set($event)" />
+            SurveyToGo / Dooblo (API de campo)
+          </label>
+        </div>
+      </fieldset>
       <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <label class="field-label min-w-[200px] flex-1">
-          Nombre
+          Nombre del proyecto
           <input
             class="field-control mt-1.5 w-full"
             [ngModel]="newName()"
@@ -213,9 +259,9 @@
     </section>
   }
 
-  @if (activeStep() === 3) {
+  @if (activeStep() === 4) {
     <section class="field-card">
-      <h2 class="field-card-title">Paso 3 — Carga, API y resumen</h2>
+      <h2 class="field-card-title">Paso 4 — Carga, API y resumen</h2>
       <p class="field-card-desc">
         En la tabla, las columnas <strong>Origen</strong> y <strong>Estudio</strong> reflejan lo declarado al crear el
         proyecto (cadena Study cuando existe).
@@ -226,7 +272,7 @@
       @if (effectiveCompanyId() != null) {
         <div [class]="doobloCredentialsPanelClass()">
           <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Credenciales SurveyToGo (Dooblo) — por empresa
+            Credenciales API SurveyToGo (Dooblo)
           </h3>
           @if (anyProjectDooblo()) {
             <p
@@ -241,9 +287,11 @@
             </p>
           }
           <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
-            Cada cliente puede usar su API REST. Guarde URL (normalmente
-            <code class="text-xs">https://api.dooblo.net/newapi</code>), usuario/REST key y clave. Se
-            cifran en el servidor; no se muestran de nuevo al volver a abrir.
+            La <strong>empresa</strong> en Siete solo define dónde se guardan estas claves (multi-tenant). Los clientes,
+            proyectos y encuestas remotos los devuelve SurveyToGo según el <strong>usuario API / REST key</strong> (no
+            según el nombre de empresa en esta consola). Guarde URL (normalmente
+            <code class="text-xs">https://api.dooblo.net/newapi</code>), usuario REST key y contraseña; se cifran en el
+            servidor y la contraseña no se vuelve a mostrar.
           </p>
           @if (doobloCompanyContext() && !doobloCredentialsLoading()) {
             <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ doobloSourceLabel() }}</p>
@@ -633,9 +681,201 @@
                         </p>
                       } @else if (doobloCompanyContext()?.configured) {
                         <p class="mt-2 text-sm text-slate-700 dark:text-slate-200">
-                          Enlace a la encuesta de Studio; luego se consulta cuota y reglas en el backend
-                          (<strong>análisis asíncrono</strong>).
+                          Los datos remotos dependen del <strong>usuario API / REST key</strong> guardado arriba (no del
+                          nombre «empresa» en Siete: eso solo define dónde se almacenan las claves). Primero elija un
+                          <strong>cliente SurveyToGo</strong>
+                          (<code class="text-xs">Customers</code>), luego los <strong>proyectos Studio</strong> de ese
+                          cliente (<code class="text-xs">CustomerProjects</code>), encuestas y vínculo.
                         </p>
+                        <label class="field-label mt-4 block max-w-md">
+                          Cliente SurveyToGo — Customer ID
+                          <input
+                            class="field-control mt-1.5 w-full"
+                            [ngModel]="doobloSurveyToGoCustomerId()"
+                            (ngModelChange)="doobloSurveyToGoCustomerId.set($event)"
+                            placeholder="ID numérico o GUID según SurveyToGo"
+                            autocomplete="off" />
+                          <span class="mt-1 block text-[11px] text-slate-500 dark:text-slate-400">
+                            Obligatorio para cargar proyectos. Puede escribirlo a mano o usar «Usar cliente» en la tabla.
+                          </span>
+                        </label>
+                        <div
+                          class="mt-4 rounded-lg border border-sky-200/80 bg-sky-50/50 p-3 dark:border-sky-800/50 dark:bg-sky-950/20">
+                          <p class="text-xs font-semibold uppercase tracking-wide text-sky-900 dark:text-sky-100/90">
+                            Clientes SurveyToGo
+                          </p>
+                          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                            Operation <code class="text-[11px]">Customers</code>: clientes visibles para este usuario API.
+                          </p>
+                          <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+                            <label class="field-label min-w-[180px] flex-1">
+                              Buscar (q)
+                              <input
+                                class="field-control mt-1.5 w-full"
+                                [ngModel]="doobloCustomersCatalogQ()"
+                                (ngModelChange)="doobloCustomersCatalogQ.set($event)"
+                                placeholder="Nombre o ID de cliente" />
+                            </label>
+                            <button
+                              type="button"
+                              class="field-btn-secondary text-sm"
+                              [disabled]="doobloCustomersCatalogBusy()"
+                              (click)="fetchDoobloCustomersCatalog(1)">
+                              Cargar clientes
+                            </button>
+                          </div>
+                          @if (doobloCustomersCatalogBusy()) {
+                            <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">Consultando clientes…</p>
+                          } @else {
+                            @if (doobloCustomersCatalog(); as cc) {
+                              <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                                {{ cc.total }} resultado(s) · página {{ cc.page }} /
+                                {{ doobloCatalogTotalPages(cc) }}
+                                @if (cc.query_applied) {
+                                  · filtro «{{ cc.query_applied }}»
+                                }
+                              </p>
+                              @if (cc.items.length === 0) {
+                                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                                  Sin clientes o formato distinto. Revise permisos del usuario API en SurveyToGo Studio.
+                                </p>
+                              } @else {
+                                <div class="mt-2 max-h-52 overflow-auto rounded border border-slate-200/80 dark:border-slate-700/80">
+                                  <table class="w-full text-left text-xs">
+                                    <thead class="sticky top-0 bg-slate-100/95 dark:bg-slate-800/95">
+                                      <tr>
+                                        <th class="px-2 py-1.5 font-semibold">Customer ID</th>
+                                        <th class="px-2 py-1.5 font-semibold">Nombre</th>
+                                        <th class="px-2 py-1.5 font-semibold"></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      @for (crow of cc.items; track crow.external_id) {
+                                        <tr class="border-t border-slate-200/70 dark:border-slate-700/70">
+                                          <td class="px-2 py-1.5 font-mono text-[11px]">{{ crow.external_id }}</td>
+                                          <td class="px-2 py-1.5">{{ crow.title }}</td>
+                                          <td class="px-2 py-1.5 whitespace-nowrap">
+                                            <button
+                                              type="button"
+                                              class="text-sky-800 underline hover:no-underline dark:text-sky-300"
+                                              (click)="applyDoobloCatalogCustomer(crow.external_id)">
+                                              Usar cliente
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      }
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    class="field-btn-secondary text-xs"
+                                    [disabled]="cc.page <= 1 || doobloCustomersCatalogBusy()"
+                                    (click)="fetchDoobloCustomersCatalog(cc.page - 1)">
+                                    Anterior
+                                  </button>
+                                  <button
+                                    type="button"
+                                    class="field-btn-secondary text-xs"
+                                    [disabled]="!cc.has_more || doobloCustomersCatalogBusy()"
+                                    (click)="fetchDoobloCustomersCatalog(cc.page + 1)">
+                                    Siguiente
+                                  </button>
+                                </div>
+                              }
+                            }
+                          }
+                        </div>
+                        <div
+                          class="mt-4 rounded-lg border border-violet-200/70 bg-violet-50/40 p-3 dark:border-violet-800/50 dark:bg-violet-950/20">
+                          <p class="text-xs font-semibold uppercase tracking-wide text-violet-900 dark:text-violet-100/90">
+                            Proyectos Studio del cliente
+                          </p>
+                          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                            Operation <code class="text-[11px]">CustomerProjects</code> con el Customer ID indicado arriba.
+                            Use una fila para rellenar «Proyecto Studio».
+                          </p>
+                          <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+                            <label class="field-label min-w-[180px] flex-1">
+                              Buscar (q)
+                              <input
+                                class="field-control mt-1.5 w-full"
+                                [ngModel]="doobloCustomerProjectsCatalogQ()"
+                                (ngModelChange)="doobloCustomerProjectsCatalogQ.set($event)"
+                                placeholder="Texto en nombre o ID de proyecto" />
+                            </label>
+                            <button
+                              type="button"
+                              class="field-btn-secondary text-sm"
+                              [disabled]="doobloCustomerProjectsCatalogBusy()"
+                              (click)="fetchDoobloCustomerProjectsCatalog(1)">
+                              Cargar proyectos del cliente
+                            </button>
+                          </div>
+                          @if (doobloCustomerProjectsCatalogBusy()) {
+                            <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">Consultando proyectos…</p>
+                          } @else {
+                            @if (doobloCustomerProjectsCatalog(); as cat) {
+                              <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                                {{ cat.total }} resultado(s) · página {{ cat.page }} /
+                                {{ doobloCatalogTotalPages(cat) }}
+                                @if (cat.query_applied) {
+                                  · filtro «{{ cat.query_applied }}»
+                                }
+                              </p>
+                              @if (cat.items.length === 0) {
+                                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                                  Sin coincidencias o sin proyectos para este cliente. Compruebe el Customer ID.
+                                </p>
+                              } @else {
+                                <div class="mt-2 max-h-52 overflow-auto rounded border border-slate-200/80 dark:border-slate-700/80">
+                                  <table class="w-full text-left text-xs">
+                                    <thead class="sticky top-0 bg-slate-100/95 dark:bg-slate-800/95">
+                                      <tr>
+                                        <th class="px-2 py-1.5 font-semibold">ID</th>
+                                        <th class="px-2 py-1.5 font-semibold">Nombre</th>
+                                        <th class="px-2 py-1.5 font-semibold"></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      @for (row of cat.items; track row.external_id) {
+                                        <tr class="border-t border-slate-200/70 dark:border-slate-700/70">
+                                          <td class="px-2 py-1.5 font-mono text-[11px]">{{ row.external_id }}</td>
+                                          <td class="px-2 py-1.5">{{ row.title }}</td>
+                                          <td class="px-2 py-1.5 whitespace-nowrap">
+                                            <button
+                                              type="button"
+                                              class="text-violet-700 underline hover:no-underline dark:text-violet-300"
+                                              (click)="applyDoobloCatalogStudioProject(row.external_id)">
+                                              Usar proyecto
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      }
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    class="field-btn-secondary text-xs"
+                                    [disabled]="cat.page <= 1 || doobloCustomerProjectsCatalogBusy()"
+                                    (click)="fetchDoobloCustomerProjectsCatalog(cat.page - 1)">
+                                    Anterior
+                                  </button>
+                                  <button
+                                    type="button"
+                                    class="field-btn-secondary text-xs"
+                                    [disabled]="!cat.has_more || doobloCustomerProjectsCatalogBusy()"
+                                    (click)="fetchDoobloCustomerProjectsCatalog(cat.page + 1)">
+                                    Siguiente
+                                  </button>
+                                </div>
+                              }
+                            }
+                          }
+                        </div>
                         @if (doobloSources().length > 0) {
                           <p class="mt-2 text-xs text-slate-600 dark:text-slate-300">
                             Vínculo activo: encuesta
@@ -675,6 +915,95 @@
                             (click)="saveDoobloSource(p.id)">
                             Guardar vínculo
                           </button>
+                        </div>
+                        <div
+                          class="mt-4 rounded-lg border border-emerald-200/70 bg-emerald-50/40 p-3 dark:border-emerald-800/50 dark:bg-emerald-950/20">
+                          <p class="text-xs font-semibold uppercase tracking-wide text-emerald-900 dark:text-emerald-100/90">
+                            Encuestas del proyecto Studio
+                          </p>
+                          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                            Usa el valor de <strong>Proyecto Studio</strong> arriba (manual o picker). Lista paginada
+                            (<code class="text-[11px]">ProjectSurveys</code>) con filtro por nombre o SurveyID.
+                          </p>
+                          <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+                            <label class="field-label min-w-[180px] flex-1">
+                              Buscar (q)
+                              <input
+                                class="field-control mt-1.5 w-full"
+                                [ngModel]="doobloProjectSurveysCatalogQ()"
+                                (ngModelChange)="doobloProjectSurveysCatalogQ.set($event)"
+                                placeholder="Texto en nombre o SurveyID" />
+                            </label>
+                            <button
+                              type="button"
+                              class="field-btn-secondary text-sm"
+                              [disabled]="doobloProjectSurveysCatalogBusy()"
+                              (click)="fetchDoobloProjectSurveysCatalog(1)">
+                              Listar encuestas del proyecto
+                            </button>
+                          </div>
+                          @if (doobloProjectSurveysCatalogBusy()) {
+                            <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">Consultando encuestas…</p>
+                          } @else {
+                            @if (doobloProjectSurveysCatalog(); as scat) {
+                              <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                                {{ scat.total }} resultado(s) · página {{ scat.page }} /
+                                {{ doobloCatalogTotalPages(scat) }}
+                                @if (scat.query_applied) {
+                                  · filtro «{{ scat.query_applied }}»
+                                }
+                              </p>
+                              @if (scat.items.length === 0) {
+                                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                                  Sin coincidencias o sin encuestas para ese proyecto. Revise el ID de proyecto Studio.
+                                </p>
+                              } @else {
+                                <div class="mt-2 max-h-52 overflow-auto rounded border border-slate-200/80 dark:border-slate-700/80">
+                                  <table class="w-full text-left text-xs">
+                                    <thead class="sticky top-0 bg-slate-100/95 dark:bg-slate-800/95">
+                                      <tr>
+                                        <th class="px-2 py-1.5 font-semibold">SurveyID</th>
+                                        <th class="px-2 py-1.5 font-semibold">Nombre</th>
+                                        <th class="px-2 py-1.5 font-semibold"></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      @for (srow of scat.items; track srow.external_id) {
+                                        <tr class="border-t border-slate-200/70 dark:border-slate-700/70">
+                                          <td class="px-2 py-1.5 font-mono text-[11px]">{{ srow.external_id }}</td>
+                                          <td class="px-2 py-1.5">{{ srow.title }}</td>
+                                          <td class="px-2 py-1.5 whitespace-nowrap">
+                                            <button
+                                              type="button"
+                                              class="text-emerald-800 underline hover:no-underline dark:text-emerald-300"
+                                              (click)="applyDoobloCatalogSurveyId(srow.external_id)">
+                                              Usar encuesta
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      }
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    class="field-btn-secondary text-xs"
+                                    [disabled]="scat.page <= 1 || doobloProjectSurveysCatalogBusy()"
+                                    (click)="fetchDoobloProjectSurveysCatalog(scat.page - 1)">
+                                    Anterior
+                                  </button>
+                                  <button
+                                    type="button"
+                                    class="field-btn-secondary text-xs"
+                                    [disabled]="!scat.has_more || doobloProjectSurveysCatalogBusy()"
+                                    (click)="fetchDoobloProjectSurveysCatalog(scat.page + 1)">
+                                    Siguiente
+                                  </button>
+                                </div>
+                              }
+                            }
+                          }
                         </div>
                         <div class="mt-4 flex flex-wrap items-center gap-3">
                           <button

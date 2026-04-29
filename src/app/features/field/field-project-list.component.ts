@@ -25,6 +25,7 @@ import {
   FieldService,
   FieldStudy,
   FieldSyncRun,
+  RemoteFieldCatalogPage,
 } from './field.service';
 
 /** Texto fijo por código técnico — lo ve el cliente sin leer el backend. */
@@ -65,7 +66,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
 
   readonly newName = signal('');
   readonly newDescription = signal('');
-  /** Origen de datos del proyecto que se va a crear (paso 2). */
+  /** Origen de datos del proyecto (paso 3 del asistente). */
   readonly newIngestMode = signal<'csv' | 'dooblo'>('csv');
   readonly newClientName = signal('');
   readonly newStudyName = signal('');
@@ -83,8 +84,8 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   /** Líneas de datos leídas en el CSV (cabecera no cuenta); viene del registro de auditoría. */
   readonly summaryLinesSeen = signal<number | null>(null);
 
-  /** Paso del asistente: 1 cliente, 2 proyecto, 3 cargas y resumen. */
-  readonly activeStep = signal<1 | 2 | 3>(1);
+  /** Asistente: 1 cliente → 2 estudio → 3 proyecto → 4 carga y resumen. */
+  readonly activeStep = signal<1 | 2 | 3 | 4>(1);
 
   /** Configuración Dooblo/ SurveyToGo de la empresa activa (credenciales por cliente). */
   readonly doobloCompanyContext = signal<DoobloCompanyConfig | null>(null);
@@ -109,6 +110,22 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   readonly decisionFocusFindingId = signal<number | null>(null);
   readonly newDoobloSurveyId = signal('');
   readonly doobloActionBusy = signal(false);
+
+  /** Customer SurveyToGo (CustomerProjects / ProjectSurveys encadenan desde aquí). */
+  readonly doobloSurveyToGoCustomerId = signal('');
+  readonly doobloCustomersCatalog = signal<RemoteFieldCatalogPage | null>(null);
+  readonly doobloCustomersCatalogBusy = signal(false);
+  readonly doobloCustomersCatalogQ = signal('');
+
+  /** Picker CustomerProjects (lista paginada + búsqueda). */
+  readonly doobloCustomerProjectsCatalog = signal<RemoteFieldCatalogPage | null>(null);
+  readonly doobloCustomerProjectsCatalogBusy = signal(false);
+  readonly doobloCustomerProjectsCatalogQ = signal('');
+
+  /** Picker ProjectSurveys (requiere Project Studio ID). */
+  readonly doobloProjectSurveysCatalog = signal<RemoteFieldCatalogPage | null>(null);
+  readonly doobloProjectSurveysCatalogBusy = signal(false);
+  readonly doobloProjectSurveysCatalogQ = signal('');
 
   /** API company/ limita a 100 (FastAPI le=100). No pedir 200. */
   private static readonly companyListLimit = 100;
@@ -348,6 +365,16 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     this.doobloDecisionFindings.set([]);
     this.newDoobloStudioProject.set('');
     this.newDoobloSurveyId.set('');
+    this.doobloCustomerProjectsCatalog.set(null);
+    this.doobloCustomerProjectsCatalogBusy.set(false);
+    this.doobloCustomerProjectsCatalogQ.set('');
+    this.doobloSurveyToGoCustomerId.set('');
+    this.doobloCustomersCatalog.set(null);
+    this.doobloCustomersCatalogBusy.set(false);
+    this.doobloCustomersCatalogQ.set('');
+    this.doobloProjectSurveysCatalog.set(null);
+    this.doobloProjectSurveysCatalogBusy.set(false);
+    this.doobloProjectSurveysCatalogQ.set('');
     this.decisionNoteByFindingId.set({});
     this.decisionLogFindingId.set(null);
     this.decisionLogItems.set([]);
@@ -506,6 +533,149 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
           this.toast.showToast('error', 'Field', this.httpErrorDetail(err, 'No se pudo guardar el vínculo Dooblo.'));
         },
       });
+  }
+
+  /** Catálogo Customers (SurveyToGo); opcionalmente use «Usar cliente» para rellenar Customer ID. */
+  fetchDoobloCustomersCatalog(page: number): void {
+    const cid = this.effectiveCompanyId();
+    if (cid == null) {
+      return;
+    }
+    if (!this.doobloCompanyContext()?.configured) {
+      this.toast.showToast('warn', 'Field', 'Configure primero las credenciales Dooblo.');
+      return;
+    }
+    this.doobloCustomersCatalogBusy.set(true);
+    const q = this.doobloCustomersCatalogQ().trim();
+    this.fieldSvc
+      .listDoobloCustomersCatalog(cid, {
+        page,
+        page_size: 25,
+        q: q || undefined,
+      })
+      .subscribe({
+        next: data => {
+          this.doobloCustomersCatalog.set(data);
+          this.doobloCustomersCatalogBusy.set(false);
+        },
+        error: (err: unknown) => {
+          this.doobloCustomersCatalogBusy.set(false);
+          this.toast.showToast(
+            'error',
+            'Field',
+            this.httpErrorDetail(err, 'No se pudieron listar clientes en SurveyToGo.')
+          );
+        },
+      });
+  }
+
+  applyDoobloCatalogCustomer(externalId: string): void {
+    this.doobloSurveyToGoCustomerId.set(externalId);
+    this.doobloCustomerProjectsCatalog.set(null);
+    this.doobloCustomerProjectsCatalogQ.set('');
+  }
+
+  /** Catálogo CustomerProjects para el Customer ID indicado (SurveyToGo). */
+  fetchDoobloCustomerProjectsCatalog(page: number): void {
+    const cid = this.effectiveCompanyId();
+    if (cid == null) {
+      return;
+    }
+    const customerId = this.doobloSurveyToGoCustomerId().trim();
+    if (!customerId) {
+      this.toast.showToast(
+        'warn',
+        'Field',
+        'Indique el Customer ID de SurveyToGo (manual o «Usar cliente» en la tabla de clientes).'
+      );
+      return;
+    }
+    if (!this.doobloCompanyContext()?.configured) {
+      this.toast.showToast('warn', 'Field', 'Configure primero las credenciales Dooblo.');
+      return;
+    }
+    this.doobloCustomerProjectsCatalogBusy.set(true);
+    const q = this.doobloCustomerProjectsCatalogQ().trim();
+    this.fieldSvc
+      .listDoobloCustomerProjectsCatalog(cid, customerId, {
+        page,
+        page_size: 25,
+        q: q || undefined,
+      })
+      .subscribe({
+        next: data => {
+          this.doobloCustomerProjectsCatalog.set(data);
+          this.doobloCustomerProjectsCatalogBusy.set(false);
+        },
+        error: (err: unknown) => {
+          this.doobloCustomerProjectsCatalogBusy.set(false);
+          this.toast.showToast(
+            'error',
+            'Field',
+            this.httpErrorDetail(err, 'No se pudo listar proyectos en SurveyToGo.')
+          );
+        },
+      });
+  }
+
+  applyDoobloCatalogStudioProject(externalId: string): void {
+    this.newDoobloStudioProject.set(externalId);
+    this.doobloProjectSurveysCatalog.set(null);
+    this.doobloProjectSurveysCatalogQ.set('');
+  }
+
+  /** Catálogo ProjectSurveys para el Project Studio indicado en «Proyecto Studio». */
+  fetchDoobloProjectSurveysCatalog(page: number): void {
+    const cid = this.effectiveCompanyId();
+    if (cid == null) {
+      return;
+    }
+    const projectId = this.newDoobloStudioProject().trim();
+    if (!projectId) {
+      this.toast.showToast(
+        'warn',
+        'Field',
+        'Indique primero el ID de proyecto Studio (manual o «Usar proyecto» arriba).'
+      );
+      return;
+    }
+    if (!this.doobloCompanyContext()?.configured) {
+      this.toast.showToast('warn', 'Field', 'Configure primero las credenciales Dooblo.');
+      return;
+    }
+    this.doobloProjectSurveysCatalogBusy.set(true);
+    const q = this.doobloProjectSurveysCatalogQ().trim();
+    this.fieldSvc
+      .listDoobloProjectSurveysCatalog(cid, projectId, {
+        page,
+        page_size: 25,
+        q: q || undefined,
+      })
+      .subscribe({
+        next: data => {
+          this.doobloProjectSurveysCatalog.set(data);
+          this.doobloProjectSurveysCatalogBusy.set(false);
+        },
+        error: (err: unknown) => {
+          this.doobloProjectSurveysCatalogBusy.set(false);
+          this.toast.showToast(
+            'error',
+            'Field',
+            this.httpErrorDetail(err, 'No se pudieron listar las encuestas del proyecto en SurveyToGo.')
+          );
+        },
+      });
+  }
+
+  applyDoobloCatalogSurveyId(externalId: string): void {
+    this.newDoobloSurveyId.set(externalId);
+  }
+
+  doobloCatalogTotalPages(cat: RemoteFieldCatalogPage): number {
+    if (cat.total <= 0 || cat.page_size <= 0) {
+      return 1;
+    }
+    return Math.ceil(cat.total / cat.page_size);
   }
 
   runDoobloAnalysis(projectId: number): void {
@@ -697,21 +867,27 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
 
   /** Borde/fondo del panel de resumen según resultado (lectura rápida). */
   goStep(step: number): void {
-    if (step === 1 || step === 2 || step === 3) {
-      this.activeStep.set(step as 1 | 2 | 3);
+    if (step >= 1 && step <= 4) {
+      this.activeStep.set(step as 1 | 2 | 3 | 4);
       if (step === 2) {
         this.reloadStudies();
+      }
+      if (step === 4) {
+        this.reloadProjects();
       }
     }
   }
 
   nextStep(): void {
     const s = this.activeStep();
-    if (s < 3) {
-      const next = (s + 1) as 1 | 2 | 3;
+    if (s < 4) {
+      const next = (s + 1) as 1 | 2 | 3 | 4;
       this.activeStep.set(next);
       if (next === 2) {
         this.reloadStudies();
+      }
+      if (next === 4) {
+        this.reloadProjects();
       }
     }
   }
@@ -719,7 +895,28 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   prevStep(): void {
     const s = this.activeStep();
     if (s > 1) {
-      this.activeStep.set((s - 1) as 1 | 2 | 3);
+      this.activeStep.set((s - 1) as 1 | 2 | 3 | 4);
+    }
+  }
+
+  /** Paso ya completado en la línea temporal del asistente. */
+  isStepCompleted(step: number): boolean {
+    return this.activeStep() > step;
+  }
+
+  /** Una línea de foco por pantalla (patrón tipo wizard). */
+  wizardInstruction(): string {
+    switch (this.activeStep()) {
+      case 1:
+        return 'Seleccione o cree el cliente final para este levantamiento.';
+      case 2:
+        return 'Opcional: vincule o cree un estudio canónico (cadena Study → proyecto).';
+      case 3:
+        return 'Nombre del proyecto y origen de datos: CSV en archivo o API SurveyToGo / Dooblo.';
+      case 4:
+        return 'Importación, credenciales por empresa y resumen operativo por proyecto.';
+      default:
+        return '';
     }
   }
 
@@ -728,31 +925,42 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       case 1:
         return 'Cliente';
       case 2:
-        return 'Proyecto';
+        return 'Estudio';
       case 3:
-        return 'Carga e integración';
+        return 'Proyecto';
+      case 4:
+        return 'Carga';
       default:
         return '';
     }
   }
 
-  stepNavButtonClass(step: number): Record<string, boolean> {
-    const on = this.activeStep() === step;
+  stepWizardStepBtnClass(step: number): Record<string, boolean> {
+    const cur = this.activeStep();
+    const done = cur > step;
+    const on = cur === step;
     return {
-      'field-step-btn flex min-w-0 items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-left text-sm transition': true,
-      'border-indigo-500 bg-indigo-50 text-indigo-950 shadow-sm dark:border-indigo-500/80 dark:bg-indigo-950/50 dark:text-indigo-100':
+      'field-wizard-step-btn group flex min-w-0 flex-col items-center gap-1.5 rounded-xl border-2 px-2 py-2 text-center transition sm:flex-row sm:gap-2 sm:px-3 sm:py-2.5 sm:text-left':
+        true,
+      'field-wizard-step-btn--current border-emerald-600 bg-emerald-50 text-emerald-950 shadow-sm ring-1 ring-emerald-500/25 dark:border-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-50':
         on,
-      'border-slate-200/90 bg-slate-50/80 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/40 dark:text-slate-200':
-        !on,
+      'field-wizard-step-btn--done border-emerald-300 bg-white text-emerald-900 dark:border-emerald-700/80 dark:bg-emerald-950/25 dark:text-emerald-100':
+        done && !on,
+      'field-wizard-step-btn--todo border-slate-200/90 bg-slate-50/80 text-slate-500 dark:border-slate-600/60 dark:bg-slate-800/40 dark:text-slate-400':
+        !on && !done,
     };
   }
 
-  stepNavCircleClass(step: number): Record<string, boolean> {
-    const on = this.activeStep() === step;
+  stepWizardCircleClass(step: number): Record<string, boolean> {
+    const cur = this.activeStep();
+    const done = cur > step;
+    const on = cur === step;
     return {
-      'field-step-num flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold': true,
-      'bg-indigo-600 text-white shadow-md dark:bg-indigo-500': on,
-      'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100': !on,
+      'field-wizard-circle flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold transition':
+        true,
+      'bg-emerald-600 text-white shadow dark:bg-emerald-500': done,
+      'bg-emerald-700 text-white shadow-md ring-2 ring-emerald-400/50 dark:bg-emerald-600': on && !done,
+      'bg-slate-200 text-slate-600 dark:bg-slate-600 dark:text-slate-200': !on && !done,
     };
   }
 
@@ -1009,7 +1217,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         this.reloadProjects();
         this.reloadStudies();
         this.reloadStudyCatalog();
-        this.activeStep.set(3);
+        this.activeStep.set(4);
       },
       error: () =>
         this.toast.showToast('error', 'Field', 'No se pudo crear el proyecto.'),

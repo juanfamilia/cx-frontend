@@ -221,6 +221,34 @@ select.field-control {
   vertical-align: top;
 }
 
+/* Wizard (SurveyToGo-style progress) */
+.field-wizard-shell .field-wizard-step-btn {
+  flex: 1 1 auto;
+  cursor: pointer;
+  max-width: 11rem;
+}
+
+.field-wizard-shell .field-wizard-step-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(16 185 129 / 0.35);
+}
+
+.field-wizard-shell .field-wizard-step-btn--todo:hover:not(:disabled) {
+  border-color: rgb(148 163 184);
+  background: rgb(248 250 252);
+}
+
+:host-context(.dark) .field-wizard-shell .field-wizard-step-btn--todo:hover:not(:disabled) {
+  border-color: rgb(100 116 139);
+  background: rgb(30 41 59 / 0.65);
+}
+
+.field-wizard-instruction {
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 :host-context(.dark) .field-summary-cell {
   border-top-color: rgb(51 65 85 / 0.7);
 }
