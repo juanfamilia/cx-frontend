@@ -182,6 +182,17 @@ export interface RemoteFieldCatalogPage {
   query_applied: string | null;
 }
 
+export interface DoobloFailedCustomer {
+  customer_id: string;
+  customer_name?: string | null;
+  reason: string;
+}
+
+/** Respuesta del barrido org. (Customers × CustomerProjects); `items` = proyectos Studio. */
+export interface OrganizationStudioProjectsCatalogPage extends RemoteFieldCatalogPage {
+  failed_customers?: DoobloFailedCustomer[];
+}
+
 /** Mapeo proyecto Field → SurveyToGo/Dooblo. */
 export interface FieldProjectExternalSource {
   id: number;
@@ -363,17 +374,17 @@ export class FieldService {
   listDoobloOrganizationStudioProjectsCatalog(
     companyId: number,
     opts?: { page?: number; page_size?: number; q?: string; max_customers?: number }
-  ): Observable<RemoteFieldCatalogPage> {
+  ): Observable<OrganizationStudioProjectsCatalogPage> {
     let params = new HttpParams()
       .set('company_id', String(companyId))
       .set('page', String(opts?.page ?? 1))
       .set('page_size', String(opts?.page_size ?? 25))
-      .set('max_customers', String(opts?.max_customers ?? 50));
+      .set('max_customers', String(opts?.max_customers ?? 10));
     const q = opts?.q?.trim();
     if (q) {
       params = params.set('q', q);
     }
-    return this.http.get<RemoteFieldCatalogPage>(
+    return this.http.get<OrganizationStudioProjectsCatalogPage>(
       `${environment.apiUrl}field/dooblo/catalog/organization-studio-projects`,
       { params }
     );

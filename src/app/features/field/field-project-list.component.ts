@@ -25,6 +25,7 @@ import {
   FieldService,
   FieldStudy,
   FieldSyncRun,
+  OrganizationStudioProjectsCatalogPage,
   RemoteFieldCatalogPage,
 } from './field.service';
 
@@ -117,10 +118,12 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   readonly doobloCustomersCatalogBusy = signal(false);
   readonly doobloCustomersCatalogQ = signal('');
 
-  /** Catálogo org-wide: proyectos Studio (Customers × CustomerProjects). */
-  readonly doobloOrgStudioProjectsCatalog = signal<RemoteFieldCatalogPage | null>(null);
+  /** Catálogo org-wide: proyectos Studio (Customers × CustomerProjects); puede incluir `failed_customers`. */
+  readonly doobloOrgStudioProjectsCatalog = signal<OrganizationStudioProjectsCatalogPage | null>(null);
   readonly doobloOrgStudioProjectsCatalogBusy = signal(false);
   readonly doobloOrgStudioProjectsCatalogQ = signal('');
+  /** Límite de clientes SurveyToGo a barrer (default 10; use 5 para aislar fallos). */
+  readonly doobloOrgCatalogMaxCustomers = signal(10);
 
   /** Picker CustomerProjects (lista paginada + búsqueda). */
   readonly doobloCustomerProjectsCatalog = signal<RemoteFieldCatalogPage | null>(null);
@@ -557,11 +560,24 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         page,
         page_size: 25,
         q: q || undefined,
+        max_customers: this.doobloOrgCatalogMaxCustomers(),
       })
       .subscribe({
         next: data => {
           this.doobloOrgStudioProjectsCatalog.set(data);
           this.doobloOrgStudioProjectsCatalogBusy.set(false);
+          const failed = data.failed_customers ?? [];
+          if (failed.length > 0) {
+            const preview = failed
+              .slice(0, 4)
+              .map(f => `${f.customer_id}: ${f.reason.slice(0, 80)}${f.reason.length > 80 ? '…' : ''}`)
+              .join(' · ');
+            this.toast.showToast(
+              'warn',
+              'Field',
+              `${failed.length} cliente(s) sin proyectos o con error en CustomerProjects. ${preview}`
+            );
+          }
         },
         error: (err: unknown) => {
           this.doobloOrgStudioProjectsCatalogBusy.set(false);
