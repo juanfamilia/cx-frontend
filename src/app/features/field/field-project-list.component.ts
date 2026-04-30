@@ -135,6 +135,9 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   readonly doobloProjectSurveysCatalogBusy = signal(false);
   readonly doobloProjectSurveysCatalogQ = signal('');
 
+  /** Destino del vínculo Dooblo desde la tarjeta «Traer listas» (sin abrir Ver resumen). */
+  readonly doobloWizardLinkProjectId = signal<number | null>(null);
+
   /** API company/ limita a 100 (FastAPI le=100). No pedir 200. */
   private static readonly companyListLimit = 100;
   private doobloPollTimer: ReturnType<typeof setTimeout> | null = null;
@@ -235,6 +238,20 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   /** Proyecto en tabla declara encuesta por API; condiciona el tablero. */
   isDoobloIngest(project: { ingest_mode?: string }): boolean {
     return (project.ingest_mode ?? 'csv') === 'dooblo';
+  }
+
+  /** Proyectos Field de la empresa con origen API (destino habitual del vínculo SurveyToGo). */
+  doobloIngestProjects(): FieldProject[] {
+    return this.projects().filter(p => this.isDoobloIngest(p));
+  }
+
+  private syncDoobloWizardLinkProjectSelection(): void {
+    const apiPs = this.doobloIngestProjects();
+    const cur = this.doobloWizardLinkProjectId();
+    if (cur != null && apiPs.some(p => p.id === cur)) {
+      return;
+    }
+    this.doobloWizardLinkProjectId.set(apiPs[0]?.id ?? null);
   }
 
   /** Hay al menos un proyecto Dooblo: el paso 3 prioriza credenciales API. */
@@ -347,6 +364,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     this.fieldSvc.listProjects(cid, null).subscribe({
       next: rows => {
         this.projects.set(rows);
+        this.syncDoobloWizardLinkProjectSelection();
         this.reloadStudyCatalog();
         this.loading.set(false);
         const open = this.summaryProjectId();
@@ -371,18 +389,6 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     this.doobloExternalSources.set([]);
     this.doobloSyncRuns.set([]);
     this.doobloDecisionFindings.set([]);
-    this.newDoobloStudioProject.set('');
-    this.newDoobloSurveyId.set('');
-    this.doobloCustomerProjectsCatalog.set(null);
-    this.doobloCustomerProjectsCatalogBusy.set(false);
-    this.doobloCustomerProjectsCatalogQ.set('');
-    this.doobloSurveyToGoCustomerId.set('');
-    this.doobloCustomersCatalog.set(null);
-    this.doobloCustomersCatalogBusy.set(false);
-    this.doobloCustomersCatalogQ.set('');
-    this.doobloProjectSurveysCatalog.set(null);
-    this.doobloProjectSurveysCatalogBusy.set(false);
-    this.doobloProjectSurveysCatalogQ.set('');
     this.decisionNoteByFindingId.set({});
     this.decisionLogFindingId.set(null);
     this.decisionLogItems.set([]);
@@ -541,6 +547,20 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
           this.toast.showToast('error', 'Field', this.httpErrorDetail(err, 'No se pudo guardar el vínculo Dooblo.'));
         },
       });
+  }
+
+  /** Guardar vínculo usando el proyecto Field elegido en la tarjeta de listas SurveyToGo (paso 4). */
+  saveDoobloWizardLink(): void {
+    const projectId = this.doobloWizardLinkProjectId();
+    if (projectId == null) {
+      this.toast.showToast(
+        'warn',
+        'Field',
+        'Elija un proyecto Field con origen API (o créelo en el paso 3 con SurveyToGo / Dooblo).'
+      );
+      return;
+    }
+    this.saveDoobloSource(projectId);
   }
 
   /** Proyectos Studio de todos los clientes visibles para el usuario API (típico en MR). */
@@ -734,8 +754,14 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     this.toast.showToast(
       'success',
       'Field',
-      `Proyecto Studio aplicado: ${pid}.${tail} Revise el recuadro «Proyecto Studio elegido» debajo o abra «Ver resumen» en un proyecto API para listar encuestas y guardar el vínculo.`
+      `Proyecto Studio aplicado: ${pid}.${tail} Se intentará cargar las encuestas de ese proyecto abajo; elija destino Field y encuesta para guardar.`
     );
+    queueMicrotask(() => {
+      if (!this.doobloCompanyContext()?.configured) {
+        return;
+      }
+      this.fetchDoobloProjectSurveysCatalog(1);
+    });
   }
 
   /** Catálogo ProjectSurveys para el Project Studio indicado en «Proyecto Studio». */

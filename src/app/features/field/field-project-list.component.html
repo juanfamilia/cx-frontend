@@ -487,9 +487,10 @@
               Proyecto Studio elegido (picker)
             </p>
             <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-              Al pulsar <strong>Usar proyecto</strong> en la tabla de arriba se rellena este campo (antes solo actualizaba datos
-              ocultos dentro de <strong>Ver resumen</strong>). Siguiente paso: abrir <strong>Ver resumen</strong> en un proyecto con
-              origen <strong>API</strong>, usar <strong>Listar encuestas del proyecto</strong> y guardar el vínculo.
+              Al pulsar <strong>Usar proyecto</strong> en la tabla superior se rellena este campo y se cargan las encuestas
+              (<code class="text-[11px]">ProjectSurveys</code>) en el bloque siguiente. Elija el proyecto Field con origen
+              <strong>API</strong>, use <strong>Usar encuesta</strong> o pegue el SurveyID y pulse <strong>Guardar vínculo</strong>
+              — sin abrir «Ver resumen».
             </p>
             <label class="field-label mt-2 block max-w-2xl">
               ID proyecto Studio
@@ -500,6 +501,141 @@
                 placeholder="Se rellena con «Usar proyecto» o pegue el ID manualmente"
                 autocomplete="off" />
             </label>
+          </div>
+
+          @if (doobloIngestProjects().length === 0) {
+            <p class="mt-4 rounded-lg border border-amber-200/90 bg-amber-50/60 px-3 py-2 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/25 dark:text-amber-100/90">
+              No hay proyectos Field con origen <strong>API</strong>. Cree uno en el <strong>paso 3</strong> eligiendo SurveyToGo
+              / Dooblo como origen; después podrá guardar aquí el vínculo encuesta–proyecto Studio.
+            </p>
+          } @else {
+            <label class="field-label mt-4 block max-w-xl">
+              Proyecto Field (guardar vínculo aquí)
+              <select
+                class="field-control mt-1.5 w-full"
+                [ngModel]="doobloWizardLinkProjectId()"
+                (ngModelChange)="doobloWizardLinkProjectId.set($event)">
+                @for (wp of doobloIngestProjects(); track wp.id) {
+                  <option [ngValue]="wp.id">{{ wp.name }} (#{{ wp.id }})</option>
+                }
+              </select>
+              <span class="mt-1 block text-[11px] text-slate-500 dark:text-slate-400">
+                Solo aparecen proyectos con origen API. Si hay varios, elija el tablero Field donde debe quedar la encuesta.
+              </span>
+            </label>
+          }
+
+          <div
+            class="mt-4 rounded-xl border border-emerald-200/90 bg-white/70 p-3 shadow-sm dark:border-emerald-900/45 dark:bg-slate-900/35">
+            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-900 dark:text-emerald-100/90">
+              Encuestas del proyecto Studio
+            </p>
+            <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              Lista <code class="text-[11px]">ProjectSurveys</code> del ID en «Proyecto Studio elegido». Tras
+              <strong>Usar proyecto</strong> se dispara sola la primera página; puede refinar con Buscar (q).
+            </p>
+            <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+              <label class="field-label min-w-[180px] flex-1">
+                Buscar (q)
+                <input
+                  class="field-control mt-1.5 w-full"
+                  [ngModel]="doobloProjectSurveysCatalogQ()"
+                  (ngModelChange)="doobloProjectSurveysCatalogQ.set($event)"
+                  placeholder="Nombre o SurveyID" />
+              </label>
+              <button
+                type="button"
+                class="field-btn-secondary text-sm"
+                [disabled]="doobloProjectSurveysCatalogBusy() || !newDoobloStudioProject().trim()"
+                (click)="fetchDoobloProjectSurveysCatalog(1)">
+                Listar encuestas del proyecto
+              </button>
+            </div>
+            @if (doobloProjectSurveysCatalogBusy()) {
+              <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">Consultando encuestas…</p>
+            } @else {
+              @if (doobloProjectSurveysCatalog(); as wcat) {
+                <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                  {{ wcat.total }} resultado(s) · página {{ wcat.page }} /
+                  {{ doobloCatalogTotalPages(wcat) }}
+                  @if (wcat.query_applied) {
+                    · filtro «{{ wcat.query_applied }}»
+                  }
+                </p>
+                @if (wcat.items.length === 0) {
+                  <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    Sin encuestas o sin coincidencias. Confirme el ID de proyecto Studio arriba.
+                  </p>
+                } @else {
+                  <div class="mt-2 max-h-52 overflow-auto rounded border border-slate-200/80 dark:border-slate-700/80">
+                    <table class="w-full text-left text-xs">
+                      <thead class="sticky top-0 bg-slate-100/95 dark:bg-slate-800/95">
+                        <tr>
+                          <th class="px-2 py-1.5 font-semibold">SurveyID</th>
+                          <th class="px-2 py-1.5 font-semibold">Nombre</th>
+                          <th class="px-2 py-1.5 font-semibold"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (wrow of wcat.items; track wrow.external_id) {
+                          <tr class="border-t border-slate-200/70 dark:border-slate-700/70">
+                            <td class="px-2 py-1.5 font-mono text-[11px]">{{ wrow.external_id }}</td>
+                            <td class="px-2 py-1.5">{{ wrow.title }}</td>
+                            <td class="px-2 py-1.5 whitespace-nowrap">
+                              <button
+                                type="button"
+                                class="text-emerald-800 underline hover:no-underline dark:text-emerald-300"
+                                (click)="applyDoobloCatalogSurveyId(wrow.external_id)">
+                                Usar encuesta
+                              </button>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      class="field-btn-secondary text-xs"
+                      [disabled]="wcat.page <= 1 || doobloProjectSurveysCatalogBusy()"
+                      (click)="fetchDoobloProjectSurveysCatalog(wcat.page - 1)">
+                      Anterior
+                    </button>
+                    <button
+                      type="button"
+                      class="field-btn-secondary text-xs"
+                      [disabled]="!wcat.has_more || doobloProjectSurveysCatalogBusy()"
+                      (click)="fetchDoobloProjectSurveysCatalog(wcat.page + 1)">
+                      Siguiente
+                    </button>
+                  </div>
+                }
+              }
+            }
+            <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+              <label class="field-label min-w-[200px] flex-1">
+                SurveyID (SurveyToGo)
+                <input
+                  class="field-control mt-1.5 w-full font-mono text-xs"
+                  [ngModel]="newDoobloSurveyId()"
+                  (ngModelChange)="newDoobloSurveyId.set($event)"
+                  placeholder="Manual o «Usar encuesta»"
+                  autocomplete="off" />
+              </label>
+              <button
+                type="button"
+                class="field-btn-primary text-sm self-end"
+                [disabled]="
+                  doobloActionBusy() ||
+                  doobloWizardLinkProjectId() == null ||
+                  !newDoobloStudioProject().trim() ||
+                  !newDoobloSurveyId().trim()
+                "
+                (click)="saveDoobloWizardLink()">
+                Guardar vínculo en proyecto Field
+              </button>
+            </div>
           </div>
 
           <p class="mt-4 text-xs font-semibold text-emerald-900 dark:text-emerald-100">Por cliente SurveyToGo (opcional)</p>
