@@ -13,6 +13,14 @@ const STAKEHOLDER_RISK: Record<string, string> = {
     'Riesgo operativo: casos dobles alargan limpieza, sesgan cierre por celda o generan dudas en facturación y entrega al cliente.',
   INVALID_DURATION:
     'Riesgo de coherencia: tiempos imposibles o vacíos afectan costos, tiempos de entrevistador o la lectura de productividad en terreno.',
+  DOOBLO_QUOTA_UPSTREAM:
+    'Riesgo de planificación: sin estado de cuota fiable no se puede defender avance por celda frente a mandante o auditoría.',
+  QUOTA_MAX_DEVIATION:
+    'Riesgo de muestra: desvíos fuera de política pueden invalidar inferencias por celda o generar retrabajo de ponderación.',
+  FIELD_GPS_INCONSISTENT:
+    'Riesgo de credibilidad: ubicaciones incoherentes debilitan defensa del dato en terreno y en QA.',
+  FIELD_FALSIFICATION_POTENTIAL:
+    'Riesgo de integridad: señales de superficie sugieren revisión focalizada antes de asumir cierre.',
 };
 
 const DEFAULT_RISK = 'Riesgo operativo: conviene alinear criterio con terreno o datos de origen antes de cerrar.';

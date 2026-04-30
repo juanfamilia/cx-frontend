@@ -38,6 +38,16 @@ const FINDING_KIND_LABEL: Record<string, string> = {
   DOOBLO_QUOTA_UPSTREAM: 'Cuota: error al leer en SurveyToGo',
   DOOBLO_NO_SURVEY_ID: 'Falta ID de encuesta Dooblo',
   QUOTA_MAX_DEVIATION: 'Posible desvío de cuota respecto a política',
+  FIELD_DURATION_ANOMALY: 'Duración de encuesta/caso fuera de rango esperado',
+  FIELD_STRAIGHT_LINING: 'Respuestas en línea recta (straight lining)',
+  FIELD_PATTERN_REPETITIVE: 'Patrón repetitivo en respuestas',
+  FIELD_FALSIFICATION_POTENTIAL: 'Señal heurística de falsificación potencial',
+  FIELD_GPS_INCONSISTENT: 'Inconsistencia de ubicación (GPS / geofence)',
+  FIELD_RISK_SCORE_CASE: 'Score de riesgo por caso',
+  FIELD_RISK_BY_INTERVIEWER: 'Riesgo agregado por encuestador',
+  FIELD_RISK_BY_SUPERVISOR: 'Riesgo agregado por supervisor',
+  FIELD_RISK_BY_ZONE: 'Riesgo agregado por zona',
+  FIELD_RISK_BY_PROJECT: 'Riesgo agregado por proyecto',
 };
 
 @Component({
