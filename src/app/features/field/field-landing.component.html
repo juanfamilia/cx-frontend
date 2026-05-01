@@ -1,71 +1,244 @@
-<div class="mx-auto max-w-3xl px-4 py-10">
-  <p
-    class="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-    Siete Field
-  </p>
-  <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
-    Control de levantamiento en campo
-  </h1>
-  <p class="mt-4 text-lg leading-relaxed text-gray-600 dark:text-gray-300">
-    Centralice los casos que vienen del terreno: defina el <strong>cliente final</strong>, cree un
-    <strong>proyecto</strong>, suba el <strong>CSV</strong> (o conecte SurveyToGo cuando lo tenga su
-    cuenta) y revise al instante no solo si el archivo “pasó”, sino <strong>qué señales pueden alargar
-    campo, re-trabajo o dudas frente al mandante</strong> si no se atienden.
-  </p>
+<div class="mx-auto max-w-5xl px-4 py-8">
+  <header class="border-b border-slate-200 pb-8 dark:border-slate-700">
+    <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+      Siete Field
+    </p>
+    <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+      Una conexión, toda la foto de campo
+    </h1>
+    <p class="mt-3 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
+      El responsable de campo y la dirección no deberían recorrer SurveyToGo pantalla a pantalla: aquí solo
+      ingresa la <strong>API</strong> y en segundos ve los <strong>proyectos activos</strong> permitidos por
+      la cuenta. El detalle operativo (vínculos, CSV, hallazgos) queda en el tablero cuando lo necesite.
+    </p>
+  </header>
 
-  <ul class="mt-8 space-y-4 text-gray-700 dark:text-gray-200">
-    <li class="flex gap-3">
-      <span
-        class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white"
-        >1</span
-      >
-      <div>
-        <p class="font-semibold text-gray-900 dark:text-gray-50">Cliente final</p>
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-          Marca o cuenta para la que corre el levantamiento (sub‑cliente de su empresa).
-        </p>
-      </div>
-    </li>
-    <li class="flex gap-3">
-      <span
-        class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white"
-        >2</span
-      >
-      <div>
-        <p class="font-semibold text-gray-900 dark:text-gray-50">Proyecto</p>
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-          Un contenedor por oleada o estudio; ahí se acumulan las importaciones de archivos.
-        </p>
-      </div>
-    </li>
-    <li class="flex gap-3">
-      <span
-        class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white"
-        >3</span
-      >
-      <div>
-        <p class="font-semibold text-gray-900 dark:text-gray-50">Archivo y resumen</p>
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-          Resumen con casos guardados, filas leídas, avisos técnicos y un bloque “para quien toma la decisión”
-          traducido a riesgo de plazo y de defensa del levantamiento.
-        </p>
-      </div>
-    </li>
-  </ul>
+  @if (isSuperAdmin) {
+    <div class="mt-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <label class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+        Empresa (tenant)
+        <select
+          class="mt-1 block w-full max-w-md rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+          [ngModel]="selectedCompanyId()"
+          (ngModelChange)="onCompanySelected($event)">
+          @for (co of companies(); track co.id) {
+            <option [ngValue]="co.id">{{ co.name }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  }
 
-  <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-    <a
-      routerLink="/field/trabajo"
-      class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-      Comenzar — ir al tablero
-    </a>
-    <a
-      routerLink="/field/trabajo"
-      class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-center text-sm font-medium text-gray-800 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800">
-      Ya conozco el flujo — ir directo
-    </a>
-  </div>
-  <p class="mt-6 text-xs text-gray-500 dark:text-gray-400">
-    Formato de archivo admitido: CSV según versión indicada en el tablero (p. ej. 2026.1).
-  </p>
+  @if (effectiveCompanyId() == null) {
+    <p class="mt-8 text-sm text-amber-700 dark:text-amber-300">
+      No hay empresa seleccionada. Compruebe su usuario o permisos de superadministrador.
+    </p>
+  } @else {
+    <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">
+        Conectar SurveyToGo / Dooblo
+      </h2>
+      <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        Son tres datos: URL de la API, usuario REST key y contraseña. Se guardan cifrados; la contraseña no se
+        vuelve a mostrar.
+      </p>
+      @if (doobloCompanyContext() && !doobloCredentialsLoading()) {
+        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ doobloSourceLabel() }}</p>
+      }
+      @if (doobloCredentialsLoading()) {
+        <p class="mt-4 text-sm text-slate-500">Cargando configuración…</p>
+      } @else {
+        <div class="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
+          <label class="min-w-[220px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+            URL de la API (newapi)
+            <input
+              class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              type="url"
+              placeholder="https://api.dooblo.net/newapi"
+              autocomplete="off"
+              [ngModel]="doobloFormBaseUrl()"
+              (ngModelChange)="doobloFormBaseUrl.set($event)" />
+          </label>
+          <label class="min-w-[200px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+            Usuario / REST key
+            <input
+              class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              autocomplete="off"
+              placeholder="REST_API_KEY…"
+              [ngModel]="doobloFormApiUser()"
+              (ngModelChange)="doobloFormApiUser.set($event)" />
+          </label>
+          <label class="min-w-[200px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+            Contraseña
+            <input
+              class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              type="password"
+              autocomplete="new-password"
+              [placeholder]="
+                doobloCompanyContext()?.has_password ? 'Vacío = no cambiar' : 'Obligatoria la primera vez'
+              "
+              [ngModel]="doobloFormPassword()"
+              (ngModelChange)="doobloFormPassword.set($event)" />
+          </label>
+          <button
+            type="button"
+            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-45"
+            [disabled]="doobloActionBusy()"
+            (click)="saveDoobloCompanyCredentials()">
+            Guardar y sincronizar vista
+          </button>
+        </div>
+      }
+    </section>
+
+    @if (doobloCompanyContext()?.configured && !doobloCredentialsLoading()) {
+      <section class="mt-10">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">
+              Pulso ejecutivo — proyectos visibles en SurveyToGo
+            </h2>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              Resumen automático tras la conexión; use el tablero para vínculos por proyecto, CSV y análisis.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-45 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            [disabled]="orgCatalogBusy()"
+            (click)="refreshOrgPulse({ announceFailures: true })">
+            Actualizar listado
+          </button>
+        </div>
+
+        <div class="mt-6 grid gap-4 sm:grid-cols-3">
+          <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Proyectos (catálogo)
+            </p>
+            @if (orgCatalogBusy()) {
+              <p class="mt-2 text-2xl font-bold text-slate-400">…</p>
+            } @else {
+              <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-50">
+                {{ studioProjectsTotal() }}
+              </p>
+            }
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Clientes distintos
+            </p>
+            @if (orgCatalogBusy()) {
+              <p class="mt-2 text-2xl font-bold text-slate-400">…</p>
+            } @else if (distinctStudioCustomers() === null) {
+              <p class="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">No informado en esta página</p>
+            } @else {
+              <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-50">
+                {{ distinctStudioCustomers() }}
+              </p>
+            }
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Clientes con incidencia
+            </p>
+            @if (orgCatalogBusy()) {
+              <p class="mt-2 text-2xl font-bold text-slate-400">…</p>
+            } @else {
+              <p
+                class="mt-2 text-3xl font-bold"
+                [class.text-rose-600]="failedCustomersCount() > 0"
+                [class.dark:text-rose-400]="failedCustomersCount() > 0"
+                [class.text-slate-900]="failedCustomersCount() === 0"
+                [class.dark:text-slate-50]="failedCustomersCount() === 0">
+                {{ failedCustomersCount() }}
+              </p>
+            }
+          </div>
+        </div>
+
+        @if (orgCatalogBusy()) {
+          <p class="mt-6 text-sm text-slate-500">Consultando SurveyToGo…</p>
+        } @else if (previewProjects().length === 0) {
+          <p class="mt-6 text-sm text-slate-600 dark:text-slate-400">
+            No hay proyectos en esta primera página o la cuenta no tiene acceso. Pulse «Actualizar listado» tras
+            revisar credenciales.
+          </p>
+        } @else {
+          <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+            <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-700">
+              <thead class="bg-slate-50 dark:bg-slate-800/60">
+                <tr>
+                  <th class="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-200">Cliente</th>
+                  <th class="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-200">Proyecto</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">ID</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900/30">
+                @for (row of previewProjects(); track trackByExternalId($index, row)) {
+                  <tr>
+                    <td class="whitespace-nowrap px-4 py-2.5 text-slate-800 dark:text-slate-200">
+                      {{ row.studio_customer_name || row.studio_customer_id || '—' }}
+                    </td>
+                    <td class="max-w-md px-4 py-2.5 font-medium text-slate-900 dark:text-slate-50">
+                      {{ row.title }}
+                    </td>
+                    <td class="whitespace-nowrap px-4 py-2.5 font-mono text-xs text-slate-500 dark:text-slate-400">
+                      {{ row.external_id }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (orgCatalog()?.has_more) {
+            <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">
+              Hay más resultados en SurveyToGo; el tablero permite profundizar por proyecto y encuesta.
+            </p>
+          }
+        }
+
+        @if ((orgCatalog()?.failed_customers?.length ?? 0) > 0) {
+          <div
+            class="mt-6 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/25 dark:text-amber-100">
+            <p class="font-semibold">Incidencias al leer algunos clientes</p>
+            <ul class="mt-2 list-disc space-y-1 pl-5">
+              @for (f of failurePreview(6); track f.customer_id) {
+                <li>
+                  <span class="font-mono text-xs">{{ f.customer_id }}</span>
+                  @if (f.customer_name) {
+                    — {{ f.customer_name }}
+                  }
+                  : {{ f.reason }}
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        <div class="mt-8">
+          <a
+            routerLink="/field/trabajo"
+            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+            Abrir tablero — vínculos por proyecto, encuestas, CSV y hallazgos
+          </a>
+        </div>
+      </section>
+    } @else if (!doobloCredentialsLoading()) {
+      <p class="mt-8 text-sm text-slate-600 dark:text-slate-400">
+        Cuando guarde credenciales válidas, esta misma pantalla mostrará automáticamente los proyectos activos
+        que SurveyToGo expone a esa cuenta API.
+      </p>
+    }
+  }
+
+  <footer class="mt-14 border-t border-slate-200 pt-8 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+    <p>
+      ¿Solo usa CSV? El tablero Field sigue disponible en
+      <a routerLink="/field/trabajo" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+        >/field/trabajo</a
+      >
+      para cargar archivos y revisar hallazgos.
+    </p>
+  </footer>
 </div>
