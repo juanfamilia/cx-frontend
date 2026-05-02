@@ -20,8 +20,10 @@ import {
   FieldFinding,
   FieldFindingDecisionLog,
   FieldImportRun,
+  FieldOperationalSnapshot,
   FieldProject,
   FieldProjectExternalSource,
+  FieldProjectOverviewRow,
   FieldService,
   FieldStudy,
   FieldSyncRun,
@@ -152,6 +154,18 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
 
   /** Destino del vínculo Dooblo desde la tarjeta «Traer listas» (sin abrir Ver resumen). */
   readonly doobloWizardLinkProjectId = signal<number | null>(null);
+
+  /** Centro de mando — resumen ejecutivo multi-proyecto. */
+  readonly commandOverview = signal<FieldProjectOverviewRow[]>([]);
+  readonly commandOverviewLoading = signal(false);
+  readonly commandSelectedProjectId = signal<number | null>(null);
+  readonly commandDetailSnapshot = signal<FieldOperationalSnapshot | null>(null);
+  readonly commandDetailFindings = signal<FieldFinding[]>([]);
+  readonly commandDetailRuns = signal<FieldSyncRun[]>([]);
+  /** Muestra priorizada desde GET /projects/{id}/overview (hallazgos abiertos). */
+  readonly commandDetailTopFindings = signal<FieldFinding[]>([]);
+  readonly commandDetailLoading = signal(false);
+  readonly commandSyncBusy = signal(false);
 
   /** API company/ limita a 100 (FastAPI le=100). No pedir 200. */
   private static readonly companyListLimit = 100;
@@ -382,6 +396,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         this.syncDoobloWizardLinkProjectSelection();
         this.reloadStudyCatalog();
         this.loading.set(false);
+        this.reloadCommandOverview();
         const open = this.summaryProjectId();
         if (open != null && !rows.some(p => p.id === open)) {
           this.closeImportSummary();
@@ -392,6 +407,247 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         this.toast.showToast('error', 'Field', 'No se pudieron cargar proyectos.');
       },
     });
+  }
+
+  reloadCommandOverview(): void {
+    const cid = this.effectiveCompanyId();
+    if (cid == null) {
+      this.commandOverview.set([]);
+      this.commandOverviewLoading.set(false);
+      return;
+    }
+    this.commandOverviewLoading.set(true);
+    this.fieldSvc.listProjectsOverview(cid, null).subscribe({
+      next: rows => {
+        this.commandOverview.set(rows);
+        this.commandOverviewLoading.set(false);
+        const sel = this.commandSelectedProjectId();
+        if (sel != null && !rows.some(r => r.project.id === sel)) {
+          this.commandSelectedProjectId.set(null);
+          this.commandDetailSnapshot.set(null);
+          this.commandDetailFindings.set([]);
+          this.commandDetailRuns.set([]);
+          this.commandDetailTopFindings.set([]);
+        } else if (sel != null) {
+          this.loadCommandDetail(sel);
+        }
+      },
+      error: () => {
+        this.commandOverviewLoading.set(false);
+        this.toast.showToast(
+          'error',
+          'Field',
+          'No se pudo cargar el resumen ejecutivo de proyectos.'
+        );
+      },
+    });
+  }
+
+  selectedOverviewRow(): FieldProjectOverviewRow | null {
+    const id = this.commandSelectedProjectId();
+    if (id == null) {
+      return null;
+    }
+    return this.commandOverview().find(r => r.project.id === id) ?? null;
+  }
+
+  toggleCommandProject(projectId: number): void {
+    if (this.commandSelectedProjectId() === projectId) {
+      this.commandSelectedProjectId.set(null);
+      return;
+    }
+    this.commandSelectedProjectId.set(projectId);
+    this.loadCommandDetail(projectId);
+  }
+
+  loadCommandDetail(projectId: number): void {
+    this.commandDetailLoading.set(true);
+    this.commandDetailTopFindings.set([]);
+    forkJoin({
+      drill: this.fieldSvc.getProjectOverview(projectId, 12).pipe(
+        catchError(() => of(null as FieldProjectOverviewRow | null))
+      ),
+      snapshot: this.fieldSvc.getOperationalSnapshot(projectId).pipe(catchError(() => of(null))),
+      findings: this.fieldSvc.listDecisionLayerFindings(projectId, null, 40).pipe(
+        catchError(() => of([] as FieldFinding[]))
+      ),
+      runs: this.fieldSvc.listSyncRuns(projectId, 15).pipe(catchError(() => of([] as FieldSyncRun[]))),
+    }).subscribe({
+      next: ({ drill, snapshot, findings, runs }) => {
+        if (drill) {
+          this.commandDetailTopFindings.set(drill.top_findings ?? []);
+          const { top_findings, ...rest } = drill;
+          void top_findings;
+          this.commandOverview.update(rows =>
+            rows.map(r => (r.project.id === projectId ? { ...r, ...rest, top_findings: [] } : r))
+          );
+        }
+        this.commandDetailSnapshot.set(snapshot);
+        this.commandDetailFindings.set(findings);
+        this.commandDetailRuns.set(runs);
+        this.commandDetailLoading.set(false);
+      },
+      error: () => {
+        this.commandDetailLoading.set(false);
+        this.toast.showToast('error', 'Field', 'No se pudo cargar el detalle del proyecto.');
+      },
+    });
+  }
+
+  overviewCompletionPct(row: FieldProjectOverviewRow): number | null {
+    const m = row.kpis_latest.find(k => k.metric_code === 'completion_rate');
+    if (!m) {
+      return null;
+    }
+    return Math.round(m.value * 1000) / 10;
+  }
+
+  overviewSampleTarget(row: FieldProjectOverviewRow): number | null {
+    const m = row.kpis_latest.find(k => k.metric_code === 'completion_rate');
+    const dims = m?.dimensions as Record<string, unknown> | undefined;
+    if (!dims || dims['sample_target'] == null) {
+      return null;
+    }
+    const n = Number(dims['sample_target']);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  commandHealthDotClass(health: string): string {
+    if (health === 'red') {
+      return 'bg-rose-500 shadow-[0_0_0_3px_rgba(244,63,94,0.35)]';
+    }
+    if (health === 'amber') {
+      return 'bg-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.35)]';
+    }
+    return 'bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.35)]';
+  }
+
+  dimDotClass(level: 'green' | 'amber' | 'red' | 'neutral'): string {
+    if (level === 'red') {
+      return 'bg-rose-500';
+    }
+    if (level === 'amber') {
+      return 'bg-amber-400';
+    }
+    if (level === 'green') {
+      return 'bg-emerald-500';
+    }
+    return 'bg-slate-300 dark:bg-slate-600';
+  }
+
+  linkageSignal(row: FieldProjectOverviewRow): 'green' | 'amber' | 'red' | 'neutral' {
+    if (!this.isDoobloIngest(row.project)) {
+      return 'neutral';
+    }
+    if (row.active_dooblo_sources === 0) {
+      return 'red';
+    }
+    if (row.dooblo_sources_with_survey_id < row.active_dooblo_sources) {
+      return 'amber';
+    }
+    return 'green';
+  }
+
+  tabularSignal(row: FieldProjectOverviewRow): 'green' | 'amber' | 'red' | 'neutral' {
+    const n = row.tabular_row_count;
+    if (n == null) {
+      return 'neutral';
+    }
+    if (!this.isDoobloIngest(row.project)) {
+      return n > 0 ? 'green' : 'neutral';
+    }
+    if (n <= 0) {
+      return 'amber';
+    }
+    return 'green';
+  }
+
+  quotaSignal(row: FieldProjectOverviewRow): 'green' | 'amber' | 'red' | 'neutral' {
+    const q = row.quota_upstream_ok;
+    if (q === true) {
+      return 'green';
+    }
+    if (q === false) {
+      return 'red';
+    }
+    return 'neutral';
+  }
+
+  gpsSignalFromFindings(findings: FieldFinding[]): 'green' | 'amber' | 'red' | 'neutral' {
+    const hits = findings.filter(
+      f =>
+        f.code.includes('GPS') ||
+        f.code.includes('GEO') ||
+        f.code === 'FIELD_GPS_INCONSISTENT'
+    );
+    if (hits.some(f => f.severity === 'error')) {
+      return 'red';
+    }
+    if (hits.some(f => f.severity === 'warn')) {
+      return 'amber';
+    }
+    if (hits.length > 0) {
+      return 'green';
+    }
+    return 'neutral';
+  }
+
+  runExecutionSyncFromCommand(): void {
+    const id = this.commandSelectedProjectId();
+    if (id == null) {
+      return;
+    }
+    this.commandSyncBusy.set(true);
+    this.fieldSvc.postExecutionSync(id).subscribe({
+      next: res => {
+        this.commandSyncBusy.set(false);
+        const errs = res.partial_errors?.length ?? 0;
+        this.toast.showToast(
+          'success',
+          'Field',
+          errs > 0
+            ? `Sync aplicado con ${errs} aviso(s) parcial(es). Revise vínculos Dooblo.`
+            : 'Sincronización de ejecución aplicada.'
+        );
+        this.reloadCommandOverview();
+        this.reloadProjects();
+        this.loadCommandDetail(id);
+      },
+      error: (err: unknown) => {
+        this.commandSyncBusy.set(false);
+        this.toast.showToast(
+          'error',
+          'Field',
+          this.httpErrorDetail(err, 'No se pudo ejecutar el sync de encuestas.')
+        );
+      },
+    });
+  }
+
+  openOperationalDrawerFromCommand(): void {
+    const id = this.commandSelectedProjectId();
+    if (id == null) {
+      return;
+    }
+    this.goStep(4);
+    this.toggleImportSummary(id);
+    setTimeout(() => {
+      document.getElementById('field-operaciones-tabla')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 120);
+  }
+
+  formatShortDate(iso: string | null | undefined): string {
+    if (!iso) {
+      return '—';
+    }
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) {
+      return iso;
+    }
+    return d.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
   }
 
   closeImportSummary(): void {
@@ -983,6 +1239,15 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
 
   clientDisplayName(clientId: number): string {
     return this.clients().find(c => c.id === clientId)?.name ?? `Cliente #${clientId}`;
+  }
+
+  /** Etiqueta de cliente final alineada al overview (B2B2B) cuando ya cargó el centro de mando. */
+  projectClientLabel(project: FieldProject): string {
+    const row = this.commandOverview().find(r => r.project.id === project.id);
+    if (row?.client_display_name?.trim()) {
+      return row.client_display_name;
+    }
+    return this.clientDisplayName(project.client_id);
   }
 
   /** Etiqueta corta del estudio enlazado al proyecto (tabla). */

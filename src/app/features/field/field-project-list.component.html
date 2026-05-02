@@ -11,17 +11,377 @@
       class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white via-slate-50/80 to-indigo-50/40 p-6 shadow-sm dark:border-slate-700/80 dark:from-slate-900/90 dark:via-slate-900/60 dark:to-indigo-950/30">
       <div
         class="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-indigo-400/10 blur-2xl dark:bg-indigo-500/10"></div>
-      <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">Tablero de trabajo</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
+        Tablero de trabajo — centro de mando
+      </h1>
       <p
-        class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:text-base">
-        Flujo en cuatro pasos: <strong class="text-slate-800 dark:text-slate-200">cliente</strong> →
-        <strong class="text-slate-800 dark:text-slate-200">estudio</strong> →
-        <strong class="text-slate-800 dark:text-slate-200">proyecto</strong> →
-        <strong class="text-slate-800 dark:text-slate-200">carga</strong>. Use
-        <strong>Ver resumen</strong> para el riesgo operativo y la capa de decisión.
+        class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:text-base">
+        Vista ejecutiva con <strong class="text-slate-800 dark:text-slate-200">semáforos</strong> y KPIs por campaña.
+        Pulse el nombre de un proyecto para ver métricas de campo (cuota, muestra, vínculos, hallazgos) y actuar. El
+        asistente en cuatro pasos sigue debajo para alta de cliente/proyecto y operaciones finas.
       </p>
     </div>
   </div>
+
+  <!-- Centro de mando (data viz ligera + drill-down) -->
+  @if (effectiveCompanyId() != null) {
+    <section
+      class="mb-10 rounded-2xl border border-slate-200/90 bg-white/95 p-5 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900/50 dark:ring-white/10 md:p-6"
+      aria-label="Centro de mando Field">
+      <div class="flex flex-col gap-4 border-b border-slate-100 pb-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300">
+            Salud de campo
+          </p>
+          <h2 class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Resumen por proyecto</h2>
+          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+            Los semáforos combinan hallazgos abiertos, último análisis Dooblo, cuota upstream y avance muestral
+            declarado.
+          </p>
+        </div>
+        <button type="button" class="field-btn-secondary shrink-0" (click)="reloadCommandOverview()">
+          Actualizar métricas
+        </button>
+      </div>
+
+      @if (commandOverviewLoading()) {
+        <p class="mt-6 text-sm text-slate-500 dark:text-slate-400">Cargando resumen ejecutivo…</p>
+      } @else if (commandOverview().length === 0) {
+        <p class="mt-6 text-sm text-slate-600 dark:text-slate-300">
+          Sin proyectos en esta empresa todavía, o aún no hay datos materializados. Cree un proyecto en el asistente o
+          sincronice desde SurveyToGo.
+        </p>
+      } @else {
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          @for (row of commandOverview(); track row.project.id) {
+            <article
+              role="button"
+              tabindex="0"
+              (click)="toggleCommandProject(row.project.id)"
+              (keyup.enter)="toggleCommandProject(row.project.id)"
+              class="cursor-pointer rounded-xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/80 p-4 text-left shadow-sm outline-none transition hover:border-indigo-300/80 hover:shadow-md dark:border-slate-700 dark:from-slate-900 dark:to-slate-900/70 dark:hover:border-indigo-700/60"
+              [class.ring-2]="commandSelectedProjectId() === row.project.id"
+              [class.ring-indigo-500]="commandSelectedProjectId() === row.project.id"
+              [ngClass]="{
+                'border-l-4 border-l-rose-500': row.health === 'red',
+                'border-l-4 border-l-amber-400': row.health === 'amber',
+                'border-l-4 border-l-emerald-500': row.health === 'green',
+              }">
+              <div class="flex items-start gap-3">
+                <span
+                  class="mt-1 inline-flex h-3 w-3 shrink-0 rounded-full"
+                  [ngClass]="commandHealthDotClass(row.health)"
+                  aria-hidden="true"></span>
+                <div class="min-w-0 flex-1">
+                  <h3 class="text-base font-semibold leading-snug text-slate-900 dark:text-white">
+                    {{ row.project.name }}
+                  </h3>
+                  <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    <span class="font-medium text-slate-600 dark:text-slate-300">{{ row.client_display_name }}</span>
+                    @if (row.client_name && row.client_name.trim() !== row.client_display_name.trim()) {
+                      <span class="block truncate text-[0.7rem] normal-case text-slate-500 dark:text-slate-400">
+                        {{ row.client_name }}
+                      </span>
+                    }
+                    @if (row.client_external_ref?.trim()) {
+                      <span
+                        class="mt-0.5 inline-block rounded border border-slate-200/90 bg-slate-100/80 px-1.5 py-0.5 font-mono text-[0.6rem] text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                        Ref. {{ row.client_external_ref }}
+                      </span>
+                    }
+                    @if (row.study_display_name) {
+                      <span class="mt-0.5 block truncate">Estudio: {{ row.study_display_name }}</span>
+                    }
+                  </p>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    @if (isDoobloIngest(row.project)) {
+                      <span
+                        class="inline-flex rounded-md border border-violet-200 bg-violet-50 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-violet-900 dark:border-violet-800/60 dark:bg-violet-950/40 dark:text-violet-200">
+                        API
+                      </span>
+                    } @else {
+                      <span
+                        class="inline-flex rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                        CSV
+                      </span>
+                    }
+                    @if ((row.findings_open_by_severity['error'] ?? 0) > 0) {
+                      <span
+                        class="inline-flex rounded-md bg-rose-100 px-2 py-0.5 text-[0.65rem] font-semibold text-rose-900 dark:bg-rose-950/50 dark:text-rose-100">
+                        {{ row.findings_open_by_severity['error'] }} crít.
+                      </span>
+                    }
+                    @if ((row.findings_open_by_severity['warn'] ?? 0) > 0) {
+                      <span
+                        class="inline-flex rounded-md bg-amber-100 px-2 py-0.5 text-[0.65rem] font-semibold text-amber-950 dark:bg-amber-950/40 dark:text-amber-100">
+                        {{ row.findings_open_by_severity['warn'] }} adv.
+                      </span>
+                    }
+                  </div>
+                  @if (overviewCompletionPct(row) != null) {
+                    <div class="mt-4">
+                      <div class="flex items-center justify-between text-[0.7rem] font-semibold text-slate-600 dark:text-slate-300">
+                        <span>Avance muestral (proxy)</span>
+                        <span class="tabular-nums">{{ overviewCompletionPct(row) }}%</span>
+                      </div>
+                      <div class="mt-1 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                        <div
+                          class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all"
+                          [style.width.%]="overviewCompletionPct(row) ?? 0"></div>
+                      </div>
+                      @if (overviewSampleTarget(row) != null) {
+                        <p class="mt-1 text-[0.65rem] text-slate-500 dark:text-slate-400">
+                          Objetivo declarado: {{ overviewSampleTarget(row) }} casos
+                        </p>
+                      }
+                    </div>
+                  } @else {
+                    <p class="mt-4 text-[0.7rem] text-slate-500 dark:text-slate-400">
+                      Sin KPI de avance todavía — ejecute sync o análisis Dooblo en el panel operativo.
+                    </p>
+                  }
+                  <div class="mt-3 flex flex-wrap gap-3 text-[0.65rem] text-slate-500 dark:text-slate-400">
+                    <span>Encuestas Field: {{ row.surveys_linked_count }}</span>
+                    @if (isDoobloIngest(row.project)) {
+                      <span
+                        >Vínculos API {{ row.dooblo_sources_with_survey_id }}/{{ row.active_dooblo_sources }}</span
+                      >
+                    }
+                  </div>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+
+      @if (selectedOverviewRow(); as selRow) {
+        <div
+          class="mt-8 rounded-2xl border border-indigo-200/70 bg-indigo-50/30 p-5 dark:border-indigo-900/40 dark:bg-indigo-950/20 md:p-6">
+          <div class="flex flex-col gap-3 border-b border-indigo-100/80 pb-4 dark:border-indigo-900/40 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-indigo-800 dark:text-indigo-200">
+                Detalle — {{ selRow.project.name }}
+              </p>
+              <p class="mt-1 text-sm text-slate-700 dark:text-slate-200">
+                <span class="font-medium">{{ selRow.client_display_name }}</span>
+                @if (selRow.client_name && selRow.client_name.trim() !== selRow.client_display_name.trim()) {
+                  <span class="text-slate-500 dark:text-slate-400"> — {{ selRow.client_name }}</span>
+                }
+                @if (selRow.client_external_ref?.trim()) {
+                  <span
+                    class="ml-2 inline-block rounded border border-indigo-200/80 bg-white/60 px-1.5 py-0.5 font-mono text-xs text-indigo-900 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-100">
+                    Ref. {{ selRow.client_external_ref }}
+                  </span>
+                }
+              </p>
+              <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                Señales derivadas del ledger y del último snapshot operativo (cuota / muestra tabular / GPS).
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                class="field-btn-primary"
+                [disabled]="commandSyncBusy()"
+                (click)="runExecutionSyncFromCommand()">
+                Sincronizar ejecución
+              </button>
+              <button type="button" class="field-btn-secondary" (click)="openOperationalDrawerFromCommand()">
+                Panel operativo completo
+              </button>
+            </div>
+          </div>
+
+          @if (commandDetailLoading()) {
+            <p class="mt-6 text-sm text-slate-500">Cargando snapshot y hallazgos…</p>
+          } @else {
+            <div class="mt-6 grid gap-6 lg:grid-cols-12">
+              <div class="lg:col-span-4">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Dimensiones (semáforo)
+                </p>
+                <ul class="mt-3 space-y-3 text-sm">
+                  <li class="flex items-center gap-3 rounded-lg bg-white/80 px-3 py-2 dark:bg-slate-900/40">
+                    <span class="inline-flex h-2.5 w-2.5 shrink-0 rounded-full" [ngClass]="dimDotClass(quotaSignal(selRow))"></span>
+                    <div>
+                      <p class="font-semibold text-slate-800 dark:text-slate-100">Cuota upstream</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">
+                        HTTP SurveyToGo / último snapshot conocido
+                      </p>
+                    </div>
+                  </li>
+                  <li class="flex items-center gap-3 rounded-lg bg-white/80 px-3 py-2 dark:bg-slate-900/40">
+                    <span class="inline-flex h-2.5 w-2.5 shrink-0 rounded-full" [ngClass]="dimDotClass(tabularSignal(selRow))"></span>
+                    <div>
+                      <p class="font-semibold text-slate-800 dark:text-slate-100">Muestra tabular</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Filas útiles en export (proxy calidad respuesta)
+                        @if (selRow.tabular_row_count != null) {
+                          <span class="font-mono"> — {{ selRow.tabular_row_count }}</span>
+                        }
+                      </p>
+                    </div>
+                  </li>
+                  <li class="flex items-center gap-3 rounded-lg bg-white/80 px-3 py-2 dark:bg-slate-900/40">
+                    <span class="inline-flex h-2.5 w-2.5 shrink-0 rounded-full" [ngClass]="dimDotClass(linkageSignal(selRow))"></span>
+                    <div>
+                      <p class="font-semibold text-slate-800 dark:text-slate-100">Vínculos SurveyToGo</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Fuentes activas con ID de encuesta vs total
+                      </p>
+                    </div>
+                  </li>
+                  <li class="flex items-center gap-3 rounded-lg bg-white/80 px-3 py-2 dark:bg-slate-900/40">
+                    <span
+                      class="inline-flex h-2.5 w-2.5 shrink-0 rounded-full"
+                      [ngClass]="dimDotClass(gpsSignalFromFindings(commandDetailFindings()))"></span>
+                    <div>
+                      <p class="font-semibold text-slate-800 dark:text-slate-100">GPS / consistencia</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Hallazgos recientes en esta vista (40 últimos)
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div class="lg:col-span-8">
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div class="rounded-xl border border-slate-200/90 bg-white/90 p-4 dark:border-slate-700 dark:bg-slate-900/50">
+                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      Ejecución
+                    </p>
+                    <dl class="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-200">
+                      <div class="flex justify-between gap-2">
+                        <dt class="text-slate-500 dark:text-slate-400">Último sync MVP</dt>
+                        <dd class="text-right tabular-nums">{{ formatShortDate(selRow.project.last_execution_sync_at) }}</dd>
+                      </div>
+                      <div class="flex justify-between gap-2">
+                        <dt class="text-slate-500 dark:text-slate-400">Último análisis Dooblo</dt>
+                        <dd class="text-right">
+                          <span class="font-medium">{{ selRow.last_analysis_run_status ?? '—' }}</span>
+                          @if (selRow.last_analysis_run_at) {
+                            <span class="block text-xs tabular-nums text-slate-500">{{
+                              formatShortDate(selRow.last_analysis_run_at)
+                            }}</span>
+                          }
+                        </dd>
+                      </div>
+                      <div class="flex justify-between gap-2">
+                        <dt class="text-slate-500 dark:text-slate-400">Último CSV</dt>
+                        <dd class="text-right">
+                          <span class="font-medium">{{ selRow.last_csv_import_status ?? '—' }}</span>
+                          @if (selRow.last_csv_import_at) {
+                            <span class="block text-xs tabular-nums text-slate-500">{{
+                              formatShortDate(selRow.last_csv_import_at)
+                            }}</span>
+                          }
+                        </dd>
+                      </div>
+                      <div class="flex justify-between gap-2">
+                        <dt class="text-slate-500 dark:text-slate-400">Snapshot operativo</dt>
+                        <dd class="text-right tabular-nums">{{ formatShortDate(selRow.operational_snapshot_at) }}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                  <div class="rounded-xl border border-slate-200/90 bg-white/90 p-4 dark:border-slate-700 dark:bg-slate-900/50">
+                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      Por qué este semáforo
+                    </p>
+                    @if (selRow.health_reasons.length === 0) {
+                      <p class="mt-3 text-sm text-emerald-800 dark:text-emerald-200/90">
+                        Sin alertas críticas registradas con los datos actuales.
+                      </p>
+                    } @else {
+                      <ul class="mt-3 list-disc space-y-1 pl-4 text-sm text-slate-700 dark:text-slate-200">
+                        @for (r of selRow.health_reasons; track r) {
+                          <li>{{ r }}</li>
+                        }
+                      </ul>
+                    }
+                  </div>
+                </div>
+
+                @if (commandDetailTopFindings().length > 0) {
+                <div class="mt-4 rounded-xl border border-amber-200/90 bg-amber-50/40 p-4 dark:border-amber-900/50 dark:bg-amber-950/25">
+                  <p class="text-xs font-bold uppercase tracking-wide text-amber-900 dark:text-amber-200">
+                    Hallazgos abiertos prioritarios
+                  </p>
+                  <p class="mt-1 text-[0.7rem] text-amber-950/80 dark:text-amber-100/80">
+                    Orden sugerido por severidad (desde el resumen de proyecto en API).
+                  </p>
+                  <ul class="mt-3 max-h-40 space-y-2 overflow-y-auto text-sm">
+                    @for (f of commandDetailTopFindings(); track f.id) {
+                      <li
+                        class="flex gap-2 rounded-lg border border-amber-200/60 bg-white/70 px-2 py-2 dark:border-amber-900/40 dark:bg-slate-900/50">
+                        <span
+                          class="mt-0.5 h-2 w-2 shrink-0 rounded-full"
+                          [class.bg-rose-500]="f.severity === 'error'"
+                          [class.bg-amber-400]="f.severity === 'warn'"
+                          [class.bg-slate-400]="f.severity === 'info'"></span>
+                        <div class="min-w-0">
+                          <p class="font-mono text-[0.65rem] text-slate-500 dark:text-slate-400">{{ f.code }}</p>
+                          <p class="font-medium text-slate-800 dark:text-slate-100">{{ f.message }}</p>
+                        </div>
+                      </li>
+                    }
+                  </ul>
+                </div>
+                }
+
+                <div class="mt-4 rounded-xl border border-slate-200/90 bg-white/90 p-4 dark:border-slate-700 dark:bg-slate-900/50">
+                  <p class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Hallazgos recientes (capa de decisión + CSV en esta muestra)
+                  </p>
+                  @if (commandDetailFindings().length === 0) {
+                    <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">
+                      No hay hallazgos en el recorte mostrado — puede disparar análisis desde el panel operativo.
+                    </p>
+                  } @else {
+                    <ul class="mt-3 max-h-52 space-y-2 overflow-y-auto text-sm">
+                      @for (f of commandDetailFindings(); track f.id) {
+                        <li
+                          class="flex gap-2 rounded-lg border border-slate-100 px-2 py-2 dark:border-slate-700/80">
+                          <span
+                            class="mt-0.5 h-2 w-2 shrink-0 rounded-full"
+                            [class.bg-rose-500]="f.severity === 'error'"
+                            [class.bg-amber-400]="f.severity === 'warn'"
+                            [class.bg-slate-400]="f.severity === 'info'"></span>
+                          <div class="min-w-0">
+                            <p class="font-mono text-[0.65rem] text-slate-500 dark:text-slate-400">{{ f.code }}</p>
+                            <p class="font-medium text-slate-800 dark:text-slate-100">{{ f.message }}</p>
+                          </div>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+
+                @if (commandDetailRuns().length > 0) {
+                  <div class="mt-4 rounded-xl border border-slate-200/90 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      Últimas corridas técnicas
+                    </p>
+                    <ul class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                      @for (r of commandDetailRuns().slice(0, 6); track r.id) {
+                        <li class="flex flex-wrap justify-between gap-2 border-b border-slate-200/60 pb-1 dark:border-slate-700/60">
+                          <span class="font-mono">{{ r.run_kind }}</span>
+                          <span class="font-medium">{{ r.status }}</span>
+                          <span class="w-full tabular-nums text-slate-500 sm:w-auto">{{
+                            formatShortDate(r.started_at)
+                          }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
 
   <!-- Asistente (wizard) -->
   <nav
@@ -710,7 +1070,7 @@
       } @else if (projects().length === 0) {
         <p class="text-slate-600 dark:text-slate-300">Aún no hay proyectos. Cree uno en el paso 3.</p>
       } @else {
-        <div class="overflow-x-auto rounded-xl border border-slate-200/90 dark:border-slate-600/50">
+        <div id="field-operaciones-tabla" class="overflow-x-auto rounded-xl border border-slate-200/90 dark:border-slate-600/50">
           <table class="w-full min-w-[820px] text-left text-sm">
             <thead
               class="bg-slate-50/90 text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
@@ -749,7 +1109,7 @@
                     }
                   </td>
                   <td class="px-3 py-3 pr-4 align-middle text-slate-700 dark:text-slate-200">
-                    {{ clientDisplayName(p.client_id) }}
+                    {{ projectClientLabel(p) }}
                   </td>
                   <td class="px-3 py-3 pr-4 align-middle">
                     <select

@@ -19,6 +19,9 @@ export interface FieldProject {
   status: string;
   /** csv: archivo; dooblo: API SurveyToGo. (Ausente = CSV en despliegues anteriores.) */
   ingest_mode?: FieldIngestMode;
+  /** Metadatos operativos (p. ej. sample_target). */
+  execution_metadata?: Record<string, unknown>;
+  last_execution_sync_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -243,6 +246,65 @@ export interface FieldSyncRun {
   completed_at: string | null;
 }
 
+/** KPI materializado (sync / pipeline Field). */
+export interface FieldMetric {
+  id: number;
+  field_project_id: number;
+  metric_code: string;
+  value: number;
+  calculated_at: string;
+  dimensions?: Record<string, unknown> | null;
+}
+
+/** Snapshot operativo (cuota, calidad tabular, GPS, etc.). */
+export interface FieldOperationalSnapshot {
+  id: number;
+  field_project_id: number;
+  field_sync_run_id: number | null;
+  field_policy_set_id: number | null;
+  quotas_state: Record<string, unknown> | null;
+  gps_state: Record<string, unknown> | null;
+  route_flags: Record<string, unknown> | null;
+  field_status: Record<string, unknown> | null;
+  last_calculated_at: string | null;
+}
+
+export interface FieldProjectSyncResponse {
+  field_project_id: number;
+  surveys_upserted: number;
+  metrics_emitted: string[];
+  partial_errors: Record<string, unknown>[];
+}
+
+/** Fila del GET /field/projects/overview (centro de mando). */
+export interface FieldProjectOverviewRow {
+  project: FieldProject;
+  /** Clave operativa (external_ref) o nombre de cuenta; ver backend. */
+  client_display_name: string;
+  /** Nombre de cuenta / marca (end_clients.name) cuando el vínculo es válido. */
+  client_name?: string | null;
+  /** Referencia externa del cliente final (end_clients.external_ref). */
+  client_external_ref?: string | null;
+  study_display_name: string | null;
+  kpis_latest: FieldMetric[];
+  findings_open_by_severity: Record<string, number>;
+  findings_pending_review: number;
+  surveys_linked_count: number;
+  active_dooblo_sources: number;
+  dooblo_sources_with_survey_id: number;
+  last_analysis_run_status: string | null;
+  last_analysis_run_at: string | null;
+  last_csv_import_status: string | null;
+  last_csv_import_at: string | null;
+  operational_snapshot_at: string | null;
+  health: 'green' | 'amber' | 'red';
+  health_reasons: string[];
+  quota_upstream_ok: boolean | null;
+  tabular_row_count: number | null;
+  /** Presente en GET /projects/{id}/overview; en listado multi-proyecto suele ir vacío. */
+  top_findings?: FieldFinding[];
+}
+
 export interface EndClient {
   id: number;
   company_id: number;
@@ -275,6 +337,46 @@ export class FieldService {
     return this.http.get<FieldProject[]>(environment.apiUrl + 'field/projects', {
       params,
     });
+  }
+
+  /** Resumen multi-proyecto con semáforo y KPIs (tablero ejecutivo). */
+  listProjectsOverview(
+    companyId: number,
+    clientId?: number | null
+  ): Observable<FieldProjectOverviewRow[]> {
+    let params = new HttpParams().set('company_id', String(companyId));
+    if (clientId != null && Number.isFinite(clientId)) {
+      params = params.set('client_id', String(clientId));
+    }
+    return this.http.get<FieldProjectOverviewRow[]>(
+      `${environment.apiUrl}field/projects/overview`,
+      { params }
+    );
+  }
+
+  /** Drill-down (clic 3): misma fila que overview + top_findings abiertos. */
+  getProjectOverview(projectId: number, topFindingsLimit = 12): Observable<FieldProjectOverviewRow> {
+    const params = new HttpParams().set(
+      'top_findings_limit',
+      String(Math.max(0, Math.min(50, topFindingsLimit)))
+    );
+    return this.http.get<FieldProjectOverviewRow>(
+      `${environment.apiUrl}field/projects/${projectId}/overview`,
+      { params }
+    );
+  }
+
+  getOperationalSnapshot(projectId: number): Observable<FieldOperationalSnapshot | null> {
+    return this.http.get<FieldOperationalSnapshot | null>(
+      `${environment.apiUrl}field/projects/${projectId}/operational-snapshot`
+    );
+  }
+
+  postExecutionSync(projectId: number): Observable<FieldProjectSyncResponse> {
+    return this.http.post<FieldProjectSyncResponse>(
+      `${environment.apiUrl}field/projects/${projectId}/sync`,
+      {}
+    );
   }
 
   createProject(body: FieldProjectCreateBody): Observable<FieldProject> {
