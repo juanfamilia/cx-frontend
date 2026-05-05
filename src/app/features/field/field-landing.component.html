@@ -11,6 +11,19 @@
       ingresa la <strong>API</strong> y en segundos ve los <strong>proyectos activos</strong> permitidos por
       la cuenta. El detalle operativo (vínculos, CSV, hallazgos) queda en el tablero cuando lo necesite.
     </p>
+    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <a
+        routerLink="/field/trabajo"
+        [queryParams]="{ focus: 'overview' }"
+        class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+        Ir al centro de mando — salud por proyecto
+      </a>
+      <a
+        routerLink="/field/trabajo"
+        class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+        Tablero completo (asistente y operaciones)
+      </a>
+    </div>
   </header>
 
   @if (isSuperAdmin) {
@@ -34,7 +47,9 @@
       No hay empresa seleccionada. Compruebe su usuario o permisos de superadministrador.
     </p>
   } @else {
-    <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+    <section
+      id="field-conectar-api"
+      class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
       <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">
         Conectar SurveyToGo / Dooblo
       </h2>
@@ -216,11 +231,17 @@
           </div>
         }
 
-        <div class="mt-8">
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <a
             routerLink="/field/trabajo"
+            [queryParams]="{ focus: 'overview' }"
             class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
-            Abrir tablero — vínculos por proyecto, encuestas, CSV y hallazgos
+            Abrir centro de mando en 7Field
+          </a>
+          <a
+            routerLink="/field/trabajo"
+            class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-center text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            Tablero completo
           </a>
         </div>
       </section>
@@ -234,9 +255,16 @@
 
   <footer class="mt-14 border-t border-slate-200 pt-8 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
     <p>
-      ¿Solo usa CSV? El tablero Field sigue disponible en
+      ¿Solo usa CSV? Abra el
+      <a
+        routerLink="/field/trabajo"
+        [queryParams]="{ focus: 'overview' }"
+        class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+        >centro de mando</a
+      >
+      o el
       <a routerLink="/field/trabajo" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
-        >/field/trabajo</a
+        >tablero completo</a
       >
       para cargar archivos y revisar hallazgos.
     </p>

@@ -1,9 +1,9 @@
 import { CommonModule, NgClass } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, forkJoin, of, Subscription } from 'rxjs';
 
 import { AuthService } from '@core/services/auth.service';
 import { ShareToasterService } from '@core/services/toast.service';
@@ -69,6 +69,8 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   private readonly fieldSvc = inject(FieldService);
   private readonly toast = inject(ShareToasterService);
   private readonly companiesSvc = inject(CompaniesService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly user = this.auth.getCurrentUser();
   readonly projects = signal<FieldProject[]>([]);
@@ -167,15 +169,27 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   readonly commandDetailLoading = signal(false);
   readonly commandSyncBusy = signal(false);
 
+  /** Tras ?focus=overview: scroll al centro de mando cuando el overview termina de cargar. */
+  private readonly pendingScrollToCommandOverview = signal(false);
+
   /** API company/ limita a 100 (FastAPI le=100). No pedir 200. */
   private static readonly companyListLimit = 100;
   private doobloPollTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnDestroy(): void {
     this.clearDoobloPoll();
+    this.queryParamsSub?.unsubscribe();
   }
 
+  private queryParamsSub?: Subscription;
+
   ngOnInit(): void {
+    this.queryParamsSub = this.route.queryParams.subscribe(params => {
+      if (params['focus'] === 'overview') {
+        this.pendingScrollToCommandOverview.set(true);
+      }
+    });
+
     if (this.isSuperAdmin) {
       this.companiesSvc.getAll(0, FieldProjectListComponent.companyListLimit).subscribe({
         next: res => {
@@ -431,6 +445,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         } else if (sel != null) {
           this.loadCommandDetail(sel);
         }
+        this.maybeScrollToCommandOverview();
       },
       error: () => {
         this.commandOverviewLoading.set(false);
@@ -439,7 +454,30 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
           'Field',
           'No se pudo cargar el resumen ejecutivo de proyectos.'
         );
+        this.maybeScrollToCommandOverview();
       },
+    });
+  }
+
+  /** Scroll suave al bloque #field-centro-mando si la URL traía ?focus=overview (landing → tablero). */
+  private maybeScrollToCommandOverview(): void {
+    if (!this.pendingScrollToCommandOverview()) {
+      return;
+    }
+    this.pendingScrollToCommandOverview.set(false);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      replaceUrl: true,
+      queryParams: { focus: null },
+      queryParamsHandling: 'merge',
+    });
+    queueMicrotask(() => {
+      requestAnimationFrame(() => {
+        document.getElementById('field-centro-mando')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      });
     });
   }
 
