@@ -92,6 +92,23 @@ export class FieldFindingsListPageComponent implements OnDestroy {
     this.modalFinding.set(null);
   }
 
+  findingStatusLabel(f: FieldFinding): string {
+    const raw = (f.approval_status || '').trim().toLowerCase();
+    if (!raw) {
+      return 'Pendiente de revisión';
+    }
+    if (raw === 'approved') {
+      return 'Revisado';
+    }
+    if (raw === 'rejected') {
+      return 'Rechazado';
+    }
+    if (raw === 'pending') {
+      return 'Pendiente de revisión';
+    }
+    return f.approval_status || 'Pendiente de revisión';
+  }
+
   private interviewerBlob(f: FieldFinding): string {
     const ev = f.evidence;
     let s = '';

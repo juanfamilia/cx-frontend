@@ -34,12 +34,12 @@ import { FieldRiskBadgeComponent, FieldRiskUiLevel } from './field-risk-badge.co
       </div>
       @if (finding.explanation) {
         <p class="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-          <span class="font-semibold text-slate-900 dark:text-slate-100">Qué pasó: </span>{{ finding.explanation }}
+          <span class="font-semibold text-slate-900 dark:text-slate-100">Descripción: </span>{{ finding.explanation }}
         </p>
       }
       @if (finding.recommendation) {
         <p class="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-          <span class="font-semibold text-slate-900 dark:text-slate-100">Qué hacer: </span
+          <span class="font-semibold text-slate-900 dark:text-slate-100">Recomendación: </span
           >{{ finding.recommendation }}
         </p>
       }

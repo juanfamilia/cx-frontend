@@ -17,27 +17,27 @@ export const fieldRoutes: Routes = [
     loadComponent: () =>
       import('./field-project-list.component').then(m => m.FieldProjectListComponent),
     canActivate: [authGuard, fieldGuard],
-    data: { ...fieldRoleData, title: 'Field — Tablero' },
+    data: { ...fieldRoleData, title: 'Field — Operaciones y asistente' },
   },
   {
     path: 'projects',
     loadComponent: () =>
       import('./field-project-selector.component').then(m => m.FieldProjectSelectorComponent),
     canActivate: [authGuard, fieldGuard],
-    data: { ...fieldRoleData, title: 'Field — Proyectos' },
+    data: { ...fieldRoleData, title: 'Field — Resumen de proyectos' },
   },
   {
     path: 'project/:projectId',
     loadComponent: () => import('./field-shell.component').then(m => m.FieldShellComponent),
     canActivate: [authGuard, fieldGuard],
-    data: { ...fieldRoleData, title: 'Field — Control proyecto' },
+    data: { ...fieldRoleData, title: 'Field — Detalle de proyecto' },
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       {
         path: 'dashboard',
         loadComponent: () =>
           import('./field-control-dashboard.component').then(m => m.FieldControlDashboardComponent),
-        data: { ...fieldRoleData, title: 'Field — Dashboard' },
+        data: { ...fieldRoleData, title: 'Field — Control del proyecto' },
       },
       {
         path: 'findings',
@@ -49,7 +49,7 @@ export const fieldRoutes: Routes = [
         path: 'scoring',
         loadComponent: () =>
           import('./field-scoring-breakdown.component').then(m => m.FieldScoringBreakdownComponent),
-        data: { ...fieldRoleData, title: 'Field — Scoring' },
+        data: { ...fieldRoleData, title: 'Field — Métricas y scoring' },
       },
       {
         path: 'executive-summary',

@@ -97,6 +97,21 @@ export class FieldControlDashboardComponent implements OnDestroy {
     return healthToRiskLevel(ov.health);
   }
 
+  /** Etiqueta legible para el semáforo de salud (sin exponer códigos crudos en UI). */
+  healthSummaryLabel(): string {
+    const h = this.overview()?.health;
+    if (h === 'green') {
+      return 'Dentro de lo esperado';
+    }
+    if (h === 'amber') {
+      return 'Requiere atención';
+    }
+    if (h === 'red') {
+      return 'Requiere acción';
+    }
+    return '—';
+  }
+
   kpiProgress(): string {
     const ov = this.overview();
     return ov ? formatCompletionRatePct(ov) : '—';
@@ -159,7 +174,7 @@ export class FieldControlDashboardComponent implements OnDestroy {
     this.fieldSvc.patchFindingApproval(pid, f.id, { status: 'approved' }).subscribe({
       next: () => {
         this.approvalBusy.set(false);
-        this.toast.showToast('success', 'Field', 'Hallazgo marcado como revisado.');
+        this.toast.showToast('success', 'Field', 'Estado actualizado: hallazgo marcado como revisado.');
         this.load(pid);
       },
       error: () => {

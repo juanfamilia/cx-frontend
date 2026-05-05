@@ -1,9 +1,11 @@
 @if (loading()) {
   <p class="text-sm text-slate-600 dark:text-slate-400">Cargando hallazgos…</p>
 } @else {
-  <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
+  <p class="text-sm text-slate-600 dark:text-slate-400">Lista completa de hallazgos del proyecto con filtros puntuales.</p>
+
+  <div class="mt-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
     <label class="text-sm font-medium text-slate-800 dark:text-slate-200">
-      Severidad (contiene)
+      Severidad (texto libre)
       <input
         type="text"
         class="mt-1 block w-full min-w-[10rem] rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
@@ -11,7 +13,7 @@
         (ngModelChange)="severityFilter.set($event)" />
     </label>
     <label class="text-sm font-medium text-slate-800 dark:text-slate-200">
-      Criticidad (contiene)
+      Criticidad operativa (texto libre)
       <input
         type="text"
         class="mt-1 block w-full min-w-[10rem] rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
@@ -19,7 +21,7 @@
         (ngModelChange)="criticalityFilter.set($event)" />
     </label>
     <label class="text-sm font-medium text-slate-800 dark:text-slate-200">
-      Encuestador / evidencia (contiene)
+      Caso o evidencia (texto libre)
       <input
         type="text"
         class="mt-1 block w-full min-w-[12rem] rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
@@ -32,10 +34,10 @@
     <table class="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-slate-700">
       <thead class="bg-slate-50 dark:bg-slate-900/60">
         <tr>
-          <th class="px-3 py-2 font-semibold">Tipo</th>
+          <th class="px-3 py-2 font-semibold">Hallazgo</th>
           <th class="px-3 py-2 font-semibold">Severidad</th>
-          <th class="px-3 py-2 font-semibold">Criticidad</th>
-          <th class="px-3 py-2 font-semibold">Estado</th>
+          <th class="px-3 py-2 font-semibold">Criticidad operativa</th>
+          <th class="px-3 py-2 font-semibold">Estado de revisión</th>
           <th class="px-3 py-2 font-semibold"></th>
         </tr>
       </thead>
@@ -47,13 +49,13 @@
               <app-field-risk-badge [level]="rowRisk(f.severity)" />
             </td>
             <td class="px-3 py-2 text-xs">{{ f.operational_criticality || '—' }}</td>
-            <td class="px-3 py-2 text-xs">{{ f.approval_status || 'abierto' }}</td>
+            <td class="px-3 py-2 text-xs">{{ findingStatusLabel(f) }}</td>
             <td class="px-3 py-2">
               <button
                 type="button"
                 class="text-sm font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
                 (click)="openDetail(f)">
-                Detalle
+                Ver ficha
               </button>
             </td>
           </tr>
@@ -61,7 +63,9 @@
       </tbody>
     </table>
     @if (filtered().length === 0) {
-      <p class="px-3 py-8 text-center text-sm text-slate-600 dark:text-slate-400">Sin hallazgos con ese filtro.</p>
+      <p class="px-3 py-8 text-center text-sm text-slate-600 dark:text-slate-400">
+        No hay hallazgos que coincidan con los filtros indicados.
+      </p>
     }
   </div>
 }
@@ -76,7 +80,7 @@
       class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-4 shadow-xl dark:bg-slate-900"
       (click)="$event.stopPropagation()">
       <div class="flex items-start justify-between gap-2">
-        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-50">Hallazgo</h2>
+        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-50">Ficha del hallazgo</h2>
         <button
           type="button"
           class="rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"

@@ -43,9 +43,9 @@ export class FieldShellComponent implements OnInit, OnDestroy {
     }
     const base = `/field/project/${id}`;
     return [
-      { label: 'Control', link: `${base}/dashboard`, fragment: undefined },
+      { label: 'Control del proyecto', link: `${base}/dashboard`, fragment: undefined },
       { label: 'Hallazgos', link: `${base}/findings`, fragment: undefined },
-      { label: 'Scoring / KPIs', link: `${base}/scoring`, fragment: undefined },
+      { label: 'Métricas y scoring', link: `${base}/scoring`, fragment: undefined },
       { label: 'Resumen ejecutivo', link: `${base}/executive-summary`, fragment: undefined },
     ];
   });
@@ -63,7 +63,9 @@ export class FieldShellComponent implements OnInit, OnDestroy {
           this.projectName.set(row.project?.name ?? `Proyecto #${id}`);
         },
         error: () => {
-          this.loadError.set('No se pudo cargar el proyecto o no tiene permiso.');
+          this.loadError.set(
+            'No se pudo cargar la información del proyecto. Compruebe permisos o vuelva al resumen de proyectos.'
+          );
           this.projectName.set(`Proyecto #${id}`);
         },
       });

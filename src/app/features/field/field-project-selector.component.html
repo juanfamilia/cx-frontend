@@ -1,18 +1,23 @@
 <div class="mx-auto max-w-6xl px-4 py-8">
   <header class="border-b border-slate-200 pb-6 dark:border-slate-700">
-    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">7Field</p>
-    <h1 class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">Selector de proyectos</h1>
-    <p class="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-300">
-      Vista operativa: avance, cliente y riesgo por proyecto. Pulse una fila para abrir el tablero de control del
-      proyecto.
+    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Siete Field</p>
+    <h1 class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">Resumen de proyectos</h1>
+    <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+      Avance, cliente y nivel de riesgo por proyecto. Seleccione una fila para abrir el panel de detalle del proyecto.
     </p>
-    <div class="mt-4 flex flex-wrap gap-3">
-      <a
-        routerLink="/field"
-        class="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400">← Inicio Field</a>
+    <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+      <a routerLink="/field" class="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+        >← Inicio Field</a
+      >
       <a
         routerLink="/field/trabajo"
-        class="text-sm font-medium text-slate-600 hover:underline dark:text-slate-400">Tablero completo</a>
+        [queryParams]="{ focus: 'overview' }"
+        class="font-medium text-slate-600 hover:underline dark:text-slate-400"
+        >Centro de mando (tablero)</a
+      >
+      <a routerLink="/field/trabajo" class="font-medium text-slate-600 hover:underline dark:text-slate-400"
+        >Operaciones y asistente</a
+      >
     </div>
   </header>
 
@@ -38,14 +43,16 @@
     @if (needsDoobloCta()) {
       <div
         class="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
-        <strong>Conecte SurveyToGo (Dooblo)</strong> para sincronizar estudios y KPIs desde la API.
-        <a routerLink="/field" class="ml-2 font-semibold text-indigo-700 underline dark:text-indigo-300">Ir a credenciales</a>
+        <strong>Configure SurveyToGo (Dooblo)</strong> para sincronizar estudios y métricas desde la API.
+        <a routerLink="/field" class="ml-2 font-semibold text-indigo-700 underline dark:text-indigo-300"
+          >Ir a credenciales</a
+        >
       </div>
     }
 
     <div class="mt-6 flex items-center justify-between gap-4">
       <p class="text-sm text-slate-600 dark:text-slate-400">
-        {{ loading() ? 'Cargando…' : rows().length + ' proyecto(s)' }}
+        {{ loading() ? 'Cargando…' : rows().length + ' proyecto(s) en esta empresa' }}
       </p>
       <button
         type="button"
@@ -64,7 +71,7 @@
             <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Cliente</th>
             <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Avance</th>
             <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Riesgo</th>
-            <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Críticos</th>
+            <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Hallazgos críticos</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -85,9 +92,9 @@
       </table>
       @if (!loading() && rows().length === 0) {
         <p class="px-4 py-8 text-center text-sm text-slate-600 dark:text-slate-400">
-          No hay proyectos Field para esta empresa. Cree uno desde el
+          No hay proyectos Field para esta empresa. Cree uno desde
           <a routerLink="/field/trabajo" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
-            >tablero completo</a
+            >operaciones y asistente</a
           >.
         </p>
       }
