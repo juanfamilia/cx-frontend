@@ -1,0 +1,92 @@
+@if (loading()) {
+  <p class="text-sm text-slate-600 dark:text-slate-400">Cargando hallazgos…</p>
+} @else {
+  <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
+    <label class="text-sm font-medium text-slate-800 dark:text-slate-200">
+      Severidad (contiene)
+      <input
+        type="text"
+        class="mt-1 block w-full min-w-[10rem] rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+        [ngModel]="severityFilter()"
+        (ngModelChange)="severityFilter.set($event)" />
+    </label>
+    <label class="text-sm font-medium text-slate-800 dark:text-slate-200">
+      Criticidad (contiene)
+      <input
+        type="text"
+        class="mt-1 block w-full min-w-[10rem] rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+        [ngModel]="criticalityFilter()"
+        (ngModelChange)="criticalityFilter.set($event)" />
+    </label>
+    <label class="text-sm font-medium text-slate-800 dark:text-slate-200">
+      Encuestador / evidencia (contiene)
+      <input
+        type="text"
+        class="mt-1 block w-full min-w-[12rem] rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+        [ngModel]="interviewerFilter()"
+        (ngModelChange)="interviewerFilter.set($event)" />
+    </label>
+  </div>
+
+  <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+    <table class="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-slate-700">
+      <thead class="bg-slate-50 dark:bg-slate-900/60">
+        <tr>
+          <th class="px-3 py-2 font-semibold">Tipo</th>
+          <th class="px-3 py-2 font-semibold">Severidad</th>
+          <th class="px-3 py-2 font-semibold">Criticidad</th>
+          <th class="px-3 py-2 font-semibold">Estado</th>
+          <th class="px-3 py-2 font-semibold"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+        @for (f of filtered(); track f.id) {
+          <tr class="bg-white dark:bg-slate-950/10">
+            <td class="px-3 py-2 font-mono text-xs">{{ f.code }}</td>
+            <td class="px-3 py-2">
+              <app-field-risk-badge [level]="rowRisk(f.severity)" />
+            </td>
+            <td class="px-3 py-2 text-xs">{{ f.operational_criticality || '—' }}</td>
+            <td class="px-3 py-2 text-xs">{{ f.approval_status || 'abierto' }}</td>
+            <td class="px-3 py-2">
+              <button
+                type="button"
+                class="text-sm font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                (click)="openDetail(f)">
+                Detalle
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (filtered().length === 0) {
+      <p class="px-3 py-8 text-center text-sm text-slate-600 dark:text-slate-400">Sin hallazgos con ese filtro.</p>
+    }
+  </div>
+}
+
+@if (modalFinding(); as mf) {
+  <div
+    class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
+    role="dialog"
+    aria-modal="true"
+    (click)="closeDetail()">
+    <div
+      class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-4 shadow-xl dark:bg-slate-900"
+      (click)="$event.stopPropagation()">
+      <div class="flex items-start justify-between gap-2">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-50">Hallazgo</h2>
+        <button
+          type="button"
+          class="rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+          (click)="closeDetail()">
+          Cerrar
+        </button>
+      </div>
+      <div class="mt-4">
+        <app-field-finding-card [finding]="mf" />
+      </div>
+    </div>
+  </div>
+}

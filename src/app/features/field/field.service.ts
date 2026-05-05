@@ -616,4 +616,14 @@ export class FieldService {
       body
     );
   }
+
+  /**
+   * Clever / capa ejecutiva (cuando el backend exponga el endpoint).
+   * Contrato esperado (MVP): `{ risks, impact, recommendations }` u objeto arbitrario.
+   */
+  generateFieldExecutiveSummary(body: {
+    field_project_id: number;
+  }): Observable<unknown> {
+    return this.http.post<unknown>(`${environment.apiUrl}clever/generate-summary`, body);
+  }
 }

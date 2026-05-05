@@ -1,0 +1,96 @@
+<div class="mx-auto max-w-6xl px-4 py-8">
+  <header class="border-b border-slate-200 pb-6 dark:border-slate-700">
+    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">7Field</p>
+    <h1 class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">Selector de proyectos</h1>
+    <p class="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-300">
+      Vista operativa: avance, cliente y riesgo por proyecto. Pulse una fila para abrir el tablero de control del
+      proyecto.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-3">
+      <a
+        routerLink="/field"
+        class="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400">← Inicio Field</a>
+      <a
+        routerLink="/field/trabajo"
+        class="text-sm font-medium text-slate-600 hover:underline dark:text-slate-400">Tablero completo</a>
+    </div>
+  </header>
+
+  @if (isSuperAdmin) {
+    <div class="mt-6">
+      <label class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+        Empresa
+        <select
+          class="mt-1 block w-full max-w-md rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+          [ngModel]="selectedCompanyId()"
+          (ngModelChange)="onCompanySelected($event)">
+          @for (co of companies(); track co.id) {
+            <option [ngValue]="co.id">{{ co.name }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  }
+
+  @if (effectiveCompanyId() == null) {
+    <p class="mt-8 text-sm text-amber-700 dark:text-amber-300">Seleccione empresa o revise permisos.</p>
+  } @else {
+    @if (needsDoobloCta()) {
+      <div
+        class="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+        <strong>Conecte SurveyToGo (Dooblo)</strong> para sincronizar estudios y KPIs desde la API.
+        <a routerLink="/field" class="ml-2 font-semibold text-indigo-700 underline dark:text-indigo-300">Ir a credenciales</a>
+      </div>
+    }
+
+    <div class="mt-6 flex items-center justify-between gap-4">
+      <p class="text-sm text-slate-600 dark:text-slate-400">
+        {{ loading() ? 'Cargando…' : rows().length + ' proyecto(s)' }}
+      </p>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-800"
+        [disabled]="loading()"
+        (click)="reloadOverview()">
+        Actualizar
+      </button>
+    </div>
+
+    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+      <table class="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-slate-700">
+        <thead class="bg-slate-50 dark:bg-slate-900/60">
+          <tr>
+            <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Proyecto</th>
+            <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Cliente</th>
+            <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Avance</th>
+            <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Riesgo</th>
+            <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Críticos</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+          @for (row of rows(); track row.project.id) {
+            <tr
+              class="cursor-pointer bg-white hover:bg-slate-50 dark:bg-slate-950/20 dark:hover:bg-slate-900/50"
+              [routerLink]="['/field/project', row.project.id, 'dashboard']">
+              <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-50">{{ row.project.name }}</td>
+              <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ row.client_display_name }}</td>
+              <td class="px-4 py-3 tabular-nums text-slate-800 dark:text-slate-200">{{ progressLabel(row) }}</td>
+              <td class="px-4 py-3">
+                <app-field-risk-badge [level]="riskLevel(row)" />
+              </td>
+              <td class="px-4 py-3 tabular-nums">{{ criticalOpen(row) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      @if (!loading() && rows().length === 0) {
+        <p class="px-4 py-8 text-center text-sm text-slate-600 dark:text-slate-400">
+          No hay proyectos Field para esta empresa. Cree uno desde el
+          <a routerLink="/field/trabajo" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+            >tablero completo</a
+          >.
+        </p>
+      }
+    </div>
+  }
+</div>

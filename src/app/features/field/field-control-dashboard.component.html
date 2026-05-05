@@ -1,0 +1,96 @@
+@if (loading()) {
+  <p class="text-sm text-slate-600 dark:text-slate-400">Cargando tablero…</p>
+} @else if (!overview()) {
+  <p class="text-sm text-slate-600 dark:text-slate-400">Sin datos de proyecto.</p>
+} @else {
+  <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <app-field-kpi-card title="Avance (completion)" [value]="kpiProgress()" />
+    <app-field-kpi-card title="Filas tabulares (proxy)" [value]="kpiInterviews()" trend="Último snapshot conocido" />
+    <div
+      class="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Riesgo global</p>
+      <div class="mt-2 flex items-center gap-2">
+        <app-field-risk-badge [level]="globalRiskLevel()" />
+        <span class="text-sm text-slate-600 dark:text-slate-300">{{ overview()!.health }}</span>
+      </div>
+    </div>
+    <app-field-kpi-card title="Hallazgos críticos abiertos" [value]="kpiCritical()" />
+  </div>
+
+  <div class="mt-8 grid gap-6 lg:grid-cols-5">
+    <div class="lg:col-span-3">
+      <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Hallazgos recientes (priorizar revisión)</h2>
+      <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+        Pulse una fila para ver detalle y acciones. Quién revisar se infiere del caso y metadatos cuando existen.
+      </p>
+      <div class="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+        <table class="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-slate-700">
+          <thead class="bg-slate-50 dark:bg-slate-900/60">
+            <tr>
+              <th class="px-3 py-2 font-semibold">Código</th>
+              <th class="px-3 py-2 font-semibold">Encuestador</th>
+              <th class="px-3 py-2 font-semibold">Región</th>
+              <th class="px-3 py-2 font-semibold">Riesgo</th>
+              <th class="px-3 py-2 font-semibold">Criticidad</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            @for (f of findings(); track f.id) {
+              <tr
+                class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/40"
+                [ngClass]="{
+                  'bg-indigo-50 dark:bg-indigo-950/30': rowSelected(f),
+                }"
+                (click)="selectFinding(f)">
+                <td class="px-3 py-2 font-mono text-xs">{{ f.code }}</td>
+                <td class="px-3 py-2">{{ interviewerLabel(f) }}</td>
+                <td class="px-3 py-2 text-slate-500">—</td>
+                <td class="px-3 py-2">
+                  <app-field-risk-badge [level]="rowRiskFromSeverity(f.severity)" />
+                </td>
+                <td class="px-3 py-2 text-xs">{{ f.operational_criticality || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        @if (findings().length === 0) {
+          <p class="px-3 py-6 text-center text-sm text-slate-600 dark:text-slate-400">Sin hallazgos en capa de decisión.</p>
+        }
+      </div>
+    </div>
+
+    <div class="lg:col-span-2">
+      <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Panel del hallazgo</h2>
+      @if (selectedFinding(); as sf) {
+        <div class="mt-3 space-y-4">
+          <app-field-finding-card [finding]="sf" />
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+              [disabled]="approvalBusy()"
+              (click)="markReviewed()">
+              Marcar revisado
+            </button>
+            <button
+              type="button"
+              disabled
+              title="Próximamente"
+              class="cursor-not-allowed rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-500 dark:border-slate-600">
+              Asignar usuario
+            </button>
+            <button
+              type="button"
+              disabled
+              title="Próximamente"
+              class="cursor-not-allowed rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-500 dark:border-slate-600">
+              Escalar
+            </button>
+          </div>
+        </div>
+      } @else {
+        <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">Seleccione un hallazgo en la tabla.</p>
+      }
+    </div>
+  </div>
+}
