@@ -8,12 +8,10 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { AuthService } from '@core/services/auth.service';
 import { ShareToasterService } from '@core/services/toast.service';
-import { Company } from '@interfaces/company';
 import { CompaniesService } from '@pages/companies/companies.service';
 
 import {
@@ -24,12 +22,12 @@ import {
   RemoteFieldCatalogItem,
 } from './field.service';
 import { FieldPrimaryNavTabsComponent } from './components/field-primary-nav-tabs.component';
-import { companyDisplayLabel } from './field-company.helpers';
+import { FieldTenantContextService } from './field-tenant-context.service';
 
 @Component({
   selector: 'app-field-landing',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, FieldPrimaryNavTabsComponent],
+  imports: [CommonModule, RouterLink, FieldPrimaryNavTabsComponent],
   templateUrl: './field-landing.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -38,17 +36,13 @@ export class FieldLandingComponent implements OnInit {
   private readonly fieldSvc = inject(FieldService);
   private readonly toast = inject(ShareToasterService);
   private readonly companiesSvc = inject(CompaniesService);
+  readonly tenantCtx = inject(FieldTenantContextService);
 
   /** Si el usuario cierra el pulso, no volver a abrirlo hasta cambio de empresa o nuevo catálogo útil. */
   private pulseSectionDismissed = false;
 
-  readonly companyDisplayLabel = companyDisplayLabel;
-
   readonly user = this.auth.getCurrentUser();
   readonly isSuperAdmin = this.user.role === 0;
-
-  readonly companies = signal<Company[]>([]);
-  readonly selectedCompanyId = signal<number | null>(null);
 
   readonly doobloCompanyContext = signal<DoobloCompanyConfig | null>(null);
   readonly doobloCredentialsLoading = signal(false);
@@ -59,6 +53,9 @@ export class FieldLandingComponent implements OnInit {
   readonly pulseSectionExpanded = signal(false);
 
   private static readonly companyListLimit = 100;
+
+  /** Evita arrastrar estado del pulso cuando el superadmin cambia de tenant en Fuentes. */
+  private lastLoadedCompanyId: number | null = null;
 
   constructor() {
     effect(() => {
@@ -79,11 +76,15 @@ export class FieldLandingComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.isSuperAdmin) {
+      const existing = this.tenantCtx.selectedCompanyId();
+      if (existing != null) {
+        this.loadFieldDoobloCompanyContext();
+        return;
+      }
       this.companiesSvc.getAll(0, FieldLandingComponent.companyListLimit).subscribe({
         next: res => {
-          this.companies.set(res.data);
           const first = res.data[0]?.id ?? null;
-          this.selectedCompanyId.set(first);
+          this.tenantCtx.setSelectedCompanyId(first);
           if (first != null) {
             this.loadFieldDoobloCompanyContext();
           }
@@ -97,29 +98,25 @@ export class FieldLandingComponent implements OnInit {
         },
       });
     } else {
-      this.selectedCompanyId.set(this.user.company_id ?? null);
       this.loadFieldDoobloCompanyContext();
     }
   }
 
-  onCompanySelected(id: number | string): void {
-    const n = typeof id === 'string' ? Number(id) : id;
-    if (!Number.isFinite(n)) {
-      return;
-    }
-    this.selectedCompanyId.set(n);
-    this.orgCatalog.set(null);
-    this.pulseSectionDismissed = false;
-    this.pulseSectionExpanded.set(false);
-    this.loadFieldDoobloCompanyContext();
-  }
-
   effectiveCompanyId(): number | null {
-    return this.selectedCompanyId();
+    if (this.isSuperAdmin) {
+      return this.tenantCtx.selectedCompanyId();
+    }
+    return this.user.company_id ?? null;
   }
 
   private loadFieldDoobloCompanyContext(): void {
     const cid = this.effectiveCompanyId();
+    if (cid !== this.lastLoadedCompanyId) {
+      this.lastLoadedCompanyId = cid;
+      this.pulseSectionDismissed = false;
+      this.orgCatalog.set(null);
+      this.pulseSectionExpanded.set(false);
+    }
     if (cid == null) {
       this.doobloCompanyContext.set(null);
       return;
@@ -230,20 +227,6 @@ export class FieldLandingComponent implements OnInit {
     } else {
       this.pulseSectionDismissed = false;
     }
-  }
-
-  doobloSourceLabel(): string {
-    const c = this.doobloCompanyContext();
-    if (!c) {
-      return '';
-    }
-    if (c.source === 'env') {
-      return 'Origen: variables de entorno del servidor.';
-    }
-    if (c.source === 'company') {
-      return 'Credenciales guardadas para esta empresa en esta consola.';
-    }
-    return '';
   }
 
   private httpErrorDetail(err: unknown, fallback: string): string {

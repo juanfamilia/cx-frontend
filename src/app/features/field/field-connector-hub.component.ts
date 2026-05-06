@@ -22,6 +22,7 @@ import {
 } from './field.service';
 import { FieldPrimaryNavTabsComponent } from './components/field-primary-nav-tabs.component';
 import { companyDisplayLabel } from './field-company.helpers';
+import { FieldTenantContextService } from './field-tenant-context.service';
 
 export type FieldConnectorTabId = 'dooblo' | 'qualtrics' | 'csv';
 
@@ -39,6 +40,7 @@ export class FieldConnectorHubComponent implements OnInit {
   private readonly companiesSvc = inject(CompaniesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  readonly tenantCtx = inject(FieldTenantContextService);
 
   readonly companyDisplayLabel = companyDisplayLabel;
 
@@ -46,7 +48,6 @@ export class FieldConnectorHubComponent implements OnInit {
   readonly isSuperAdmin = this.user.role === 0;
 
   readonly companies = signal<Company[]>([]);
-  readonly selectedCompanyId = signal<number | null>(null);
 
   readonly activeConnector = signal<FieldConnectorTabId>('dooblo');
 
@@ -82,9 +83,12 @@ export class FieldConnectorHubComponent implements OnInit {
       this.companiesSvc.getAll(0, FieldConnectorHubComponent.companyListLimit).subscribe({
         next: res => {
           this.companies.set(res.data);
-          const first = res.data[0]?.id ?? null;
-          this.selectedCompanyId.set(first);
-          if (first != null) {
+          let sid = this.tenantCtx.selectedCompanyId();
+          if (sid == null || !res.data.some(c => c.id === sid)) {
+            sid = res.data[0]?.id ?? null;
+            this.tenantCtx.setSelectedCompanyId(sid);
+          }
+          if (sid != null) {
             this.reloadConnectorContexts();
           }
         },
@@ -97,7 +101,6 @@ export class FieldConnectorHubComponent implements OnInit {
         },
       });
     } else {
-      this.selectedCompanyId.set(this.user.company_id ?? null);
       this.reloadConnectorContexts();
     }
   }
@@ -107,12 +110,15 @@ export class FieldConnectorHubComponent implements OnInit {
     if (!Number.isFinite(n)) {
       return;
     }
-    this.selectedCompanyId.set(n);
+    this.tenantCtx.setSelectedCompanyId(n);
     this.reloadConnectorContexts();
   }
 
   effectiveCompanyId(): number | null {
-    return this.selectedCompanyId();
+    if (!this.isSuperAdmin) {
+      return this.user.company_id ?? null;
+    }
+    return this.tenantCtx.selectedCompanyId();
   }
 
   selectConnector(id: FieldConnectorTabId): void {

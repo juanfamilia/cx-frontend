@@ -32,6 +32,12 @@ export type FieldPrimaryNavTabId =
         >Inicio Field</a
       >
       <a
+        routerLink="/field/conectores"
+        class="inline-flex items-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-500/50"
+        [ngClass]="navTabClass('fuentes')"
+        >Fuentes de datos</a
+      >
+      <a
         routerLink="/field/projects"
         class="inline-flex items-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-500/50"
         [ngClass]="navTabClass('resumen')"

@@ -24,7 +24,7 @@
         }
         <select
           class="mt-1 block w-full max-w-md rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-          [ngModel]="selectedCompanyId()"
+          [ngModel]="tenantCtx.selectedCompanyId()"
           (ngModelChange)="onCompanySelected($event)">
           @for (co of companies(); track co.id) {
             <option [ngValue]="co.id">{{ companyDisplayLabel(co) }}</option>
