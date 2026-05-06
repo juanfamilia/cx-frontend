@@ -14,11 +14,12 @@ import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { FieldService } from './field.service';
+import { FieldPrimaryNavTabsComponent } from './components/field-primary-nav-tabs.component';
 
 @Component({
   selector: 'app-field-shell',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, FieldPrimaryNavTabsComponent],
   templateUrl: './field-shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

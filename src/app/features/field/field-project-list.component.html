@@ -1,24 +1,24 @@
 <div class="field-work-root mx-auto max-w-6xl px-4 py-8 md:px-6">
+  <app-field-primary-nav-tabs class="mb-8" />
+
   <!-- Cabecera de página -->
   <div class="mb-8">
-    <a
-      routerLink="/field"
-      class="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
-      <span aria-hidden="true" class="text-lg">←</span>
-      <span>Volver al inicio de Field</span>
-    </a>
     <div
       class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white via-slate-50/80 to-indigo-50/40 p-6 shadow-sm dark:border-slate-700/80 dark:from-slate-900/90 dark:via-slate-900/60 dark:to-indigo-950/30">
       <div
         class="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-indigo-400/10 blur-2xl dark:bg-indigo-500/10"></div>
-      <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
-        Tablero de trabajo — centro de mando
+      <p class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300">
+        Siete Field
+      </p>
+      <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
+        Operaciones y centro de mando
       </h1>
       <p
         class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:text-base">
-        Vista ejecutiva con <strong class="text-slate-800 dark:text-slate-200">semáforos</strong> y KPIs por campaña.
-        Pulse el nombre de un proyecto para ver métricas de campo (cuota, muestra, vínculos, hallazgos) y actuar. El
-        asistente en cuatro pasos sigue debajo para alta de cliente/proyecto y operaciones finas.
+        Este tablero combina el <strong class="text-slate-800 dark:text-slate-200">centro de mando</strong> (bloque
+        superior con semáforos y KPIs) y las <strong class="text-slate-800 dark:text-slate-200">operaciones y asistente</strong>
+        (registro de cliente, proyecto, CSV y vínculos SurveyToGo). Para una vista tabular compacta use también
+        <a routerLink="/field/projects" class="font-semibold text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400">resumen de proyectos</a>.
       </p>
     </div>
   </div>
@@ -28,7 +28,7 @@
     <section
       id="field-centro-mando"
       class="mb-10 rounded-2xl border border-slate-200/90 bg-white/95 p-5 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900/50 dark:ring-white/10 md:p-6"
-      aria-label="Centro de mando Field">
+      aria-label="Centro de mando">
       <div class="flex flex-col gap-4 border-b border-slate-100 pb-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p class="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300">
@@ -49,8 +49,9 @@
         <p class="mt-6 text-sm text-slate-500 dark:text-slate-400">Cargando resumen ejecutivo…</p>
       } @else if (commandOverview().length === 0) {
         <p class="mt-6 text-sm text-slate-600 dark:text-slate-300">
-          Aún no hay proyectos Field para esta empresa en 7Field, o la lista está vacía. Cree un proyecto con el
-          asistente (más abajo) o, si ya existen en otra herramienta, vincule encuestas desde el panel operativo.
+          Aún no hay proyectos Field para esta empresa en Siete Field, o la lista está vacía. Cree un proyecto con el
+          asistente de operaciones (más abajo) o, si ya existen en otra herramienta, vincule encuestas desde este mismo
+          tablero.
         </p>
         <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
           Si acaba de dar de alta un proyecto, pulse <strong>Actualizar métricas</strong> arriba.
@@ -387,16 +388,16 @@
     </section>
   }
 
-  <!-- Asistente (wizard) -->
+  <!-- Operaciones y asistente (wizard) -->
   <nav
     class="field-wizard-shell mb-8 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600/50 dark:bg-slate-800/60 dark:ring-white/5 md:p-6"
-    aria-label="Asistente Field">
+    aria-label="Operaciones y Asistente Field">
     <div class="flex flex-col gap-1 border-b border-slate-100 pb-3 dark:border-slate-600/50 md:flex-row md:items-end md:justify-between">
       <div>
         <p class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
-          Asistente Field
+          Operaciones y Asistente
         </p>
-        <p class="mt-0.5 text-sm font-semibold text-slate-800 dark:text-slate-100">Export / configuración guiada</p>
+        <p class="mt-0.5 text-sm font-semibold text-slate-800 dark:text-slate-100">Alta guiada y vínculos SurveyToGo</p>
       </div>
     </div>
 
@@ -484,7 +485,7 @@
             class="field-control mt-1.5"
             (change)="onCompanySelect($event)">
             @for (c of companies(); track c.id) {
-              <option [value]="c.id" [selected]="c.id === selectedCompanyId()">{{ c.name }}</option>
+              <option [value]="c.id" [selected]="c.id === selectedCompanyId()">{{ companyDisplayLabel(c) }}</option>
             }
           </select>
         </label>

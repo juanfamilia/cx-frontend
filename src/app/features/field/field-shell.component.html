@@ -1,4 +1,6 @@
 <div class="mx-auto max-w-7xl px-4 py-6">
+  <app-field-primary-nav-tabs class="mb-5" />
+
   <nav class="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600 dark:text-slate-400">
     <a routerLink="/field/projects" class="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
       >Resumen de proyectos</a
@@ -6,7 +8,7 @@
     <span class="text-slate-300 dark:text-slate-600" aria-hidden="true">/</span>
     <span class="text-slate-800 dark:text-slate-200">{{ projectName() }}</span>
     <span class="mx-1 text-slate-300 dark:text-slate-600">·</span>
-    <a routerLink="/field/trabajo" class="hover:underline">Operaciones y asistente</a>
+    <a routerLink="/field/trabajo" queryParamsHandling="" class="hover:underline">Operaciones y Asistente</a>
   </nav>
 
   @if (loadError()) {

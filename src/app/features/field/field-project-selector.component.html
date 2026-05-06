@@ -5,30 +5,7 @@
     <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
       Avance, cliente y nivel de riesgo por proyecto. Seleccione una fila para abrir el panel de detalle del proyecto.
     </p>
-    <nav
-      class="mt-5 flex flex-wrap gap-2 border-b border-slate-200 pb-4 dark:border-slate-700"
-      aria-label="Secciones principales de Field">
-      <a
-        routerLink="/field"
-        class="inline-flex items-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-500/50"
-        [ngClass]="navTabClass('inicio')"
-        >Inicio Field</a
-      >
-      <a
-        routerLink="/field/trabajo"
-        [queryParams]="{ focus: 'overview' }"
-        class="inline-flex items-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-500/50"
-        [ngClass]="navTabClass('centro')"
-        >Centro de mando</a
-      >
-      <a
-        routerLink="/field/trabajo"
-        queryParamsHandling=""
-        class="inline-flex items-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-500/50"
-        [ngClass]="navTabClass('operaciones')"
-        >Operaciones y Asistente</a
-      >
-    </nav>
+    <app-field-primary-nav-tabs class="mt-5" />
   </header>
 
   @if (isSuperAdmin) {
@@ -40,7 +17,7 @@
           [ngModel]="selectedCompanyId()"
           (ngModelChange)="onCompanySelected($event)">
           @for (co of companies(); track co.id) {
-            <option [ngValue]="co.id">{{ co.name }}</option>
+            <option [ngValue]="co.id">{{ companyDisplayLabel(co) }}</option>
           }
         </select>
       </label>

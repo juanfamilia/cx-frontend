@@ -11,24 +11,10 @@
       <strong>panel de detalle</strong> cuando deba profundizar. Para crear proyectos, cargar CSV o enlazar encuestas,
       use operaciones avanzadas.
     </p>
-    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-      <a
-        routerLink="/field/projects"
-        class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
-        Abrir resumen de proyectos
-      </a>
-      <a
-        routerLink="/field/trabajo"
-        [queryParams]="{ focus: 'overview' }"
-        class="inline-flex items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3 text-center text-sm font-semibold text-indigo-900 shadow-sm hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-100 dark:hover:bg-indigo-950/70">
-        Centro de mando en tablero
-      </a>
-      <a
-        routerLink="/field/trabajo"
-        class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-        Operaciones y asistente
-      </a>
-    </div>
+    <app-field-primary-nav-tabs class="mt-6" />
+    <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">
+      Continúe hacia abajo para configurar credenciales SurveyToGo y revisar el pulso del catálogo.
+    </p>
   </header>
 
   @if (isSuperAdmin) {
@@ -40,7 +26,7 @@
           [ngModel]="selectedCompanyId()"
           (ngModelChange)="onCompanySelected($event)">
           @for (co of companies(); track co.id) {
-            <option [ngValue]="co.id">{{ co.name }}</option>
+            <option [ngValue]="co.id">{{ companyDisplayLabel(co) }}</option>
           }
         </select>
       </label>
@@ -236,24 +222,7 @@
           </div>
         }
 
-        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <a
-            routerLink="/field/projects"
-            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
-            Abrir resumen de proyectos
-          </a>
-          <a
-            routerLink="/field/trabajo"
-            [queryParams]="{ focus: 'overview' }"
-            class="inline-flex items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 px-6 py-3 text-center text-sm font-semibold text-indigo-900 shadow-sm hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-100 dark:hover:bg-indigo-950/70">
-            Centro de mando en tablero
-          </a>
-          <a
-            routerLink="/field/trabajo"
-            class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-center text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-            Operaciones y asistente
-          </a>
-        </div>
+        <app-field-primary-nav-tabs class="mt-8" />
       </section>
     } @else if (!doobloCredentialsLoading()) {
       <p class="mt-8 text-sm text-slate-600 dark:text-slate-400">
@@ -277,7 +246,7 @@
       >
       u
       <a routerLink="/field/trabajo" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
-        >operaciones y asistente</a
+        >Operaciones y Asistente</a
       >
       para cargar archivos y revisar hallazgos.
     </p>

@@ -22,11 +22,13 @@ import {
   OrganizationStudioProjectsCatalogPage,
   RemoteFieldCatalogItem,
 } from './field.service';
+import { FieldPrimaryNavTabsComponent } from './components/field-primary-nav-tabs.component';
+import { companyDisplayLabel } from './field-company.helpers';
 
 @Component({
   selector: 'app-field-landing',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, FieldPrimaryNavTabsComponent],
   templateUrl: './field-landing.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -35,6 +37,8 @@ export class FieldLandingComponent implements OnInit {
   private readonly fieldSvc = inject(FieldService);
   private readonly toast = inject(ShareToasterService);
   private readonly companiesSvc = inject(CompaniesService);
+
+  readonly companyDisplayLabel = companyDisplayLabel;
 
   readonly user = this.auth.getCurrentUser();
   readonly isSuperAdmin = this.user.role === 0;

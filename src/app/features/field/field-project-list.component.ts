@@ -31,6 +31,9 @@ import {
   RemoteFieldCatalogPage,
 } from './field.service';
 
+import { FieldPrimaryNavTabsComponent } from './components/field-primary-nav-tabs.component';
+import { companyDisplayLabel } from './field-company.helpers';
+
 /** Texto fijo por código técnico — lo ve el cliente sin leer el backend. */
 const FINDING_KIND_LABEL: Record<string, string> = {
   ROW_INCOMPLETE: 'Fila no guardada (faltan datos clave)',
@@ -60,7 +63,7 @@ const FINDING_KIND_LABEL: Record<string, string> = {
 @Component({
   selector: 'app-field-project-list',
   standalone: true,
-  imports: [CommonModule, NgClass, FormsModule, RouterLink],
+  imports: [CommonModule, NgClass, FormsModule, RouterLink, FieldPrimaryNavTabsComponent],
   templateUrl: './field-project-list.component.html',
   styleUrl: './field-project-list.component.css',
 })
@@ -71,6 +74,8 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   private readonly companiesSvc = inject(CompaniesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
+  readonly companyDisplayLabel = companyDisplayLabel;
 
   readonly user = this.auth.getCurrentUser();
   readonly projects = signal<FieldProject[]>([]);

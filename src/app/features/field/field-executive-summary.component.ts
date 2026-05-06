@@ -58,7 +58,7 @@ export class FieldExecutiveSummaryComponent implements OnDestroy {
         const hint =
           err instanceof HttpErrorResponse
             ? err.status === 404
-              ? 'El endpoint Clever aún no está desplegado para este entorno (404).'
+              ? 'El resumen ejecutivo (Siete Clever) no está disponible en este entorno. Cuando el backend publique POST /clever/generate-summary, podrá generarlo desde aquí.'
               : `${err.status}: ${err.message || 'Error'}`
             : 'No se pudo generar el resumen.';
         this.errorHint.set(hint);
