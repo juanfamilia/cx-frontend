@@ -9,8 +9,8 @@
           Control de campo, con contexto claro
         </h1>
         <p class="mt-1.5 max-w-3xl text-sm leading-snug text-slate-600 dark:text-slate-300">
-          Resumen por proyecto y detalle cuando haga falta. Configure aquí la conexión o use
-          <strong>Fuentes de datos</strong> si trabaja con Qualtrics o CSV.
+          Vista operativa y pulso de proyectos. Las credenciales de cada origen se gestionan en
+          <strong>Fuentes de datos</strong> (SurveyToGo, Qualtrics o CSV).
         </p>
       </div>
       <div class="shrink-0 lg:max-w-[min(100%,28rem)] lg:pt-1">
@@ -51,6 +51,11 @@
     <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
       <label class="text-xs font-semibold text-slate-800 dark:text-slate-100">
         Empresa (tenant)
+        @if (companies().length > 0) {
+          <span class="ml-1 font-normal text-slate-500 dark:text-slate-400">
+            · {{ companies().length }} {{ companies().length === 1 ? 'empresa en lista' : 'empresas en lista' }}
+          </span>
+        }
         <select
           class="mt-1 block w-full max-w-xs rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
           [ngModel]="selectedCompanyId()"
@@ -69,63 +74,41 @@
     </p>
   } @else {
     <section
-      id="field-conectar-api"
       class="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-      <div class="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
-          Credenciales SurveyToGo (Dooblo)
-        </h2>
-        <span class="text-[0.65rem] text-slate-500 dark:text-slate-400">Cifrado en servidor · contraseña no se vuelve a mostrar</span>
-      </div>
-      @if (doobloCompanyContext() && !doobloCredentialsLoading()) {
-        <p class="mt-1 text-[0.7rem] text-slate-500 dark:text-slate-400">{{ doobloSourceLabel() }}</p>
-      }
-      @if (doobloCredentialsLoading()) {
-        <p class="mt-3 text-sm text-slate-500">Cargando configuración…</p>
-      } @else {
-        <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end">
-          <label class="text-xs font-semibold text-slate-800 dark:text-slate-200 md:col-span-4">
-            URL (newapi)
-            <input
-              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 sm:text-sm"
-              type="url"
-              placeholder="https://api.dooblo.net/newapi"
-              autocomplete="off"
-              [ngModel]="doobloFormBaseUrl()"
-              (ngModelChange)="doobloFormBaseUrl.set($event)" />
-          </label>
-          <label class="text-xs font-semibold text-slate-800 dark:text-slate-200 md:col-span-4">
-            Usuario / REST key
-            <input
-              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 sm:text-sm"
-              autocomplete="off"
-              placeholder="REST_API_KEY…"
-              [ngModel]="doobloFormApiUser()"
-              (ngModelChange)="doobloFormApiUser.set($event)" />
-          </label>
-          <label class="text-xs font-semibold text-slate-800 dark:text-slate-200 md:col-span-3">
-            Contraseña
-            <input
-              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 sm:text-sm"
-              type="password"
-              autocomplete="new-password"
-              [placeholder]="
-                doobloCompanyContext()?.has_password ? 'Vacío = no cambiar' : 'Obligatoria la primera vez'
-              "
-              [ngModel]="doobloFormPassword()"
-              (ngModelChange)="doobloFormPassword.set($event)" />
-          </label>
-          <div class="md:col-span-1 md:flex md:justify-end">
-            <button
-              type="button"
-              class="w-full rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-45 md:w-auto md:py-1.5 md:text-sm"
-              [disabled]="doobloActionBusy()"
-              (click)="saveDoobloCompanyCredentials()">
-              Guardar
-            </button>
-          </div>
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="min-w-0 flex-1">
+          <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">SurveyToGo / Dooblo</h2>
+          @if (doobloCredentialsLoading()) {
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Comprobando estado de la conexión…</p>
+          } @else if (doobloCompanyContext()?.configured) {
+            <p class="mt-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">Conectado para esta empresa</p>
+            <p class="mt-1 text-[0.7rem] text-slate-500 dark:text-slate-400">{{ doobloSourceLabel() }}</p>
+            <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+              Para rotar claves o revisar la URL use <strong>Fuentes de datos</strong>; aquí conservamos solo el pulso operativo.
+            </p>
+          } @else {
+            <p class="mt-2 text-sm font-medium text-amber-800 dark:text-amber-300">
+              Sin credenciales de empresa para SurveyToGo
+            </p>
+            <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              Es un paso previo de configuración: elija SurveyToGo en fuentes, guarde la API y vuelva aquí para ver el catálogo.
+            </p>
+          }
         </div>
-      }
+        <div class="flex shrink-0 flex-col gap-2 sm:items-end">
+          <a
+            routerLink="/field/conectores"
+            [queryParams]="{ tab: 'dooblo' }"
+            class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400">
+            Abrir Fuentes de datos — Dooblo
+          </a>
+          <a
+            routerLink="/field/conectores"
+            class="text-center text-[0.65rem] font-medium text-indigo-600 underline underline-offset-2 hover:text-indigo-500 dark:text-indigo-400">
+            Ver todos los orígenes (Qualtrics, CSV…)
+          </a>
+        </div>
+      </div>
     </section>
 
     @if (doobloCompanyContext()?.configured && !doobloCredentialsLoading()) {
@@ -269,7 +252,9 @@
       </div>
     } @else if (!doobloCredentialsLoading()) {
       <p class="mt-4 text-xs text-slate-600 dark:text-slate-400">
-        Al guardar credenciales válidas podrá expandir el pulso de proyectos SurveyToGo aquí abajo.
+        Cuando SurveyToGo esté configurado en
+        <a routerLink="/field/conectores" class="font-semibold text-indigo-600 underline dark:text-indigo-400">Fuentes</a>
+        aparecerá el pulso de proyectos aquí debajo.
       </p>
     }
   }

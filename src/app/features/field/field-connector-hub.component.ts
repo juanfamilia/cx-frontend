@@ -64,6 +64,10 @@ export class FieldConnectorHubComponent implements OnInit {
   readonly qualtricsActionBusy = signal(false);
   readonly qualtricsProbeBusy = signal(false);
 
+  /** Si ya hay credenciales, el formulario queda plegado hasta que el usuario elija editar. */
+  readonly doobloCredentialFormOpen = signal(true);
+  readonly qualtricsCredentialFormOpen = signal(true);
+
   private static readonly companyListLimit = 100;
 
   ngOnInit(): void {
@@ -133,6 +137,33 @@ export class FieldConnectorHubComponent implements OnInit {
     };
   }
 
+  openDoobloCredentialForm(): void {
+    this.doobloCredentialFormOpen.set(true);
+  }
+
+  closeDoobloCredentialForm(): void {
+    this.doobloCredentialFormOpen.set(false);
+    const c = this.doobloCompanyContext();
+    if (c) {
+      this.doobloFormBaseUrl.set(c.base_url || '');
+      this.doobloFormApiUser.set(c.api_user || '');
+      this.doobloFormPassword.set('');
+    }
+  }
+
+  openQualtricsCredentialForm(): void {
+    this.qualtricsCredentialFormOpen.set(true);
+  }
+
+  closeQualtricsCredentialForm(): void {
+    this.qualtricsCredentialFormOpen.set(false);
+    const c = this.qualtricsCompanyContext();
+    if (c) {
+      this.qualtricsFormBaseUrl.set(c.base_url || '');
+      this.qualtricsFormApiToken.set('');
+    }
+  }
+
   private reloadConnectorContexts(): void {
     this.loadDoobloContext();
     this.loadQualtricsContext();
@@ -151,6 +182,7 @@ export class FieldConnectorHubComponent implements OnInit {
         this.doobloFormBaseUrl.set(c.base_url || '');
         this.doobloFormApiUser.set(c.api_user || '');
         this.doobloFormPassword.set('');
+        this.doobloCredentialFormOpen.set(!c.configured);
         this.doobloCredentialsLoading.set(false);
       },
       error: () => {
@@ -213,6 +245,7 @@ export class FieldConnectorHubComponent implements OnInit {
         this.qualtricsCompanyContext.set(c);
         this.qualtricsFormBaseUrl.set(c.base_url || '');
         this.qualtricsFormApiToken.set('');
+        this.qualtricsCredentialFormOpen.set(!c.configured);
         this.qualtricsCredentialsLoading.set(false);
       },
       error: () => {

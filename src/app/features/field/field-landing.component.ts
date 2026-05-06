@@ -39,7 +39,7 @@ export class FieldLandingComponent implements OnInit {
   private readonly toast = inject(ShareToasterService);
   private readonly companiesSvc = inject(CompaniesService);
 
-  /** Si el usuario cierra el pulso, no volver a abrirlo hasta cambio de empresa o guardado OK. */
+  /** Si el usuario cierra el pulso, no volver a abrirlo hasta cambio de empresa o nuevo catálogo útil. */
   private pulseSectionDismissed = false;
 
   readonly companyDisplayLabel = companyDisplayLabel;
@@ -52,10 +52,6 @@ export class FieldLandingComponent implements OnInit {
 
   readonly doobloCompanyContext = signal<DoobloCompanyConfig | null>(null);
   readonly doobloCredentialsLoading = signal(false);
-  readonly doobloFormBaseUrl = signal('');
-  readonly doobloFormApiUser = signal('');
-  readonly doobloFormPassword = signal('');
-  readonly doobloActionBusy = signal(false);
 
   readonly orgCatalog = signal<OrganizationStudioProjectsCatalogPage | null>(null);
   readonly orgCatalogBusy = signal(false);
@@ -132,9 +128,6 @@ export class FieldLandingComponent implements OnInit {
     this.fieldSvc.getDoobloContext(cid).subscribe({
       next: c => {
         this.doobloCompanyContext.set(c);
-        this.doobloFormBaseUrl.set(c.base_url || '');
-        this.doobloFormApiUser.set(c.api_user || '');
-        this.doobloFormPassword.set('');
         this.doobloCredentialsLoading.set(false);
         if (c.configured) {
           this.refreshOrgPulse({ announceFailures: false });
@@ -149,47 +142,6 @@ export class FieldLandingComponent implements OnInit {
         this.toast.showToast('error', 'Field', 'No se pudo cargar la configuración Dooblo.');
       },
     });
-  }
-
-  saveDoobloCompanyCredentials(): void {
-    const cid = this.effectiveCompanyId();
-    if (cid == null) {
-      return;
-    }
-    const base = this.doobloFormBaseUrl().trim();
-    const user = this.doobloFormApiUser().trim();
-    const pass = this.doobloFormPassword().trim();
-    if (!user) {
-      this.toast.showToast('warn', 'Field', 'Indique el usuario o REST_KEY de la API Dooblo.');
-      return;
-    }
-    if (!pass && !this.doobloCompanyContext()?.has_password) {
-      this.toast.showToast('warn', 'Field', 'Indique la contraseña o clave de la API (primera vez).');
-      return;
-    }
-    this.doobloActionBusy.set(true);
-    this.fieldSvc
-      .putDoobloCredentials(cid, {
-        base_url: base || null,
-        api_user: user,
-        password: pass || undefined,
-      })
-      .subscribe({
-        next: () => {
-          this.toast.showToast('success', 'Field', 'Credenciales guardadas. Actualizando proyectos…');
-          this.doobloActionBusy.set(false);
-          this.pulseSectionDismissed = false;
-          this.loadFieldDoobloCompanyContext();
-        },
-        error: (err: unknown) => {
-          this.doobloActionBusy.set(false);
-          this.toast.showToast(
-            'error',
-            'Field',
-            this.httpErrorDetail(err, 'No se pudieron guardar las credenciales.')
-          );
-        },
-      });
   }
 
   /**

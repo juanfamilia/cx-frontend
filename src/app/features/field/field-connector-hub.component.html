@@ -17,6 +17,11 @@
     <div class="mt-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <label class="text-sm font-semibold text-slate-800 dark:text-slate-100">
         Empresa (tenant)
+        @if (companies().length > 0) {
+          <span class="ml-1 font-normal text-slate-500 dark:text-slate-400">
+            · {{ companies().length }} {{ companies().length === 1 ? 'empresa en lista' : 'empresas en lista' }}
+          </span>
+        }
         <select
           class="mt-1 block w-full max-w-md rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
           [ngModel]="selectedCompanyId()"
@@ -56,49 +61,85 @@
         <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
           URL de la newapi, usuario REST key y contraseña. Los datos sensibles se cifran; la contraseña no se vuelve a mostrar.
         </p>
-        @if (doobloCompanyContext() && !doobloCredentialsLoading()) {
-          <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ doobloSourceLabel() }}</p>
-        }
         @if (doobloCredentialsLoading()) {
-          <p class="mt-4 text-sm text-slate-500">Cargando configuración…</p>
+          <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Cargando configuración…</p>
         } @else {
-          <div class="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
-            <label class="min-w-[220px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
-              URL de la API
-              <input
-                class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                type="url"
-                autocomplete="off"
-                placeholder="https://api.dooblo.net/newapi"
-                [ngModel]="doobloFormBaseUrl()"
-                (ngModelChange)="doobloFormBaseUrl.set($event)" />
-            </label>
-            <label class="min-w-[200px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
-              Usuario / REST key
-              <input
-                class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                autocomplete="off"
-                [ngModel]="doobloFormApiUser()"
-                (ngModelChange)="doobloFormApiUser.set($event)" />
-            </label>
-            <label class="min-w-[200px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
-              Contraseña
-              <input
-                class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                type="password"
-                autocomplete="new-password"
-                [placeholder]="doobloCompanyContext()?.has_password ? 'Dejar vacío para no cambiar' : 'Obligatoria la primera vez'"
-                [ngModel]="doobloFormPassword()"
-                (ngModelChange)="doobloFormPassword.set($event)" />
-            </label>
-            <button
-              type="button"
-              class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-600"
-              [disabled]="doobloActionBusy()"
-              (click)="saveDoobloCompanyCredentials()">
-              Guardar
-            </button>
-          </div>
+          @if (doobloCompanyContext()?.configured && !doobloCredentialFormOpen()) {
+            <div
+              class="mt-4 flex flex-col gap-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/25 sm:flex-row sm:items-center sm:justify-between">
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-200">Credenciales guardadas</p>
+                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">{{ doobloSourceLabel() }}</p>
+                @if (doobloCompanyContext(); as dctx) {
+                  <p class="mt-2 truncate font-mono text-[0.7rem] text-slate-700 dark:text-slate-300">
+                    {{ dctx.base_url || 'URL por defecto del servicio' }}
+                  </p>
+                  <p class="mt-1 text-[0.65rem] text-slate-500 dark:text-slate-400">
+                    Usuario REST guardado; la contraseña no se muestra de nuevo.
+                  </p>
+                }
+              </div>
+              <button
+                type="button"
+                class="shrink-0 rounded-xl border border-emerald-700 bg-white px-4 py-2 text-sm font-semibold text-emerald-900 shadow-sm hover:bg-emerald-50 dark:border-emerald-500 dark:bg-emerald-900 dark:text-emerald-100 dark:hover:bg-emerald-900/80"
+                (click)="openDoobloCredentialForm()">
+                Actualizar credenciales
+              </button>
+            </div>
+          }
+
+          @if (!doobloCompanyContext()?.configured || doobloCredentialFormOpen()) {
+            @if (doobloCompanyContext()?.configured && doobloCredentialFormOpen()) {
+              <div class="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  class="text-xs font-semibold text-slate-500 underline underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  (click)="closeDoobloCredentialForm()">
+                  Ocultar sin guardar
+                </button>
+              </div>
+            }
+            @if (doobloCompanyContext()) {
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ doobloSourceLabel() }}</p>
+            }
+            <div class="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
+              <label class="min-w-[220px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                URL de la API
+                <input
+                  class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                  type="url"
+                  autocomplete="off"
+                  placeholder="https://api.dooblo.net/newapi"
+                  [ngModel]="doobloFormBaseUrl()"
+                  (ngModelChange)="doobloFormBaseUrl.set($event)" />
+              </label>
+              <label class="min-w-[200px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                Usuario / REST key
+                <input
+                  class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                  autocomplete="off"
+                  [ngModel]="doobloFormApiUser()"
+                  (ngModelChange)="doobloFormApiUser.set($event)" />
+              </label>
+              <label class="min-w-[200px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                Contraseña
+                <input
+                  class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                  type="password"
+                  autocomplete="new-password"
+                  [placeholder]="doobloCompanyContext()?.has_password ? 'Dejar vacío para no cambiar' : 'Obligatoria la primera vez'"
+                  [ngModel]="doobloFormPassword()"
+                  (ngModelChange)="doobloFormPassword.set($event)" />
+              </label>
+              <button
+                type="button"
+                class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                [disabled]="doobloActionBusy()"
+                (click)="saveDoobloCompanyCredentials()">
+                Guardar
+              </button>
+            </div>
+          }
         }
         <p class="mt-6 text-sm text-slate-600 dark:text-slate-400">
           Para catálogo Studio, clientes y vínculo encuesta → proyecto Field use
@@ -120,55 +161,104 @@
           <code class="text-xs">X-API-TOKEN</code>). El token se cifra en reposo.
         </p>
         @if (qualtricsCredentialsLoading()) {
-          <p class="mt-4 text-sm text-slate-500">Cargando configuración…</p>
+          <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">Cargando configuración…</p>
         } @else {
-          @if (qualtricsCompanyContext(); as qc) {
-            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              Estado:
-              <strong>{{ qc.configured ? 'Configurado' : 'Pendiente' }}</strong>
-              @if (qc.base_url) {
-                · {{ qc.base_url }}
-              }
-            </p>
-          }
-          <div class="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
-            <label class="min-w-[260px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
-              URL del datacenter
-              <input
-                class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                type="url"
-                autocomplete="off"
-                placeholder="https://xxx.qualtrics.com"
-                [ngModel]="qualtricsFormBaseUrl()"
-                (ngModelChange)="qualtricsFormBaseUrl.set($event)" />
-            </label>
-            <label class="min-w-[220px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
-              API token
-              <input
-                class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                type="password"
-                autocomplete="new-password"
-                [placeholder]="qualtricsCompanyContext()?.has_api_token ? 'Dejar vacío para no cambiar' : 'Obligatorio la primera vez'"
-                [ngModel]="qualtricsFormApiToken()"
-                (ngModelChange)="qualtricsFormApiToken.set($event)" />
-            </label>
-            <div class="flex flex-wrap gap-2">
-              <button
-                type="button"
-                class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-600"
-                [disabled]="qualtricsActionBusy()"
-                (click)="saveQualtricsCredentials()">
-                Guardar
-              </button>
-              <button
-                type="button"
-                class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-                [disabled]="qualtricsProbeBusy() || !qualtricsCompanyContext()?.configured"
-                (click)="probeQualtrics()">
-                Validar con API
-              </button>
+          @if (qualtricsCompanyContext()?.configured && !qualtricsCredentialFormOpen()) {
+            <div
+              class="mt-4 flex flex-col gap-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/25 sm:flex-row sm:items-center sm:justify-between">
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-200">Credenciales Qualtrics guardadas</p>
+                @if (qualtricsCompanyContext(); as qcSum) {
+                  <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                    Datacenter:
+                    <span class="font-mono text-[0.7rem]">{{ qcSum.base_url || '—' }}</span>
+                  </p>
+                  @if (qcSum.api_probe_ok === true) {
+                    <p class="mt-1 text-[0.65rem] text-emerald-700 dark:text-emerald-400">Última validación API: correcta.</p>
+                  } @else if (qcSum.api_probe_ok === false) {
+                    <p class="mt-1 text-[0.65rem] text-amber-800 dark:text-amber-300">
+                      Revise token o permisos; puede validar de nuevo sin abrir el formulario.
+                    </p>
+                  }
+                }
+              </div>
+              <div class="flex shrink-0 flex-wrap gap-2">
+                <button
+                  type="button"
+                  class="rounded-xl border border-emerald-700 bg-white px-4 py-2 text-sm font-semibold text-emerald-900 shadow-sm hover:bg-emerald-50 dark:border-emerald-500 dark:bg-emerald-900 dark:text-emerald-100 dark:hover:bg-emerald-900/80"
+                  (click)="openQualtricsCredentialForm()">
+                  Actualizar credenciales
+                </button>
+                <button
+                  type="button"
+                  class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                  [disabled]="qualtricsProbeBusy()"
+                  (click)="probeQualtrics()">
+                  Validar con API
+                </button>
+              </div>
             </div>
-          </div>
+          }
+
+          @if (!qualtricsCompanyContext()?.configured || qualtricsCredentialFormOpen()) {
+            @if (qualtricsCompanyContext()?.configured && qualtricsCredentialFormOpen()) {
+              <div class="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  class="text-xs font-semibold text-slate-500 underline underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  (click)="closeQualtricsCredentialForm()">
+                  Ocultar sin guardar
+                </button>
+              </div>
+            }
+            @if (qualtricsCompanyContext(); as qc) {
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Estado:
+                <strong>{{ qc.configured ? 'Configurado' : 'Pendiente' }}</strong>
+                @if (qc.base_url) {
+                  · {{ qc.base_url }}
+                }
+              </p>
+            }
+            <div class="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
+              <label class="min-w-[260px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                URL del datacenter
+                <input
+                  class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                  type="url"
+                  autocomplete="off"
+                  placeholder="https://xxx.qualtrics.com"
+                  [ngModel]="qualtricsFormBaseUrl()"
+                  (ngModelChange)="qualtricsFormBaseUrl.set($event)" />
+              </label>
+              <label class="min-w-[220px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                API token
+                <input
+                  class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                  type="password"
+                  autocomplete="new-password"
+                  [placeholder]="qualtricsCompanyContext()?.has_api_token ? 'Dejar vacío para no cambiar' : 'Obligatorio la primera vez'"
+                  [ngModel]="qualtricsFormApiToken()"
+                  (ngModelChange)="qualtricsFormApiToken.set($event)" />
+              </label>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                  [disabled]="qualtricsActionBusy()"
+                  (click)="saveQualtricsCredentials()">
+                  Guardar
+                </button>
+                <button
+                  type="button"
+                  class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                  [disabled]="qualtricsProbeBusy() || !qualtricsCompanyContext()?.configured"
+                  (click)="probeQualtrics()">
+                  Validar con API
+                </button>
+              </div>
+            </div>
+          }
         }
         <p class="mt-6 text-sm text-slate-600 dark:text-slate-400">
           Cree un proyecto Field con origen Qualtrics en el asistente y guarde el ID de encuesta (
