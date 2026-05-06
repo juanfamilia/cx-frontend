@@ -186,6 +186,9 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   /** Tras ?focus=overview: scroll al centro de mando cuando el overview termina de cargar. */
   private readonly pendingScrollToCommandOverview = signal(false);
 
+  /** Tras ?focus=csv: ir a paso 4 y hacer scroll a la tabla / zona de importación. */
+  private readonly pendingScrollToCsvImport = signal(false);
+
   /** API company/ limita a 100 (FastAPI le=100). No pedir 200. */
   private static readonly companyListLimit = 100;
   private doobloPollTimer: ReturnType<typeof setTimeout> | null = null;
@@ -201,6 +204,10 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     this.queryParamsSub = this.route.queryParams.subscribe(params => {
       if (params['focus'] === 'overview') {
         this.pendingScrollToCommandOverview.set(true);
+      }
+      if (params['focus'] === 'csv') {
+        this.pendingScrollToCsvImport.set(true);
+        this.activeStep.set(4);
       }
     });
 
@@ -487,11 +494,34 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         if (open != null && !rows.some(p => p.id === open)) {
           this.closeImportSummary();
         }
+        this.maybeScrollToCsvImport();
       },
       error: () => {
         this.loading.set(false);
         this.toast.showToast('error', 'Field', 'No se pudieron cargar proyectos.');
       },
+    });
+  }
+
+  /** Scroll suave al paso 4 / tabla si la URL traía ?focus=csv (Fuentes → Operaciones). */
+  private maybeScrollToCsvImport(): void {
+    if (!this.pendingScrollToCsvImport()) {
+      return;
+    }
+    this.pendingScrollToCsvImport.set(false);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      replaceUrl: true,
+      queryParams: { focus: null },
+      queryParamsHandling: 'merge',
+    });
+    queueMicrotask(() => {
+      requestAnimationFrame(() => {
+        document.getElementById('field-csv-import-anchor')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      });
     });
   }
 

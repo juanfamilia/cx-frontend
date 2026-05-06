@@ -195,8 +195,9 @@ select.field-control {
   box-shadow: none;
 }
 
-/* “Elegir archivo” como control secundario */
+/* “Elegir archivo”: input superpuesto evita fallos del patrón sr-only + label en algunos navegadores */
 .field-file-link {
+  position: relative;
   display: inline-flex;
   align-items: center;
   font-size: 0.8125rem;
@@ -205,6 +206,18 @@ select.field-control {
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
+}
+
+.field-file-link input[type='file'] {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  margin: 0;
+  cursor: pointer;
+  opacity: 0;
+  font-size: 0;
+  width: 100%;
+  min-height: 100%;
 }
 
 :host-context(.dark) .field-file-link {

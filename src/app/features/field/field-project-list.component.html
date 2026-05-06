@@ -645,7 +645,7 @@
   }
 
   @if (activeStep() === 4) {
-    <section class="field-card">
+    <section id="field-csv-import-anchor" class="field-card scroll-mt-20">
       <h2 class="field-card-title">Paso 4 — Carga, API y resumen</h2>
       <p class="field-card-desc">
         La tabla muestra si cada proyecto usa <strong>CSV</strong> o <strong>API</strong> (SurveyToGo o Qualtrics) y, si aplicó, el estudio
@@ -1246,11 +1246,11 @@
                       <label
                         class="field-file-link"
                         [class.opacity-80]="isApiConnectorIngest(p)">
-                        Elegir archivo
+                        <span>Elegir archivo</span>
                         <input
                           type="file"
-                          accept=".csv,text/csv"
-                          class="sr-only"
+                          accept=".csv,text/csv,text/plain,.txt"
+                          [attr.title]="'CSV UTF-8, layout Field 2026.1'"
                           (change)="onImport(p.id, $event)" />
                       </label>
                     </div>
