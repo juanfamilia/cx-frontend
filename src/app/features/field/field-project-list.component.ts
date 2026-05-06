@@ -20,6 +20,7 @@ import {
   FieldFinding,
   FieldFindingDecisionLog,
   FieldImportRun,
+  FieldIngestMode,
   FieldOperationalSnapshot,
   FieldProject,
   FieldProjectExternalSource,
@@ -28,6 +29,7 @@ import {
   FieldStudy,
   FieldSyncRun,
   OrganizationStudioProjectsCatalogPage,
+  QualtricsCompanyConfig,
   RemoteFieldCatalogPage,
 } from './field.service';
 
@@ -92,7 +94,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   readonly newName = signal('');
   readonly newDescription = signal('');
   /** Origen de datos del proyecto (paso 3 del asistente). */
-  readonly newIngestMode = signal<'csv' | 'dooblo'>('csv');
+  readonly newIngestMode = signal<FieldIngestMode>('csv');
   readonly newClientName = signal('');
   readonly newStudyName = signal('');
   readonly newStudyDescription = signal('');
@@ -135,6 +137,13 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   readonly decisionFocusFindingId = signal<number | null>(null);
   readonly newDoobloSurveyId = signal('');
   readonly doobloActionBusy = signal(false);
+
+  /** Qualtrics XM: contexto credenciales por empresa + vínculo SV_. */
+  readonly qualtricsCompanyContext = signal<QualtricsCompanyConfig | null>(null);
+  readonly qualtricsCredentialsLoading = signal(false);
+  readonly newQualtricsSurveyId = signal('');
+  readonly qualtricsWizardLinkProjectId = signal<number | null>(null);
+  readonly qualtricsActionBusy = signal(false);
 
   /** Customer SurveyToGo (CustomerProjects / ProjectSurveys encadenan desde aquí). */
   readonly doobloSurveyToGoCustomerId = signal('');
@@ -285,10 +294,55 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
 
   /** Proyecto en tabla declara encuesta por API; condiciona el tablero. */
   isDoobloIngest(project: { ingest_mode?: string }): boolean {
-    return (project.ingest_mode ?? 'csv') === 'dooblo';
+    return (project.ingest_mode ?? 'csv').toLowerCase() === 'dooblo';
   }
 
-  /** Proyectos Field de la empresa con origen API (destino habitual del vínculo SurveyToGo). */
+  /** Proyecto declara ingest Qualtrics XM. */
+  isQualtricsIngest(project: { ingest_mode?: string }): boolean {
+    return (project.ingest_mode ?? 'csv').toLowerCase() === 'qualtrics';
+  }
+
+  /** SurveyToGo o Qualtrics: datos vía API declarada. */
+  isApiConnectorIngest(project: { ingest_mode?: string }): boolean {
+    return this.isDoobloIngest(project) || this.isQualtricsIngest(project);
+  }
+
+  qualtricsIngestProjects(): FieldProject[] {
+    return this.projects().filter(p => this.isQualtricsIngest(p));
+  }
+
+  anyProjectQualtrics(): boolean {
+    return this.projects().some(p => this.isQualtricsIngest(p));
+  }
+
+  private syncQualtricsWizardLinkProjectSelection(): void {
+    const list = this.qualtricsIngestProjects();
+    const cur = this.qualtricsWizardLinkProjectId();
+    if (cur != null && list.some(p => p.id === cur)) {
+      return;
+    }
+    this.qualtricsWizardLinkProjectId.set(list[0]?.id ?? null);
+  }
+
+  private loadFieldQualtricsCompanyContext(): void {
+    const cid = this.effectiveCompanyId();
+    if (cid == null) {
+      this.qualtricsCompanyContext.set(null);
+      return;
+    }
+    this.qualtricsCredentialsLoading.set(true);
+    this.fieldSvc.getQualtricsCredentials(cid).subscribe({
+      next: c => {
+        this.qualtricsCompanyContext.set(c);
+        this.qualtricsCredentialsLoading.set(false);
+      },
+      error: () => {
+        this.qualtricsCompanyContext.set(null);
+        this.qualtricsCredentialsLoading.set(false);
+      },
+    });
+  }
+
   doobloIngestProjects(): FieldProject[] {
     return this.projects().filter(p => this.isDoobloIngest(p));
   }
@@ -304,14 +358,25 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
 
   /** Hay al menos un proyecto Dooblo: el paso 3 prioriza credenciales API. */
   anyProjectDooblo(): boolean {
-    return this.projects().some(p => (p.ingest_mode ?? 'csv') === 'dooblo');
+    return this.projects().some(p => this.isDoobloIngest(p));
   }
 
+  qualtricsSummaryPanelClass(project: { ingest_mode?: string }): string {
+    const base =
+      'rounded-xl border border-sky-200/80 bg-sky-50/40 p-4 dark:border-sky-900/50 dark:bg-sky-950/20';
+    if (this.isQualtricsIngest(project)) {
+      return `${base} ring-2 ring-sky-300/50 dark:ring-sky-600/40`;
+    }
+    return base;
+  }
   doobloCredentialsPanelClass(): string {
     const base =
       'mb-6 rounded-xl border border-slate-200/90 bg-slate-50/60 p-4 dark:border-slate-600/50 dark:bg-slate-800/30';
     if (this.anyProjectDooblo()) {
       return `${base} ring-2 ring-indigo-400/50 dark:ring-indigo-500/40`;
+    }
+    if (this.anyProjectQualtrics()) {
+      return `${base} ring-2 ring-sky-400/45 dark:ring-sky-500/35`;
     }
     return base;
   }
@@ -397,6 +462,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
         this.reloadStudyCatalog();
         this.reloadProjects();
         this.loadFieldDoobloCompanyContext();
+        this.loadFieldQualtricsCompanyContext();
       },
       error: () =>
         this.toast.showToast('error', 'Field', 'No se pudieron cargar clientes finales.'),
@@ -413,6 +479,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       next: rows => {
         this.projects.set(rows);
         this.syncDoobloWizardLinkProjectSelection();
+        this.syncQualtricsWizardLinkProjectSelection();
         this.reloadStudyCatalog();
         this.loading.set(false);
         this.reloadCommandOverview();
@@ -579,6 +646,18 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   }
 
   linkageSignal(row: FieldProjectOverviewRow): 'green' | 'amber' | 'red' | 'neutral' {
+    const ingest = (row.project.ingest_mode ?? 'csv').toLowerCase();
+    if (ingest === 'qualtrics') {
+      const active = row.active_qualtrics_sources ?? 0;
+      const withSurvey = row.qualtrics_sources_with_survey_id ?? 0;
+      if (active === 0) {
+        return 'red';
+      }
+      if (withSurvey < active) {
+        return 'amber';
+      }
+      return 'green';
+    }
     if (!this.isDoobloIngest(row.project)) {
       return 'neutral';
     }
@@ -596,7 +675,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
     if (n == null) {
       return 'neutral';
     }
-    if (!this.isDoobloIngest(row.project)) {
+    if (!this.isDoobloIngest(row.project) && !this.isQualtricsIngest(row.project)) {
       return n > 0 ? 'green' : 'neutral';
     }
     if (n <= 0) {
@@ -875,6 +954,60 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       return;
     }
     this.saveDoobloSource(projectId);
+  }
+
+  saveQualtricsSource(projectId: number): void {
+    const survey = this.newQualtricsSurveyId().trim();
+    if (!survey) {
+      this.toast.showToast('warn', 'Field', 'Indique el Survey ID de Qualtrics (SV_…).');
+      return;
+    }
+    if (!this.qualtricsCompanyContext()?.configured) {
+      this.toast.showToast(
+        'warn',
+        'Field',
+        'Configure credenciales Qualtrics en Fuentes de datos (/field/conectores).'
+      );
+      return;
+    }
+    this.qualtricsActionBusy.set(true);
+    this.fieldSvc
+      .createExternalSource(projectId, {
+        source_type: 'qualtrics',
+        external_survey_id: survey,
+        is_active: true,
+      })
+      .subscribe({
+        next: () => {
+          this.newQualtricsSurveyId.set('');
+          this.toast.showToast('success', 'Field', 'Vínculo Qualtrics guardado.');
+          this.loadDoobloContextOnly(projectId, () => {
+            this.qualtricsActionBusy.set(false);
+          });
+          this.reloadCommandOverview();
+        },
+        error: (err: unknown) => {
+          this.qualtricsActionBusy.set(false);
+          this.toast.showToast(
+            'error',
+            'Field',
+            this.httpErrorDetail(err, 'No se pudo guardar el vínculo Qualtrics.')
+          );
+        },
+      });
+  }
+
+  saveQualtricsWizardLink(): void {
+    const projectId = this.qualtricsWizardLinkProjectId();
+    if (projectId == null) {
+      this.toast.showToast(
+        'warn',
+        'Field',
+        'Elija un proyecto Field con origen Qualtrics (paso 3) o créelo primero.'
+      );
+      return;
+    }
+    this.saveQualtricsSource(projectId);
   }
 
   /** Proyectos Studio de todos los clientes visibles para el usuario API (típico en MR). */
@@ -1382,7 +1515,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
       case 2:
         return 'Opcional: puede elegir o crear un «estudio» para agrupar el proyecto bajo un mismo nombre. También puede saltar este paso.';
       case 3:
-        return 'Ponga nombre al proyecto y diga si los datos vendrán de un CSV o de SurveyToGo / Dooblo.';
+        return 'Ponga nombre al proyecto y diga si los datos vendrán de CSV, SurveyToGo / Dooblo o Qualtrics XM.';
       case 4:
         return 'Aquí carga archivos, conecta SurveyToGo con usuario y clave, y revisa el estado de cada proyecto.';
       default:

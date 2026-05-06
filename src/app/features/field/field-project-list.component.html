@@ -102,7 +102,12 @@
                     @if (isDoobloIngest(row.project)) {
                       <span
                         class="inline-flex rounded-md border border-violet-200 bg-violet-50 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-violet-900 dark:border-violet-800/60 dark:bg-violet-950/40 dark:text-violet-200">
-                        API
+                        SurveyToGo
+                      </span>
+                    } @else if (isQualtricsIngest(row.project)) {
+                      <span
+                        class="inline-flex rounded-md border border-sky-200 bg-sky-50 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-sky-900 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-200">
+                        Qualtrics
                       </span>
                     } @else {
                       <span
@@ -149,7 +154,12 @@
                     <span>Encuestas Field: {{ row.surveys_linked_count }}</span>
                     @if (isDoobloIngest(row.project)) {
                       <span
-                        >Vínculos API {{ row.dooblo_sources_with_survey_id }}/{{ row.active_dooblo_sources }}</span
+                        >SurveyToGo {{ row.dooblo_sources_with_survey_id }}/{{ row.active_dooblo_sources }}</span
+                      >
+                    }
+                    @if (isQualtricsIngest(row.project)) {
+                      <span
+                        >Qualtrics {{ row.qualtrics_sources_with_survey_id ?? 0 }}/{{ row.active_qualtrics_sources ?? 0 }}</span
                       >
                     }
                   </div>
@@ -582,7 +592,7 @@
       <fieldset class="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 p-3 dark:border-slate-600/50 dark:bg-slate-800/30">
         <legend class="px-1 text-sm font-semibold text-slate-800 dark:text-slate-200">Origen de datos</legend>
         <p class="mb-2 text-xs text-slate-600 dark:text-slate-400">
-          En el paso siguiente podrá cargar CSV o configurar API según lo que elija aquí.
+          En el paso siguiente podrá cargar CSV o configurar SurveyToGo, Qualtrics u otro conector según lo que elija aquí.
         </p>
         <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-4">
           <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
@@ -602,6 +612,15 @@
               [ngModel]="newIngestMode()"
               (ngModelChange)="newIngestMode.set($event)" />
             SurveyToGo / Dooblo (API de campo)
+          </label>
+          <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
+            <input
+              type="radio"
+              name="field-ingest-mode"
+              [value]="'qualtrics'"
+              [ngModel]="newIngestMode()"
+              (ngModelChange)="newIngestMode.set($event)" />
+            Qualtrics XM (API v3)
           </label>
         </div>
       </fieldset>
@@ -629,16 +648,21 @@
     <section class="field-card">
       <h2 class="field-card-title">Paso 4 — Carga, API y resumen</h2>
       <p class="field-card-desc">
-        La tabla muestra si cada proyecto usa <strong>CSV</strong> o <strong>API</strong> y, si aplicó, el estudio
-        elegido antes. Para SurveyToGo: guarde usuario y clave, luego use los botones de carga o abra
-        <strong>Ver resumen</strong> en una fila para enlazar encuesta y ver alertas.
+        La tabla muestra si cada proyecto usa <strong>CSV</strong> o <strong>API</strong> (SurveyToGo o Qualtrics) y, si aplicó, el estudio
+        elegido antes. Configure credenciales en
+        <a
+          routerLink="/field/conectores"
+          class="font-semibold text-indigo-600 underline underline-offset-2 dark:text-indigo-400"
+          >/field/conectores</a
+        >
+        o aquí mismo para SurveyToGo.
       </p>
       <p
         class="mb-4 rounded-lg border border-indigo-200/70 bg-indigo-50/60 px-3 py-2 text-xs text-indigo-950 dark:border-indigo-800/40 dark:bg-indigo-950/20 dark:text-indigo-100/95">
-        Las credenciales de SurveyToGo también pueden configurarse primero en la pantalla de inicio de Field
-        (<a routerLink="/field" class="font-semibold underline underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-200"
-          >/field</a
-        >), donde verá un resumen ejecutivo de proyectos antes de entrar al tablero.
+        El selector unificado de fuentes (Dooblo, Qualtrics, CSV) está en
+        <a routerLink="/field/conectores" class="font-semibold underline underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-200"
+          >Fuentes de datos</a
+        >. La pantalla de inicio Field también permite SurveyToGo antes del tablero.
       </p>
       @if (effectiveCompanyId() != null) {
         <div [class]="doobloCredentialsPanelClass()">
@@ -1068,6 +1092,78 @@
           }
         </div>
       }
+      @if (effectiveCompanyId() != null) {
+        <div
+          class="mb-6 rounded-xl border border-sky-200/90 bg-sky-50/40 p-4 shadow-sm dark:border-sky-900/45 dark:bg-sky-950/25">
+          <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Qualtrics XM — vínculo de encuesta</h3>
+          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+            Configure datacenter y API token en
+            <a
+              routerLink="/field/conectores"
+              [queryParams]="{ tab: 'qualtrics' }"
+              class="font-semibold text-sky-700 underline underline-offset-2 dark:text-sky-300"
+              >Fuentes de datos</a
+            >. Aquí indique el Survey ID (<code class="text-[11px]">SV_…</code>) para el proyecto Field elegido.
+          </p>
+          @if (qualtricsCredentialsLoading()) {
+            <p class="mt-2 text-xs text-slate-500">Comprobando configuración Qualtrics…</p>
+          } @else {
+            @if (qualtricsCompanyContext(); as qc) {
+              <p
+                class="mt-2 text-xs font-medium"
+                [class.text-emerald-800]="qc.configured"
+                [class.dark:text-emerald-200]="qc.configured"
+                [class.text-amber-900]="!qc.configured"
+                [class.dark:text-amber-200]="!qc.configured">
+                {{
+                  qc.configured
+                    ? 'Credenciales Qualtrics listas para esta empresa.'
+                    : 'Faltan credenciales Qualtrics — ábralas desde Fuentes de datos.'
+                }}
+              </p>
+            }
+          }
+          @if (qualtricsIngestProjects().length === 0) {
+            <p class="mt-3 rounded-lg border border-sky-200/70 bg-white/60 px-3 py-2 text-xs text-slate-700 dark:border-sky-900/40 dark:bg-slate-900/30 dark:text-slate-300">
+              No hay proyectos con origen Qualtrics. En el <strong>paso 3</strong> elija <strong>Qualtrics XM</strong> al crear el proyecto.
+            </p>
+          } @else {
+            <label class="field-label mt-3 block max-w-xl">
+              Proyecto Field
+              <select
+                class="field-control mt-1.5 w-full"
+                [ngModel]="qualtricsWizardLinkProjectId()"
+                (ngModelChange)="qualtricsWizardLinkProjectId.set($event)">
+                @for (wp of qualtricsIngestProjects(); track wp.id) {
+                  <option [ngValue]="wp.id">{{ wp.name }} (#{{ wp.id }})</option>
+                }
+              </select>
+            </label>
+            <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+              <label class="field-label min-w-[240px] flex-1">
+                Survey ID
+                <input
+                  class="field-control mt-1.5 w-full font-mono text-xs"
+                  [ngModel]="newQualtricsSurveyId()"
+                  (ngModelChange)="newQualtricsSurveyId.set($event)"
+                  placeholder="SV_…"
+                  autocomplete="off" />
+              </label>
+              <button
+                type="button"
+                class="field-btn-primary text-sm self-end"
+                [disabled]="
+                  qualtricsActionBusy() ||
+                  qualtricsWizardLinkProjectId() == null ||
+                  !newQualtricsSurveyId().trim()
+                "
+                (click)="saveQualtricsWizardLink()">
+                Guardar vínculo Qualtrics
+              </button>
+            </div>
+          }
+        </div>
+      }
       @if (loading()) {
         <p class="text-slate-500">Cargando…</p>
       } @else if (effectiveCompanyId() == null) {
@@ -1104,7 +1200,12 @@
                     @if (isDoobloIngest(p)) {
                       <span
                         class="inline-flex rounded-md border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-900 dark:border-violet-800/60 dark:bg-violet-950/40 dark:text-violet-200">
-                        API
+                        SurveyToGo
+                      </span>
+                    } @else if (isQualtricsIngest(p)) {
+                      <span
+                        class="inline-flex rounded-md border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-200">
+                        Qualtrics
                       </span>
                     } @else {
                       <span
@@ -1135,16 +1236,16 @@
                   <td class="px-3 py-3 pr-4 align-middle">
                     <div
                       [class]="
-                        isDoobloIngest(p)
+                        isApiConnectorIngest(p)
                           ? 'flex flex-col gap-0.5 text-slate-500 dark:text-slate-400'
                           : ''
                       ">
-                      @if (isDoobloIngest(p)) {
+                      @if (isApiConnectorIngest(p)) {
                         <span class="text-[0.7rem] uppercase tracking-wide">CSV opcional</span>
                       }
                       <label
                         class="field-file-link"
-                        [class.opacity-80]="isDoobloIngest(p)">
+                        [class.opacity-80]="isApiConnectorIngest(p)">
                         Elegir archivo
                         <input
                           type="file"
@@ -1267,16 +1368,21 @@
                       }
                     }
                     @if (!summaryRun()) {
-                      @if (isDoobloIngest(p)) {
+                      @if (isApiConnectorIngest(p)) {
                         <p class="text-sm text-slate-600 dark:text-slate-300">
-                          Este proyecto declara origen <strong>API</strong>: use credenciales y el bloque SurveyToGo más
-                          abajo. Puede añadir un CSV de apoyo con <strong class="whitespace-nowrap">Elegir archivo</strong>
-                          si lo necesita.
+                          @if (isDoobloIngest(p)) {
+                            Este proyecto declara origen <strong>SurveyToGo</strong>: use credenciales y el bloque de listas más abajo o en
+                            <a routerLink="/field/conectores" class="font-semibold underline underline-offset-2">Fuentes de datos</a>.
+                          } @else {
+                            Este proyecto declara origen <strong>Qualtrics</strong>: token y datacenter en
+                            <a routerLink="/field/conectores" [queryParams]="{ tab: 'qualtrics' }" class="font-semibold underline underline-offset-2">Fuentes de datos</a>
+                            y Survey ID en el paso 4.
+                          }
+                          Puede añadir un CSV de apoyo con <strong class="whitespace-nowrap">Elegir archivo</strong> si lo necesita.
                         </p>
                       } @else {
                         <p class="text-sm text-slate-600 dark:text-slate-300">
-                          Todavía no hay importación CSV en este proyecto. Puede vincular Dooblo abajo; para datos
-                          tabulares suba un CSV en la fila de arriba.
+                          Todavía no hay importación CSV en este proyecto. Para datos tabulares suba un CSV en la fila de arriba o cree un proyecto API desde el asistente.
                         </p>
                       }
                     } @else {

@@ -20,6 +20,13 @@ export const fieldRoutes: Routes = [
     data: { ...fieldRoleData, title: 'Field — Operaciones y asistente' },
   },
   {
+    path: 'conectores',
+    loadComponent: () =>
+      import('./field-connector-hub.component').then(m => m.FieldConnectorHubComponent),
+    canActivate: [authGuard, fieldGuard],
+    data: { ...fieldRoleData, title: 'Field — Fuentes de datos' },
+  },
+  {
     path: 'projects',
     loadComponent: () =>
       import('./field-project-selector.component').then(m => m.FieldProjectSelectorComponent),

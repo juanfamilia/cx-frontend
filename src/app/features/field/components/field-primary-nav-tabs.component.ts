@@ -12,6 +12,7 @@ import { filter } from 'rxjs/operators';
 export type FieldPrimaryNavTabId =
   | 'inicio'
   | 'resumen'
+  | 'fuentes'
   | 'centro'
   | 'operaciones'
   | 'neutral';
@@ -95,6 +96,9 @@ export class FieldPrimaryNavTabsComponent {
     }
     if (path === '/field/projects') {
       return 'resumen';
+    }
+    if (path === '/field/conectores') {
+      return 'fuentes';
     }
     if (path === '/field/trabajo') {
       return params.get('focus') === 'overview' ? 'centro' : 'operaciones';

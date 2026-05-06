@@ -1,0 +1,200 @@
+<div class="mx-auto max-w-5xl px-4 py-8">
+  <header class="border-b border-slate-200 pb-8 dark:border-slate-700">
+    <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+      Siete Field
+    </p>
+    <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+      Fuentes de datos
+    </h1>
+    <p class="mt-3 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
+      Elija el <strong>origen del levantamiento</strong> para esta empresa: SurveyToGo / Dooblo, Qualtrics XM o archivo CSV.
+      La experiencia en tableros y alertas es la misma; aquí solo configura credenciales y enlaces técnicos.
+    </p>
+    <app-field-primary-nav-tabs class="mt-6" />
+  </header>
+
+  @if (isSuperAdmin) {
+    <div class="mt-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <label class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+        Empresa (tenant)
+        <select
+          class="mt-1 block w-full max-w-md rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+          [ngModel]="selectedCompanyId()"
+          (ngModelChange)="onCompanySelected($event)">
+          @for (co of companies(); track co.id) {
+            <option [ngValue]="co.id">{{ companyDisplayLabel(co) }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  }
+
+  @if (effectiveCompanyId() == null) {
+    <p class="mt-8 text-sm text-amber-700 dark:text-amber-300">
+      No hay empresa seleccionada. Compruebe su usuario o permisos de superadministrador.
+    </p>
+  } @else {
+    <div class="mt-8 grid gap-3 sm:grid-cols-3">
+      <button type="button" [ngClass]="connectorBtnClass('dooblo')" (click)="selectConnector('dooblo')">
+        SurveyToGo / Dooblo
+        <span class="mt-1 block text-xs font-normal text-slate-600 dark:text-slate-400">API newapi, catálogo Studio</span>
+      </button>
+      <button type="button" [ngClass]="connectorBtnClass('qualtrics')" (click)="selectConnector('qualtrics')">
+        Qualtrics XM
+        <span class="mt-1 block text-xs font-normal text-slate-600 dark:text-slate-400">Datacenter + API token (v3)</span>
+      </button>
+      <button type="button" [ngClass]="connectorBtnClass('csv')" (click)="selectConnector('csv')">
+        Archivo CSV
+        <span class="mt-1 block text-xs font-normal text-slate-600 dark:text-slate-400">Layout 2026.1 en el asistente</span>
+      </button>
+    </div>
+
+    @if (activeConnector() === 'dooblo') {
+      <section
+        class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">Credenciales SurveyToGo (Dooblo)</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          URL de la newapi, usuario REST key y contraseña. Los datos sensibles se cifran; la contraseña no se vuelve a mostrar.
+        </p>
+        @if (doobloCompanyContext() && !doobloCredentialsLoading()) {
+          <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ doobloSourceLabel() }}</p>
+        }
+        @if (doobloCredentialsLoading()) {
+          <p class="mt-4 text-sm text-slate-500">Cargando configuración…</p>
+        } @else {
+          <div class="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
+            <label class="min-w-[220px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              URL de la API
+              <input
+                class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                type="url"
+                autocomplete="off"
+                placeholder="https://api.dooblo.net/newapi"
+                [ngModel]="doobloFormBaseUrl()"
+                (ngModelChange)="doobloFormBaseUrl.set($event)" />
+            </label>
+            <label class="min-w-[200px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              Usuario / REST key
+              <input
+                class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                autocomplete="off"
+                [ngModel]="doobloFormApiUser()"
+                (ngModelChange)="doobloFormApiUser.set($event)" />
+            </label>
+            <label class="min-w-[200px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              Contraseña
+              <input
+                class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                type="password"
+                autocomplete="new-password"
+                [placeholder]="doobloCompanyContext()?.has_password ? 'Dejar vacío para no cambiar' : 'Obligatoria la primera vez'"
+                [ngModel]="doobloFormPassword()"
+                (ngModelChange)="doobloFormPassword.set($event)" />
+            </label>
+            <button
+              type="button"
+              class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+              [disabled]="doobloActionBusy()"
+              (click)="saveDoobloCompanyCredentials()">
+              Guardar
+            </button>
+          </div>
+        }
+        <p class="mt-6 text-sm text-slate-600 dark:text-slate-400">
+          Para catálogo Studio, clientes y vínculo encuesta → proyecto Field use
+          <a routerLink="/field/trabajo" class="font-semibold text-indigo-600 underline underline-offset-2 dark:text-indigo-400"
+            >Operaciones y asistente</a
+          >
+          (paso 4).
+        </p>
+      </section>
+    }
+
+    @if (activeConnector() === 'qualtrics') {
+      <section
+        class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">Credenciales Qualtrics XM</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          Use el origen HTTPS del datacenter de su marca (p. ej.
+          <code class="text-xs">https://eu.qualtrics.com</code>) y el token de API (
+          <code class="text-xs">X-API-TOKEN</code>). El token se cifra en reposo.
+        </p>
+        @if (qualtricsCredentialsLoading()) {
+          <p class="mt-4 text-sm text-slate-500">Cargando configuración…</p>
+        } @else {
+          @if (qualtricsCompanyContext(); as qc) {
+            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              Estado:
+              <strong>{{ qc.configured ? 'Configurado' : 'Pendiente' }}</strong>
+              @if (qc.base_url) {
+                · {{ qc.base_url }}
+              }
+            </p>
+          }
+          <div class="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
+            <label class="min-w-[260px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              URL del datacenter
+              <input
+                class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                type="url"
+                autocomplete="off"
+                placeholder="https://xxx.qualtrics.com"
+                [ngModel]="qualtricsFormBaseUrl()"
+                (ngModelChange)="qualtricsFormBaseUrl.set($event)" />
+            </label>
+            <label class="min-w-[220px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              API token
+              <input
+                class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                type="password"
+                autocomplete="new-password"
+                [placeholder]="qualtricsCompanyContext()?.has_api_token ? 'Dejar vacío para no cambiar' : 'Obligatorio la primera vez'"
+                [ngModel]="qualtricsFormApiToken()"
+                (ngModelChange)="qualtricsFormApiToken.set($event)" />
+            </label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                [disabled]="qualtricsActionBusy()"
+                (click)="saveQualtricsCredentials()">
+                Guardar
+              </button>
+              <button
+                type="button"
+                class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                [disabled]="qualtricsProbeBusy() || !qualtricsCompanyContext()?.configured"
+                (click)="probeQualtrics()">
+                Validar con API
+              </button>
+            </div>
+          </div>
+        }
+        <p class="mt-6 text-sm text-slate-600 dark:text-slate-400">
+          Cree un proyecto Field con origen Qualtrics en el asistente y guarde el ID de encuesta (
+          <code class="text-xs">SV_…</code>) como vínculo externo en el
+          <a routerLink="/field/trabajo" class="font-semibold text-indigo-600 underline underline-offset-2 dark:text-indigo-400"
+            >paso 4</a
+          >.
+        </p>
+      </section>
+    }
+
+    @if (activeConnector() === 'csv') {
+      <section
+        class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">Importación por archivo CSV</h2>
+        <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          No requiere credenciales de plataforma externa en esta pantalla: en el asistente cree el proyecto con origen
+          <strong>CSV</strong>, luego suba el archivo en la tabla de proyectos (layout
+          <strong>2026.1</strong>).
+        </p>
+        <a
+          routerLink="/field/trabajo"
+          class="mt-6 inline-flex rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600">
+          Ir a Operaciones y asistente
+        </a>
+      </section>
+    }
+  }
+</div>

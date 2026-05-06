@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
 
 /** Origen principal declarado al crear el proyecto (tablero Field). */
-export type FieldIngestMode = 'csv' | 'dooblo';
+export type FieldIngestMode = 'csv' | 'dooblo' | 'qualtrics';
 
 export interface FieldProject {
   id: number;
@@ -17,7 +17,7 @@ export interface FieldProject {
   description: string | null;
   import_format_version: string;
   status: string;
-  /** csv: archivo; dooblo: API SurveyToGo. (Ausente = CSV en despliegues anteriores.) */
+  /** csv: archivo; dooblo: SurveyToGo; qualtrics: XM API v3. */
   ingest_mode?: FieldIngestMode;
   /** Metadatos operativos (p. ej. sample_target). */
   execution_metadata?: Record<string, unknown>;
@@ -159,6 +159,23 @@ export interface DoobloCompanyConfig {
   updated_at: string | null;
 }
 
+export interface QualtricsCompanyConfig {
+  company_id: number;
+  configured: boolean;
+  qualtrics_configured?: boolean;
+  base_url: string | null;
+  has_api_token: boolean;
+  updated_at: string | null;
+  api_probe_ok?: boolean | null;
+  api_probe_status?: number | null;
+  api_probe_error?: string | null;
+}
+
+export interface QualtricsCredentialsPut {
+  base_url?: string | null;
+  api_token?: string | null;
+}
+
 export interface DoobloCredentialsPut {
   base_url?: string | null;
   api_user?: string | null;
@@ -292,6 +309,8 @@ export interface FieldProjectOverviewRow {
   surveys_linked_count: number;
   active_dooblo_sources: number;
   dooblo_sources_with_survey_id: number;
+  active_qualtrics_sources?: number;
+  qualtrics_sources_with_survey_id?: number;
   last_analysis_run_status: string | null;
   last_analysis_run_at: string | null;
   last_csv_import_status: string | null;
@@ -470,6 +489,28 @@ export class FieldService {
       body,
       { params: { company_id: String(companyId) } }
     );
+  }
+
+  getQualtricsCredentials(companyId: number): Observable<QualtricsCompanyConfig> {
+    return this.http.get<QualtricsCompanyConfig>(`${environment.apiUrl}field/qualtrics/credentials`, {
+      params: { company_id: String(companyId) },
+    });
+  }
+
+  getQualtricsStatus(companyId: number, probe = false): Observable<QualtricsCompanyConfig> {
+    let params = new HttpParams().set('company_id', String(companyId));
+    if (probe) {
+      params = params.set('probe', 'true');
+    }
+    return this.http.get<QualtricsCompanyConfig>(`${environment.apiUrl}field/qualtrics/status`, {
+      params,
+    });
+  }
+
+  putQualtricsCredentials(companyId: number, body: QualtricsCredentialsPut): Observable<unknown> {
+    return this.http.put(`${environment.apiUrl}field/qualtrics/credentials`, body, {
+      params: { company_id: String(companyId) },
+    });
   }
 
   /** Customers × CustomerProjects: proyectos Studio visibles para el usuario API (toda la organización permitida). */
