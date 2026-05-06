@@ -1,32 +1,58 @@
-<div class="mx-auto max-w-5xl px-4 py-8">
-  <header class="border-b border-slate-200 pb-8 dark:border-slate-700">
-    <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-      Siete Field
-    </p>
-    <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-      Control de campo, con contexto claro
-    </h1>
-    <p class="mt-3 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
-      Conecte SurveyToGo una vez y trabaje desde un <strong>resumen por proyecto</strong> y un
-      <strong>panel de detalle</strong> cuando deba profundizar. Para crear proyectos, cargar CSV o enlazar encuestas,
-      use operaciones avanzadas.
-    </p>
-    <app-field-primary-nav-tabs class="mt-6" />
-    <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">
-      Continúe hacia abajo para configurar SurveyToGo o abra
-      <a routerLink="/field/conectores" class="font-semibold underline underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-200"
-        >Fuentes de datos</a
-      >
-      para elegir Dooblo, Qualtrics o CSV antes del tablero.
-    </p>
+<div class="mx-auto max-w-6xl px-4 py-4">
+  <header class="border-b border-slate-200 pb-4 dark:border-slate-700">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+      <div class="min-w-0 flex-1">
+        <p class="text-[0.65rem] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+          Siete Field
+        </p>
+        <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 lg:text-[1.65rem]">
+          Control de campo, con contexto claro
+        </h1>
+        <p class="mt-1.5 max-w-3xl text-sm leading-snug text-slate-600 dark:text-slate-300">
+          Resumen por proyecto y detalle cuando haga falta. Configure aquí la conexión o use
+          <strong>Fuentes de datos</strong> si trabaja con Qualtrics o CSV.
+        </p>
+      </div>
+      <div class="shrink-0 lg:max-w-[min(100%,28rem)] lg:pt-1">
+        <app-field-primary-nav-tabs />
+      </div>
+    </div>
+
+    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Origen de datos</p>
+      <div class="flex flex-wrap gap-2">
+        <a
+          routerLink="/field/conectores"
+          class="inline-flex rounded-lg border border-violet-300 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-900 shadow-sm hover:bg-violet-100 dark:border-violet-700 dark:bg-violet-950/50 dark:text-violet-100 dark:hover:bg-violet-950/80">
+          SurveyToGo / Dooblo
+        </a>
+        <a
+          routerLink="/field/conectores"
+          [queryParams]="{ tab: 'qualtrics' }"
+          class="inline-flex rounded-lg border border-sky-300 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-900 shadow-sm hover:bg-sky-100 dark:border-sky-700 dark:bg-sky-950/50 dark:text-sky-100 dark:hover:bg-sky-950/80">
+          Qualtrics XM
+        </a>
+        <a
+          routerLink="/field/conectores"
+          [queryParams]="{ tab: 'csv' }"
+          class="inline-flex rounded-lg border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm hover:bg-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">
+          Archivo CSV
+        </a>
+      </div>
+      <a
+        routerLink="/field/conectores"
+        class="text-xs font-medium text-indigo-600 underline underline-offset-2 hover:text-indigo-500 dark:text-indigo-400">
+        Abrir pantalla completa de fuentes
+      </a>
+    </div>
   </header>
 
   @if (isSuperAdmin) {
-    <div class="mt-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <label class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+    <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <label class="text-xs font-semibold text-slate-800 dark:text-slate-100">
         Empresa (tenant)
         <select
-          class="mt-1 block w-full max-w-md rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+          class="mt-1 block w-full max-w-xs rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
           [ngModel]="selectedCompanyId()"
           (ngModelChange)="onCompanySelected($event)">
           @for (co of companies(); track co.id) {
@@ -38,50 +64,49 @@
   }
 
   @if (effectiveCompanyId() == null) {
-    <p class="mt-8 text-sm text-amber-700 dark:text-amber-300">
+    <p class="mt-4 text-sm text-amber-700 dark:text-amber-300">
       No hay empresa seleccionada. Compruebe su usuario o permisos de superadministrador.
     </p>
   } @else {
     <section
       id="field-conectar-api"
-      class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">
-        Credenciales SurveyToGo (Dooblo)
-      </h2>
-      <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-        URL de la API, usuario (REST key) y contraseña. Los datos sensibles se almacenan de forma segura; la contraseña
-        no se muestra de nuevo tras guardarla.
-      </p>
+      class="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
+          Credenciales SurveyToGo (Dooblo)
+        </h2>
+        <span class="text-[0.65rem] text-slate-500 dark:text-slate-400">Cifrado en servidor · contraseña no se vuelve a mostrar</span>
+      </div>
       @if (doobloCompanyContext() && !doobloCredentialsLoading()) {
-        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ doobloSourceLabel() }}</p>
+        <p class="mt-1 text-[0.7rem] text-slate-500 dark:text-slate-400">{{ doobloSourceLabel() }}</p>
       }
       @if (doobloCredentialsLoading()) {
-        <p class="mt-4 text-sm text-slate-500">Cargando configuración…</p>
+        <p class="mt-3 text-sm text-slate-500">Cargando configuración…</p>
       } @else {
-        <div class="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
-          <label class="min-w-[220px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
-            URL de la API (newapi)
+        <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end">
+          <label class="text-xs font-semibold text-slate-800 dark:text-slate-200 md:col-span-4">
+            URL (newapi)
             <input
-              class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 sm:text-sm"
               type="url"
               placeholder="https://api.dooblo.net/newapi"
               autocomplete="off"
               [ngModel]="doobloFormBaseUrl()"
               (ngModelChange)="doobloFormBaseUrl.set($event)" />
           </label>
-          <label class="min-w-[200px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+          <label class="text-xs font-semibold text-slate-800 dark:text-slate-200 md:col-span-4">
             Usuario / REST key
             <input
-              class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 sm:text-sm"
               autocomplete="off"
               placeholder="REST_API_KEY…"
               [ngModel]="doobloFormApiUser()"
               (ngModelChange)="doobloFormApiUser.set($event)" />
           </label>
-          <label class="min-w-[200px] flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200">
+          <label class="text-xs font-semibold text-slate-800 dark:text-slate-200 md:col-span-3">
             Contraseña
             <input
-              class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 sm:text-sm"
               type="password"
               autocomplete="new-password"
               [placeholder]="
@@ -90,169 +115,178 @@
               [ngModel]="doobloFormPassword()"
               (ngModelChange)="doobloFormPassword.set($event)" />
           </label>
-          <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-45"
-            [disabled]="doobloActionBusy()"
-            (click)="saveDoobloCompanyCredentials()">
-            Guardar y sincronizar vista
-          </button>
+          <div class="md:col-span-1 md:flex md:justify-end">
+            <button
+              type="button"
+              class="w-full rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-45 md:w-auto md:py-1.5 md:text-sm"
+              [disabled]="doobloActionBusy()"
+              (click)="saveDoobloCompanyCredentials()">
+              Guardar
+            </button>
+          </div>
         </div>
       }
     </section>
 
     @if (doobloCompanyContext()?.configured && !doobloCredentialsLoading()) {
-      <section class="mt-10">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">
-              Pulso ejecutivo — proyectos visibles en SurveyToGo
-            </h2>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-              Resumen automático tras la conexión; use el tablero para vínculos por proyecto, CSV y análisis.
-            </p>
-          </div>
-          <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-45 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-            [disabled]="orgCatalogBusy()"
-            (click)="refreshOrgPulse({ announceFailures: true })">
-            Actualizar listado
-          </button>
-        </div>
-
-        <div class="mt-6 grid gap-4 sm:grid-cols-3">
-          <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Proyectos (catálogo)
-            </p>
-            @if (orgCatalogBusy()) {
-              <p class="mt-2 text-2xl font-bold text-slate-400">…</p>
+      <div
+        class="mt-4 rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow dark:border-slate-700 dark:bg-slate-900/30"
+        [class.shadow-md]="pulseSectionExpanded()">
+        <button
+          type="button"
+          class="flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-50"
+          [attr.aria-expanded]="pulseSectionExpanded()"
+          (click)="togglePulseSection()">
+          <span>Pulso ejecutivo — catálogo SurveyToGo</span>
+          <span class="text-xs font-normal text-slate-500 dark:text-slate-400">
+            @if (pulseSectionExpanded()) {
+              Pulse para ocultar tabla y KPIs
             } @else {
-              <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-50">
-                {{ studioProjectsTotal() }}
-              </p>
+              Pulse para expandir tabla y KPIs
             }
-          </div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Clientes distintos
-            </p>
-            @if (orgCatalogBusy()) {
-              <p class="mt-2 text-2xl font-bold text-slate-400">…</p>
-            } @else if (distinctStudioCustomers() === null) {
-              <p class="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">No informado en esta página</p>
-            } @else {
-              <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-50">
-                {{ distinctStudioCustomers() }}
+          </span>
+        </button>
+        @if (pulseSectionExpanded()) {
+          <div class="border-t border-slate-200 px-4 pb-4 pt-2 dark:border-slate-700">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p class="text-xs text-slate-600 dark:text-slate-400">
+                Tras conectar, revise proyectos visibles; el tablero Field lleva vínculos por proyecto y CSV.
               </p>
-            }
+            </div>
+            <button
+              type="button"
+              class="inline-flex shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-45 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              [disabled]="orgCatalogBusy()"
+              (click)="refreshOrgPulse({ announceFailures: true })">
+              Actualizar listado
+            </button>
           </div>
-          <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Clientes con incidencia
-            </p>
-            @if (orgCatalogBusy()) {
-              <p class="mt-2 text-2xl font-bold text-slate-400">…</p>
-            } @else {
-              <p
-                class="mt-2 text-3xl font-bold"
-                [class.text-rose-600]="failedCustomersCount() > 0"
-                [class.dark:text-rose-400]="failedCustomersCount() > 0"
-                [class.text-slate-900]="failedCustomersCount() === 0"
-                [class.dark:text-slate-50]="failedCustomersCount() === 0">
-                {{ failedCustomersCount() }}
-              </p>
-            }
-          </div>
-        </div>
 
-        @if (orgCatalogBusy()) {
-          <p class="mt-6 text-sm text-slate-500">Consultando SurveyToGo…</p>
-        } @else if (previewProjects().length === 0) {
-          <p class="mt-6 text-sm text-slate-600 dark:text-slate-400">
-            No hay proyectos en esta primera página o la cuenta no tiene acceso. Pulse «Actualizar listado» tras
-            revisar credenciales.
-          </p>
-        } @else {
-          <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
-            <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-700">
-              <thead class="bg-slate-50 dark:bg-slate-800/60">
-                <tr>
-                  <th class="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-200">Cliente</th>
-                  <th class="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-200">Proyecto</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">ID</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900/30">
-                @for (row of previewProjects(); track trackByExternalId($index, row)) {
-                  <tr>
-                    <td class="whitespace-nowrap px-4 py-2.5 text-slate-800 dark:text-slate-200">
-                      {{ row.studio_customer_name || row.studio_customer_id || '—' }}
-                    </td>
-                    <td class="max-w-md px-4 py-2.5 font-medium text-slate-900 dark:text-slate-50">
-                      {{ row.title }}
-                    </td>
-                    <td class="whitespace-nowrap px-4 py-2.5 font-mono text-xs text-slate-500 dark:text-slate-400">
-                      {{ row.external_id }}
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-          @if (orgCatalog()?.has_more) {
-            <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Hay más resultados en SurveyToGo; en operaciones avanzadas puede enlazar proyecto y encuesta con más detalle.
-            </p>
-          }
-        }
-
-        @if ((orgCatalog()?.failed_customers?.length ?? 0) > 0) {
-          <div
-            class="mt-6 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/25 dark:text-amber-100">
-            <p class="font-semibold">Incidencias al leer algunos clientes</p>
-            <ul class="mt-2 list-disc space-y-1 pl-5">
-              @for (f of failurePreview(6); track f.customer_id) {
-                <li>
-                  <span class="font-mono text-xs">{{ f.customer_id }}</span>
-                  @if (f.customer_name) {
-                    — {{ f.customer_name }}
-                  }
-                  : {{ f.reason }}
-                </li>
+          <div class="mt-4 grid gap-2 sm:grid-cols-3">
+            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-800/40">
+              <p class="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Proyectos
+              </p>
+              @if (orgCatalogBusy()) {
+                <p class="mt-1 text-xl font-bold text-slate-400">…</p>
+              } @else {
+                <p class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-50">{{ studioProjectsTotal() }}</p>
               }
-            </ul>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-800/40">
+              <p class="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Clientes distintos
+              </p>
+              @if (orgCatalogBusy()) {
+                <p class="mt-1 text-xl font-bold text-slate-400">…</p>
+              } @else if (distinctStudioCustomers() === null) {
+                <p class="mt-1 text-xs font-medium text-slate-600 dark:text-slate-300">N/D</p>
+              } @else {
+                <p class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-50">
+                  {{ distinctStudioCustomers() }}
+                </p>
+              }
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-800/40">
+              <p class="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Incidencias
+              </p>
+              @if (orgCatalogBusy()) {
+                <p class="mt-1 text-xl font-bold text-slate-400">…</p>
+              } @else {
+                <p
+                  class="mt-1 text-2xl font-bold"
+                  [class.text-rose-600]="failedCustomersCount() > 0"
+                  [class.dark:text-rose-400]="failedCustomersCount() > 0"
+                  [class.text-slate-900]="failedCustomersCount() === 0"
+                  [class.dark:text-slate-50]="failedCustomersCount() === 0">
+                  {{ failedCustomersCount() }}
+                </p>
+              }
+            </div>
           </div>
-        }
 
-        <app-field-primary-nav-tabs class="mt-8" />
-      </section>
+          @if (orgCatalogBusy()) {
+            <p class="mt-4 text-xs text-slate-500">Consultando SurveyToGo…</p>
+          } @else if (previewProjects().length === 0) {
+            <p class="mt-4 text-xs text-slate-600 dark:text-slate-400">
+              Sin proyectos en esta vista o sin permisos. Revise credenciales y pulse Actualizar.
+            </p>
+          } @else {
+            <div class="mt-4 max-h-[min(40vh,16rem)] overflow-auto rounded-lg border border-slate-200 dark:border-slate-700">
+              <table class="min-w-full divide-y divide-slate-200 text-xs dark:divide-slate-700">
+                <thead class="sticky top-0 bg-slate-50 dark:bg-slate-800/90">
+                  <tr>
+                    <th class="px-3 py-2 text-left font-semibold text-slate-700 dark:text-slate-200">Cliente</th>
+                    <th class="px-3 py-2 text-left font-semibold text-slate-700 dark:text-slate-200">Proyecto</th>
+                    <th class="px-3 py-2 text-left font-semibold text-slate-500 dark:text-slate-400">ID</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900/30">
+                  @for (row of previewProjects(); track trackByExternalId($index, row)) {
+                    <tr>
+                      <td class="whitespace-nowrap px-3 py-2 text-slate-800 dark:text-slate-200">
+                        {{ row.studio_customer_name || row.studio_customer_id || '—' }}
+                      </td>
+                      <td class="max-w-[12rem] truncate px-3 py-2 font-medium text-slate-900 dark:text-slate-50">
+                        {{ row.title }}
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-2 font-mono text-[0.65rem] text-slate-500 dark:text-slate-400">
+                        {{ row.external_id }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            @if (orgCatalog()?.has_more) {
+              <p class="mt-2 text-[0.65rem] text-slate-500 dark:text-slate-400">
+                Hay más resultados en SurveyToGo; detalle en Operaciones y Asistente.
+              </p>
+            }
+          }
+
+          @if ((orgCatalog()?.failed_customers?.length ?? 0) > 0) {
+            <div
+              class="mt-4 rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/25 dark:text-amber-100">
+              <p class="font-semibold">Incidencias al leer algunos clientes</p>
+              <ul class="mt-1 list-disc space-y-0.5 pl-4">
+                @for (f of failurePreview(6); track f.customer_id) {
+                  <li>
+                    <span class="font-mono text-[0.65rem]">{{ f.customer_id }}</span>
+                    @if (f.customer_name) {
+                      — {{ f.customer_name }}
+                    }
+                    : {{ f.reason }}
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+        }
+      </div>
     } @else if (!doobloCredentialsLoading()) {
-      <p class="mt-8 text-sm text-slate-600 dark:text-slate-400">
-        Cuando guarde credenciales válidas, esta misma pantalla mostrará automáticamente los proyectos activos
-        que SurveyToGo expone a esa cuenta API.
+      <p class="mt-4 text-xs text-slate-600 dark:text-slate-400">
+        Al guardar credenciales válidas podrá expandir el pulso de proyectos SurveyToGo aquí abajo.
       </p>
     }
   }
 
-  <footer class="mt-14 border-t border-slate-200 pt-8 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
-    <p>
-      ¿Trabaja solo con CSV? Use
-      <a routerLink="/field/projects" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
-        >resumen de proyectos</a
-      >,
+  <footer class="mt-6 border-t border-slate-200 pt-4 text-[0.65rem] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+    <p class="leading-snug">
+      Solo CSV:
+      <a routerLink="/field/projects" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">Resumen</a>
+      ·
       <a
         routerLink="/field/trabajo"
         [queryParams]="{ focus: 'overview' }"
         class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
-        >centro de mando</a
-      >
-      u
+        >Centro de mando</a>
+      ·
       <a routerLink="/field/trabajo" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
-        >Operaciones y Asistente</a
-      >
-      para cargar archivos y revisar hallazgos.
+        >Operaciones</a>
     </p>
   </footer>
 </div>

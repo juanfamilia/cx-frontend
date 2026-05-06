@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -38,6 +39,9 @@ export class FieldLandingComponent implements OnInit {
   private readonly toast = inject(ShareToasterService);
   private readonly companiesSvc = inject(CompaniesService);
 
+  /** Si el usuario cierra el pulso, no volver a abrirlo hasta cambio de empresa o guardado OK. */
+  private pulseSectionDismissed = false;
+
   readonly companyDisplayLabel = companyDisplayLabel;
 
   readonly user = this.auth.getCurrentUser();
@@ -56,7 +60,26 @@ export class FieldLandingComponent implements OnInit {
   readonly orgCatalog = signal<OrganizationStudioProjectsCatalogPage | null>(null);
   readonly orgCatalogBusy = signal(false);
 
+  readonly pulseSectionExpanded = signal(false);
+
   private static readonly companyListLimit = 100;
+
+  constructor() {
+    effect(() => {
+      const loading = this.doobloCredentialsLoading();
+      const ctx = this.doobloCompanyContext();
+      const busy = this.orgCatalogBusy();
+      const cat = this.orgCatalog();
+      if (loading || busy || !ctx?.configured || cat == null) {
+        return;
+      }
+      const hasData = (cat.total ?? 0) > 0 || (cat.items?.length ?? 0) > 0;
+      if (!hasData || this.pulseSectionDismissed) {
+        return;
+      }
+      this.pulseSectionExpanded.set(true);
+    });
+  }
 
   ngOnInit(): void {
     if (this.isSuperAdmin) {
@@ -90,6 +113,8 @@ export class FieldLandingComponent implements OnInit {
     }
     this.selectedCompanyId.set(n);
     this.orgCatalog.set(null);
+    this.pulseSectionDismissed = false;
+    this.pulseSectionExpanded.set(false);
     this.loadFieldDoobloCompanyContext();
   }
 
@@ -115,6 +140,7 @@ export class FieldLandingComponent implements OnInit {
           this.refreshOrgPulse({ announceFailures: false });
         } else {
           this.orgCatalog.set(null);
+          this.pulseSectionExpanded.set(false);
         }
       },
       error: () => {
@@ -152,6 +178,7 @@ export class FieldLandingComponent implements OnInit {
         next: () => {
           this.toast.showToast('success', 'Field', 'Credenciales guardadas. Actualizando proyectos…');
           this.doobloActionBusy.set(false);
+          this.pulseSectionDismissed = false;
           this.loadFieldDoobloCompanyContext();
         },
         error: (err: unknown) => {
@@ -241,6 +268,16 @@ export class FieldLandingComponent implements OnInit {
 
   trackByExternalId(_i: number, row: RemoteFieldCatalogItem): string {
     return row.external_id;
+  }
+
+  togglePulseSection(): void {
+    const next = !this.pulseSectionExpanded();
+    this.pulseSectionExpanded.set(next);
+    if (!next) {
+      this.pulseSectionDismissed = true;
+    } else {
+      this.pulseSectionDismissed = false;
+    }
   }
 
   doobloSourceLabel(): string {
