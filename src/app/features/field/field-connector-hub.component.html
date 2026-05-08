@@ -7,8 +7,8 @@
       Fuentes de datos
     </h1>
     <p class="mt-3 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
-      Elija el <strong>origen del levantamiento</strong> para esta empresa: SurveyToGo / Dooblo, Qualtrics XM o archivo CSV.
-      La experiencia en tableros y alertas es la misma; aquí solo configura credenciales y enlaces técnicos.
+      Flujo en <strong>dos pasos</strong>: primero elija la fuente de datos (paso 1); después solo verá lo que corresponde — credenciales para SurveyToGo o Qualtrics; para CSV, plantilla,
+      proyecto destino y archivo (paso 2).
     </p>
     <app-field-primary-nav-tabs class="mt-6" />
   </header>
@@ -39,24 +39,32 @@
       No hay empresa seleccionada. Compruebe su usuario o permisos de superadministrador.
     </p>
   } @else {
-    <div class="mt-8 grid gap-3 sm:grid-cols-3">
+    <p
+      class="mt-8 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+      Paso 1 — ¿De dónde vienen los datos?
+    </p>
+    <div class="mt-3 grid gap-3 sm:grid-cols-3">
       <button type="button" [ngClass]="connectorBtnClass('dooblo')" (click)="selectConnector('dooblo')">
         SurveyToGo / Dooblo
-        <span class="mt-1 block text-xs font-normal text-slate-600 dark:text-slate-400">API newapi, catálogo Studio</span>
+        <span class="mt-1 block text-xs font-normal text-slate-600 dark:text-slate-400">Credenciales API newapi</span>
       </button>
       <button type="button" [ngClass]="connectorBtnClass('qualtrics')" (click)="selectConnector('qualtrics')">
         Qualtrics XM
-        <span class="mt-1 block text-xs font-normal text-slate-600 dark:text-slate-400">Datacenter + API token (v3)</span>
+        <span class="mt-1 block text-xs font-normal text-slate-600 dark:text-slate-400">Datacenter + API token</span>
       </button>
       <button type="button" [ngClass]="connectorBtnClass('csv')" (click)="selectConnector('csv')">
         Archivo CSV
-        <span class="mt-1 block text-xs font-normal text-slate-600 dark:text-slate-400">Layout 2026.1 en el asistente</span>
+        <span class="mt-1 block text-xs font-normal text-slate-600 dark:text-slate-400">Plantilla, proyecto e importar</span>
       </button>
     </div>
 
     @if (activeConnector() === 'dooblo') {
       <section
         class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+        <p
+          class="mb-4 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-indigo-600 dark:text-indigo-400">
+          Paso 2 — Credenciales SurveyToGo
+        </p>
         <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">Credenciales SurveyToGo (Dooblo)</h2>
         <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
           URL de la newapi, usuario REST key y contraseña. Los datos sensibles se cifran; la contraseña no se vuelve a mostrar.
@@ -154,6 +162,10 @@
     @if (activeConnector() === 'qualtrics') {
       <section
         class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+        <p
+          class="mb-4 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-indigo-600 dark:text-indigo-400">
+          Paso 2 — Credenciales Qualtrics
+        </p>
         <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">Credenciales Qualtrics XM</h2>
         <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
           Use el origen HTTPS del datacenter de su marca (p. ej.
@@ -273,42 +285,104 @@
     @if (activeConnector() === 'csv') {
       <section
         class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">Importación por archivo CSV</h2>
-        <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-          Aquí no se sube el archivo (solo configuración de otros orígenes). El CSV se elige en
-          <strong>Operaciones y asistente</strong>, paso 4, columna «CSV» de cada proyecto (
-          <span class="font-semibold text-slate-800 dark:text-slate-100">Elegir archivo</span>).
+        <p
+          class="mb-4 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400">
+          Paso 2 — CSV al proyecto correcto
         </p>
-        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-          Formato esperado por el servidor hoy: layout <strong>2026.1</strong> con cabeceras obligatorias
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">case_id</code>,
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">wave_id</code>,
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">interviewer_id</code>,
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">disposition</code>,
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">started_at</code>,
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">completed_at</code>,
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">duration_sec</code>
-          y opcionales
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">quota_cell</code>,
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">lat</code>,
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">lon</code>,
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">flags</code>.
-          Otros esquemas requerirían nueva versión de layout o un paso de mapeo de columnas (no está en esta iteración).
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">Archivo CSV (layout 2026.1)</h2>
+        <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          Complete estos tres pasos en orden. El servidor valida cabeceras y tipos; use la plantilla para evitar errores.
         </p>
-        <p class="mt-3">
+
+        <ol class="mt-8 space-y-8 border-t border-slate-100 pt-8 dark:border-slate-700/80">
+          <li class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+            <div class="min-w-0 flex-1">
+              <span class="text-xs font-bold text-slate-400 dark:text-slate-500">2.1</span>
+              <p class="mt-1 font-semibold text-slate-900 dark:text-slate-50">Plantilla</p>
+              <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                Descargue el ejemplo con las columnas obligatorias (<code class="text-xs">case_id</code>,
+                <code class="text-xs">wave_id</code>,
+                <code class="text-xs">duration_sec</code>, …).
+              </p>
+            </div>
+            <a
+              href="/downloads/field-sample-layout-2026-1.csv"
+              download="field-sample-layout-2026-1.csv"
+              class="inline-flex shrink-0 items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-900 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-100 dark:hover:bg-indigo-950/80">
+              Descargar plantilla
+            </a>
+          </li>
+
+          <li>
+            <span class="text-xs font-bold text-slate-400 dark:text-slate-500">2.2</span>
+            <p class="mt-1 font-semibold text-slate-900 dark:text-slate-50">Proyecto Field</p>
+            <p class="mt-1 max-w-3xl text-sm text-slate-600 dark:text-slate-400">
+              Solo aparecen proyectos creados con origen <strong>CSV</strong>. Si no hay ninguno, créelo antes en Operaciones (nombre, cliente, paso 3 «Archivo CSV»).
+            </p>
+            @if (csvProjectsLoading()) {
+              <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Cargando proyectos…</p>
+            } @else if (csvProjects().length === 0) {
+              <div
+                class="mt-4 rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/25 dark:text-amber-100">
+                No hay proyectos CSV para esta empresa todavía.
+                <a
+                  routerLink="/field/trabajo"
+                  class="ml-1 font-semibold text-indigo-700 underline underline-offset-2 dark:text-indigo-300">
+                  Ir a Operaciones para crear uno</a>.
+              </div>
+            } @else {
+              <label class="mt-3 block max-w-xl text-sm font-semibold text-slate-800 dark:text-slate-200">
+                ¿En qué proyecto cargamos las filas?
+                <select
+                  class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                  [ngModel]="csvSelectedProjectId()"
+                  (ngModelChange)="csvSelectedProjectId.set($event)">
+                  @for (p of csvProjects(); track p.id) {
+                    <option [ngValue]="p.id">{{ csvProjectOptionLabel(p) }}</option>
+                  }
+                </select>
+              </label>
+            }
+          </li>
+
+          <li>
+            <span class="text-xs font-bold text-slate-400 dark:text-slate-500">2.3</span>
+            <p class="mt-1 font-semibold text-slate-900 dark:text-slate-50">Archivo</p>
+            <p class="mt-1 max-w-3xl text-sm text-slate-600 dark:text-slate-400">
+              Elija el CSV terminado; al cerrar el explorador se importa de inmediato (misma validación que en Operaciones).
+            </p>
+            <div class="mt-4 flex flex-wrap items-center gap-4">
+              <label
+                class="relative inline-flex min-h-[2.75rem] cursor-pointer items-center overflow-hidden rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:pointer-events-none disabled:opacity-40 dark:bg-emerald-500 dark:hover:bg-emerald-600">
+                Elegir CSV e importar
+                <input
+                  type="file"
+                  accept=".csv,text/csv,text/plain,.txt"
+                  class="absolute inset-0 cursor-pointer opacity-0"
+                  [disabled]="
+                    csvImportBusy() ||
+                    csvProjectsLoading() ||
+                    csvProjects().length === 0 ||
+                    csvSelectedProjectId() == null
+                  "
+                  (change)="onCsvImport($event)" />
+              </label>
+              @if (csvImportBusy()) {
+                <span class="text-sm text-slate-500 dark:text-slate-400">Importando…</span>
+              }
+            </div>
+          </li>
+        </ol>
+
+        <p class="mt-10 border-t border-slate-100 pt-6 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
+          ¿Prefiere la tabla con todos los proyectos y vínculos API?
           <a
-            href="/downloads/field-sample-layout-2026-1.csv"
-            download="field-sample-layout-2026-1.csv"
-            class="text-sm font-semibold text-indigo-600 underline underline-offset-2 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
-            Descargar plantilla de ejemplo (3 filas)
-          </a>
+            routerLink="/field/trabajo"
+            [queryParams]="{ focus: 'csv' }"
+            class="font-semibold text-indigo-600 underline underline-offset-2 dark:text-indigo-400">
+            Abrir Operaciones — paso 4</a
+          >.
         </p>
-        <a
-          routerLink="/field/trabajo"
-          [queryParams]="{ focus: 'csv' }"
-          class="mt-6 inline-flex rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600">
-          Abrir paso 4 — subir CSV
-        </a>
       </section>
     }
   }

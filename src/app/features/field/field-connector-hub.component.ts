@@ -17,6 +17,7 @@ import { CompaniesService } from '@pages/companies/companies.service';
 
 import {
   DoobloCompanyConfig,
+  FieldProject,
   FieldService,
   QualtricsCompanyConfig,
 } from './field.service';
@@ -68,6 +69,11 @@ export class FieldConnectorHubComponent implements OnInit {
   /** Si ya hay credenciales, el formulario queda plegado hasta que el usuario elija editar. */
   readonly doobloCredentialFormOpen = signal(true);
   readonly qualtricsCredentialFormOpen = signal(true);
+
+  readonly csvProjects = signal<FieldProject[]>([]);
+  readonly csvProjectsLoading = signal(false);
+  readonly csvSelectedProjectId = signal<number | null>(null);
+  readonly csvImportBusy = signal(false);
 
   private static readonly companyListLimit = 100;
 
@@ -173,6 +179,77 @@ export class FieldConnectorHubComponent implements OnInit {
   private reloadConnectorContexts(): void {
     this.loadDoobloContext();
     this.loadQualtricsContext();
+    this.loadCsvProjects();
+  }
+
+  private loadCsvProjects(): void {
+    const cid = this.effectiveCompanyId();
+    if (cid == null) {
+      this.csvProjects.set([]);
+      this.csvSelectedProjectId.set(null);
+      return;
+    }
+    this.csvProjectsLoading.set(true);
+    this.fieldSvc.listProjects(cid, null).subscribe({
+      next: rows => {
+        const csvOnly = rows.filter(p => (p.ingest_mode ?? 'csv').toLowerCase() === 'csv');
+        this.csvProjects.set(csvOnly);
+        this.csvProjectsLoading.set(false);
+        const sel = this.csvSelectedProjectId();
+        if (sel == null || !csvOnly.some(p => p.id === sel)) {
+          this.csvSelectedProjectId.set(csvOnly[0]?.id ?? null);
+        }
+      },
+      error: () => {
+        this.csvProjects.set([]);
+        this.csvProjectsLoading.set(false);
+        this.csvSelectedProjectId.set(null);
+        this.toast.showToast('error', 'Field', 'No se pudieron cargar los proyectos para CSV.');
+      },
+    });
+  }
+
+  csvProjectOptionLabel(p: FieldProject): string {
+    return `${p.name} (#${p.id})`;
+  }
+
+  onCsvImport(ev: Event): void {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const pid = this.csvSelectedProjectId();
+    if (!file) {
+      return;
+    }
+    if (pid == null) {
+      input.value = '';
+      this.toast.showToast('warn', 'Field', 'Seleccione un proyecto Field con origen CSV.');
+      return;
+    }
+    this.csvImportBusy.set(true);
+    this.fieldSvc.importCsv(pid, file).subscribe({
+      next: run => {
+        input.value = '';
+        this.csvImportBusy.set(false);
+        if (run.status === 'completed') {
+          this.toast.showToast(
+            'success',
+            'Importación',
+            `Listo: ${run.row_count ?? 0} caso(s) registrados.`
+          );
+        } else {
+          this.toast.showToast(
+            'error',
+            'Importación',
+            run.error_detail ?? 'Falló la validación del CSV.'
+          );
+        }
+      },
+      error: () => {
+        input.value = '';
+        this.csvImportBusy.set(false);
+        this.toast.showToast('error', 'Importación', 'Error al subir el archivo.');
+      },
+    });
   }
 
   private loadDoobloContext(): void {
