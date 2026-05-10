@@ -1,37 +1,146 @@
 <section class="space-y-8">
   <div>
     <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
-      PRE-FIELD · Instrument Builder (MVP)
+      PRE-FIELD · Instrument Builder
     </p>
-    <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">
-      Revisiones de instrumento (`instrument_spec`)
-    </h2>
-    <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-      Cree borradores versionados a partir del catálogo Framework Library o de la plantilla mínima interna. La validación
-      schema y Auto QA siguen en la API.
-    </p>
+    @if (phase() === 'setup') {
+      <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">Paso 1 — Objetivo y proyecto</h2>
+      <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+        Las versiones del cuestionario (instrumento) se guardan en un
+        <strong class="text-slate-800 dark:text-slate-100">estudio de proyecto</strong> dentro de Siete Field: es la
+        carpeta lógica del diseño, independiente de SurveyToGo o del CSV. Si su proyecto Field aún no tenía esa carpeta,
+        la creamos aquí y la enlazamos por usted (no tiene que buscar IDs ni ir a otro menú).
+      </p>
+    } @else {
+      <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">Paso 2 — Plantillas y revisiones</h2>
+      <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+        Cree borradores del instrumento o elija una plantilla del catálogo. Validación de esquema y Auto QA siguen en la
+        API.
+      </p>
+    }
   </div>
 
-  @if (loading()) {
-    <p class="text-sm text-slate-600 dark:text-slate-400">Cargando proyecto…</p>
-  } @else if (studyId() == null) {
-    <div
-      class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
-      <strong>Falta vincular un estudio</strong> a este proyecto Field. Asigne un <code class="rounded bg-white/60 px-1 dark:bg-slate-900/60">study_id</code>
-      desde
-      <a routerLink="/field/trabajo" class="font-semibold text-indigo-700 underline dark:text-indigo-300"
-        >Operaciones y Asistente</a
-      >
-      para usar PRE-FIELD en este contexto.
+  @if (phase() === 'setup') {
+    @if (loading()) {
+      <p class="text-sm text-slate-600 dark:text-slate-400">Cargando datos del proyecto abierto…</p>
+    }
+
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+      <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50">
+        Objetivo del estudio / instrumento
+        <textarea
+          rows="4"
+          class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+          [(ngModel)]="businessObjective"
+          placeholder="Ej.: Medir satisfacción post-compra en tienda y detectar fricciones en el proceso de pago."></textarea>
+      </label>
+
+      <fieldset class="mt-6">
+        <legend class="text-sm font-semibold text-slate-900 dark:text-slate-50">¿Cómo quiere continuar?</legend>
+        <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+          <label
+            class="flex cursor-pointer items-start gap-2 rounded-lg border px-3 py-2 text-sm dark:border-slate-600"
+            [class.border-indigo-500]="projectLinkMode === 'existing'"
+            [class.bg-indigo-50]="projectLinkMode === 'existing'"
+            [class.dark:bg-indigo-950/30]="projectLinkMode === 'existing'">
+            <input type="radio" name="prefieldProjMode" [value]="'existing'" [checked]="projectLinkMode === 'existing'" (change)="setProjectLinkMode('existing')" />
+            <span>
+              <span class="font-medium text-slate-900 dark:text-slate-50">Vincular a un proyecto Field existente</span>
+              @if (contextProjectLabel()) {
+                <span class="mt-1 block text-xs text-slate-600 dark:text-slate-400">
+                  Abierto ahora: <strong>{{ contextProjectLabel() }}</strong> — puede cambiar el proyecto en el selector.
+                </span>
+              }
+            </span>
+          </label>
+          <label
+            class="flex cursor-pointer items-start gap-2 rounded-lg border px-3 py-2 text-sm dark:border-slate-600"
+            [class.border-indigo-500]="projectLinkMode === 'new'"
+            [class.bg-indigo-50]="projectLinkMode === 'new'"
+            [class.dark:bg-indigo-950/30]="projectLinkMode === 'new'">
+            <input type="radio" name="prefieldProjMode" [value]="'new'" [checked]="projectLinkMode === 'new'" (change)="setProjectLinkMode('new')" />
+            <span class="font-medium text-slate-900 dark:text-slate-50">Crear un proyecto Field nuevo</span>
+          </label>
+        </div>
+      </fieldset>
+
+      @if (projectLinkMode === 'existing') {
+        <label class="mt-6 block text-sm font-medium text-slate-800 dark:text-slate-100">
+          Proyecto Field
+          <select
+            class="mt-1 block w-full max-w-lg rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+            [(ngModel)]="selectedExistingProjectId">
+            <option [ngValue]="null">Seleccione…</option>
+            @for (p of projectsPicklist(); track p.id) {
+              <option [ngValue]="p.id">{{ p.name }} (ID {{ p.id }})</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (projectLinkMode === 'new') {
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+            Nombre del proyecto Field
+            <input
+              type="text"
+              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+              [(ngModel)]="newProjectName"
+              placeholder="Ej.: Wave 1 — CX tiendas norte" />
+          </label>
+          <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+            Cliente / cuenta (marca)
+            <select
+              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+              [(ngModel)]="selectedClientId">
+              <option [ngValue]="null">Seleccione…</option>
+              @for (c of clientsPicklist(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </label>
+        </div>
+        <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">
+          Crearemos el estudio de proyecto y el proyecto Field enlazados entre sí; después podrá seguir con plantillas y
+          borradores del instrumento.
+        </p>
+      }
+
+      <div class="mt-6">
+        <button
+          type="button"
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+          [disabled]="setupSubmitting() || loading()"
+          (click)="submitSetup()">
+          {{ setupSubmitting() ? 'Guardando…' : 'Continuar al instrumento' }}
+        </button>
+      </div>
     </div>
-  } @else {
-    <p class="text-sm text-slate-700 dark:text-slate-200">
-      <span class="font-semibold">Estudio:</span>
-      {{ studyTitle() || ('#' + studyId()) }}
-      <span class="mx-2 text-slate-400">·</span>
-      <span class="font-semibold">ID estudio:</span>
-      {{ studyId() }}
-    </p>
+  }
+
+  @if (phase() === 'instrument') {
+    <div class="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/50">
+      <div class="min-w-0 flex-1">
+        <p class="font-semibold text-slate-900 dark:text-slate-50">Contexto</p>
+        @if (businessObjective.trim()) {
+          <p class="mt-1 whitespace-pre-wrap text-slate-700 dark:text-slate-300">{{ businessObjective.trim() }}</p>
+        } @else {
+          <p class="mt-1 text-slate-500 dark:text-slate-400">Sin objetivo indicado en el paso anterior.</p>
+        }
+        <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+          Proyecto Field:
+          <span class="font-medium">{{ contextProjectLabel() || ('#' + projectId()) }}</span>
+          · Estudio:
+          <span class="font-medium">{{ studyTitle() || ('#' + studyId()) }}</span>
+        </p>
+      </div>
+      <button
+        type="button"
+        class="shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-white dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-800"
+        (click)="backToSetup()">
+        Cambiar objetivo / proyecto
+      </button>
+    </div>
 
     <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
       <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Nueva revisión borrador</h3>
@@ -70,7 +179,7 @@
             placeholder="Si se omite, la API asigna vN" />
         </label>
         <label class="block text-sm font-medium text-slate-800 dark:text-slate-100 md:col-span-2">
-          Notas internas (opcional)
+          Notas internas (opcional; si vacío, usamos el objetivo como referencia en la revisión)
           <input
             type="text"
             class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
@@ -92,7 +201,7 @@
     </div>
 
     <div>
-      <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Revisiones del estudio</h3>
+      <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Revisiones del instrumento</h3>
       <div class="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
         <table class="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-slate-700">
           <thead class="bg-slate-50 dark:bg-slate-900/60">
