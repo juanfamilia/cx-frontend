@@ -60,6 +60,51 @@ export interface FieldStudyCreateBody {
   company_id?: number | null;
 }
 
+/** Catálogo Framework Library (`GET /field/framework-templates`). */
+export interface FieldFrameworkTemplate {
+  id: number;
+  slug: string;
+  study_type: string;
+  framework_version: string;
+  title: string;
+  description: string | null;
+  coverage_rules: Record<string, unknown>;
+  stub_spec_json: Record<string, unknown> | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
+/** Revisión `instrument_spec` (lista / metadatos). */
+export interface FieldInstrumentRevision {
+  id: number;
+  study_id: number;
+  company_id: number;
+  revision_label: string;
+  status: string;
+  framework_template_id: string | null;
+  notes: string | null;
+  title: string | null;
+  instrument_spec_version_declared: string | null;
+  content_hash: string;
+  last_validation_at: string | null;
+  last_validation_ok: boolean | null;
+  last_validation_issue_count: number | null;
+  last_validation_content_hash: string | null;
+  created_at: string;
+  updated_at: string;
+  created_by_user_id: number | null;
+  updated_by_user_id: number | null;
+}
+
+export interface FieldInstrumentRevisionCreateBody {
+  spec?: Record<string, unknown> | null;
+  revision_label?: string | null;
+  framework_template_id?: string | null;
+  framework_template_slug?: string | null;
+  framework_template_version?: string | null;
+  notes?: string | null;
+}
+
 export interface FieldImportRun {
   id: number;
   field_project_id: number;
@@ -422,6 +467,49 @@ export class FieldService {
 
   createStudy(body: FieldStudyCreateBody): Observable<FieldStudy> {
     return this.http.post<FieldStudy>(environment.apiUrl + 'field/studies', body);
+  }
+
+  /** Plantillas metodológicas PRE-FIELD (opcional filtro por `study_type` del schema). */
+  listFrameworkTemplates(studyType?: string | null): Observable<FieldFrameworkTemplate[]> {
+    let params = new HttpParams();
+    const st = studyType?.trim().toLowerCase();
+    if (st) {
+      params = params.set('study_type', st);
+    }
+    return this.http.get<FieldFrameworkTemplate[]>(
+      `${environment.apiUrl}field/framework-templates`,
+      { params }
+    );
+  }
+
+  listInstrumentRevisions(
+    studyId: number,
+    companyId?: number | null
+  ): Observable<FieldInstrumentRevision[]> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.get<FieldInstrumentRevision[]>(
+      `${environment.apiUrl}field/studies/${studyId}/instrument-revisions`,
+      { params }
+    );
+  }
+
+  createInstrumentRevision(
+    studyId: number,
+    body: FieldInstrumentRevisionCreateBody,
+    companyId?: number | null
+  ): Observable<FieldInstrumentRevision> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.post<FieldInstrumentRevision>(
+      `${environment.apiUrl}field/studies/${studyId}/instrument-revisions`,
+      body,
+      { params }
+    );
   }
 
   importCsv(projectId: number, file: File): Observable<FieldImportRun> {

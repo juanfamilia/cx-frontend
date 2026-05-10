@@ -64,6 +64,12 @@ export const fieldRoutes: Routes = [
           import('./field-executive-summary.component').then(m => m.FieldExecutiveSummaryComponent),
         data: { ...fieldRoleData, title: 'Field — Resumen ejecutivo' },
       },
+      {
+        path: 'pre-field',
+        loadComponent: () =>
+          import('./field-pre-field.component').then(m => m.FieldPreFieldComponent),
+        data: { ...fieldRoleData, title: 'Field — PRE-FIELD (instrumento)' },
+      },
     ],
   },
 ];
