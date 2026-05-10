@@ -19,6 +19,10 @@
         superior con semáforos y KPIs) y las <strong class="text-slate-800 dark:text-slate-200">operaciones y asistente</strong>
         (registro de cliente, proyecto, CSV y vínculos SurveyToGo). Para una vista tabular compacta use también
         <a routerLink="/field/projects" class="font-semibold text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400">resumen de proyectos</a>.
+        <span class="block pt-2 text-slate-700 dark:text-slate-200">
+          <strong>PRE-FIELD</strong> (plantillas e instrumento): use el enlace en cada tarjeta del centro de mando o en el
+          detalle del proyecto seleccionado.
+        </span>
       </p>
     </div>
   </div>
@@ -163,6 +167,14 @@
                       >
                     }
                   </div>
+                  <div class="mt-3 border-t border-slate-200/90 pt-3 dark:border-slate-700">
+                    <a
+                      class="text-[0.7rem] font-semibold text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400"
+                      [routerLink]="['/field/project', row.project.id, 'pre-field']"
+                      (click)="$event.stopPropagation()"
+                      >PRE-FIELD · instrumento</a
+                    >
+                  </div>
                 </div>
               </div>
             </article>
@@ -205,6 +217,11 @@
               <button type="button" class="field-btn-secondary" (click)="openOperationalDrawerFromCommand()">
                 Panel operativo completo
               </button>
+              <a
+                class="field-btn-secondary inline-flex cursor-pointer items-center justify-center no-underline"
+                [routerLink]="['/field/project', selRow.project.id, 'pre-field']">
+                PRE-FIELD
+              </a>
             </div>
           </div>
 
