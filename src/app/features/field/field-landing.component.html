@@ -12,6 +12,15 @@
           Pulso operativo de proyectos SurveyToGo. Orígenes y credenciales están en la pestaña
           <strong>Fuentes de datos</strong>.
         </p>
+        <p class="mt-2 max-w-3xl text-sm leading-snug text-slate-600 dark:text-slate-300">
+          <strong class="text-slate-800 dark:text-slate-100">PRE-FIELD</strong> (instrumento y plantillas) no está en esta
+          pantalla: vaya a
+          <a routerLink="/field/projects" class="font-semibold text-indigo-600 underline dark:text-indigo-400"
+            >Resumen de proyectos</a
+          >
+          y use el enlace <strong class="text-slate-800 dark:text-slate-100">PRE-FIELD</strong> por fila, o abra el
+          proyecto y elija la pestaña homónima arriba.
+        </p>
         @if (isSuperAdmin) {
           <p class="mt-2 max-w-3xl text-[0.7rem] leading-snug text-slate-500 dark:text-slate-400">
             Superadmin: elija la <strong>empresa (tenant)</strong> activa en
@@ -183,7 +192,11 @@
 
   <footer class="mt-6 border-t border-slate-200 pt-4 text-[0.65rem] text-slate-500 dark:border-slate-700 dark:text-slate-400">
     <p class="leading-snug">
-      Solo CSV:
+      PRE-FIELD:
+      <a routerLink="/field/projects" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+        >desde Resumen (columna o pestaña en proyecto)</a
+      >
+      · Solo CSV:
       <a routerLink="/field/projects" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">Resumen</a>
       ·
       <a

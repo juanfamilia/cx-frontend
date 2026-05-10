@@ -3,7 +3,9 @@
     <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Siete Field</p>
     <h1 class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">Resumen de proyectos</h1>
     <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-      Avance, cliente y nivel de riesgo por proyecto. Seleccione una fila para abrir el panel de detalle del proyecto.
+      Avance, cliente y nivel de riesgo por proyecto. La fila abre el tablero del proyecto; la columna
+      <strong class="text-slate-800 dark:text-slate-100">Instrumento</strong> lleva directo a
+      <strong class="text-slate-800 dark:text-slate-100">PRE-FIELD</strong> (plantillas y revisiones del instrumento).
     </p>
     <app-field-primary-nav-tabs class="mt-5" />
   </header>
@@ -59,6 +61,7 @@
             <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Avance</th>
             <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Riesgo</th>
             <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Hallazgos críticos</th>
+            <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Instrumento</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -73,6 +76,13 @@
                 <app-field-risk-badge [level]="riskLevel(row)" />
               </td>
               <td class="px-4 py-3 tabular-nums">{{ criticalOpen(row) }}</td>
+              <td class="px-4 py-3" (click)="$event.stopPropagation()">
+                <a
+                  [routerLink]="['/field/project', row.project.id, 'pre-field']"
+                  class="text-sm font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                  >PRE-FIELD</a
+                >
+              </td>
             </tr>
           }
         </tbody>
