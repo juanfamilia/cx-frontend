@@ -20,6 +20,7 @@ import {
   EndClient,
   FieldFrameworkTemplate,
   FieldInstrumentRevision,
+  FieldInstrumentRevisionWithSpec,
   FieldProject,
   FieldService,
 } from './field.service';
@@ -71,6 +72,9 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
 
   readonly templates = signal<FieldFrameworkTemplate[]>([]);
   readonly revisions = signal<FieldInstrumentRevision[]>([]);
+
+  readonly detailRevision = signal<FieldInstrumentRevisionWithSpec | null>(null);
+  readonly detailLoading = signal(false);
 
   readonly projectsPicklist = signal<FieldProject[]>([]);
   readonly clientsPicklist = signal<EndClient[]>([]);
@@ -154,10 +158,46 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     }
     const cq = this.companyQueryForApi(cid);
     this.fieldSvc.listInstrumentRevisions(sid, cq).subscribe({
-      next: rows => this.revisions.set(rows),
+      next: rows => {
+        this.revisions.set(rows);
+        const open = this.detailRevision()?.id;
+        if (open != null && !rows.some(r => r.id === open)) {
+          this.detailRevision.set(null);
+        }
+      },
       error: () =>
         this.toast.showToast('error', 'PRE-FIELD', 'No se pudieron cargar las revisiones del instrumento.'),
     });
+  }
+
+  toggleRevisionDetail(revisionId: number): void {
+    if (this.detailRevision()?.id === revisionId) {
+      this.detailRevision.set(null);
+      return;
+    }
+    const cid = this.projectCompanyId();
+    if (cid == null) {
+      return;
+    }
+    const cq = this.companyQueryForApi(cid);
+    this.detailLoading.set(true);
+    this.detailRevision.set(null);
+    this.fieldSvc.getInstrumentRevision(revisionId, cq).subscribe({
+      next: row => {
+        this.detailRevision.set(row);
+        this.detailLoading.set(false);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.detailLoading.set(false);
+        this.toast.showToast('error', 'PRE-FIELD', 'No se pudo cargar el borrador.');
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  closeRevisionDetail(): void {
+    this.detailRevision.set(null);
   }
 
   submitSetup(): void {

@@ -105,6 +105,11 @@ export interface FieldInstrumentRevisionCreateBody {
   notes?: string | null;
 }
 
+/** Detalle API: metadatos + `instrument_spec` completo (`GET .../instrument-revisions/{id}`). */
+export interface FieldInstrumentRevisionWithSpec extends FieldInstrumentRevision {
+  spec: Record<string, unknown>;
+}
+
 export interface FieldImportRun {
   id: number;
   field_project_id: number;
@@ -508,6 +513,21 @@ export class FieldService {
     return this.http.post<FieldInstrumentRevision>(
       `${environment.apiUrl}field/studies/${studyId}/instrument-revisions`,
       body,
+      { params }
+    );
+  }
+
+  /** Borrador completo con JSON `instrument_spec`. */
+  getInstrumentRevision(
+    revisionId: number,
+    companyId?: number | null
+  ): Observable<FieldInstrumentRevisionWithSpec> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.get<FieldInstrumentRevisionWithSpec>(
+      `${environment.apiUrl}field/instrument-revisions/${revisionId}`,
       { params }
     );
   }
