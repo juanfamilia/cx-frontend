@@ -40,9 +40,11 @@
         <div class="mt-3 flex flex-col gap-3 sm:flex-row">
           <label
             class="flex cursor-pointer items-start gap-2 rounded-lg border px-3 py-2 text-sm dark:border-slate-600"
-            [class.border-indigo-500]="projectLinkMode === 'existing'"
-            [class.bg-indigo-50]="projectLinkMode === 'existing'"
-            [class.dark:bg-indigo-950/30]="projectLinkMode === 'existing'">
+            [ngClass]="{
+              'border-indigo-500': projectLinkMode === 'existing',
+              'bg-indigo-50': projectLinkMode === 'existing',
+              'dark:bg-indigo-950/30': projectLinkMode === 'existing',
+            }">
             <input type="radio" name="prefieldProjMode" [value]="'existing'" [checked]="projectLinkMode === 'existing'" (change)="setProjectLinkMode('existing')" />
             <span>
               <span class="font-medium text-slate-900 dark:text-slate-50">Vincular a un proyecto Field existente</span>
@@ -55,9 +57,11 @@
           </label>
           <label
             class="flex cursor-pointer items-start gap-2 rounded-lg border px-3 py-2 text-sm dark:border-slate-600"
-            [class.border-indigo-500]="projectLinkMode === 'new'"
-            [class.bg-indigo-50]="projectLinkMode === 'new'"
-            [class.dark:bg-indigo-950/30]="projectLinkMode === 'new'">
+            [ngClass]="{
+              'border-indigo-500': projectLinkMode === 'new',
+              'bg-indigo-50': projectLinkMode === 'new',
+              'dark:bg-indigo-950/30': projectLinkMode === 'new',
+            }">
             <input type="radio" name="prefieldProjMode" [value]="'new'" [checked]="projectLinkMode === 'new'" (change)="setProjectLinkMode('new')" />
             <span class="font-medium text-slate-900 dark:text-slate-50">Crear un proyecto Field nuevo</span>
           </label>
