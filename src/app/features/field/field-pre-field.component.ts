@@ -9,6 +9,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
@@ -83,6 +84,11 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
 
   private paramSub?: Subscription;
 
+  /** Reintentos ante 404 del brief (réplica de lectura vs escritura recién después del alta). */
+  private brief404Retries = 0;
+  /** Un intento de recuperación vía PATCH vacío tras agotar reintentos GET (misma semántica ensure en servidor). */
+  private briefPatchFallbackUsed = false;
+
   readonly studyTypeOptions = STUDY_TYPE_OPTIONS;
 
   readonly phase = signal<Phase>('setup');
@@ -105,6 +111,8 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   readonly brief = signal<FieldStudyBriefPublic | null>(null);
   readonly briefLoading = signal(false);
   readonly briefSaving = signal(false);
+  /** Mensaje tras fallo de GET/PATCH del brief (la pestaña no puede quedar en blanco). */
+  readonly briefLoadError = signal<string | null>(null);
   readonly readinessPolicy = signal<FieldReadinessPolicyPublic | null>(null);
   readonly policyLoading = signal(false);
 
@@ -178,6 +186,17 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
 
   setInstrumentTab(tab: InstrumentWorkbenchTab): void {
     this.instrumentTab.set(tab);
+    if (tab === 'brief' && this.phase() === 'instrument') {
+      const sid = this.studyId();
+      const cid = this.projectCompanyId();
+      if (sid != null && cid != null && !this.briefLoading()) {
+        if (this.brief() == null) {
+          this.brief404Retries = 0;
+          this.briefPatchFallbackUsed = false;
+          this.reloadBrief();
+        }
+      }
+    }
     this.cdr.markForCheck();
   }
 
@@ -480,28 +499,89 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     });
   }
 
+  retryLoadBrief(): void {
+    this.brief404Retries = 0;
+    this.briefPatchFallbackUsed = false;
+    this.briefLoadError.set(null);
+    this.reloadBrief();
+  }
+
+  private applyBriefLoaded(sid: number, b: FieldStudyBriefPublic, cq: number | null): void {
+    this.brief404Retries = 0;
+    this.briefPatchFallbackUsed = false;
+    this.briefLoadError.set(null);
+    this.brief.set(b);
+    this.briefPayloadText = JSON.stringify(b.payload_json ?? {}, null, 2);
+    this.briefCompletenessStr =
+      b.completeness_score != null && Number.isFinite(b.completeness_score)
+        ? String(b.completeness_score)
+        : '';
+    this.briefLoading.set(false);
+    this.maybeSeedBriefFromObjective(sid, b, cq);
+    this.cdr.markForCheck();
+  }
+
+  private formatBriefHttpError(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      const raw = err.error?.detail;
+      if (typeof raw === 'string') {
+        return raw;
+      }
+      if (err.status === 0) {
+        return 'Sin respuesta del servidor (red, CORS o certificado).';
+      }
+      return `No se pudo obtener el brief (HTTP ${err.status}).`;
+    }
+    return 'Error al cargar el brief.';
+  }
+
   reloadBrief(): void {
     const sid = this.studyId();
     const cid = this.projectCompanyId();
     if (sid == null || cid == null) {
+      if (this.phase() === 'instrument' && !this.loading()) {
+        this.briefLoadError.set(
+          'Faltan estudio o empresa en contexto. Recargue la página o complete el paso 1 y pulse «Continuar al instrumento».'
+        );
+      }
       return;
     }
     const cq = this.companyQueryForApi(cid);
+    this.briefLoadError.set(null);
     this.briefLoading.set(true);
     this.fieldSvc.getStudyBrief(sid, cq).subscribe({
-      next: b => {
-        this.brief.set(b);
-        this.briefPayloadText = JSON.stringify(b.payload_json ?? {}, null, 2);
-        this.briefCompletenessStr =
-          b.completeness_score != null && Number.isFinite(b.completeness_score)
-            ? String(b.completeness_score)
-            : '';
+      next: b => this.applyBriefLoaded(sid, b, cq),
+      error: err => {
         this.briefLoading.set(false);
-        this.maybeSeedBriefFromObjective(sid, b, cq);
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.briefLoading.set(false);
+        const status = err instanceof HttpErrorResponse ? err.status : 0;
+        if (status === 404 && this.brief404Retries < 4) {
+          this.brief404Retries++;
+          const delayMs = 350 * this.brief404Retries;
+          window.setTimeout(() => {
+            this.reloadBrief();
+            this.cdr.markForCheck();
+          }, delayMs);
+          return;
+        }
+        if (status === 404 && !this.briefPatchFallbackUsed) {
+          this.briefPatchFallbackUsed = true;
+          this.briefLoading.set(true);
+          this.fieldSvc.patchStudyBrief(sid, {}, cq).subscribe({
+            next: b => this.applyBriefLoaded(sid, b, cq),
+            error: errPatch => {
+              this.briefLoading.set(false);
+              this.briefPatchFallbackUsed = false;
+              const detail = this.formatBriefHttpError(errPatch);
+              this.briefLoadError.set(detail);
+              this.toast.showToast('error', 'PRE-FIELD', 'No se pudo cargar el brief del estudio.');
+              this.cdr.markForCheck();
+            },
+          });
+          return;
+        }
+        this.brief404Retries = 0;
+        this.briefPatchFallbackUsed = false;
+        this.briefLoadError.set(this.formatBriefHttpError(err));
         this.toast.showToast('error', 'PRE-FIELD', 'No se pudo cargar el brief del estudio.');
         this.cdr.markForCheck();
       },
@@ -892,21 +972,23 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       })
       .pipe(
         switchMap(study =>
-          this.fieldSvc.createProject({
-            name: pname,
-            description: objective.slice(0, 500),
-            client_id: clientId,
-            company_id: cqBody,
-            study_id: study.id,
-          })
+          this.fieldSvc
+            .createProject({
+              name: pname,
+              description: objective.slice(0, 500),
+              client_id: clientId,
+              company_id: cqBody,
+              study_id: study.id,
+            })
+            .pipe(map(project => ({ study, project })))
         )
       )
       .subscribe({
-        next: project => {
+        next: ({ study, project }) => {
           this.setupSubmitting.set(false);
           this.toast.showToast('success', 'PRE-FIELD', 'Proyecto y estudio creados. Ya puede definir el instrumento.');
           this.router.navigate(['/field/project', project.id, 'pre-field'], {
-            queryParams: { ready: '1' },
+            queryParams: { ready: '1', study_id: String(study.id) },
             replaceUrl: true,
           });
         },
@@ -977,14 +1059,21 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
         this.projectCompanyId.set(row.project.company_id);
         this.loading.set(false);
         this.loadPicklists(row.project.company_id);
-        const sid = row.project.study_id ?? null;
+        const sidFromProject = row.project.study_id ?? null;
+        const qpStudyRaw = this.route.snapshot.queryParamMap.get('study_id');
+        const qpStudyNum = qpStudyRaw != null ? Number(qpStudyRaw) : NaN;
+        const qpStudyOk = Number.isFinite(qpStudyNum) && qpStudyNum > 0;
         const forceInstrument = this.route.snapshot.queryParamMap.get('ready') === '1';
+        let sid: number | null = sidFromProject;
+        if (forceInstrument && qpStudyOk) {
+          sid = qpStudyNum;
+        }
         if (sid != null && (this.phase() === 'instrument' || forceInstrument)) {
           if (forceInstrument) {
             this.phase.set('instrument');
           }
           this.studyId.set(sid);
-          this.studyTitle.set(row.study_display_name);
+          this.studyTitle.set(row.study_display_name ?? row.project.name);
           this.reloadTemplates();
           this.reloadRevisions();
           this.reloadBrief();

@@ -332,6 +332,25 @@
               </div>
             </details>
           </div>
+          } @else {
+            <div
+              class="rounded-xl border border-amber-200/90 bg-amber-50/90 px-4 py-4 dark:border-amber-900/50 dark:bg-amber-950/25">
+              <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Brief no disponible todavía</p>
+              @if (briefLoadError(); as bem) {
+                <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">{{ bem }}</p>
+              } @else {
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                  Si acaba de crear el proyecto, puede haber un retardo breve. Pulse Reintentar o cambie de pestaña y vuelva.
+                </p>
+              }
+              <button
+                type="button"
+                class="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                [disabled]="briefLoading()"
+                (click)="retryLoadBrief()">
+                {{ briefLoading() ? 'Cargando…' : 'Reintentar carga del brief' }}
+              </button>
+            </div>
           }
         }
       </div>
