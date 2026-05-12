@@ -49,6 +49,7 @@ export interface FieldStudy {
   name: string;
   description: string | null;
   status: string;
+  primary_language?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -94,6 +95,12 @@ export interface FieldInstrumentRevision {
   updated_at: string;
   created_by_user_id: number | null;
   updated_by_user_id: number | null;
+  /** Hash del brief vigente al crear la revisión (lineage). */
+  brief_snapshot_hash?: string;
+  /** Versión catálogo framework efectiva. */
+  framework_catalog_version?: string | null;
+  /** Último ruleset QA ejecutado sobre esta revisión. */
+  last_ruleset_version?: string | null;
 }
 
 export interface FieldInstrumentRevisionCreateBody {
@@ -108,6 +115,82 @@ export interface FieldInstrumentRevisionCreateBody {
 /** Detalle API: metadatos + `instrument_spec` completo (`GET .../instrument-revisions/{id}`). */
 export interface FieldInstrumentRevisionWithSpec extends FieldInstrumentRevision {
   spec: Record<string, unknown>;
+}
+
+/** Brief PRE-FIELD ligado al estudio. */
+export interface FieldStudyBriefPublic {
+  study_id: number;
+  company_id: number;
+  payload_json: Record<string, unknown>;
+  completeness_score: number | null;
+  approval_state: string;
+  approved_internal_user_id: number | null;
+  approved_internal_at: string | null;
+  approved_client_user_id: number | null;
+  approved_client_at: string | null;
+  body_hash: string;
+  updated_at: string;
+}
+
+export interface FieldStudyBriefPatchBody {
+  payload?: Record<string, unknown>;
+  completeness_score?: number | null;
+}
+
+export interface FieldFrameworkWaiverPublic {
+  id: number;
+  instrument_revision_id: number;
+  company_id: number;
+  rationale: string;
+  waived_sections_json: unknown[] | Record<string, unknown> | null;
+  created_at: string;
+  created_by_user_id: number | null;
+}
+
+export interface FieldFrameworkWaiverCreateBody {
+  rationale: string;
+  waived_sections?: unknown[] | Record<string, unknown> | null;
+}
+
+/** Política Readiness L4. */
+export interface FieldReadinessPolicyPublic {
+  company_id: number;
+  require_role_research: boolean;
+  require_role_qa: boolean;
+  require_role_account: boolean;
+  block_on_schema_invalid: boolean;
+  block_on_missing_schema_validation: boolean;
+  block_on_qa_stop: boolean;
+  block_on_qa_fix_now: boolean;
+  require_qa_run: boolean;
+  enforce_signatory_grants: boolean;
+  require_brief_approved: boolean;
+}
+
+export interface FieldReadinessGatePublic {
+  revision_id: number;
+  revision_status: string;
+  aggregate_status: string;
+  blocking_codes: string[];
+  missing_roles: string[];
+  stale_roles: string[];
+  required_roles: string[];
+  policy: FieldReadinessPolicyPublic;
+  last_validation_ok: boolean | null;
+  content_hash: string;
+  latest_qa_run_id: number | null;
+  qa_stop_count: number | null;
+  qa_fix_now_count: number | null;
+  signatures: Array<{
+    id: number;
+    revision_id: number;
+    signature_role: string;
+    signer_user_id: number;
+    signed_at: string;
+    comment?: string | null;
+    snapshot_spec_hash: string;
+    snapshot_qa_run_id: number | null;
+  }>;
 }
 
 export interface FieldImportRun {
@@ -528,6 +611,112 @@ export class FieldService {
     }
     return this.http.get<FieldInstrumentRevisionWithSpec>(
       `${environment.apiUrl}field/instrument-revisions/${revisionId}`,
+      { params }
+    );
+  }
+
+  getStudyBrief(studyId: number, companyId?: number | null): Observable<FieldStudyBriefPublic> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.get<FieldStudyBriefPublic>(
+      `${environment.apiUrl}field/studies/${studyId}/brief`,
+      { params }
+    );
+  }
+
+  patchStudyBrief(
+    studyId: number,
+    body: FieldStudyBriefPatchBody,
+    companyId?: number | null
+  ): Observable<FieldStudyBriefPublic> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.patch<FieldStudyBriefPublic>(
+      `${environment.apiUrl}field/studies/${studyId}/brief`,
+      body,
+      { params }
+    );
+  }
+
+  approveStudyBriefInternal(studyId: number, companyId?: number | null): Observable<FieldStudyBriefPublic> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.post<FieldStudyBriefPublic>(
+      `${environment.apiUrl}field/studies/${studyId}/brief/approve-internal`,
+      {},
+      { params }
+    );
+  }
+
+  approveStudyBriefClient(studyId: number, companyId?: number | null): Observable<FieldStudyBriefPublic> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.post<FieldStudyBriefPublic>(
+      `${environment.apiUrl}field/studies/${studyId}/brief/approve-client`,
+      {},
+      { params }
+    );
+  }
+
+  listFrameworkWaivers(
+    revisionId: number,
+    companyId?: number | null
+  ): Observable<FieldFrameworkWaiverPublic[]> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.get<FieldFrameworkWaiverPublic[]>(
+      `${environment.apiUrl}field/instrument-revisions/${revisionId}/framework-waivers`,
+      { params }
+    );
+  }
+
+  createFrameworkWaiver(
+    revisionId: number,
+    body: FieldFrameworkWaiverCreateBody,
+    companyId?: number | null
+  ): Observable<FieldFrameworkWaiverPublic> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.post<FieldFrameworkWaiverPublic>(
+      `${environment.apiUrl}field/instrument-revisions/${revisionId}/framework-waivers`,
+      body,
+      { params }
+    );
+  }
+
+  getReadinessPolicy(companyId?: number | null): Observable<FieldReadinessPolicyPublic> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.get<FieldReadinessPolicyPublic>(
+      `${environment.apiUrl}field/readiness-policy`,
+      { params }
+    );
+  }
+
+  getReadinessForRevision(
+    revisionId: number,
+    companyId?: number | null
+  ): Observable<FieldReadinessGatePublic> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.get<FieldReadinessGatePublic>(
+      `${environment.apiUrl}field/instrument-revisions/${revisionId}/readiness`,
       { params }
     );
   }

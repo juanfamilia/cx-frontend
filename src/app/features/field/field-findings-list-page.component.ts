@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { Subscription } from 'rxjs';
 
@@ -15,7 +15,7 @@ import { FieldFinding, FieldService } from './field.service';
 @Component({
   selector: 'app-field-findings-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, FieldRiskBadgeComponent, FieldFindingCardComponent],
+  imports: [CommonModule, FormsModule, FieldRiskBadgeComponent, FieldFindingCardComponent, RouterLink],
   templateUrl: './field-findings-list-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -90,6 +90,12 @@ export class FieldFindingsListPageComponent implements OnDestroy {
 
   closeDetail(): void {
     this.modalFinding.set(null);
+  }
+
+  safeProjectId(): number | null {
+    const raw = this.route.parent?.snapshot.paramMap.get('projectId');
+    const id = raw ? Number(raw) : NaN;
+    return Number.isFinite(id) ? id : null;
   }
 
   findingStatusLabel(f: FieldFinding): string {

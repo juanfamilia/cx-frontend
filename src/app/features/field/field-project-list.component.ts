@@ -35,6 +35,7 @@ import {
 
 import { FieldPrimaryNavTabsComponent } from './components/field-primary-nav-tabs.component';
 import { companyDisplayLabel } from './field-company.helpers';
+import { executiveHealthReason } from './field-ui.helpers';
 
 /** Texto fijo por código técnico — lo ve el cliente sin leer el backend. */
 const FINDING_KIND_LABEL: Record<string, string> = {
@@ -78,6 +79,7 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
 
   readonly companyDisplayLabel = companyDisplayLabel;
+  readonly executiveHealthReason = executiveHealthReason;
 
   readonly user = this.auth.getCurrentUser();
   readonly projects = signal<FieldProject[]>([]);

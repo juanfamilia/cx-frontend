@@ -3,12 +3,42 @@
 } @else if (!overview()) {
   <p class="text-sm text-slate-600 dark:text-slate-400">No hay datos de resumen para este proyecto.</p>
 } @else {
-  <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-    <app-field-kpi-card title="Avance estimado" [value]="kpiProgress()" trend="Según última sincronización" />
+  <div
+    class="rounded-xl border border-indigo-200/80 bg-indigo-50/60 px-4 py-3 dark:border-indigo-900/50 dark:bg-indigo-950/25">
+    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200">
+      Siguiente paso sugerido
+    </p>
+    <p class="mt-1 text-sm text-slate-800 dark:text-slate-100">{{ nextStepHint() }}</p>
+    @if (safeDashboardProjectId(); as pid) {
+      <div class="mt-3 flex flex-wrap gap-2">
+        <a
+          [routerLink]="['/field/project', pid, 'findings']"
+          class="text-xs font-semibold text-indigo-700 underline hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100">
+          Ver todos los hallazgos →
+        </a>
+        <a
+          [routerLink]="['/field/project', pid, 'scoring']"
+          class="text-xs font-semibold text-indigo-700 underline hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100">
+          Métricas y scoring →
+        </a>
+        <a
+          [routerLink]="['/field/project', pid, 'pre-field']"
+          class="text-xs font-semibold text-indigo-700 underline hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100">
+          PRE-FIELD →
+        </a>
+      </div>
+    }
+  </div>
+
+  <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <app-field-kpi-card
+      title="Avance muestral"
+      [value]="kpiProgress()"
+      trend="Desde última sincronización · indicador de avance declarado" />
     <app-field-kpi-card
       title="Volumen tabular"
       [value]="kpiInterviews()"
-      trend="Último snapshot disponible en servidor" />
+      trend="Filas útiles en servidor (último snapshot)" />
     <div
       class="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
       <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Salud global</p>
@@ -16,9 +46,45 @@
         <app-field-risk-badge [level]="globalRiskLevel()" />
         <span class="text-sm text-slate-600 dark:text-slate-300">{{ healthSummaryLabel() }}</span>
       </div>
+      <p class="mt-2 text-[0.65rem] text-slate-500 dark:text-slate-400">
+        Combina riesgo por hallazgos, ingestión y consistencia declarada en servidor.
+      </p>
     </div>
-    <app-field-kpi-card title="Hallazgos críticos abiertos" [value]="kpiCritical()" />
+    <app-field-kpi-card
+      title="Hallazgos críticos abiertos"
+      [value]="kpiCritical()"
+      trend="Severidad alta · lista operativa" />
+    <app-field-kpi-card
+      title="Advertencias abiertas"
+      [value]="kpiWarn()"
+      trend="Requieren seguimiento · lista operativa" />
+    <app-field-kpi-card
+      title="Pendientes de revisión"
+      [value]="kpiPendingReview()"
+      trend="Pendiente operativo en lista de hallazgos" />
   </div>
+
+  @if (dashboardHealthReasons().length > 0) {
+    <div
+      class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        Por qué esta salud en el proyecto
+      </p>
+      <ul class="mt-3 space-y-2 text-sm text-slate-800 dark:text-slate-100">
+        @for (reason of dashboardHealthReasons(); track $index) {
+          <li class="rounded-lg border border-slate-100 bg-slate-50/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-950/30">
+            <p>{{ executiveHealthReason(reason) }}</p>
+            <details class="mt-1">
+              <summary class="cursor-pointer text-[0.65rem] font-medium text-slate-500 dark:text-slate-400">
+                Señal técnica original
+              </summary>
+              <p class="mt-1 font-mono text-[0.65rem] text-slate-500 dark:text-slate-400">{{ reason }}</p>
+            </details>
+          </li>
+        }
+      </ul>
+    </div>
+  }
 
   <div class="mt-8 grid gap-6 lg:grid-cols-5">
     <div class="lg:col-span-3">
@@ -59,7 +125,7 @@
         </table>
         @if (findings().length === 0) {
           <p class="px-3 py-6 text-center text-sm text-slate-600 dark:text-slate-400">
-            No hay hallazgos registrados para este proyecto en la capa de decisión.
+            No hay hallazgos en la lista operativa de decisión para este proyecto.
           </p>
         }
       </div>

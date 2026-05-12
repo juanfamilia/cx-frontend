@@ -3,10 +3,25 @@
 } @else if (!overview()) {
   <p class="text-sm text-slate-600 dark:text-slate-400">No hay información de métricas para mostrar.</p>
 } @else {
-  <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">Métricas y scoring</h2>
+  @if (safeProjectId(); as pid) {
+    <p class="text-sm text-slate-600 dark:text-slate-400">
+      <a
+        [routerLink]="['/field/project', pid, 'dashboard']"
+        class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+        >← Tablero operativo</a
+      >
+      <span class="mx-2 text-slate-300 dark:text-slate-600">·</span>
+      <a
+        [routerLink]="['/field/project', pid, 'findings']"
+        class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+        >Hallazgos</a
+      >
+    </p>
+  }
+  <h2 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-50">Métricas y scoring</h2>
   <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-    Valores más recientes por indicador. Cuando exista un paquete de scoring versionado en el sistema, aquí se
-    podrá enlazar el desglose ponderado; por ahora se muestran los últimos números materializados.
+    Valores más recientes materializados en servidor (riesgo operativo y avance). El código técnico del indicador aparece
+    en segunda línea para trazabilidad.
   </p>
 
   <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
@@ -15,13 +30,16 @@
         <tr>
           <th class="px-4 py-3 font-semibold">Indicador</th>
           <th class="px-4 py-3 font-semibold">Valor</th>
-          <th class="px-4 py-3 font-semibold">Notas</th>
+          <th class="px-4 py-3 font-semibold">Contexto</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
         @for (m of sortedMetrics(); track m.id) {
           <tr class="bg-white dark:bg-slate-950/10">
-            <td class="px-4 py-3 font-mono text-xs">{{ m.metric_code }}</td>
+            <td class="px-4 py-3">
+              <p class="font-medium text-slate-900 dark:text-slate-50">{{ metricExecutiveLabel(m.metric_code) }}</p>
+              <p class="mt-0.5 font-mono text-[0.65rem] text-slate-500 dark:text-slate-400">{{ m.metric_code }}</p>
+            </td>
             <td class="px-4 py-3 tabular-nums">{{ m.value }}</td>
             <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">{{ dimensionNote(m) || '—' }}</td>
           </tr>

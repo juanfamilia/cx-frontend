@@ -1,6 +1,6 @@
 import { CommonModule, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { ShareToasterService } from '@core/services/toast.service';
@@ -13,7 +13,14 @@ import {
   FieldProjectOverviewRow,
   FieldService,
 } from './field.service';
-import { formatCompletionRatePct, healthToRiskLevel } from './field-ui.helpers';
+import {
+  formatCompletionRatePct,
+  executiveHealthReason,
+  healthExecutiveLabel,
+  healthToRiskLevel,
+  openSeverityCount,
+  operationalNextStepHint,
+} from './field-ui.helpers';
 import { FieldRiskUiLevel } from './components/field-risk-badge.component';
 
 @Component({
@@ -22,6 +29,7 @@ import { FieldRiskUiLevel } from './components/field-risk-badge.component';
   imports: [
     CommonModule,
     NgClass,
+    RouterLink,
     FieldKpiCardComponent,
     FieldRiskBadgeComponent,
     FieldFindingCardComponent,
@@ -39,6 +47,8 @@ export class FieldControlDashboardComponent implements OnDestroy {
   readonly loading = signal(true);
   readonly selectedFinding = signal<FieldFinding | null>(null);
   readonly approvalBusy = signal(false);
+
+  readonly executiveHealthReason = executiveHealthReason;
 
   private sub?: Subscription;
 
@@ -83,10 +93,19 @@ export class FieldControlDashboardComponent implements OnDestroy {
     });
   }
 
+  dashboardHealthReasons(): string[] {
+    return this.overview()?.health_reasons ?? [];
+  }
+
   projectId(): number {
     const raw = this.route.parent!.snapshot.paramMap.get('projectId');
     const id = raw ? Number(raw) : NaN;
     return Number.isFinite(id) ? id : NaN;
+  }
+
+  safeDashboardProjectId(): number | null {
+    const id = this.projectId();
+    return Number.isFinite(id) ? id : null;
   }
 
   globalRiskLevel() {
@@ -99,17 +118,20 @@ export class FieldControlDashboardComponent implements OnDestroy {
 
   /** Etiqueta legible para el semáforo de salud (sin exponer códigos crudos en UI). */
   healthSummaryLabel(): string {
-    const h = this.overview()?.health;
-    if (h === 'green') {
-      return 'Dentro de lo esperado';
-    }
-    if (h === 'amber') {
-      return 'Requiere atención';
-    }
-    if (h === 'red') {
-      return 'Requiere acción';
-    }
-    return '—';
+    return healthExecutiveLabel(this.overview()?.health);
+  }
+
+  nextStepHint(): string {
+    return operationalNextStepHint(this.overview());
+  }
+
+  kpiWarn(): string {
+    return String(openSeverityCount(this.overview(), 'warn'));
+  }
+
+  kpiPendingReview(): string {
+    const n = this.overview()?.findings_pending_review;
+    return n != null ? String(n) : '—';
   }
 
   kpiProgress(): string {

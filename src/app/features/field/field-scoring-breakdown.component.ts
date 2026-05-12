@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { FieldMetric, FieldProjectOverviewRow, FieldService } from './field.service';
+import { metricCodeExecutiveLabel } from './field-ui.helpers';
 
 @Component({
   selector: 'app-field-scoring-breakdown',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './field-scoring-breakdown.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -20,6 +21,8 @@ export class FieldScoringBreakdownComponent implements OnDestroy {
 
   readonly overview = signal<FieldProjectOverviewRow | null>(null);
   readonly loading = signal(true);
+
+  readonly metricExecutiveLabel = metricCodeExecutiveLabel;
 
   constructor() {
     this.routeSub = this.route.parent!.paramMap.subscribe(p => {
@@ -43,6 +46,12 @@ export class FieldScoringBreakdownComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.routeSub.unsubscribe();
+  }
+
+  safeProjectId(): number | null {
+    const raw = this.route.parent?.snapshot.paramMap.get('projectId');
+    const id = raw ? Number(raw) : NaN;
+    return Number.isFinite(id) ? id : null;
   }
 
   sortedMetrics(): FieldMetric[] {
