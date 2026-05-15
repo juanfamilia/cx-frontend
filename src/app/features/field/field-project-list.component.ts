@@ -1543,13 +1543,13 @@ export class FieldProjectListComponent implements OnInit, OnDestroy {
   wizardInstruction(): string {
     switch (this.activeStep()) {
       case 1:
-        return 'Elija el cliente final del levantamiento (o cree uno nuevo).';
+        return 'Empecemos por el cliente final: quién paga o autoriza suele definir el ritmo de aprobaciones más adelante.';
       case 2:
-        return 'Opcional: puede elegir o crear un «estudio» para agrupar el proyecto bajo un mismo nombre. También puede saltar este paso.';
+        return 'Si agrupa olas bajo un estudio, le será más fácil encontrar este proyecto dentro de un año; si no aplica, siga al siguiente paso sin culpa.';
       case 3:
-        return 'Ponga nombre al proyecto y diga si los datos vendrán de CSV, SurveyToGo / Dooblo o Qualtrics XM.';
+        return 'Nombre claro y origen de datos honesto (CSV, SurveyToGo o Qualtrics): así la siguiente pantalla le muestra solo lo relevante.';
       case 4:
-        return 'Aquí carga archivos, conecta SurveyToGo con usuario y clave, y revisa el estado de cada proyecto.';
+        return 'Último tramo operativo: cargas, credenciales si hace falta y tabla de estado— ideal para revisarlo con alguien de campo antes del «ya está».';
       default:
         return '';
     }

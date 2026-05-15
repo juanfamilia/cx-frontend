@@ -1,12 +1,14 @@
 @if (loading()) {
-  <p class="text-sm text-slate-600 dark:text-slate-400">Cargando panel de control…</p>
+  <p class="text-sm text-slate-600 dark:text-slate-400">Preparando lectura del proyecto…</p>
 } @else if (!overview()) {
-  <p class="text-sm text-slate-600 dark:text-slate-400">No hay datos de resumen para este proyecto.</p>
+  <p class="text-sm text-slate-600 dark:text-slate-400">
+    Aún no hay resumen agregado para este proyecto; suele aparecer tras la primera importación o sincronización con campo.
+  </p>
 } @else {
   <div
     class="rounded-xl border border-indigo-200/80 bg-indigo-50/60 px-4 py-3 dark:border-indigo-900/50 dark:bg-indigo-950/25">
     <p class="text-xs font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200">
-      Siguiente paso sugerido
+      Siguiente paso que sugiere el tablero
     </p>
     <p class="mt-1 text-sm text-slate-800 dark:text-slate-100">{{ nextStepHint() }}</p>
     @if (safeDashboardProjectId(); as pid) {

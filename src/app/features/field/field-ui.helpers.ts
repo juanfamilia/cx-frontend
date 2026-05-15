@@ -179,6 +179,23 @@ export function executiveQaConsistencySummary(d: QaConsistencySnapshot): string 
   return 'Sin resultado de revisión de consistencia / control de calidad en esta revisión todavía.';
 }
 
+/** Superficie guiada PRE-FIELD: sin IDs de paquetes, reglas ni runtime en el mensaje. */
+export function executiveQaConsistencySummaryGuided(d: QaConsistencySnapshot): string {
+  if (d.last_validation_ok === false) {
+    const n = d.last_validation_issue_count;
+    return n != null
+      ? `Detectamos ${n} tema(s) en la última comprobación automática que merecen su revisión.`
+      : 'La última comprobación automática necesita su revisión antes de dar por cerrado el flujo.';
+  }
+  if (d.last_validation_ok === true) {
+    return 'La última comprobación automática está en orden para este borrador.';
+  }
+  if (d.last_validation_at) {
+    return 'Hay una comprobación reciente; revise en el paso «Revisión» que encaje con lo que quiere llevar a campo.';
+  }
+  return 'Aún no registramos una comprobación automática para este borrador.';
+}
+
 /** Etiqueta legible para filas de KPI en scoring. */
 export function metricCodeExecutiveLabel(metricCode: string): string {
   const c = (metricCode || '').trim();

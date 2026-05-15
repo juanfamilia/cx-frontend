@@ -24,7 +24,7 @@ export type FieldPrimaryNavTabId =
   template: `
     <nav
       class="flex flex-wrap gap-2 border-b border-slate-200 pb-4 dark:border-slate-700"
-      aria-label="Secciones principales de Field">
+      aria-label="Navegación principal de Siete Field">
       <a
         routerLink="/field"
         class="inline-flex items-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-500/50"

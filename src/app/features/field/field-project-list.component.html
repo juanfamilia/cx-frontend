@@ -11,19 +11,17 @@
         Siete Field
       </p>
       <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-3xl">
-        Operaciones y centro de mando
+        Centro de mando y operaciones guiadas
       </h1>
-      <p
-        class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:text-base">
-        Este tablero combina el <strong class="text-slate-800 dark:text-slate-200">centro de mando</strong> (bloque
-        superior con semáforos y KPIs) y las <strong class="text-slate-800 dark:text-slate-200">operaciones y asistente</strong>
-        (registro de cliente, proyecto, CSV y vínculos SurveyToGo). Para una vista tabular compacta use también
-        <a routerLink="/field/projects" class="font-semibold text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400">resumen de proyectos</a>.
-        <span class="block pt-2 text-slate-700 dark:text-slate-200">
-          <strong>PRE-FIELD</strong> (plantillas e instrumento): use el enlace en cada tarjeta del centro de mando o en el
-          detalle del proyecto seleccionado.
-        </span>
-      </p>
+    <p class="mt-3 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
+      Dos paneles que trabajan juntos: el <strong class="text-slate-800 dark:text-slate-200">centro de mando</strong> le muestra semáforos y KPIs por proyecto para priorizar;
+      <strong class="text-slate-800 dark:text-slate-200">Operaciones y asistente</strong> es el lugar donde alta cliente/proyecto, CSV y vínculos a SurveyToGo o Qualtrics se vuelven acciones concretas.
+      Para una vista tabular compacta sigue siendo útil el
+      <a routerLink="/field/projects" class="font-semibold text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400">resumen de proyectos</a>.
+      <span class="block pt-2 text-slate-700 dark:text-slate-200">
+        <strong>PRE-FIELD</strong> vive junto al diseño del instrumento: desde cada tarjeta del centro de mando o desde el detalle del proyecto— mismo tono guiado que en el resto de Siete Field.
+      </span>
+    </p>
     </div>
   </div>
 
@@ -40,8 +38,7 @@
           </p>
           <h2 class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Resumen por proyecto</h2>
           <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-            Los semáforos combinan hallazgos abiertos, último análisis Dooblo, cuota upstream y avance muestral
-            declarado.
+            Los semáforos mezclan hallazgos abiertos, último análisis Dooblo, cuota upstream y avance muestral declarado— piénselos como conversación de prioridades, no como veredicto único.
           </p>
         </div>
         <button type="button" class="field-btn-secondary shrink-0" (click)="reloadCommandOverview()">
@@ -53,12 +50,10 @@
         <p class="mt-6 text-sm text-slate-500 dark:text-slate-400">Cargando resumen ejecutivo…</p>
       } @else if (commandOverview().length === 0) {
         <p class="mt-6 text-sm text-slate-600 dark:text-slate-300">
-          Aún no hay proyectos Field para esta empresa en Siete Field, o la lista está vacía. Cree un proyecto con el
-          asistente de operaciones (más abajo) o, si ya existen en otra herramienta, vincule encuestas desde este mismo
-          tablero.
+          Todavía no hay proyectos Field para esta empresa aquí, o la lista llegó vacía. Cree uno con el asistente de operaciones más abajo, o— si ya existen fuera de Siete Field— enlácelos desde esta misma pantalla cuando corresponda.
         </p>
         <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-          Si acaba de dar de alta un proyecto, pulse <strong>Actualizar métricas</strong> arriba.
+          Si acaba de guardar algo nuevo y no lo ve, pulse <strong>Actualizar métricas</strong> arriba: suele ser solo sincronización de vista.
         </p>
       } @else {
         <div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -209,7 +204,7 @@
                 }
               </p>
               <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                Señales derivadas del ledger y del último snapshot operativo (cuota / muestra tabular / GPS).
+                Lectura sintética de lo que ya sabemos del proyecto— suficiente para decidir si hoy toca sync, revisión de cuotas o llamar a alguien.
               </p>
             </div>
             <div class="flex flex-wrap gap-2">
@@ -443,7 +438,7 @@
         <p class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
           Operaciones y Asistente
         </p>
-        <p class="mt-0.5 text-sm font-semibold text-slate-800 dark:text-slate-100">Alta guiada y vínculos SurveyToGo</p>
+        <p class="mt-0.5 text-sm font-semibold text-slate-800 dark:text-slate-100">Del alta guiado al vínculo con campo real</p>
       </div>
     </div>
 
@@ -543,7 +538,7 @@
   @if (activeStep() === 1) {
     <section class="field-card mb-8">
       <h2 class="field-card-title">Paso 1 — Cliente final</h2>
-      <p class="field-card-desc">Elija el cliente o cree uno para este levantamiento.</p>
+      <p class="field-card-desc">Elija el cliente para este levantamiento o cree uno nuevo; es la primera decisión que mantiene alineados a Ops y cuenta.</p>
       @if (effectiveCompanyId() == null) {
         <p
           class="rounded-lg border border-amber-200/80 bg-amber-50/50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-100">
@@ -578,8 +573,7 @@
     <section class="field-card mb-8">
       <h2 class="field-card-title">Paso 2 — Estudio (opcional)</h2>
       <p class="field-card-desc">
-        Si lo usa, el proyecto quedará etiquetado con ese estudio (mismo cliente que eligió en el paso 1). Si no lo necesita,
-        siga al paso 3 sin cambiar nada aquí.
+        Opcional pero recomendable cuando tiene olas o renovaciones: un «estudio» etiqueta el proyecto para reporting consistente. Si no lo necesita ahora, siga tranquilo al paso 3— puede volver después.
       </p>
       <fieldset class="rounded-xl border border-indigo-200/70 bg-indigo-50/35 p-4 dark:border-indigo-900/45 dark:bg-indigo-950/25">
         <legend class="px-1 text-sm font-semibold text-indigo-950 dark:text-indigo-100">Estudio</legend>
@@ -623,7 +617,8 @@
     <section class="field-card mb-8">
       <h2 class="field-card-title">Paso 3 — Nuevo proyecto</h2>
       <p class="field-card-desc">
-        Un proyecto agrupa importaciones y el tablero; aquí elija el <strong>origen declarado</strong> de datos y el nombre del proyecto.
+        Aquí nombra el proyecto y declara si los datos llegarán por <strong>CSV</strong>, <strong>SurveyToGo / Dooblo</strong> o <strong>Qualtrics XM</strong>.
+        No tiene que tener todo cerrado todavía: solo suficiente contexto para que la siguiente pantalla sepa qué formulario mostrarle.
       </p>
       <fieldset class="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 p-3 dark:border-slate-600/50 dark:bg-slate-800/30">
         <legend class="px-1 text-sm font-semibold text-slate-800 dark:text-slate-200">Origen de datos</legend>
@@ -684,8 +679,8 @@
     <section id="field-csv-import-anchor" class="field-card scroll-mt-20">
       <h2 class="field-card-title">Paso 4 — Carga, API y resumen</h2>
       <p class="field-card-desc">
-        La tabla muestra si cada proyecto usa <strong>CSV</strong> o <strong>API</strong> (SurveyToGo o Qualtrics) y, si aplicó, el estudio
-        elegido antes. Configure credenciales en
+        Cierre el ciclo: cargue CSV, complete credenciales SurveyToGo si corresponde, revise vínculos y estado por fila. Piénselo como checklist operativo antes de pedirle a alguien que «solo ejecute campo».
+        Configure credenciales también en
         <a
           routerLink="/field/conectores"
           class="font-semibold text-indigo-600 underline underline-offset-2 dark:text-indigo-400"
@@ -702,10 +697,10 @@
       </p>
       <p
         class="mb-4 rounded-lg border border-indigo-200/70 bg-indigo-50/60 px-3 py-2 text-xs text-indigo-950 dark:border-indigo-800/40 dark:bg-indigo-950/20 dark:text-indigo-100/95">
-        El selector unificado de fuentes (Dooblo, Qualtrics, CSV) está en
+        Si prefiere un único lugar para SurveyToGo, Qualtrics y CSV, use también
         <a routerLink="/field/conectores" class="font-semibold underline underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-200"
           >Fuentes de datos</a
-        >. La pantalla de inicio Field también permite SurveyToGo antes del tablero.
+        >; la pantalla de inicio Field sigue mostrando el pulso de SurveyToGo cuando ya configuró la cuenta.
       </p>
       @if (effectiveCompanyId() != null) {
         <div [class]="doobloCredentialsPanelClass()">

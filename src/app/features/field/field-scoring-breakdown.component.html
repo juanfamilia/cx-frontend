@@ -1,7 +1,9 @@
 @if (loading()) {
-  <p class="text-sm text-slate-600 dark:text-slate-400">Cargando métricas…</p>
+  <p class="text-sm text-slate-600 dark:text-slate-400">Sincronizando métricas con lo último que registró el servidor…</p>
 } @else if (!overview()) {
-  <p class="text-sm text-slate-600 dark:text-slate-400">No hay información de métricas para mostrar.</p>
+  <p class="text-sm text-slate-600 dark:text-slate-400">
+    Todavía no hay métricas materializadas para mostrar; suele llenarse después de importaciones o corridas de análisis sobre este proyecto.
+  </p>
 } @else {
   @if (safeProjectId(); as pid) {
     <p class="text-sm text-slate-600 dark:text-slate-400">
@@ -20,8 +22,7 @@
   }
   <h2 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-50">Métricas y scoring</h2>
   <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-    Valores más recientes materializados en servidor (riesgo operativo y avance). El código técnico del indicador aparece
-    en segunda línea para trazabilidad.
+    Lectura cuantitativa reciente del proyecto: úsela para respaldar conversaciones con campo y cliente. El código técnico del indicador queda en segunda línea solo para trazabilidad cuando alguien de TI pregunte «¿de dónde salió esto?».
   </p>
 
   <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">

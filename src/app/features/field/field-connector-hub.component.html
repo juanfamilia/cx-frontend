@@ -7,8 +7,8 @@
       Fuentes de datos
     </h1>
     <p class="mt-3 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
-      Flujo en <strong>dos pasos</strong>: primero elija la fuente de datos (paso 1); después solo verá lo que corresponde — credenciales para SurveyToGo o Qualtrics; para CSV, plantilla,
-      proyecto destino y archivo (paso 2).
+      Le guiamos en <strong>dos pasos</strong>: primero elija de dónde vienen los datos; después solo aparece lo que necesita para esa fuente— credenciales SurveyToGo o Qualtrics si aplica;
+      para CSV, plantilla, proyecto destino y archivo. Menos pantallas genéricas, más checklist accionable.
     </p>
     <app-field-primary-nav-tabs class="mt-6" />
   </header>
@@ -41,7 +41,7 @@
   } @else {
     <p
       class="mt-8 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-      Paso 1 — ¿De dónde vienen los datos?
+      Paso 1 — ¿De dónde vienen los datos hoy?
     </p>
     <div class="mt-3 grid gap-3 sm:grid-cols-3">
       <button type="button" [ngClass]="connectorBtnClass('dooblo')" (click)="selectConnector('dooblo')">

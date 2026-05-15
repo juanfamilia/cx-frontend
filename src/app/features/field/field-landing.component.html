@@ -6,28 +6,27 @@
           Siete Field
         </p>
         <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 lg:text-[1.65rem]">
-          Control de campo, con contexto claro
+          Campo con contexto, sin perderse en menús
         </h1>
         <p class="mt-1.5 max-w-3xl text-sm leading-snug text-slate-600 dark:text-slate-300">
-          Pulso operativo de proyectos SurveyToGo. Orígenes y credenciales están en la pestaña
-          <strong>Fuentes de datos</strong>.
+          Esta pantalla es su <strong class="text-slate-800 dark:text-slate-100">pulso ejecutivo</strong> sobre SurveyToGo:
+          qué proyectos ve la cuenta y si algo necesita atención antes de que Operaciones lo sienta. Las credenciales y el origen de datos viven en
+          <strong class="text-slate-800 dark:text-slate-100">Fuentes de datos</strong>.
         </p>
         <p class="mt-2 max-w-3xl text-sm leading-snug text-slate-600 dark:text-slate-300">
-          <strong class="text-slate-800 dark:text-slate-100">PRE-FIELD</strong> (instrumento y plantillas) no está en esta
-          pantalla: vaya a
+          <strong class="text-slate-800 dark:text-slate-100">PRE-FIELD</strong> (brief, plantillas e instrumento antes de salir a campo) no está aquí de forma explícita: desde
           <a routerLink="/field/projects" class="font-semibold text-indigo-600 underline dark:text-indigo-400"
             >Resumen de proyectos</a
           >
-          y use el enlace <strong class="text-slate-800 dark:text-slate-100">PRE-FIELD</strong> por fila, o abra el
-          proyecto y elija la pestaña homónima arriba.
+          abra la columna <strong class="text-slate-800 dark:text-slate-100">Instrumento</strong>, o entre al proyecto y elija la pestaña <strong class="text-slate-800 dark:text-slate-100">PRE-FIELD</strong> arriba. Lo guiaremos paso a paso cuando llegue.
         </p>
         @if (isSuperAdmin) {
           <p class="mt-2 max-w-3xl text-[0.7rem] leading-snug text-slate-500 dark:text-slate-400">
-            Superadmin: elija la <strong>empresa (tenant)</strong> activa en
+            Superadmin: active la <strong>empresa (tenant)</strong> correcta en
             <a routerLink="/field/conectores" class="font-semibold text-indigo-600 underline dark:text-indigo-400"
               >Fuentes de datos</a
             >
-            para alinear este pulso con esa cuenta.
+            para que este pulso y el tablero hablen de la misma cuenta.
           </p>
         }
       </div>
@@ -51,12 +50,12 @@
           class="flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-50"
           [attr.aria-expanded]="pulseSectionExpanded()"
           (click)="togglePulseSection()">
-          <span>Pulso ejecutivo — catálogo SurveyToGo</span>
+          <span>Pulso ejecutivo · catálogo SurveyToGo</span>
           <span class="text-xs font-normal text-slate-500 dark:text-slate-400">
             @if (pulseSectionExpanded()) {
-              Pulse para ocultar tabla y KPIs
+              Ocultar tabla y KPIs
             } @else {
-              Pulse para expandir tabla y KPIs
+              Ver proyectos visibles y contadores rápidos
             }
           </span>
         </button>
@@ -65,7 +64,7 @@
           <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p class="text-xs text-slate-600 dark:text-slate-400">
-                Tras conectar, revise proyectos visibles; el tablero Field lleva vínculos por proyecto y CSV.
+                Cuando la cuenta está bien configurada, esta tabla ayuda a validar que lo que esperan ver en reunión coincide con lo que devuelve la API— antes de abrir tickets.
               </p>
             </div>
             <button
@@ -125,7 +124,7 @@
             <p class="mt-4 text-xs text-slate-500">Consultando SurveyToGo…</p>
           } @else if (previewProjects().length === 0) {
             <p class="mt-4 text-xs text-slate-600 dark:text-slate-400">
-              Sin proyectos en esta vista o sin permisos. Revise credenciales y pulse Actualizar.
+              No ve proyectos o esperaba otros: suele ser permiso en SurveyToGo o credencial equivocada. Revise Fuentes de datos y pulse Actualizar.
             </p>
           } @else {
             <div class="mt-4 max-h-[min(40vh,16rem)] overflow-auto rounded-lg border border-slate-200 dark:border-slate-700">
@@ -183,22 +182,22 @@
       </div>
     } @else if (!doobloCredentialsLoading()) {
       <p class="mt-4 text-xs text-slate-600 dark:text-slate-400">
-        Cuando SurveyToGo esté configurado en
+        Cuando configure SurveyToGo en
         <a routerLink="/field/conectores" class="font-semibold text-indigo-600 underline dark:text-indigo-400">Fuentes</a>
-        aparecerá el pulso de proyectos aquí debajo.
+        aparecerá aquí el mismo pulso que acostumbra revisar con datos antes de bajar al tablero.
       </p>
     }
   }
 
   <footer class="mt-6 border-t border-slate-200 pt-4 text-[0.65rem] text-slate-500 dark:border-slate-700 dark:text-slate-400">
     <p class="leading-snug">
-      PRE-FIELD:
+      <strong class="font-semibold text-slate-600 dark:text-slate-300">PRE-FIELD</strong>: desde
       <a routerLink="/field/projects" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
-        >desde Resumen (columna o pestaña en proyecto)</a
+        >resumen por proyecto</a
       >
-      · Solo CSV:
+      (columna Instrumento o detalle del proyecto). Solo CSV:
       <a routerLink="/field/projects" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">Resumen</a>
-      ·
+      · Coordinación operativa:
       <a
         routerLink="/field/trabajo"
         [queryParams]="{ focus: 'overview' }"
@@ -206,7 +205,7 @@
         >Centro de mando</a>
       ·
       <a routerLink="/field/trabajo" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
-        >Operaciones</a>
+        >Operaciones y asistente</a>
     </p>
   </footer>
 </div>

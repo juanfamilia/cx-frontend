@@ -5,7 +5,6 @@ import {
   Component,
   OnDestroy,
   OnInit,
-  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -32,7 +31,7 @@ import {
 } from './field.service';
 
 import {
-  executiveQaConsistencySummary,
+  executiveQaConsistencySummaryGuided,
   executiveReadinessBlocking,
   executiveStakeholderRole,
 } from './field-ui.helpers';
@@ -51,17 +50,8 @@ const STUDY_TYPE_OPTIONS: readonly { value: string; label: string }[] = [
 
 type Phase = 'setup' | 'instrument';
 
-/** Sub-vista dentro del paso instrumento (Brief vs trabajo técnico). */
-type InstrumentWorkbenchTab = 'brief' | 'instrument';
-
-type PrefieldPipelineVariant = 'done' | 'active' | 'blocked' | 'muted';
-
-interface PrefieldPipelineStepVm {
-  key: string;
-  title: string;
-  caption: string;
-  variant: PrefieldPipelineVariant;
-}
+/** Flujo guiado dentro de PRE-FIELD (solo UX; mismas APIs). */
+type PrefieldProductStep = 'brief' | 'methodology' | 'questionnaire' | 'review' | 'ready';
 
 @Component({
   selector: 'app-field-pre-field',
@@ -80,7 +70,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
 
   readonly executiveReadinessBlocking = executiveReadinessBlocking;
   readonly executiveStakeholderRole = executiveStakeholderRole;
-  readonly executiveQaConsistencySummary = executiveQaConsistencySummary;
+  readonly executiveQaConsistencySummaryGuided = executiveQaConsistencySummaryGuided;
 
   private paramSub?: Subscription;
 
@@ -92,7 +82,15 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   readonly studyTypeOptions = STUDY_TYPE_OPTIONS;
 
   readonly phase = signal<Phase>('setup');
-  readonly instrumentTab = signal<InstrumentWorkbenchTab>('brief');
+  readonly productStep = signal<PrefieldProductStep>('brief');
+
+  readonly productFlowSteps: readonly { id: PrefieldProductStep; label: string }[] = [
+    { id: 'brief', label: 'Brief' },
+    { id: 'methodology', label: 'Metodología' },
+    { id: 'questionnaire', label: 'Cuestionario' },
+    { id: 'review', label: 'Revisión' },
+    { id: 'ready', label: 'Listo para campo' },
+  ];
 
   readonly loading = signal(false);
   readonly setupSubmitting = signal(false);
@@ -111,7 +109,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   readonly brief = signal<FieldStudyBriefPublic | null>(null);
   readonly briefLoading = signal(false);
   readonly briefSaving = signal(false);
-  /** Mensaje tras fallo de GET/PATCH del brief (la pestaña no puede quedar en blanco). */
+  /** Mensaje tras fallo de GET/PATCH del brief (el paso Brief no puede quedar sin contexto). */
   readonly briefLoadError = signal<string | null>(null);
   readonly readinessPolicy = signal<FieldReadinessPolicyPublic | null>(null);
   readonly policyLoading = signal(false);
@@ -132,10 +130,17 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   notes = '';
   selectedTemplateSlug = '';
 
-  /** Editor JSON del payload del brief (sincronizado al cargar). */
+  /** Editor JSON del payload del brief (sincronizado al cargar; solo «Detalles técnicos»). */
   briefPayloadText = '';
   /** Score 0–100 como texto (vacío = sin cambiar en algunos flujos). */
   briefCompletenessStr = '';
+
+  /** Campos guiados ↔ `payload_json` del brief (clave estable por campo). */
+  briefGuidedObjective = '';
+  briefGuidedBusinessQuestion = '';
+  briefGuidedAudience = '';
+  briefGuidedMarket = '';
+  briefGuidedExpectedOutcome = '';
   waiverRationale = '';
   /** JSON opcional: lista u objeto de secciones relevadas del framework. */
   waiverSectionsJson = '';
@@ -150,7 +155,8 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   newProjectName = '';
   selectedClientId: number | null = null;
 
-  readonly pipelineStepsView = computed(() => this.buildPipelineSteps());
+  /** Insights contextuales descartados localmente (solo UX; sin backend). */
+  private readonly dismissedInsightIds = signal<ReadonlySet<string>>(new Set());
 
   ngOnInit(): void {
     const parent = this.route.parent;
@@ -184,9 +190,9 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  setInstrumentTab(tab: InstrumentWorkbenchTab): void {
-    this.instrumentTab.set(tab);
-    if (tab === 'brief' && this.phase() === 'instrument') {
+  setProductStep(step: PrefieldProductStep): void {
+    this.productStep.set(step);
+    if (step === 'brief' && this.phase() === 'instrument') {
       const sid = this.studyId();
       const cid = this.projectCompanyId();
       if (sid != null && cid != null && !this.briefLoading()) {
@@ -194,10 +200,431 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
           this.brief404Retries = 0;
           this.briefPatchFallbackUsed = false;
           this.reloadBrief();
+        } else {
+          this.syncGuidedFromPayload();
         }
       }
     }
+    if (step === 'ready' && this.phase() === 'instrument') {
+      const cur = this.currentRevision();
+      if (cur != null) {
+        this.reloadReadinessForRevision(cur.id);
+      }
+    }
+    if (step === 'questionnaire' && this.phase() === 'instrument') {
+      const cur = this.currentRevision();
+      if (cur != null) {
+        this.reloadReadinessForRevision(cur.id);
+      }
+    }
     this.cdr.markForCheck();
+  }
+
+  /** Borrador más reciente por fecha de actualización. */
+  currentRevision(): FieldInstrumentRevision | null {
+    const rows = this.revisions();
+    if (rows.length === 0) {
+      return null;
+    }
+    const sorted = [...rows].sort(
+      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    );
+    return sorted[0] ?? null;
+  }
+
+  /** Resto de borradores (más antiguos), para historial colapsado. */
+  revisionHistory(): FieldInstrumentRevision[] {
+    const rows = this.revisions();
+    if (rows.length <= 1) {
+      return [];
+    }
+    const sorted = [...rows].sort(
+      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    );
+    return sorted.slice(1);
+  }
+
+  /** Abre el panel de trabajo para la revisión indicada (sin toggle si ya es la activa). */
+  openRevisionWorkspace(revisionId: number): void {
+    if (this.detailRevision()?.id === revisionId) {
+      return;
+    }
+    this.toggleRevisionDetail(revisionId);
+  }
+
+  /** Historial: abrir versión anterior y llevar al paso Revisión. */
+  openHistoricalRevision(revisionId: number): void {
+    this.openRevisionWorkspace(revisionId);
+    this.productStep.set('review');
+    this.cdr.markForCheck();
+  }
+
+  dismissInsight(id: string): void {
+    const cur = this.dismissedInsightIds();
+    if (cur.has(id)) {
+      return;
+    }
+    const next = new Set(cur);
+    next.add(id);
+    this.dismissedInsightIds.set(next);
+    this.cdr.markForCheck();
+  }
+
+  applyInsight(id: string): void {
+    this.dismissInsight(id);
+    if (id === 'ins-brief' || id.startsWith('ins-brief-')) {
+      this.setProductStep('brief');
+      return;
+    }
+    if (
+      id === 'ins-fatigue' ||
+      id === 'ins-demographics-order' ||
+      id === 'ins-induced-soft'
+    ) {
+      const cur = this.currentRevision();
+      if (cur != null) {
+        this.openRevisionWorkspace(cur.id);
+      }
+      this.productStep.set('review');
+      this.cdr.markForCheck();
+      return;
+    }
+    if (id.startsWith('ins-readiness')) {
+      const cur = this.currentRevision();
+      if (cur != null) {
+        this.openRevisionWorkspace(cur.id);
+      }
+      this.productStep.set('review');
+      this.cdr.markForCheck();
+      return;
+    }
+    if (id.startsWith('ins-qa')) {
+      const cur = this.currentRevision();
+      if (cur != null) {
+        this.openRevisionWorkspace(cur.id);
+      }
+      this.productStep.set('review');
+      this.cdr.markForCheck();
+      return;
+    }
+    this.productStep.set('review');
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Detecciones orientadas a acción (sin motor nuevo; reusa brief / QA / readiness ya cargados).
+   */
+  contextualInsights(): readonly {
+    id: string;
+    tone: 'warn' | 'ok';
+    message: string;
+    applyLabel: string;
+    showApply: boolean;
+  }[] {
+    const out: {
+      id: string;
+      tone: 'warn' | 'ok';
+      message: string;
+      applyLabel: string;
+      showApply: boolean;
+    }[] = [];
+    const skip = this.dismissedInsightIds();
+
+    const b = this.brief();
+    if (
+      b?.approval_state === 'draft' &&
+      b.completeness_score != null &&
+      b.completeness_score < 55 &&
+      !skip.has('ins-brief-sparse')
+    ) {
+      out.push({
+        id: 'ins-brief-sparse',
+        tone: 'warn',
+        message:
+          'El brief todavía se siente liviano en contenido. Unas líneas más sobre público, hipótesis y decisiones esperadas suelen ahorrar vueltas cuando el cuestionario ya está en marcha.',
+        applyLabel: 'Ir al brief',
+        showApply: true,
+      });
+    }
+
+    if (b?.approval_state === 'draft' && !skip.has('ins-brief-draft')) {
+      out.push({
+        id: 'ins-brief-draft',
+        tone: 'warn',
+        message:
+          'Mientras el brief queda en borrador, es fácil que cliente y equipo interpreten cosas distintas. Si puede, cierre expectativas aquí antes de invertir horas en redacción de campo.',
+        applyLabel: 'Ir al brief',
+        showApply: true,
+      });
+    }
+
+    const cur = this.currentRevision();
+    const d = this.detailRevision();
+    const qaTarget = d?.id === cur?.id ? d : cur;
+    const titlesForHeuristics = this.detailRevision() ? this.rawInstrumentBlockTitles() : [];
+
+    if (titlesForHeuristics.length >= 9 && !skip.has('ins-fatigue')) {
+      out.push({
+        id: 'ins-fatigue',
+        tone: 'warn',
+        message:
+          'Hay bastantes bloques visibles en este borrador: si el tiempo con la persona es acotado, conviene priorizar lo esencial y recortar lo que no cambiaría una decisión.',
+        applyLabel: 'Revisar flujo',
+        showApply: true,
+      });
+    }
+
+    let demoEarly = false;
+    titlesForHeuristics.forEach((title, idx) => {
+      const ix = FieldPreFieldComponent.phaseIndexForBlockTitle(title);
+      if (ix === 4 && titlesForHeuristics.length >= 4 && idx < Math.floor(titlesForHeuristics.length / 2)) {
+        demoEarly = true;
+      }
+    });
+    if (demoEarly && !skip.has('ins-demographics-order')) {
+      out.push({
+        id: 'ins-demographics-order',
+        tone: 'warn',
+        message:
+          'Los datos de perfil aparecen bastante al inicio del relato. Cuando la guía lo permita, suele funcionar mejor dejarlos para después del bloque de experiencia: la persona primero cuenta, luego se clasifica.',
+        applyLabel: 'Ver en revisión',
+        showApply: true,
+      });
+    }
+
+    if (titlesForHeuristics.length >= 6 && !skip.has('ins-induced-soft')) {
+      const earlySat = titlesForHeuristics.slice(0, Math.ceil(titlesForHeuristics.length / 2)).some(t => {
+        const x = t.toLowerCase();
+        return x.includes('satisf') || x.includes('excelente') || x.includes('maravill');
+      });
+      if (earlySat) {
+        out.push({
+          id: 'ins-induced-soft',
+          tone: 'warn',
+          message:
+            'Hay una formulación que invita a responder muy bien antes de haber contado la experiencia: puede inflar satisfacción sin querer. Vale la pena moverla o suavizar el tono.',
+          applyLabel: 'Revisar redacción',
+          showApply: true,
+        });
+      }
+    }
+
+    if (qaTarget && qaTarget.last_validation_ok === false && !skip.has('ins-qa-fail')) {
+      out.push({
+        id: 'ins-qa-fail',
+        tone: 'warn',
+        message:
+          'La última pasada automática encontró fricción en este borrador: saltos confusos, redacciones ambiguas o incoherencias. No es veredicto humano, pero sí una lista corta de donde mirar primero.',
+        applyLabel: 'Revisar ahora',
+        showApply: true,
+      });
+    }
+
+    if (
+      qaTarget &&
+      qaTarget.last_validation_ok === true &&
+      !skip.has('ins-qa-ok') &&
+      out.length < 5
+    ) {
+      out.push({
+        id: 'ins-qa-ok',
+        tone: 'ok',
+        message:
+          'La última pasada automática no marcó alertas graves: buena señal. Le sugerimos igual una lectura humana— piense en alguien cansado, con poco tiempo, leyendo esto en un celular.',
+        applyLabel: 'Abrir revisión',
+        showApply: true,
+      });
+    }
+
+    const rg = this.readinessGate();
+    if (rg?.blocking_codes?.length && !skip.has('ins-readiness-block')) {
+      const first = rg.blocking_codes[0];
+      const hint = executiveReadinessBlocking(first);
+      out.push({
+        id: 'ins-readiness-block',
+        tone: 'warn',
+        message: `Antes de llamar a Operaciones conviene cerrar esto en equipo: ${hint} Si ya está resuelto en otro canal, use la revisión para confirmar que quedó reflejado.`,
+        applyLabel: 'Ver detalle',
+        showApply: true,
+      });
+    }
+
+    return out.slice(0, 5);
+  }
+
+  private static readonly PARTICIPANT_PHASES: readonly { label: string; story: string }[] = [
+    {
+      label: 'Introducción',
+      story: 'Saludo honesto, por qué lo contactamos y qué haremos con lo que cuente— sin prometer lo que el estudio no puede cumplir.',
+    },
+    {
+      label: 'Screening',
+      story: 'Preguntas cortas para confirmar que encaja el perfil; mejor decepcionar temprano que forzar una conversación irrelevante.',
+    },
+    {
+      label: 'Experiencia',
+      story: 'El corazón del estudio: qué hizo, qué sintió, qué recuerda. Aquí es donde suele vivir la decisión de negocio.',
+    },
+    {
+      label: 'Satisfacción',
+      story: 'Cierre evaluativo con la cabeza ya cargada de contexto: recomendaría, repetiría, qué destacaría.',
+    },
+    {
+      label: 'Demográficos',
+      story: 'Perfil para cruzar resultados; si va al final, molesta menos y el relato fluye antes.',
+    },
+    { label: 'Cierre', story: 'Gracias claras, siguiente paso si lo hay, y sensación de que el tiempo fue respetado.' },
+  ];
+
+  private static phaseIndexForBlockTitle(title: string): number {
+    const t = title.toLowerCase();
+    const tests: { i: number; keys: string[] }[] = [
+      { i: 0, keys: ['intro', 'bienven', 'contexto', 'propósito', 'proposito', 'calibr'] },
+      { i: 1, keys: ['screen', 'filt', 'elegib', 'cuota', 'recruit', 'target'] },
+      { i: 2, keys: ['experien', 'jornada', 'uso', 'touch', 'compra', 'visita', 'interacc'] },
+      { i: 3, keys: ['satisf', 'nps', 'csat', 'recomen', 'valoración', 'valoracion'] },
+      { i: 4, keys: ['demográf', 'demograf', 'socio', 'edad', 'género', 'genero', 'ingreso', 'perfil'] },
+      { i: 5, keys: ['cierre', 'desped', 'thank', 'gracia', 'final'] },
+    ];
+    for (const { i, keys } of tests) {
+      if (keys.some(k => t.includes(k))) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  private rawInstrumentBlockTitles(): string[] {
+    const d = this.detailRevision();
+    const spec = d?.spec as Record<string, unknown> | undefined | null;
+    if (!spec || typeof spec !== 'object') {
+      return [];
+    }
+    let arr: unknown[] | null = null;
+    for (const k of ['blocks', 'sections', 'pages', 'items']) {
+      const v = spec[k];
+      if (Array.isArray(v) && v.length > 0) {
+        arr = v;
+        break;
+      }
+    }
+    if (!arr) {
+      return [];
+    }
+    return arr.slice(0, 40).map((raw, i) => {
+      if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+        const o = raw as Record<string, unknown>;
+        const s = String(o['title'] ?? o['name'] ?? o['label'] ?? o['heading'] ?? '').trim();
+        return s || `momento_${i + 1}`;
+      }
+      return `momento_${i + 1}`;
+    });
+  }
+
+  /** Relato del participante (6 momentos); no expone nombres internos del borrador en superficie. */
+  participantJourneyCards(): readonly { label: string; story: string; hasSignal: boolean }[] {
+    const titles = this.rawInstrumentBlockTitles();
+    const counts = [0, 0, 0, 0, 0, 0];
+    let rr = 0;
+    for (const title of titles) {
+      let ix = FieldPreFieldComponent.phaseIndexForBlockTitle(title);
+      if (ix < 0) {
+        ix = rr % 6;
+        rr++;
+      }
+      counts[ix]++;
+    }
+    const hasAny = titles.length > 0;
+    return FieldPreFieldComponent.PARTICIPANT_PHASES.map((p, i) => ({
+      label: p.label,
+      story: p.story,
+      hasSignal: hasAny && counts[i] > 0,
+    }));
+  }
+
+  /** Solo compatibilidad / uso futuro; la UI usa `participantJourneyCards`. */
+  instrumentPreviewBlocks(): readonly { title: string }[] {
+    return this.rawInstrumentBlockTitles().slice(0, 14).map(t => ({ title: t }));
+  }
+
+  readyCheckBriefDone(): boolean {
+    const b = this.brief();
+    return b != null && this.briefApprovedForGate(b.approval_state);
+  }
+
+  readyBriefStatus(): 'ok' | 'warn' {
+    return this.readyCheckBriefDone() ? 'ok' : 'warn';
+  }
+
+  /** Flujo revisado frente a Operaciones (sin listar gates técnicos). */
+  readyFlowStatus(): 'ok' | 'warn' {
+    const cur = this.currentRevision();
+    if (!cur) {
+      return 'warn';
+    }
+    const rg = this.readinessGate();
+    if (rg?.blocking_codes?.length) {
+      return 'warn';
+    }
+    const x = (rg?.aggregate_status || '').toLowerCase();
+    if (rg && (x === 'ready' || x === 'approved')) {
+      return 'ok';
+    }
+    if (!rg) {
+      return cur.last_validation_ok === true ? 'ok' : 'warn';
+    }
+    return 'warn';
+  }
+
+  readyQaStatus(): 'ok' | 'warn' {
+    const cur = this.currentRevision();
+    if (!cur) {
+      return 'warn';
+    }
+    return cur.last_validation_ok === true ? 'ok' : 'warn';
+  }
+
+  onPublishToFieldClick(): void {
+    this.toast.showToast(
+      'info',
+      'PRE-FIELD',
+      'Publicación directa aún no está enlazada desde esta pantalla; use su flujo Field habitual o coordinación con Operaciones.'
+    );
+  }
+
+  onSendToOperationsClick(): void {
+    this.toast.showToast(
+      'info',
+      'PRE-FIELD',
+      'Envío a Operaciones se configurará con su proceso interno; de momento puede seguir desde Field / ticketing.'
+    );
+  }
+
+  productStepNavClass(stepId: PrefieldProductStep): Record<string, boolean> {
+    const active = this.productStep() === stepId;
+    return {
+      'border-indigo-500 bg-white text-indigo-800 shadow-sm dark:border-indigo-500 dark:bg-slate-900 dark:text-indigo-200':
+        active,
+      'border-slate-200 bg-slate-100/70 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/90':
+        !active,
+    };
+  }
+
+  /** Copy breve bajo el selector de plantilla (sin versiones visibles en la superficie). */
+  selectedTemplateSummary(): string {
+    const slug = this.selectedTemplateSlug.trim();
+    if (!slug) {
+      return 'Arranca con un borrador mínimo alineado a su estándar interno; puede añadir bloques después.';
+    }
+    const t = this.templates().find(x => x.slug === slug);
+    if (!t) {
+      return 'Plantilla seleccionada: preparamos el cuestionario base con esa estructura.';
+    }
+    const desc = (t.description ?? '').trim();
+    if (desc) {
+      return desc;
+    }
+    return `Recomendación: «${t.title}» suele encajar bien con estudios de tipo «${t.study_type || 'general'}».`;
   }
 
   briefMeetsReadinessPolicy(): boolean {
@@ -327,33 +754,6 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  /** Resumen de qué revisión centra el trabajo (panel abierto o última actividad). */
-  focusRevisionHeadline(): string {
-    const d = this.detailRevision();
-    if (d) {
-      return `${d.revision_label} · ${this.revisionExecutiveStatus(d.status)}`;
-    }
-    const revs = this.revisions();
-    if (revs.length === 0) {
-      return 'Sin borradores — cree la primera revisión';
-    }
-    const sorted = [...revs].sort(
-      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    );
-    const r = sorted[0];
-    return `Última actividad: ${r.revision_label} — abra «Ver borrador» para consistencia y despliegue`;
-  }
-
-  pipelineStepCircleClass(variant: PrefieldPipelineVariant): Record<string, boolean> {
-    return {
-      'bg-emerald-500 text-white dark:bg-emerald-600': variant === 'done',
-      'bg-indigo-600 text-white ring-2 ring-indigo-300 ring-offset-2 ring-offset-slate-50 dark:ring-offset-slate-900':
-        variant === 'active',
-      'bg-amber-500 text-white dark:bg-amber-600': variant === 'blocked',
-      'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400': variant === 'muted',
-    };
-  }
-
   readinessAggregateBadgeClass(status: string): Record<string, boolean> {
     const x = (status || '').toLowerCase();
     return {
@@ -369,113 +769,52 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     };
   }
 
-  private buildPipelineSteps(): PrefieldPipelineStepVm[] {
-    const pol = this.readinessPolicy();
-    const b = this.brief();
-    const revs = this.revisions();
-    const d = this.detailRevision();
-    const gate = this.readinessGate();
-    const waivers = this.detailWaivers();
-    const bl = this.briefLoading();
-
-    let briefVariant: PrefieldPipelineVariant = 'muted';
-    let briefCap = 'Sin datos';
-    if (bl) {
-      briefVariant = 'active';
-      briefCap = 'Cargando…';
-    } else if (b) {
-      const approved = this.briefApprovedForGate(b.approval_state);
-      const briefBlocked = !!pol?.require_brief_approved && !approved;
-      if (approved) {
-        briefVariant = 'done';
-        briefCap =
-          b.approval_state === 'approved'
-            ? 'Aprobado con cliente'
-            : 'Listo según política de Readiness';
-      } else if (briefBlocked) {
-        briefVariant = 'blocked';
-        briefCap = 'Aprobación requerida antes del gate';
-      } else {
-        briefVariant = 'active';
-        briefCap = 'En preparación o en circuito de aprobación';
+  /** Rellena campos guiados desde `briefPayloadText` (mejor esfuerzo si el JSON es inválido). */
+  private syncGuidedFromPayload(): void {
+    const raw = this.briefPayloadText.trim();
+    let obj: Record<string, unknown> = {};
+    try {
+      if (raw) {
+        const p = JSON.parse(raw) as unknown;
+        if (p && typeof p === 'object' && !Array.isArray(p)) {
+          obj = p as Record<string, unknown>;
+        }
       }
+    } catch {
+      return;
     }
+    const s = (k: string) => (typeof obj[k] === 'string' ? String(obj[k]) : '');
+    const objTrim = (k: string) => s(k).trim();
+    this.briefGuidedObjective = objTrim('objective') || this.businessObjective.trim();
+    this.briefGuidedBusinessQuestion = objTrim('business_question');
+    this.briefGuidedAudience = objTrim('audience');
+    this.briefGuidedMarket = objTrim('market');
+    this.briefGuidedExpectedOutcome = objTrim('expected_outcome');
+  }
 
-    let revVariant: PrefieldPipelineVariant;
-    let revCap: string;
-    if (revs.length === 0) {
-      revVariant = 'active';
-      revCap = 'Cree el primer borrador';
-    } else if (d) {
-      revVariant = 'done';
-      revCap = `${d.revision_label} · ${this.revisionExecutiveStatus(d.status)}`;
-    } else {
-      revVariant = 'active';
-      revCap = 'Seleccione revisión en la tabla';
-    }
-
-    let qaVariant: PrefieldPipelineVariant = 'muted';
-    let qaCap = 'Abra una revisión';
-    if (d) {
-      if (d.last_validation_ok === false) {
-        qaVariant = 'blocked';
-        qaCap = 'Consistencia automática no superada';
-      } else if (d.last_validation_ok === true) {
-        qaVariant = 'done';
-        qaCap = d.last_ruleset_version
-          ? `Paquete de reglas ${d.last_ruleset_version}`
-          : 'Última revisión de consistencia correcta';
-      } else if (d.last_validation_at != null) {
-        qaVariant = 'active';
-        qaCap = 'Revise resultado en operaciones';
-      } else {
-        qaVariant = 'active';
-        qaCap = 'Ejecute revisión de consistencia si procede';
+  /** Combina JSON actual del brief con los campos guiados antes de guardar. */
+  private mergeBriefPayloadFromUi(): Record<string, unknown> | null {
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(this.briefPayloadText || '{}') as Record<string, unknown>;
+      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return null;
       }
+    } catch {
+      return null;
     }
-
-    let waiverVariant: PrefieldPipelineVariant = 'muted';
-    let waiverCap = 'Abra una revisión';
-    if (d) {
-      if (waivers.length > 0) {
-        waiverVariant = 'done';
-        waiverCap = `${waivers.length} registro(s) de excepción`;
-      } else if (d.status === 'draft') {
-        waiverVariant = 'active';
-        waiverCap = 'Solo si hay acuerdo formal de excepción';
-      } else {
-        waiverVariant = 'done';
-        waiverCap = 'Sin excepciones';
+    const apply = (key: string, val: string) => {
+      const t = val.trim();
+      if (t) {
+        parsed[key] = t;
       }
-    }
-
-    let readinessVariant: PrefieldPipelineVariant = 'muted';
-    let readinessCap = 'Abra una revisión';
-    if (d && gate) {
-      const blocked = gate.blocking_codes.length > 0;
-      const agg = (gate.aggregate_status || '').toLowerCase();
-      if (blocked) {
-        readinessVariant = 'blocked';
-        readinessCap = `${this.readinessAggregateExecutiveLabel(gate.aggregate_status)} · hay bloqueos`;
-      } else if (agg === 'approved' || agg === 'ready') {
-        readinessVariant = 'done';
-        readinessCap = this.readinessAggregateExecutiveLabel(gate.aggregate_status);
-      } else {
-        readinessVariant = 'active';
-        readinessCap = this.readinessAggregateExecutiveLabel(gate.aggregate_status);
-      }
-    } else if (d && !gate && !this.detailLoading()) {
-      readinessVariant = 'active';
-      readinessCap = 'Sin evaluación todavía';
-    }
-
-    return [
-      { key: 'brief', title: 'Brief', caption: briefCap, variant: briefVariant },
-      { key: 'revision', title: 'Revisión metodológica', caption: revCap, variant: revVariant },
-      { key: 'qa', title: 'Consistencia', caption: qaCap, variant: qaVariant },
-      { key: 'waiver', title: 'Excepciones', caption: waiverCap, variant: waiverVariant },
-      { key: 'readiness', title: 'Despliegue', caption: readinessCap, variant: readinessVariant },
-    ];
+    };
+    apply('objective', this.briefGuidedObjective);
+    apply('business_question', this.briefGuidedBusinessQuestion);
+    apply('audience', this.briefGuidedAudience);
+    apply('market', this.briefGuidedMarket);
+    apply('expected_outcome', this.briefGuidedExpectedOutcome);
+    return parsed;
   }
 
   reloadReadinessPolicy(): void {
@@ -516,6 +855,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       b.completeness_score != null && Number.isFinite(b.completeness_score)
         ? String(b.completeness_score)
         : '';
+    this.syncGuidedFromPayload();
     this.briefLoading.set(false);
     this.maybeSeedBriefFromObjective(sid, b, cq);
     this.cdr.markForCheck();
@@ -608,6 +948,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       next: b => {
         this.brief.set(b);
         this.briefPayloadText = JSON.stringify(b.payload_json ?? {}, null, 2);
+        this.syncGuidedFromPayload();
         this.cdr.markForCheck();
       },
       error: () => {
@@ -622,16 +963,12 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     if (sid == null || cid == null) {
       return;
     }
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(this.briefPayloadText || '{}') as Record<string, unknown>;
-      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        throw new Error('root');
-      }
-    } catch {
+    const parsed = this.mergeBriefPayloadFromUi();
+    if (!parsed) {
       this.toast.showToast('error', 'PRE-FIELD', 'JSON del brief inválido: debe ser un objeto { … }.');
       return;
     }
+    this.briefPayloadText = JSON.stringify(parsed, null, 2);
     let completeness: number | null | undefined = undefined;
     const cs = this.briefCompletenessStr.trim();
     if (cs !== '') {
@@ -657,6 +994,8 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
         next: b => {
           this.brief.set(b);
           this.briefSaving.set(false);
+          this.briefPayloadText = JSON.stringify(b.payload_json ?? {}, null, 2);
+          this.syncGuidedFromPayload();
           this.toast.showToast('success', 'PRE-FIELD', 'Brief actualizado.');
           const open = this.detailRevision()?.id;
           if (open != null) {
@@ -690,6 +1029,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
         this.brief.set(b);
         this.briefSaving.set(false);
         this.briefPayloadText = JSON.stringify(b.payload_json ?? {}, null, 2);
+        this.syncGuidedFromPayload();
         this.toast.showToast('success', 'PRE-FIELD', 'Brief aprobado internamente.');
         this.reloadReadinessPolicy();
         const open = this.detailRevision()?.id;
@@ -719,6 +1059,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
         this.brief.set(b);
         this.briefSaving.set(false);
         this.briefPayloadText = JSON.stringify(b.payload_json ?? {}, null, 2);
+        this.syncGuidedFromPayload();
         this.toast.showToast('success', 'PRE-FIELD', 'Visto bueno cliente registrado.');
         this.reloadReadinessPolicy();
         const open = this.detailRevision()?.id;
@@ -1038,6 +1379,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
         this.selectedTemplateSlug = '';
         this.toast.showToast('success', 'PRE-FIELD', 'Revisión borrador creada.');
         this.reloadRevisions();
+        this.productStep.set('questionnaire');
         this.cdr.markForCheck();
       },
       error: () => {
@@ -1169,6 +1511,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
 
   private enterInstrumentPhase(): void {
     this.phase.set('instrument');
+    this.productStep.set('brief');
     const sid = this.studyId();
     const cid = this.projectCompanyId();
     if (sid != null && cid != null) {

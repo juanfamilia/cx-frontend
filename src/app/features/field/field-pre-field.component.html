@@ -1,23 +1,20 @@
 <section class="space-y-8">
   <div>
     <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
-      PRE-FIELD · Gobierno del instrumento
+      PRE-FIELD · Antes de campo
     </p>
     @if (phase() === 'setup') {
       <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">Paso 1 — Objetivo y proyecto</h2>
       <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-        Las versiones del cuestionario (instrumento) se guardan en un
-        <strong class="text-slate-800 dark:text-slate-100">estudio de proyecto</strong> dentro de Siete Field: es la
-        carpeta lógica del diseño, independiente de SurveyToGo o del CSV. Si su proyecto Field aún no tenía esa carpeta,
-        la creamos aquí y la enlazamos por usted (no tiene que buscar IDs ni ir a otro menú).
+        Antes de plantillas y borradores, ancle <strong class="text-slate-800 dark:text-slate-100">qué problema de negocio</strong> resuelve este instrumento y en qué proyecto Field vive.
+        El instrumento se guarda en un <strong class="text-slate-800 dark:text-slate-100">estudio de proyecto</strong> dentro de Siete Field: carpeta lógica del diseño, separada de SurveyToGo o del CSV.
+        Si aún no existía, la creamos y enlazamos aquí para que no tenga que cazar IDs en otro menú.
       </p>
     } @else {
-      <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">Gobierno del instrumento (PRE-FIELD)</h2>
+      <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">7Field le guía antes de campo</h2>
       <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-        Asegure brief aprobado según política, versiones del cuestionario trazadas y readiness antes de campo.
-        Use las pestañas para alternar entre el <strong class="text-slate-800 dark:text-slate-100">brief</strong> y la
-        <strong class="text-slate-800 dark:text-slate-100">configuración técnica del instrumento</strong>; la revisión de
-        consistencia y el estado de despliegue están enlazados a la revisión que abra abajo.
+        Cinco pasos con un objetivo cada uno. Lo necesario para decidir y avanzar va primero; el resto técnico está al
+        final, agrupado solo si lo necesita. Piénselo como un copilot que le ordena la mesa, no como otro formulario interminable.
       </p>
     }
   </div>
@@ -38,7 +35,7 @@
       </label>
 
       <fieldset class="mt-6">
-        <legend class="text-sm font-semibold text-slate-900 dark:text-slate-50">¿Cómo quiere continuar?</legend>
+        <legend class="text-sm font-semibold text-slate-900 dark:text-slate-50">¿Enlaza un proyecto Field existente o prefiere crear uno nuevo?</legend>
         <div class="mt-3 flex flex-col gap-3 sm:flex-row">
           <label
             class="flex cursor-pointer items-start gap-2 rounded-lg border px-3 py-2 text-sm dark:border-slate-600"
@@ -118,21 +115,26 @@
           class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
           [disabled]="setupSubmitting() || loading()"
           (click)="submitSetup()">
-          {{ setupSubmitting() ? 'Guardando…' : 'Continuar al instrumento' }}
+          {{ setupSubmitting() ? 'Guardando…' : 'Siguiente: instrumento y PRE-FIELD' }}
         </button>
       </div>
     </div>
   }
 
   @if (phase() === 'instrument') {
-    <div class="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/50">
+    <div class="flex flex-wrap items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/80 px-5 py-5 text-sm dark:border-slate-700 dark:bg-slate-900/50">
       <div class="min-w-0 flex-1">
         <p class="font-semibold text-slate-900 dark:text-slate-50">Contexto</p>
         @if (businessObjective.trim()) {
           <p class="mt-1 whitespace-pre-wrap text-slate-700 dark:text-slate-300">{{ businessObjective.trim() }}</p>
         } @else {
-          <p class="mt-1 text-slate-500 dark:text-slate-400">Sin objetivo indicado en el paso anterior.</p>
+          <p class="mt-1 text-slate-500 dark:text-slate-400">
+            Sin objetivo indicado en el paso anterior— puede volver a «Objetivo y proyecto» cuando quiera a completarlo.
+          </p>
         }
+        <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+          Este resumen lo acompaña en cada paso para que usted y su equipo no pierdan el hilo de qué problema están resolviendo.
+        </p>
         <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
           Proyecto Field:
           <span class="font-medium">{{ contextProjectLabel() || ('#' + projectId()) }}</span>
@@ -148,570 +150,886 @@
       </button>
     </div>
 
-    <div
-      class="mt-6 rounded-xl border border-indigo-200/90 bg-gradient-to-r from-indigo-50/90 via-white to-slate-50/80 px-4 py-4 dark:border-indigo-900/45 dark:from-indigo-950/35 dark:via-slate-900/40 dark:to-slate-900/60">
-      <p class="text-xs font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200">
-        Progresión · Brief → Revisión metodológica → Consistencia → Excepciones → Despliegue
-      </p>
-      <div class="mt-4 flex flex-wrap items-start justify-center gap-4 lg:flex-nowrap lg:justify-between">
-        @for (step of pipelineStepsView(); track step.key; let idx = $index) {
-          <div class="flex min-w-[130px] max-w-[11rem] flex-1 flex-col items-center text-center">
-            <span
-              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums"
-              [ngClass]="pipelineStepCircleClass(step.variant)">
-              {{ idx + 1 }}
-            </span>
-            <p class="mt-2 text-xs font-semibold text-slate-900 dark:text-slate-50">{{ step.title }}</p>
-            <p class="mt-1 text-[0.65rem] leading-snug text-slate-600 dark:text-slate-400">{{ step.caption }}</p>
-          </div>
-        }
-      </div>
-      <p
-        class="mt-4 border-t border-indigo-100 pt-3 text-sm text-slate-800 dark:border-indigo-900/40 dark:text-slate-100">
-        <span class="font-semibold text-indigo-900 dark:text-indigo-200">En foco:</span>
-        {{ focusRevisionHeadline() }}
-      </p>
-    </div>
-
     <nav
-      class="mt-6 flex flex-wrap gap-2 border-b border-slate-200 pb-2 dark:border-slate-700"
-      aria-label="Secciones PRE-FIELD">
-      <button
-        type="button"
-        class="rounded-t-lg px-4 py-2 text-sm font-semibold transition-colors"
-        [ngClass]="{
-          'border border-b-0 border-slate-300 bg-white text-indigo-700 dark:border-slate-600 dark:bg-slate-900 dark:text-indigo-300':
-            instrumentTab() === 'brief',
-          'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800':
-            instrumentTab() !== 'brief',
-        }"
-        (click)="setInstrumentTab('brief')">
-        Brief
-      </button>
-      <button
-        type="button"
-        class="rounded-t-lg px-4 py-2 text-sm font-semibold transition-colors"
-        [ngClass]="{
-          'border border-b-0 border-slate-300 bg-white text-indigo-700 dark:border-slate-600 dark:bg-slate-900 dark:text-indigo-300':
-            instrumentTab() === 'instrument',
-          'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800':
-            instrumentTab() !== 'instrument',
-        }"
-        (click)="setInstrumentTab('instrument')">
-        Instrumento · consistencia · despliegue
-      </button>
-    </nav>
-
-    @if (instrumentTab() === 'brief') {
-      <div class="mt-4 space-y-4">
-        @if (readinessPolicy()?.require_brief_approved && !briefMeetsReadinessPolicy()) {
-          <div
-            class="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
-            <p class="font-semibold">El despliegue puede estar bloqueado</p>
-            <p class="mt-1">
-              Su empresa exige <strong>brief aprobado</strong> antes del gate operativo. Estado actual del brief:
-              <span class="font-semibold">{{ brief() ? briefStateLabel(brief()!.approval_state) : '—' }}</span>.
-              Complete aprobaciones en esta pestaña o solicite la intervención indicada abajo.
-            </p>
-          </div>
-        }
-
-        @if (policyLoading()) {
-          <p class="text-xs text-slate-500 dark:text-slate-400">Cargando política operativa (brief / despliegue)…</p>
-        }
-
-        @if (briefLoading()) {
-          <p class="text-sm text-slate-600 dark:text-slate-400">Cargando brief del estudio…</p>
-        } @else {
-          @if (brief(); as br) {
-          <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-            <div class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-700">
-              <div class="min-w-0">
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                  Estado metodológico · Brief del estudio
-                </p>
-                <div class="mt-2 flex flex-wrap items-center gap-2">
-                  <span
-                    class="rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide"
-                    [ngClass]="{
-                      'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100':
-                        br.approval_state === 'draft',
-                      'bg-indigo-100 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-200':
-                        br.approval_state === 'approved_internal',
-                      'bg-emerald-100 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200':
-                        br.approval_state === 'approved',
-                    }">
-                    {{ briefStateLabel(br.approval_state) }}
-                  </span>
-                  @if (br.completeness_score != null) {
-                    <span class="text-xs font-medium text-slate-600 dark:text-slate-300">
-                      Completitud {{ br.completeness_score }}/100
-                    </span>
-                  }
-                </div>
-                @if (briefObjectiveSnippet()) {
-                  <p class="mt-3 text-sm leading-snug text-slate-800 dark:text-slate-100">{{ briefObjectiveSnippet() }}</p>
-                }
-                <dl class="mt-4 grid gap-2 text-sm text-slate-700 dark:text-slate-300 sm:grid-cols-2">
-                  <div>
-                    <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400">Qué falta</dt>
-                    <dd class="mt-0.5">{{ briefWhatsMissingExecutive(br) }}</dd>
-                  </div>
-                  <div>
-                    <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400">Quién debe actuar</dt>
-                    <dd class="mt-0.5">{{ briefWhoActsExecutive(br) }}</dd>
-                  </div>
-                </dl>
-                @if (br.completeness_score != null) {
-                  <div class="mt-4">
-                    <div class="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                      <div
-                        class="h-full rounded-full bg-indigo-500 transition-[width] dark:bg-indigo-400"
-                        [style.width.%]="br.completeness_score"></div>
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <div class="mt-5 flex flex-wrap gap-2">
-              <button
-                type="button"
-                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
-                [disabled]="briefSaving() || br.approval_state !== 'draft'"
-                (click)="saveBriefPayload()">
-                {{ briefSaving() ? 'Guardando…' : 'Guardar borrador' }}
-              </button>
-              <button
-                type="button"
-                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-800"
-                [disabled]="briefSaving() || briefApprovedForGate(br.approval_state)"
-                (click)="approveBriefInternalUi()">
-                Aprobar internamente
-              </button>
-              <button
-                type="button"
-                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-800"
-                [disabled]="briefSaving() || br.approval_state !== 'approved_internal'"
-                (click)="approveBriefClientUi()">
-                Visto bueno cliente
-              </button>
-            </div>
-
-            <details class="mt-6 rounded-lg border border-slate-200 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-950/40">
-              <summary
-                class="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                Contenido y referencia técnica (avanzado)
-              </summary>
-              <div class="border-t border-slate-200 px-4 pb-4 pt-3 dark:border-slate-700">
-                <p class="text-xs text-slate-600 dark:text-slate-400">
-                  Payload persistido como objeto JSON; úselo si necesita campos estructurados fuera del resumen mostrado
-                  arriba.
-                  <span class="text-slate-500">Huella</span>
-                  <span class="ml-1 font-mono text-[11px]">{{ shortHash(br.body_hash, 14) }}</span>
-                </p>
-                <label class="mt-3 block text-sm font-medium text-slate-800 dark:text-slate-100">
-                  Contenido (JSON)
-                  <textarea
-                    rows="10"
-                    class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs leading-relaxed text-slate-900 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-                    [(ngModel)]="briefPayloadText"
-                    [readonly]="br.approval_state !== 'draft'"
-                    [attr.aria-readonly]="br.approval_state !== 'draft'"></textarea>
-                </label>
-                <label class="mt-4 block text-sm font-medium text-slate-800 dark:text-slate-100">
-                  Completitud 0–100 (opcional)
-                  <input
-                    type="text"
-                    inputmode="decimal"
-                    class="mt-1 block w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-                    [(ngModel)]="briefCompletenessStr"
-                    [readonly]="br.approval_state !== 'draft'"
-                    placeholder="Ej. 72" />
-                </label>
-              </div>
-            </details>
-          </div>
-          } @else {
-            <div
-              class="rounded-xl border border-amber-200/90 bg-amber-50/90 px-4 py-4 dark:border-amber-900/50 dark:bg-amber-950/25">
-              <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Brief no disponible todavía</p>
-              @if (briefLoadError(); as bem) {
-                <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">{{ bem }}</p>
-              } @else {
-                <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                  Si acaba de crear el proyecto, puede haber un retardo breve. Pulse Reintentar o cambie de pestaña y vuelva.
-                </p>
-              }
-              <button
-                type="button"
-                class="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
-                [disabled]="briefLoading()"
-                (click)="retryLoadBrief()">
-                {{ briefLoading() ? 'Cargando…' : 'Reintentar carga del brief' }}
-              </button>
-            </div>
-          }
-        }
-      </div>
-    }
-
-    @if (instrumentTab() === 'instrument') {
-    <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">
-      Cree borradores aquí y ábralos en la tabla para ver <strong>consistencia del cuestionario</strong>,
-      <strong>excepciones metodológicas</strong> y el <strong>estado de despliegue</strong> de esa revisión.
-    </p>
-
-    <div class="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-5 dark:border-slate-600 dark:bg-slate-950/30">
-      <div class="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Nueva revisión borrador</h3>
-        <span class="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
-          >Configuración técnica</span
-        >
-      </div>
-      <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-        Plantilla, catálogo y etiquetas: solo definen cómo se materializa el borrador; el gobierno del ciclo se sigue arriba y en el panel de revisión.
-      </p>
-      <div class="mt-4 grid gap-4 md:grid-cols-2">
-        <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
-          Filtro catálogo por tipo de estudio
-          <select
-            class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-            [ngModel]="studyTypeFilter()"
-            (ngModelChange)="onStudyTypeFilterChange($event)">
-            @for (opt of studyTypeOptions; track opt.label) {
-              <option [value]="opt.value">{{ opt.label }}</option>
-            }
-          </select>
-        </label>
-        <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
-          Plantilla Framework Library
-          <select
-            class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-            [(ngModel)]="selectedTemplateSlug"
-            [disabled]="templatesLoading()">
-            <option value="">Plantilla mínima interna (sin slug)</option>
-            @for (tpl of templates(); track tpl.id) {
-              <option [value]="tpl.slug">
-                {{ tpl.title }} ({{ tpl.slug }} · {{ tpl.framework_version }})
-              </option>
-            }
-          </select>
-        </label>
-        <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
-          Etiqueta de revisión (opcional)
-          <input
-            type="text"
-            class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-            [(ngModel)]="revisionLabel"
-            placeholder="Si se omite, la API asigna vN" />
-        </label>
-        <label class="block text-sm font-medium text-slate-800 dark:text-slate-100 md:col-span-2">
-          Notas internas (opcional; si vacío, usamos el objetivo como referencia en la revisión)
-          <input
-            type="text"
-            class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-            [(ngModel)]="notes" />
-        </label>
-      </div>
-      @if (templatesLoading()) {
-        <p class="mt-3 text-xs text-slate-500">Actualizando catálogo…</p>
-      }
-      <div class="mt-5">
+      class="mt-8 flex flex-wrap gap-3 rounded-xl border border-slate-200 bg-white/90 p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/40"
+      aria-label="Pasos PRE-FIELD">
+      @for (s of productFlowSteps; track s.id) {
         <button
           type="button"
-          class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
-          [disabled]="saving()"
-          (click)="submitCreate()">
-          {{ saving() ? 'Creando…' : 'Crear borrador' }}
+          class="rounded-lg border px-3 py-2 text-sm font-semibold transition-colors"
+          [ngClass]="productStepNavClass(s.id)"
+          (click)="setProductStep(s.id)">
+          {{ s.label }}
         </button>
-      </div>
-    </div>
+      }
+    </nav>
 
-    <div class="mt-8">
-      <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Revisiones del instrumento</h3>
-      <div class="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
-        <table class="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-slate-700">
-          <thead class="bg-slate-50 dark:bg-slate-900/60">
-            <tr>
-              <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Etiqueta</th>
-              <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Estado</th>
-              <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">En gobierno</th>
-              <th class="hidden px-4 py-3 font-semibold text-slate-700 md:table-cell dark:text-slate-200">
-                Plantilla
-              </th>
-              <th class="hidden px-4 py-3 font-semibold text-slate-700 lg:table-cell dark:text-slate-200">
-                Versión declarada
-              </th>
-              <th class="hidden px-4 py-3 font-semibold text-slate-700 lg:table-cell dark:text-slate-200">
-                Brief al crear
-              </th>
-              <th class="hidden px-4 py-3 font-semibold text-slate-700 xl:table-cell dark:text-slate-200">
-                Catálogo metodológico
-              </th>
-              <th class="hidden px-4 py-3 font-semibold text-slate-700 xl:table-cell dark:text-slate-200">
-                Paquete consistencia
-              </th>
-              <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Actualizado</th>
-              <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Vista</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-950/20">
-            @for (rev of revisions(); track rev.id) {
-              <tr
-                class="hover:bg-slate-50 dark:hover:bg-slate-900/40"
-                [ngClass]="{
-                  'bg-indigo-50/80 dark:bg-indigo-950/25': detailRevision()?.id === rev.id,
-                }">
-                <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-50">{{ rev.revision_label }}</td>
-                <td class="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-400">{{ rev.status }}</td>
-                <td class="px-4 py-3">
-                  <span
-                    class="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-800 dark:bg-slate-800 dark:text-slate-100">
-                    {{ revisionExecutiveStatus(rev.status) }}
-                  </span>
-                  @if (detailRevision()?.id === rev.id) {
-                    <span class="ml-2 text-[0.65rem] font-semibold uppercase text-indigo-600 dark:text-indigo-400">
-                      Panel abierto
-                    </span>
-                  }
-                </td>
-                <td class="hidden px-4 py-3 font-mono text-xs text-slate-600 md:table-cell dark:text-slate-400">
-                  {{ rev.framework_template_id || '—' }}
-                </td>
-                <td class="hidden px-4 py-3 text-slate-700 lg:table-cell dark:text-slate-300">
-                  {{ rev.instrument_spec_version_declared || '—' }}
-                </td>
-                <td class="hidden px-4 py-3 font-mono text-xs text-slate-600 lg:table-cell dark:text-slate-400">
-                  {{ shortHash(rev.brief_snapshot_hash, 12) }}
-                </td>
-                <td class="hidden px-4 py-3 font-mono text-xs text-slate-600 xl:table-cell dark:text-slate-400">
-                  {{ rev.framework_catalog_version || '—' }}
-                </td>
-                <td class="hidden px-4 py-3 font-mono text-xs text-slate-600 xl:table-cell dark:text-slate-400">
-                  {{ rev.last_ruleset_version || '—' }}
-                </td>
-                <td class="px-4 py-3 tabular-nums text-slate-600 dark:text-slate-400">
-                  {{ rev.updated_at | date: 'short' }}
-                </td>
-                <td class="px-4 py-3">
+    <p class="mt-5 max-w-3xl text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+      <span class="font-semibold text-indigo-700 dark:text-indigo-300">Aquí no está solo.</span>
+      Use estos pasos como una conversación guiada con su equipo: puede saltar adelante o atrás cuando lo necesite; lo importante es saber qué decidir en cada pantalla.
+    </p>
+
+    @switch (productStep()) {
+      @case ('brief') {
+        <div
+          class="mt-8 rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-7 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
+          <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Brief</p>
+          <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">Define qué quieres aprender y para quién.</p>
+          <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Aquí se alinea el negocio: preguntas, público y resultado esperado. Las aprobaciones también viven aquí para que nadie llegue a campo a ciegas.
+            Si la historia del estudio está clara en esta página, todo lo demás— cuestionario, QA y Operaciones— es más fácil de defender.
+          </p>
+        </div>
+
+        <div class="mt-10 space-y-10">
+          @if (readinessPolicy()?.require_brief_approved && !briefMeetsReadinessPolicy()) {
+            <div
+              class="rounded-xl border border-amber-300/90 bg-amber-50 px-5 py-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+              <p class="font-semibold">Antes de campo, su proceso suele pedir el brief cerrado</p>
+              <p class="mt-2 leading-relaxed">
+                Estado del brief:
+                <span class="font-semibold">{{ brief() ? briefStateLabel(brief()!.approval_state) : '—' }}</span>.
+                Complete aquí las aprobaciones o coordine con quien corresponda— así nadie llega sorprendido a Operaciones.
+              </p>
+            </div>
+          }
+
+          @if (policyLoading()) {
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              Revisando cómo suele trabajar su empresa con brief y campo…
+            </p>
+          }
+
+          @if (briefLoading()) {
+            <p class="text-sm text-slate-600 dark:text-slate-400">Cargando brief del estudio…</p>
+          } @else {
+            @if (brief(); as br) {
+              <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8 dark:border-slate-700 dark:bg-slate-900/40">
+                <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-6 dark:border-slate-700">
+                  <div class="min-w-0">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      Estado del brief y quién debe moverse
+                    </p>
+                    <div class="mt-3 flex flex-wrap items-center gap-2">
+                      <span
+                        class="rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide"
+                        [ngClass]="{
+                          'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100':
+                            br.approval_state === 'draft',
+                          'bg-indigo-100 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-200':
+                            br.approval_state === 'approved_internal',
+                          'bg-emerald-100 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200':
+                            br.approval_state === 'approved',
+                        }">
+                        {{ briefStateLabel(br.approval_state) }}
+                      </span>
+                    </div>
+                    @if (briefObjectiveSnippet()) {
+                      <p class="mt-3 text-sm leading-snug text-slate-800 dark:text-slate-100">{{ briefObjectiveSnippet() }}</p>
+                    }
+                    <dl class="mt-6 grid gap-5 text-sm leading-relaxed text-slate-700 dark:text-slate-300 sm:grid-cols-2">
+                      <div>
+                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400">Qué falta</dt>
+                        <dd class="mt-1">{{ briefWhatsMissingExecutive(br) }}</dd>
+                      </div>
+                      <div>
+                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400">Quién debe actuar</dt>
+                        <dd class="mt-1">{{ briefWhoActsExecutive(br) }}</dd>
+                      </div>
+                    </dl>
+                    @if (br.completeness_score != null) {
+                      <div class="mt-6">
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Avance del contenido del brief</p>
+                        <span class="sr-only">Completitud aproximada {{ br.completeness_score }} de cien</span>
+                        <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                          <div
+                            class="h-full rounded-full bg-indigo-500 transition-[width] dark:bg-indigo-400"
+                            [style.width.%]="br.completeness_score"></div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <div class="mt-8 space-y-5">
+                  <div>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Lo que queremos capturar</p>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                      En lenguaje llano; lo consolidamos en el brief del estudio. Si necesita el detalle crudo, está al final en «Detalles técnicos».
+                    </p>
+                  </div>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+                    Pregunta o decisión de negocio
+                    <textarea
+                      rows="2"
+                      class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                      [(ngModel)]="briefGuidedBusinessQuestion"
+                      [readonly]="br.approval_state !== 'draft'"
+                      placeholder="Ej.: ¿Qué canal debemos priorizar para recuperación de carritos?"></textarea>
+                  </label>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+                    Audiencia o territorio
+                    <input
+                      type="text"
+                      class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                      [(ngModel)]="briefGuidedAudience"
+                      [readonly]="br.approval_state !== 'draft'"
+                      placeholder="Ej.: Compradores recurrentes en CDMX" />
+                  </label>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+                    Mercado o canal
+                    <input
+                      type="text"
+                      class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                      [(ngModel)]="briefGuidedMarket"
+                      [readonly]="br.approval_state !== 'draft'"
+                      placeholder="Ej.: Retail moderno / e‑commerce propio" />
+                  </label>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+                    Resultado esperado
+                    <input
+                      type="text"
+                      class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                      [(ngModel)]="briefGuidedExpectedOutcome"
+                      [readonly]="br.approval_state !== 'draft'"
+                      placeholder="Ej.: Priorizar 3 tácticas con evidencia cuantificada" />
+                  </label>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+                    Objetivo del estudio (resumen)
+                    <textarea
+                      rows="3"
+                      class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                      [(ngModel)]="briefGuidedObjective"
+                      [readonly]="br.approval_state !== 'draft'"
+                      placeholder="En pocas frases: qué debe resolver el campo y para quién."></textarea>
+                  </label>
+                </div>
+
+                <div class="mt-10 flex flex-col gap-6 border-t border-slate-100 pt-8 dark:border-slate-700">
                   <button
                     type="button"
-                    class="text-sm font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
-                    (click)="toggleRevisionDetail(rev.id)">
-                    {{ detailRevision()?.id === rev.id ? 'Ocultar panel' : 'Abrir panel de revisión' }}
+                    class="w-full rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 disabled:opacity-50 sm:w-auto dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                    [disabled]="briefSaving() || br.approval_state !== 'draft'"
+                    (click)="saveBriefPayload()">
+                    {{ briefSaving() ? 'Guardando…' : 'Guardar borrador del brief' }}
                   </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        @if (detailLoading()) {
-          <p class="border-t border-slate-200 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
-            Cargando instrumento…
-          </p>
-        }
-        @if (detailRevision(); as d) {
-          <div
-            class="border-t border-slate-200 bg-gradient-to-b from-indigo-50/40 to-slate-50/90 px-4 py-4 dark:border-slate-700 dark:from-indigo-950/20 dark:to-slate-900/70">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200">
-                  Panel de revisión · consistencia y despliegue
-                </p>
-                <p class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-50">{{ d.revision_label }}</p>
-                <div class="mt-2 flex flex-wrap items-center gap-2">
-                  <span
-                    class="rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide bg-white text-slate-800 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-600">
-                    {{ revisionExecutiveStatus(d.status) }}
-                  </span>
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      Aprobaciones (cuando toque)
+                    </p>
+                    <div class="mt-3 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-800"
+                        [disabled]="briefSaving() || briefApprovedForGate(br.approval_state)"
+                        (click)="approveBriefInternalUi()">
+                        Aprobar internamente
+                      </button>
+                      <button
+                        type="button"
+                        class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-800"
+                        [disabled]="briefSaving() || br.approval_state !== 'approved_internal'"
+                        (click)="approveBriefClientUi()">
+                        Visto bueno cliente
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <p class="mt-3 max-w-3xl text-sm text-slate-700 dark:text-slate-300">
-                  {{ executiveQaConsistencySummary(d) }}
-                </p>
-              </div>
-              <button
-                type="button"
-                class="text-xs font-semibold text-slate-600 underline hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-                (click)="closeRevisionDetail()">
-                Cerrar panel
-              </button>
-            </div>
-
-            @if (readinessGate(); as rg) {
-              <div
-                class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-600 dark:bg-slate-950/50">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                    Estado de despliegue (gate operativo)
-                  </p>
-                  <span
-                    class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide"
-                    [ngClass]="readinessAggregateBadgeClass(rg.aggregate_status)">
-                    {{ readinessAggregateExecutiveLabel(rg.aggregate_status) }}
-                  </span>
-                </div>
-                @if (rg.blocking_codes.length) {
-                  <p class="mt-3 text-xs font-semibold text-amber-800 dark:text-amber-200">Qué está bloqueando el gate</p>
-                  <ul class="mt-2 space-y-2 text-sm text-slate-800 dark:text-slate-100">
-                    @for (c of rg.blocking_codes; track c) {
-                      <li class="rounded-lg border border-amber-200/80 bg-amber-50/80 px-3 py-2 dark:border-amber-900/40 dark:bg-amber-950/25">
-                        {{ executiveReadinessBlocking(c) }}
-                        <span class="mt-1 block font-mono text-[0.65rem] text-slate-500 dark:text-slate-400">{{ c }}</span>
-                      </li>
-                    }
-                  </ul>
-                  <p class="mt-3 text-xs text-slate-600 dark:text-slate-400">
-                    <span class="font-semibold">Siguiente paso:</span>
-                    resuelva el primer bloqueo listado con el rol correspondiente (brief, control de calidad o firmas según el caso).
-                  </p>
-                } @else {
-                  <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">
-                    No hay códigos bloqueantes en esta evaluación. Complete firmas o políticas pendientes si el estado aún
-                    no es «listo».
-                  </p>
-                }
-                @if (rg.missing_roles.length) {
-                  <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    Quién debe intervenir (roles pendientes)
-                  </p>
-                  <ul class="mt-2 flex flex-wrap gap-2">
-                    @for (role of rg.missing_roles; track role) {
-                      <li
-                        class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-100">
-                        {{ executiveStakeholderRole(role) }}
-                      </li>
-                    }
-                  </ul>
-                }
-                @if (rg.revision_status !== d.status) {
-                  <p class="mt-3 text-[0.65rem] text-slate-500 dark:text-slate-400">
-                    Estado técnico en API de revisión: <span class="font-mono">{{ rg.revision_status }}</span>
-                  </p>
-                }
               </div>
             } @else {
-              <p class="mt-4 rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-950/40 dark:text-slate-400">
-                Evaluación de despliegue aún no disponible para esta revisión (cargando o sin evaluación).
-              </p>
-            }
-
-            <div class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 dark:border-slate-600 dark:bg-slate-950/40">
-              <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Excepciones metodológicas registradas</p>
-              <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-                Cuando se aprueba apartarse del marco estándar; solo cuando aplique.
-              </p>
-              @if (detailWaiversLoading()) {
-                <p class="mt-2 text-xs text-slate-500">Cargando…</p>
-              } @else if (detailWaivers().length === 0) {
-                <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">Sin excepciones registradas.</p>
-              } @else {
-                <ul class="mt-3 space-y-3">
-                  @for (w of detailWaivers(); track w.id) {
-                    <li class="rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/40">
-                      <p class="text-sm text-slate-800 dark:text-slate-100">{{ w.rationale }}</p>
-                      <p class="mt-1 tabular-nums text-xs text-slate-500 dark:text-slate-400">
-                        {{ w.created_at | date: 'short' }}
-                      </p>
-                      @if (w.waived_sections_json != null) {
-                        <details class="mt-2">
-                          <summary class="cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-400">
-                            Detalle técnico de secciones relevadas
-                          </summary>
-                          <pre
-                            class="mt-2 max-h-28 overflow-auto rounded border border-slate-200 bg-white p-2 font-mono text-[10px] text-slate-700 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300">{{ w.waived_sections_json | json }}</pre>
-                        </details>
-                      }
-                    </li>
-                  }
-                </ul>
-              }
-            </div>
-
-            @if (d.status === 'draft') {
               <div
-                class="mt-5 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-4 dark:border-slate-600 dark:bg-slate-950/25">
-                <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Registrar excepción</p>
-                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-                  Motivo obligatorio para auditoría. El detalle de secciones es opcional y puede mantenerse colapsado si no
-                  lo necesita su proceso.
-                </p>
-                <label class="mt-3 block text-xs font-medium text-slate-800 dark:text-slate-100">
-                  Motivo acordado
-                  <textarea
-                    rows="2"
-                    class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-                    [(ngModel)]="waiverRationale"></textarea>
-                </label>
-                <details class="mt-3">
-                  <summary class="cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-400">
-                    Detalle técnico opcional (JSON de secciones)
-                  </summary>
-                  <textarea
-                    rows="3"
-                    class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-                    [(ngModel)]="waiverSectionsJson"
-                    placeholder='Ej. {{ "{}" }} o ["bloque_a"]'></textarea>
-                </details>
+                class="rounded-xl border border-amber-200/90 bg-amber-50/90 px-4 py-4 dark:border-amber-900/50 dark:bg-amber-950/25">
+                <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Brief no disponible todavía</p>
+                @if (briefLoadError(); as bem) {
+                  <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">{{ bem }}</p>
+                } @else {
+                  <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                    Si acaba de crear el proyecto, puede haber un retardo breve. Pulse Reintentar o vuelva a este paso en unos segundos.
+                  </p>
+                }
                 <button
                   type="button"
-                  class="mt-4 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
-                  [disabled]="waiverSubmitting()"
-                  (click)="submitFrameworkWaiver()">
-                  {{ waiverSubmitting() ? 'Enviando…' : 'Registrar excepción' }}
+                  class="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                  [disabled]="briefLoading()"
+                  (click)="retryLoadBrief()">
+                  {{ briefLoading() ? 'Cargando…' : 'Reintentar carga del brief' }}
                 </button>
               </div>
             }
+          }
+        </div>
+      }
 
-            <details class="mt-5 rounded-lg border border-slate-200 bg-slate-50/90 dark:border-slate-700 dark:bg-slate-900/50">
-              <summary class="cursor-pointer px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                Trazabilidad técnica (huellas y versiones)
-              </summary>
-              <div class="border-t border-slate-200 px-4 pb-4 pt-3 dark:border-slate-700">
-                <dl class="grid gap-3 text-xs text-slate-700 sm:grid-cols-3 dark:text-slate-300">
-                  <div>
-                    <dt class="font-medium text-slate-500 dark:text-slate-400">Brief vigente al crear la revisión</dt>
-                    <dd class="mt-0.5 font-mono text-[11px] text-slate-800 dark:text-slate-200">
-                      {{ shortHash(d.brief_snapshot_hash, 14) }}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt class="font-medium text-slate-500 dark:text-slate-400">Catálogo framework</dt>
-                    <dd class="mt-0.5 font-mono text-[11px] text-slate-800 dark:text-slate-200">
-                      {{ d.framework_catalog_version || '—' }}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt class="font-medium text-slate-500 dark:text-slate-400">Huella contenido revisión</dt>
-                    <dd class="mt-0.5 font-mono text-[11px] text-slate-800 dark:text-slate-200">
-                      {{ shortHash(d.content_hash, 16) }}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </details>
-
-            <details class="mt-3 rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950/30">
-              <summary class="cursor-pointer px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                Especificación técnica completa del instrumento (JSON)
-              </summary>
-              <div class="border-t border-slate-200 px-4 pb-4 pt-3 dark:border-slate-700">
-                <p class="text-xs text-slate-600 dark:text-slate-400">
-                  Solo necesario para ingeniería del cuestionario o depuración profunda.
-                </p>
-                <pre
-                  class="mt-3 max-h-[min(70vh,28rem)] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-xs leading-relaxed text-slate-800 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-200">{{ d.spec | json }}</pre>
-              </div>
-            </details>
-          </div>
-        }
-        @if (revisions().length === 0) {
-          <p class="px-4 py-8 text-center text-sm text-slate-600 dark:text-slate-400">
-            Aún no hay revisiones para este estudio.
+      @case ('methodology') {
+        <div
+          class="mt-8 rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-7 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
+          <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Metodología</p>
+          <p class="mt-1 text-lg font-bold text-slate-900 dark:text-slate-50">
+            Te recomendamos la mejor estructura para este estudio.
           </p>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            Elija un punto de partida coherente con el tipo de estudio; después lo refinará como documento vivo en «Cuestionario». Nosotros sugerimos estructura— usted mantiene el criterio metodológico.
+          </p>
+        </div>
+
+        <div class="mt-10 space-y-6">
+          <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-6 md:p-8 dark:border-slate-600 dark:bg-slate-950/30">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Nuevo borrador del cuestionario</h3>
+            </div>
+            <p class="mt-2 rounded-lg bg-white/80 px-3 py-2 text-xs leading-relaxed text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/50 dark:text-slate-300 dark:ring-slate-600">
+              {{ selectedTemplateSummary() }}
+            </p>
+            <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              Si no está seguro de la plantilla, elija la sugerida y ajústela después: el objetivo en este momento es salir del papel en blanco con algo que su equipo pueda criticar con datos.
+            </p>
+            <div class="mt-4 grid gap-4 md:grid-cols-2">
+              <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+                Tipo de estudio (filtra plantillas recomendadas)
+                <select
+                  class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                  [ngModel]="studyTypeFilter()"
+                  (ngModelChange)="onStudyTypeFilterChange($event)">
+                  @for (opt of studyTypeOptions; track opt.label) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                  }
+                </select>
+              </label>
+              <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+                Plantilla sugerida
+                <select
+                  class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                  [(ngModel)]="selectedTemplateSlug"
+                  [disabled]="templatesLoading()">
+                  <option value="">Plantilla mínima interna</option>
+                  @for (tpl of templates(); track tpl.id) {
+                    <option [value]="tpl.slug">{{ tpl.title }}</option>
+                  }
+                </select>
+              </label>
+              <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+                Nombre visible del borrador (opcional)
+                <input
+                  type="text"
+                  class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                  [(ngModel)]="revisionLabel"
+                  placeholder="Si se omite, asignamos una versión automática" />
+              </label>
+              <label class="block text-sm font-medium text-slate-800 dark:text-slate-100 md:col-span-2">
+                Notas para el equipo (opcional)
+                <input
+                  type="text"
+                  class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                  [(ngModel)]="notes"
+                  placeholder="Si vacío, usamos el objetivo del paso 1 como referencia" />
+              </label>
+            </div>
+            @if (templatesLoading()) {
+              <p class="mt-3 text-xs text-slate-500">Actualizando plantillas disponibles…</p>
+            }
+            <div class="mt-5 flex flex-wrap gap-2">
+              <button
+                type="button"
+                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                [disabled]="saving()"
+                (click)="submitCreate()">
+                {{ saving() ? 'Creando…' : 'Crear borrador y pasar al cuestionario' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      @case ('questionnaire') {
+        <div
+          class="mt-8 rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-7 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
+          <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Cuestionario</p>
+          <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">
+            Piensa en la historia que vivirá quien responde.
+          </p>
+          <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            No necesita un constructor enorme aquí: solo claridad sobre la <strong class="text-slate-800 dark:text-slate-100">versión actual</strong>
+            y cómo se siente el relato. Lo denso queda disponible al final, colapsado.
+            Cuando dude, pregúntese si una persona real entendería por qué viene cada bloque después del anterior— si la respuesta es no, el orden o la redacción probablemente piden cariño.
+          </p>
+        </div>
+
+        <ng-container *ngTemplateOutlet="prefieldInsightsPanel" />
+
+        <div class="mt-10 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+          @if (currentRevision(); as cur) {
+            <div class="border-b border-slate-100 px-6 py-8 dark:border-slate-700">
+              <div class="flex flex-wrap items-start justify-between gap-6">
+                <div class="max-w-xl">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Versión actual
+                  </p>
+                  <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{{ cur.revision_label }}</p>
+                  <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">
+                    Estado visible para su equipo:
+                    <span class="font-semibold text-slate-800 dark:text-slate-100">{{
+                      revisionExecutiveStatus(cur.status)
+                    }}</span>
+                  </p>
+                  <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Última actualización {{ cur.updated_at | date: 'short' }}
+                  </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    class="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                    (click)="detailRevision()?.id === cur.id ? closeRevisionDetail() : openRevisionWorkspace(cur.id)">
+                    {{ detailRevision()?.id === cur.id ? 'Cerrar acompañamiento' : 'Preparar esta versión conmigo' }}
+                  </button>
+                </div>
+              </div>
+
+              @if (detailRevision()?.id === cur.id) {
+                <div class="mt-10">
+                  <p class="text-base font-semibold text-slate-900 dark:text-slate-50">El relato del participante</p>
+                  <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                    No mostramos nombres internos ni armazón técnica: solo cómo se divide la conversación en momentos que una persona puede seguir sin manual.
+                  </p>
+                  <div class="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    @for (step of participantJourneyCards(); track step.label) {
+                      <div
+                        class="rounded-xl border px-5 py-5 shadow-sm transition-colors dark:border-slate-600"
+                        [ngClass]="{
+                          'border-indigo-200 bg-indigo-50/50 dark:border-indigo-900/50 dark:bg-indigo-950/25':
+                            step.hasSignal,
+                          'border-slate-200/90 bg-white dark:border-slate-700 dark:bg-slate-950/20':
+                            !step.hasSignal,
+                        }">
+                        <p class="text-sm font-bold text-slate-900 dark:text-slate-50">{{ step.label }}</p>
+                        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ step.story }}</p>
+                        @if (step.hasSignal) {
+                          <p class="mt-4 text-xs font-semibold text-indigo-800 dark:text-indigo-200">
+                            Hay contenido que encaja aquí en su borrador
+                          </p>
+                        } @else {
+                          <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">
+                            Sin señales claras todavía— puede completarlo con su equipo en la herramienta de campo.
+                          </p>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <p class="mt-8 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  Pulse <strong class="text-slate-800 dark:text-slate-100">Preparar esta versión conmigo</strong> para ver el acompañamiento, ideas útiles según lo cargado y cómo se siente el relato de punta a punta.
+                </p>
+              }
+            </div>
+          } @else {
+            <div class="px-6 py-14 text-center">
+              <p class="text-sm font-medium text-slate-800 dark:text-slate-100">Aún no hay una versión del cuestionario</p>
+              <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                Vaya a «Metodología» para crear el primer borrador; volverá aquí para darle forma como experiencia. No tiene que quedar perfecto en el primer intento— solo sustancialmente discutible con su equipo.
+              </p>
+              <button
+                type="button"
+                class="mt-8 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                (click)="setProductStep('methodology')">
+                Ir a Metodología
+              </button>
+            </div>
+          }
+
+          @if (revisionHistory().length > 0) {
+            <details class="group border-t border-slate-100 dark:border-slate-700">
+              <summary
+                class="cursor-pointer list-none px-6 py-5 text-sm font-semibold text-indigo-700 hover:bg-slate-50 dark:text-indigo-300 dark:hover:bg-slate-800/80 [&::-webkit-details-marker]:hidden">
+                Ver historial ({{ revisionHistory().length }} versión(es) anterior(es))
+              </summary>
+              <div class="space-y-3 border-t border-slate-100 px-6 pb-8 pt-4 dark:border-slate-700">
+                @for (rev of revisionHistory(); track rev.id) {
+                  <div
+                    class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3 text-sm dark:border-slate-600 dark:bg-slate-950/30">
+                    <div>
+                      <p class="font-medium text-slate-900 dark:text-slate-50">{{ rev.revision_label }}</p>
+                      <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        {{ revisionExecutiveStatus(rev.status) }} · {{ rev.updated_at | date: 'short' }}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      class="text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                      (click)="openHistoricalRevision(rev.id)">
+                      Abrir en Revisión
+                    </button>
+                  </div>
+                }
+              </div>
+            </details>
+          }
+
+          @if (detailLoading()) {
+            <p class="border-t border-slate-200 px-6 py-3 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
+              Preparando el borrador…
+            </p>
+          }
+          <ng-container *ngTemplateOutlet="revisionDetailPanel" />
+        </div>
+      }
+
+      @case ('review') {
+        <div
+          class="mt-8 rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-7 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
+          <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Revisión</p>
+          <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">
+            Pulir detalles antes de que salga a campo.
+          </p>
+          <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Espacio para resolver dudas de equipo, acuerdos explícitos y coherencia del relato— sin convertir esto en otro constructor de encuestas.
+            Piénselo como una última lectura en voz alta: ¿suena negociable, humano y alineado con lo que prometió en el brief?
+          </p>
+        </div>
+
+        <ng-container *ngTemplateOutlet="prefieldInsightsPanel" />
+
+        <div class="mt-10 space-y-4">
+          @if (!detailRevision()) {
+            <div
+              class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 px-6 py-12 text-center dark:border-slate-600 dark:bg-slate-950/30">
+              <p class="text-base font-semibold text-slate-800 dark:text-slate-100">Elija la versión que quiere afinar</p>
+              <p class="mt-3 max-w-lg mx-auto text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                En «Cuestionario», pulse <strong class="text-slate-800 dark:text-slate-100">Preparar esta versión conmigo</strong>
+                o recupere algo del historial. Si llegó aquí sin abrir un borrador, no hay problema: volver atrás no borra lo ya guardado.
+              </p>
+              <button
+                type="button"
+                class="mt-8 rounded-xl border border-indigo-300 bg-white px-6 py-3 text-sm font-semibold text-indigo-800 hover:bg-indigo-50 dark:border-indigo-700 dark:bg-slate-900 dark:text-indigo-200 dark:hover:bg-indigo-950/40"
+                (click)="setProductStep('questionnaire')">
+                  Volver al cuestionario
+                </button>
+            </div>
+          } @else {
+            <ng-container *ngTemplateOutlet="revisionDetailPanel" />
+          }
+        </div>
+      }
+
+      @case ('ready') {
+        <div
+          class="mt-10 rounded-2xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50 via-white to-indigo-50/80 px-8 py-8 dark:border-emerald-900/35 dark:from-emerald-950/25 dark:via-slate-900/60 dark:to-indigo-950/25">
+          <p class="text-xs font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">Listo para campo</p>
+          <p class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">Un último vistazo antes de coordinar</p>
+          <p class="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Celebre lo ya avanzado con su equipo; si algo falta, es mejor saberlo aquí que en medio del levantamiento.
+            Esta pantalla resume lo que vemos desde PRE-FIELD— úsela para coordinar la conversación con Operaciones sin sorpresas de último minuto.
+          </p>
+        </div>
+
+        <div class="mt-10 rounded-2xl border border-slate-200 bg-white px-8 py-10 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+          <ul class="space-y-6 text-base leading-snug">
+            <li class="flex gap-4">
+              <span class="select-none text-xl shrink-0" aria-hidden="true">{{
+                readyBriefStatus() === 'ok' ? '✅' : '⚠️'
+              }}</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-50">Brief aprobado</p>
+                @if (readyBriefStatus() !== 'ok') {
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                    Falta alinear aprobaciones según cómo trabaja su empresa.
+                  </p>
+                } @else {
+                  <p class="mt-1 text-sm text-emerald-800 dark:text-emerald-200/90">
+                    Buena señal: el brief muestra el acuerdo formal que su proceso suele pedir antes de salir a campo.
+                  </p>
+                }
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <span class="select-none text-xl shrink-0" aria-hidden="true">{{
+                readyFlowStatus() === 'ok' ? '✅' : '⚠️'
+              }}</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-50">Flujo revisado</p>
+                @if (readyFlowStatus() !== 'ok') {
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                    Aún hay fricción operativa o falta cerrar conversaciones con Operaciones.
+                  </p>
+                } @else {
+                  <p class="mt-1 text-sm text-emerald-800 dark:text-emerald-200/90">
+                    Desde PRE-FIELD no vemos bloqueos operativos explícitos en la lectura compartida— coordinación debería ser conversación, no rescate.
+                  </p>
+                }
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <span class="select-none text-xl shrink-0" aria-hidden="true">{{
+                readyQaStatus() === 'ok' ? '✅' : '⚠️'
+              }}</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-50">Validación QA</p>
+                @if (readyQaStatus() !== 'ok') {
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                    Falta validación QA en la versión actual del cuestionario (o aún no aplica en este borrador).
+                  </p>
+                } @else {
+                  <p class="mt-1 text-sm text-emerald-800 dark:text-emerald-200/90">
+                    La última pasada automática sobre la versión visible fue favorable; siga confiando en una revisión humana para tono y negocio.
+                  </p>
+                }
+              </div>
+            </li>
+          </ul>
+
+          @if (readinessGate(); as rgReady) {
+            <p class="mt-10 text-center text-sm text-slate-600 dark:text-slate-400">
+              Lectura compartida con Operaciones:
+              <span class="font-semibold text-slate-800 dark:text-slate-100">{{
+                readinessAggregateExecutiveLabel(rgReady.aggregate_status)
+              }}</span>
+            </p>
+          }
+
+          <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center">
+            <button
+              type="button"
+              class="rounded-xl bg-emerald-600 px-8 py-3.5 text-sm font-bold text-white shadow-md hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400"
+              (click)="onPublishToFieldClick()">
+              Publicar a Field
+            </button>
+            <button
+              type="button"
+              class="rounded-xl border-2 border-indigo-400 bg-white px-8 py-3.5 text-sm font-bold text-indigo-900 hover:bg-indigo-50 dark:border-indigo-600 dark:bg-slate-900 dark:text-indigo-100 dark:hover:bg-indigo-950/40"
+              (click)="onSendToOperationsClick()">
+              Enviar a Operaciones
+            </button>
+          </div>
+
+          <p class="mt-8 text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            Estos envíos se conectarán a su proceso cuando esté definido; el valor de 7Field está en gobernar la operación,
+            no en sustituir su herramienta de campo. Si solo necesita dejar constancia interna por ahora, puede usar el botón que mejor encaje con cómo trabaja su empresa.
+          </p>
+        </div>
+      }
+    }
+
+    <details
+      class="mt-14 rounded-2xl border border-slate-200 bg-slate-50/90 dark:border-slate-700 dark:bg-slate-950/50">
+      <summary class="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
+        Detalles técnicos
+      </summary>
+      <div class="space-y-8 border-t border-slate-200 px-4 pb-5 pt-4 dark:border-slate-700">
+        @if (brief(); as brTech) {
+          <section>
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Brief persistido</p>
+            <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              Objeto JSON enviado al servidor; huella actual
+              <span class="ml-1 font-mono text-[11px]">{{ shortHash(brTech.body_hash, 14) }}</span>
+            </p>
+            <label class="mt-3 block text-sm font-medium text-slate-800 dark:text-slate-100">
+              Payload (JSON)
+              <textarea
+                rows="8"
+                class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs leading-relaxed text-slate-900 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                [(ngModel)]="briefPayloadText"
+                [readonly]="brTech.approval_state !== 'draft'"
+                [attr.aria-readonly]="brTech.approval_state !== 'draft'"></textarea>
+            </label>
+            <label class="mt-4 block text-sm font-medium text-slate-800 dark:text-slate-100">
+              Completitud 0–100 (opcional)
+              <input
+                type="text"
+                inputmode="decimal"
+                class="mt-1 block w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                [(ngModel)]="briefCompletenessStr"
+                [readonly]="brTech.approval_state !== 'draft'"
+                placeholder="Ej. 72" />
+            </label>
+            @if (brTech.approval_state === 'draft') {
+              <button
+                type="button"
+                class="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                [disabled]="briefSaving()"
+                (click)="saveBriefPayload()">
+                {{ briefSaving() ? 'Guardando…' : 'Guardar brief (JSON / completitud)' }}
+              </button>
+            }
+          </section>
+        }
+
+        @if (detailRevision(); as dTech) {
+          <section>
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Borrador abierto · metadatos y especificación
+            </p>
+            <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">{{ dTech.revision_label }}</p>
+            <dl class="mt-3 grid gap-3 text-xs text-slate-700 sm:grid-cols-2 dark:text-slate-300">
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Estado en API</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.status }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Plantilla (id técnico)</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.framework_template_id || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Versión declarada del instrumento</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.instrument_spec_version_declared || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Brief al crear la revisión</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ shortHash(dTech.brief_snapshot_hash, 14) }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Versión catálogo framework</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.framework_catalog_version || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Huella contenido revisión</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ shortHash(dTech.content_hash, 16) }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Último paquete de consistencia</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.last_ruleset_version || '—' }}</dd>
+              </div>
+            </dl>
+            <p class="mt-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Especificación completa (JSON)</p>
+            <pre
+              class="mt-2 max-h-[min(70vh,28rem)] overflow-auto rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs leading-relaxed text-slate-800 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-200">{{ dTech.spec | json }}</pre>
+          </section>
+        }
+
+        @if (detailWaivers().length > 0) {
+          <section>
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Excepciones · JSON registrado
+            </p>
+            <ul class="mt-3 space-y-3">
+              @for (w of detailWaivers(); track w.id) {
+                <li class="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900/40">
+                  <p class="text-xs text-slate-500 dark:text-slate-400">ID {{ w.id }} · {{ w.created_at | date: 'short' }}</p>
+                  @if (w.waived_sections_json != null) {
+                    <pre
+                      class="mt-2 max-h-40 overflow-auto rounded border border-slate-100 bg-slate-50 p-2 font-mono text-[10px] text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">{{ w.waived_sections_json | json }}</pre>
+                  } @else {
+                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Sin JSON de secciones adjunto.</p>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        @if (revisions().length > 0) {
+          <section>
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Tabla técnica · todas las revisiones
+            </p>
+            <div class="mt-2 overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+              <table class="min-w-full divide-y divide-slate-200 text-left text-xs dark:divide-slate-700">
+                <thead class="bg-slate-100 dark:bg-slate-900/80">
+                  <tr>
+                    <th class="px-3 py-2 font-semibold">Etiqueta</th>
+                    <th class="px-3 py-2 font-semibold">Estado API</th>
+                    <th class="px-3 py-2 font-semibold">Plantilla</th>
+                    <th class="px-3 py-2 font-semibold">Versión declarada</th>
+                    <th class="px-3 py-2 font-semibold">Brief al crear</th>
+                    <th class="px-3 py-2 font-semibold">Catálogo</th>
+                    <th class="px-3 py-2 font-semibold">Consistencia</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-950/30">
+                  @for (rev of revisions(); track rev.id) {
+                    <tr>
+                      <td class="px-3 py-2 font-medium">{{ rev.revision_label }}</td>
+                      <td class="px-3 py-2 font-mono text-[10px] text-slate-600">{{ rev.status }}</td>
+                      <td class="px-3 py-2 font-mono text-[10px]">{{ rev.framework_template_id || '—' }}</td>
+                      <td class="px-3 py-2">{{ rev.instrument_spec_version_declared || '—' }}</td>
+                      <td class="px-3 py-2 font-mono text-[10px]">{{ shortHash(rev.brief_snapshot_hash, 12) }}</td>
+                      <td class="px-3 py-2 font-mono text-[10px]">{{ rev.framework_catalog_version || '—' }}</td>
+                      <td class="px-3 py-2 font-mono text-[10px]">{{ rev.last_ruleset_version || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
         }
       </div>
-    </div>
-    }
+    </details>
   }
 </section>
+
+<ng-template #prefieldInsightsPanel>
+  @if (contextualInsights().length > 0) {
+    <div class="mt-10 rounded-2xl border border-slate-200/90 bg-white px-6 py-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+      <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Asistente de preparación</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        Leyemos lo que ya cargó y le sugerimos el siguiente movimiento razonable. Nada de esto sustituye su criterio— puede ignorar con tranquilidad lo que no aplique.
+      </p>
+      <ul class="mt-6 space-y-4">
+        @for (ins of contextualInsights(); track ins.id) {
+          <li
+            class="flex flex-wrap items-start gap-4 rounded-xl border px-4 py-4 text-sm leading-relaxed dark:border-slate-600"
+            [ngClass]="{
+              'border-amber-200/90 bg-amber-50/70 text-amber-950 dark:border-amber-900/45 dark:bg-amber-950/20 dark:text-amber-50':
+                ins.tone === 'warn',
+              'border-emerald-200/90 bg-emerald-50/70 text-emerald-950 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-50':
+                ins.tone === 'ok',
+            }">
+            <p class="min-w-0 flex-1">{{ ins.message }}</p>
+            <div class="flex shrink-0 flex-wrap gap-2">
+              @if (ins.showApply) {
+                <button
+                  type="button"
+                  class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                  (click)="applyInsight(ins.id)">
+                  {{ ins.applyLabel }}
+                </button>
+              }
+              <button
+                type="button"
+                class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+                (click)="dismissInsight(ins.id)">
+                Ignorar
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</ng-template>
+
+<ng-template #revisionDetailPanel>
+  @if (detailRevision(); as d) {
+    <div
+      class="border-t border-slate-200 bg-gradient-to-b from-indigo-50/40 to-slate-50/90 px-6 py-6 dark:border-slate-700 dark:from-indigo-950/20 dark:to-slate-900/70">
+      <div class="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200">
+            Acompañamiento del borrador
+          </p>
+          <p class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-50">{{ d.revision_label }}</p>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <span
+              class="rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide bg-white text-slate-800 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-600">
+              {{ revisionExecutiveStatus(d.status) }}
+            </span>
+          </div>
+          <p class="mt-3 max-w-3xl text-sm text-slate-700 dark:text-slate-300">
+            {{ executiveQaConsistencySummaryGuided(d) }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="text-xs font-semibold text-slate-600 underline hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          (click)="closeRevisionDetail()">
+          Cerrar
+        </button>
+      </div>
+
+      @if (readinessGate(); as rg) {
+        <div
+          class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-600 dark:bg-slate-950/50">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">¿Listo para coordinar con Operaciones?</p>
+            <span
+              class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide"
+              [ngClass]="readinessAggregateBadgeClass(rg.aggregate_status)">
+              {{ readinessAggregateExecutiveLabel(rg.aggregate_status) }}
+            </span>
+          </div>
+          @if (rg.blocking_codes.length) {
+            <p class="mt-3 text-xs font-semibold text-amber-800 dark:text-amber-200">Qué puede estar frenando el paso a campo</p>
+            <ul class="mt-2 space-y-2 text-sm text-slate-800 dark:text-slate-100">
+              @for (c of rg.blocking_codes; track c) {
+                <li class="rounded-lg border border-amber-200/80 bg-amber-50/80 px-3 py-2 dark:border-amber-900/40 dark:bg-amber-950/25">
+                  {{ executiveReadinessBlocking(c) }}
+                </li>
+              }
+            </ul>
+            <p class="mt-3 text-xs text-slate-600 dark:text-slate-400">
+              <span class="font-semibold">Siguiente paso:</span>
+              resuelva el primer punto con el rol correspondiente (brief, control de calidad o firmas según el caso).
+            </p>
+          } @else {
+            <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">
+              No hay bloqueos registrados en esta evaluación. Si el estado aún no es «listo», revise firmas o políticas pendientes con su equipo.
+            </p>
+          }
+          @if (rg.missing_roles.length) {
+            <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Quién debe intervenir (roles pendientes)
+            </p>
+            <ul class="mt-2 flex flex-wrap gap-2">
+              @for (role of rg.missing_roles; track role) {
+                <li
+                  class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-100">
+                  {{ executiveStakeholderRole(role) }}
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      } @else {
+        <p class="mt-4 rounded-lg border border-slate-200 bg-white px-4 py-4 text-sm leading-relaxed text-slate-600 dark:border-slate-600 dark:bg-slate-950/40 dark:text-slate-400">
+          Aún no tenemos una lectura compartida con Operaciones para esta versión (puede estar cargando).
+        </p>
+      }
+
+      <div class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 dark:border-slate-600 dark:bg-slate-950/40">
+        <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Excepciones metodológicas registradas</p>
+        <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+          Acuerdos formales para apartarse del marco estándar. La definición técnica completa está en «Detalles técnicos».
+        </p>
+        @if (detailWaiversLoading()) {
+          <p class="mt-2 text-xs text-slate-500">Cargando…</p>
+        } @else if (detailWaivers().length === 0) {
+          <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">Sin excepciones registradas.</p>
+        } @else {
+          <ul class="mt-3 space-y-3">
+            @for (w of detailWaivers(); track w.id) {
+              <li class="rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/40">
+                <p class="text-sm text-slate-800 dark:text-slate-100">{{ w.rationale }}</p>
+                <p class="mt-1 tabular-nums text-xs text-slate-500 dark:text-slate-400">
+                  {{ w.created_at | date: 'short' }}
+                </p>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      @if (d.status === 'draft') {
+        <div
+          class="mt-5 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-4 dark:border-slate-600 dark:bg-slate-950/25">
+          <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Registrar excepción</p>
+          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+            Motivo obligatorio para auditoría. El JSON opcional de secciones queda reflejado en «Detalles técnicos» tras guardar.
+          </p>
+          <label class="mt-3 block text-xs font-medium text-slate-800 dark:text-slate-100">
+            Motivo acordado
+            <textarea
+              rows="2"
+              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+              [(ngModel)]="waiverRationale"></textarea>
+          </label>
+          <details class="mt-3">
+            <summary class="cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-400">
+              JSON opcional de secciones relevadas
+            </summary>
+            <textarea
+              rows="3"
+              class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+              [(ngModel)]="waiverSectionsJson"
+              placeholder='Ej. {{ "{}" }} o ["bloque_a"]'></textarea>
+          </details>
+          <button
+            type="button"
+            class="mt-4 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            [disabled]="waiverSubmitting()"
+            (click)="submitFrameworkWaiver()">
+            {{ waiverSubmitting() ? 'Enviando…' : 'Registrar excepción' }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</ng-template>
