@@ -9,6 +9,25 @@
     <p class="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
       {{ studyFocusLine() }}
     </p>
+    @if (intelligenceSource() === 'live') {
+      <div
+        class="mt-6 max-w-3xl rounded-2xl border border-indigo-200/80 bg-indigo-50/80 px-5 py-4 text-sm leading-relaxed text-indigo-950 dark:border-indigo-800/60 dark:bg-indigo-950/30 dark:text-indigo-100">
+        <p class="font-semibold text-indigo-900 dark:text-indigo-100">Recomendación actual</p>
+        <p class="mt-2 text-indigo-900/90 dark:text-indigo-200/95">
+          Las tarjetas inferiores vienen del motor dinámico sobre el borrador vigente (consultivo). No sustituyen la
+          <strong class="font-semibold">última validación guardada</strong> ni el estado
+          <strong class="font-semibold">Readiness</strong> persistente — véase «Revisión» y firmas.
+        </p>
+      </div>
+    } @else if (intelligenceSource() === 'fallback') {
+      <div
+        class="mt-6 max-w-3xl rounded-2xl border border-amber-200/90 bg-amber-50/90 px-5 py-4 text-sm leading-relaxed text-amber-950 dark:border-amber-800/50 dark:bg-amber-950/25 dark:text-amber-100">
+        <p class="font-semibold text-amber-900 dark:text-amber-100">Sin análisis del servidor</p>
+        <p class="mt-2 text-amber-900/90 dark:text-amber-200/95">
+          Vista neutra de respaldo. Al recuperar conexión se cargará el recorrido desde el servidor.
+        </p>
+      </div>
+    }
   </header>
 
   @if (loading()) {

@@ -29,3 +29,9 @@ export interface ParticipantJourneyInput {
   readonly qaIssueCount: number | null;
   readonly readinessBlockingFirstCode: string | null;
 }
+
+/** Vista preview — lo construye el mapper desde `StudyIntelligenceBundlePublic` o fallback mínimo. */
+export interface ParticipantJourneyPreviewModel {
+  readonly phases: readonly JourneyPhasePreview[];
+  readonly globalInsights: readonly { readonly text: string; readonly tone: JourneyInsightTone }[];
+}

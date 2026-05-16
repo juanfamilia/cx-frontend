@@ -25,9 +25,9 @@ alwaysApply: true
 
 ## Contrato análisis ↔ UI
 
-**Backend** analiza y audita: longitud, fatiga, sesgo, redundancia, orden, consistencia, cobertura metodológica, validaciones, riesgos operacionales.
+**Backend (`cx-backend`):** motor de análisis (longitud, fatiga, sesgo, redundancia, orden, consistencia, cobertura metodológica, validaciones, riesgos operacionales) — ver doc maestro § contrato.
 
-**Este repo (Angular):** **solo insights humanos** — presentar lo que venga de API/backend; **no** duplicar el motor salvo formateo trivial (ver § contrato en doc maestro).
+**Este repo (Angular):** **traducir experiencia** — consumir `StudyIntelligenceBundlePublic` vía `GET .../instrument-revisions/{id}/study-intelligence`; mapear a UI; **no** duplicar heurísticas ni scoring en helpers (solo fallback neutro si falla la API). **«Recomendación actual»** (motor dinámico) ≠ **«Última validación guardada» / Readiness** (oficial) — ver `cx-backend/docs/7FIELD_BACKEND_INTELLIGENCE_ENGINE_V1.md` §1.1.
 
 ---
 

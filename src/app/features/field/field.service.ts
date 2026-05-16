@@ -193,6 +193,85 @@ export interface FieldReadinessGatePublic {
   }>;
 }
 
+/** Respuesta `GET .../instrument-revisions/{id}/study-intelligence` (motor backend). */
+export interface StudyIntelligenceJourneyPhasePublic {
+  phase_key: string;
+  order_index: number;
+  title: string;
+  narrative_summary?: string | null;
+  block_ids: string[];
+}
+
+export interface StudyIntelligenceParticipantJourneyPublic {
+  study_id: number;
+  instrument_revision_id: number;
+  brief_snapshot_hash?: string | null;
+  instrument_spec_content_hash?: string | null;
+  framework_catalog_version?: string | null;
+  phases: StudyIntelligenceJourneyPhasePublic[];
+}
+
+export interface StudyIntelligenceOperationalRiskPublic {
+  code: string;
+  message_human: string;
+  severity: string;
+  linked_block_id?: string | null;
+  linked_item_id?: string | null;
+  source_rule_id?: string | null;
+}
+
+export interface StudyIntelligenceMethodologicalSignalPublic {
+  code: string;
+  message_human: string;
+  severity: string;
+  linked_block_id?: string | null;
+  framework_rule_ref?: string | null;
+}
+
+export interface StudyIntelligenceFatigueRiskPublic {
+  code: string;
+  message_human: string;
+  level: string;
+  linked_block_id?: string | null;
+}
+
+export interface StudyIntelligenceSensitivityAreaPublic {
+  code: string;
+  label_human: string;
+  rationale_human: string;
+  linked_block_ids: string[];
+}
+
+export interface StudyIntelligenceExpectedDropoutZonePublic {
+  phase_key?: string | null;
+  linked_block_id?: string | null;
+  message_human: string;
+  confidence?: string | null;
+}
+
+export interface StudyIntelligenceInsightCardPublic {
+  insight_id: string;
+  headline: string;
+  body: string;
+  priority: string;
+  tone?: string;
+  trace_rule_ids: string[];
+  trace_heuristic_ids: string[];
+}
+
+export interface StudyIntelligenceBundlePublic {
+  engine_version: string;
+  ruleset_versions: string[];
+  participant_journey?: StudyIntelligenceParticipantJourneyPublic | null;
+  operational_risks: StudyIntelligenceOperationalRiskPublic[];
+  methodological_signals: StudyIntelligenceMethodologicalSignalPublic[];
+  fatigue_risks: StudyIntelligenceFatigueRiskPublic[];
+  sensitivity_areas: StudyIntelligenceSensitivityAreaPublic[];
+  expected_dropout_zones: StudyIntelligenceExpectedDropoutZonePublic[];
+  insight_cards: StudyIntelligenceInsightCardPublic[];
+  contextual_scores: Record<string, unknown>;
+}
+
 export interface FieldImportRun {
   id: number;
   field_project_id: number;
@@ -717,6 +796,21 @@ export class FieldService {
     }
     return this.http.get<FieldReadinessGatePublic>(
       `${environment.apiUrl}field/instrument-revisions/${revisionId}/readiness`,
+      { params }
+    );
+  }
+
+  /** Motor Study Intelligence — journey + QA dinámico + Readiness (consultivo). */
+  getStudyIntelligence(
+    revisionId: number,
+    companyId?: number | null
+  ): Observable<StudyIntelligenceBundlePublic> {
+    let params = new HttpParams();
+    if (companyId != null && Number.isFinite(companyId)) {
+      params = params.set('company_id', String(companyId));
+    }
+    return this.http.get<StudyIntelligenceBundlePublic>(
+      `${environment.apiUrl}field/instrument-revisions/${revisionId}/study-intelligence`,
       { params }
     );
   }

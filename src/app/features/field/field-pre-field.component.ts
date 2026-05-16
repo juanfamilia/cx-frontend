@@ -28,6 +28,7 @@ import {
   FieldReadinessPolicyPublic,
   FieldService,
   FieldStudyBriefPublic,
+  StudyIntelligenceBundlePublic,
 } from './field.service';
 
 import {
@@ -38,13 +39,12 @@ import {
 
 import { FieldParticipantJourneyPreviewComponent } from './components/journey/field-participant-journey-preview.component';
 import {
-  buildParticipantJourneyPreview,
   extractBlockTitlesFromSpec,
   journeyStudyFocusLine,
-  phaseIndexForBlockTitle,
-  type ParticipantJourneyPreviewModel,
+  minimalNeutralJourneyFallback,
 } from './components/journey/participant-journey-preview.helper';
-import type { ParticipantJourneyInput } from './components/journey/participant-journey.types';
+import { mapStudyIntelligenceBundleToPreview } from './components/journey/study-intelligence-to-preview.mapper';
+import type { ParticipantJourneyInput, ParticipantJourneyPreviewModel } from './components/journey/participant-journey.types';
 
 /** Valores de `study_type` del diseño del cuestionario (filtro de catálogo). */
 const STUDY_TYPE_OPTIONS: readonly { value: string; label: string }[] = [
@@ -133,6 +133,10 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   /** Spec cargado para preview del recorrido (revisión actual), sin depender de abrir «Afinar». */
   readonly previewRevisionSpec = signal<FieldInstrumentRevisionWithSpec | null>(null);
   readonly previewSpecLoading = signal(false);
+
+  /** Motor Study Intelligence (backend); null hasta cargar o tras error. */
+  readonly studyIntelligenceBundle = signal<StudyIntelligenceBundlePublic | null>(null);
+  readonly studyIntelligenceLoading = signal(false);
 
   readonly waiverSubmitting = signal(false);
 
@@ -331,7 +335,8 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Detecciones orientadas a acción (sin motor nuevo; reusa brief / QA / readiness ya cargados).
+   * Brief / validación de esquema persistida / Readiness — sin motor journey dinámico.
+   * El recorrido participante usa `GET .../study-intelligence` por separado.
    */
   contextualInsights(): readonly {
     id: string;
@@ -378,57 +383,13 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     const cur = this.currentRevision();
     const d = this.detailRevision();
     const qaTarget = d?.id === cur?.id ? d : cur;
-    const titlesForHeuristics = this.rawInstrumentBlockTitles();
-
-    if (titlesForHeuristics.length >= 9 && !skip.has('ins-fatigue')) {
-      out.push({
-        id: 'ins-fatigue',
-        tone: 'warn',
-        message: 'Hay muchos bloques: si el tiempo con quien responde es corto, priorice lo que sí mueve una decisión.',
-        applyLabel: 'Revisar el flujo',
-        showApply: true,
-      });
-    }
-
-    let demoEarly = false;
-    titlesForHeuristics.forEach((title, idx) => {
-      const ix = phaseIndexForBlockTitle(title);
-      if (ix === 4 && titlesForHeuristics.length >= 4 && idx < Math.floor(titlesForHeuristics.length / 2)) {
-        demoEarly = true;
-      }
-    });
-    if (demoEarly && !skip.has('ins-demographics-order')) {
-      out.push({
-        id: 'ins-demographics-order',
-        tone: 'warn',
-        message: 'Los datos de perfil están muy arriba en el flujo; suele funcionar mejor después de la experiencia.',
-        applyLabel: 'Ver en revisión',
-        showApply: true,
-      });
-    }
-
-    if (titlesForHeuristics.length >= 6 && !skip.has('ins-induced-soft')) {
-      const earlySat = titlesForHeuristics.slice(0, Math.ceil(titlesForHeuristics.length / 2)).some(t => {
-        const x = t.toLowerCase();
-        return x.includes('satisf') || x.includes('excelente') || x.includes('maravill');
-      });
-      if (earlySat) {
-        out.push({
-          id: 'ins-induced-soft',
-          tone: 'warn',
-          message:
-            'Una pregunta muy «positiva» aparece antes de la experiencia; puede sesgar la respuesta. Considere moverla o suavizarla.',
-          applyLabel: 'Revisar redacción',
-          showApply: true,
-        });
-      }
-    }
 
     if (qaTarget && qaTarget.last_validation_ok === false && !skip.has('ins-qa-fail')) {
       out.push({
         id: 'ins-qa-fail',
         tone: 'warn',
-        message: 'La última revisión automática marcó puntos a mirar (orden, redacción o saltos). Vale una pasada humana.',
+        message:
+          'La última validación de esquema guardada en esta revisión reportó incidencias (JSON / estructura). Es distinta de la «Recomendación actual» del recorrido.',
         applyLabel: 'Revisar ahora',
         showApply: true,
       });
@@ -443,7 +404,8 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       out.push({
         id: 'ins-qa-ok',
         tone: 'ok',
-        message: 'La última revisión automática no marcó problemas graves. Una lectura rápida en celular sigue ayudando.',
+        message:
+          'La última validación de esquema guardada no reportó errores graves de sintaxis/estructura. Una lectura humana sigue ayudando.',
         applyLabel: 'Abrir revisión',
         showApply: true,
       });
@@ -491,9 +453,11 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     const d = this.detailRevision();
     if (d?.id === cur.id) {
       this.previewRevisionSpec.set(d);
+      this.fetchStudyIntelligenceForPreview(cur.id);
       return;
     }
     if (this.previewRevisionSpec()?.id === cur.id) {
+      this.fetchStudyIntelligenceForPreview(cur.id);
       return;
     }
     if (this.previewSpecLoading()) {
@@ -505,11 +469,41 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       next: row => {
         this.previewRevisionSpec.set(row);
         this.previewSpecLoading.set(false);
+        this.fetchStudyIntelligenceForPreview(cur.id);
         this.cdr.markForCheck();
       },
       error: () => {
         this.previewSpecLoading.set(false);
         this.previewRevisionSpec.set(null);
+        this.studyIntelligenceBundle.set(null);
+        this.studyIntelligenceLoading.set(false);
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  private fetchStudyIntelligenceForPreview(revisionId: number): void {
+    const cid = this.projectCompanyId();
+    if (cid == null) {
+      return;
+    }
+    this.studyIntelligenceLoading.set(true);
+    const cq = this.companyQueryForApi(cid);
+    this.fieldSvc.getStudyIntelligence(revisionId, cq).subscribe({
+      next: bundle => {
+        if (this.currentRevision()?.id !== revisionId) {
+          this.studyIntelligenceLoading.set(false);
+          return;
+        }
+        this.studyIntelligenceBundle.set(bundle);
+        this.studyIntelligenceLoading.set(false);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        if (this.currentRevision()?.id === revisionId) {
+          this.studyIntelligenceBundle.set(null);
+        }
+        this.studyIntelligenceLoading.set(false);
         this.cdr.markForCheck();
       },
     });
@@ -519,11 +513,15 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     const cur = this.currentRevision();
     if (cur == null) {
       this.previewRevisionSpec.set(null);
+      this.studyIntelligenceBundle.set(null);
+      this.studyIntelligenceLoading.set(false);
       return;
     }
     const cached = this.previewRevisionSpec();
     if (cached != null && cached.id !== cur.id) {
       this.previewRevisionSpec.set(null);
+      this.studyIntelligenceBundle.set(null);
+      this.studyIntelligenceLoading.set(false);
     }
     const step = this.productStep();
     if (
@@ -553,17 +551,35 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     };
   }
 
-  participantJourneyPreviewModel(): ParticipantJourneyPreviewModel {
-    return buildParticipantJourneyPreview(this.buildParticipantJourneyInput());
+  participantJourneyPreviewModel(): ParticipantJourneyPreviewModel | null {
+    const cur = this.currentRevision();
+    if (!cur) {
+      return null;
+    }
+    if (this.previewSpecLoading() || this.studyIntelligenceLoading()) {
+      return null;
+    }
+    const b = this.studyIntelligenceBundle();
+    if (b) {
+      return mapStudyIntelligenceBundleToPreview(b);
+    }
+    return minimalNeutralJourneyFallback();
+  }
+
+  /** `live` = motor API; `fallback` = sin servidor (no mezclar con Readiness oficial). */
+  participantJourneyIntelligenceSource(): 'live' | 'fallback' | null {
+    const cur = this.currentRevision();
+    if (!cur) {
+      return null;
+    }
+    if (this.previewSpecLoading() || this.studyIntelligenceLoading()) {
+      return null;
+    }
+    return this.studyIntelligenceBundle() ? 'live' : 'fallback';
   }
 
   participantJourneyFocusLine(): string {
     return journeyStudyFocusLine(this.buildParticipantJourneyInput());
-  }
-
-  private rawInstrumentBlockTitles(): string[] {
-    const row = this.specSourceForCurrentRevision();
-    return extractBlockTitlesFromSpec(row?.spec as Record<string, unknown> | undefined);
   }
 
   readyCheckBriefDone(): boolean {
@@ -1019,6 +1035,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
           const open = this.detailRevision()?.id;
           if (open != null) {
             this.reloadReadinessForRevision(open);
+            this.fetchStudyIntelligenceForPreview(open);
           }
           this.cdr.markForCheck();
         },
@@ -1054,6 +1071,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
         const open = this.detailRevision()?.id;
         if (open != null) {
           this.reloadReadinessForRevision(open);
+          this.fetchStudyIntelligenceForPreview(open);
         }
         this.cdr.markForCheck();
       },
@@ -1084,6 +1102,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
         const open = this.detailRevision()?.id;
         if (open != null) {
           this.reloadReadinessForRevision(open);
+          this.fetchStudyIntelligenceForPreview(open);
         }
         this.cdr.markForCheck();
       },
@@ -1257,6 +1276,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
         const cur = this.currentRevision();
         if (cur?.id === revisionId) {
           this.previewRevisionSpec.set(row);
+          this.fetchStudyIntelligenceForPreview(revisionId);
         }
         this.reloadWaiversForRevision(revisionId);
         this.reloadReadinessForRevision(revisionId);

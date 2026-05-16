@@ -439,8 +439,9 @@
           class="mt-14 block"
           [model]="participantJourneyPreviewModel()"
           [studyFocusLine]="participantJourneyFocusLine()"
-          [loading]="previewSpecLoading()"
-          [hasRevision]="!!currentRevision()" />
+          [loading]="previewSpecLoading() || studyIntelligenceLoading()"
+          [hasRevision]="!!currentRevision()"
+          [intelligenceSource]="participantJourneyIntelligenceSource()" />
 
         <ng-container *ngTemplateOutlet="prefieldInsightsPanel" />
 
@@ -552,8 +553,9 @@
           class="mt-14 block"
           [model]="participantJourneyPreviewModel()"
           [studyFocusLine]="participantJourneyFocusLine()"
-          [loading]="previewSpecLoading()"
-          [hasRevision]="!!currentRevision()" />
+          [loading]="previewSpecLoading() || studyIntelligenceLoading()"
+          [hasRevision]="!!currentRevision()"
+          [intelligenceSource]="participantJourneyIntelligenceSource()" />
 
         <ng-container *ngTemplateOutlet="prefieldInsightsPanel" />
 
@@ -825,8 +827,11 @@
 <ng-template #prefieldInsightsPanel>
   @if (contextualInsights().length > 0) {
     <div class="mt-10 rounded-2xl border border-slate-200/90 bg-white px-6 py-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-      <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Lo que detectamos</p>
-      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Recomendaciones breves. Puede ignorar lo que no aplique.</p>
+      <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Brief y validación guardada</p>
+      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+        Incluye brief y <strong class="font-medium text-slate-600 dark:text-slate-300">última validación de esquema</strong> persistida en la revisión, más Readiness cuando aplique. Es independiente de la
+        <strong class="font-medium text-slate-600 dark:text-slate-300">«Recomendación actual»</strong> del recorrido participante (motor dinámico).
+      </p>
       <ul class="mt-6 space-y-4">
         @for (ins of contextualInsights(); track ins.id) {
           <li
