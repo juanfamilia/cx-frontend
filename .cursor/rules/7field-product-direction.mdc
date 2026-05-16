@@ -23,6 +23,14 @@ alwaysApply: true
 
 ---
 
+## Contrato análisis ↔ UI
+
+**Backend** analiza y audita: longitud, fatiga, sesgo, redundancia, orden, consistencia, cobertura metodológica, validaciones, riesgos operacionales.
+
+**Este repo (Angular):** **solo insights humanos** — presentar lo que venga de API/backend; **no** duplicar el motor salvo formateo trivial (ver § contrato en doc maestro).
+
+---
+
 ## Checklist pantalla
 
 ¿Piensa mejor? ¿Ejecuta mejor? ¿Continuidad? ¿Premium/inteligente? ¿Menos complejidad visible? ¿Demo ~3 min con confianza? Si no → iterar.
