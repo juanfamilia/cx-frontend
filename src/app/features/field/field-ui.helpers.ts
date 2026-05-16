@@ -47,7 +47,7 @@ export function openSeverityCount(row: FieldProjectOverviewRow | null | undefine
   return typeof raw === 'number' && Number.isFinite(raw) ? raw : 0;
 }
 
-/** Mensaje corto orientado a acción para la vista tablero. */
+/** Mensaje corto para el tablero: qué hacer ahora. */
 export function operationalNextStepHint(row: FieldProjectOverviewRow | null | undefined): string {
   if (!row) {
     return '—';
@@ -56,15 +56,15 @@ export function operationalNextStepHint(row: FieldProjectOverviewRow | null | un
   const warn = openSeverityCount(row, 'warn');
   const pending = row.findings_pending_review ?? 0;
   if (row.health === 'red' || critical > 0) {
-    return `Prioridad: revise los hallazgos críticos abiertos (${critical}). Use la tabla de prioridades o la lista completa.`;
+    return `Primero: revise hallazgos críticos (${critical}).`;
   }
   if (row.health === 'amber' || warn > 0) {
-    return `Salud en observación: ${warn} advertencia(s) abierta(s). Complemente con métricas y sincronización si aplica.`;
+    return `${warn} advertencia(s) abierta(s): vale una pasada en equipo.`;
   }
   if (pending > 0) {
-    return `${pending} elemento(s) pendiente(s) de revisión en la lista operativa de hallazgos.`;
+    return `${pending} tema(s) pendientes en la lista.`;
   }
-  return 'Sin bloqueos críticos visibles aquí. Mantenga sincronización periódica y el instrumento al día en PRE-FIELD.';
+  return 'Todo tranquilo por aquí. Mantenga el instrumento al día antes de campo.';
 }
 
 /** Señal cruda `health_reasons` del overview → lenguaje operacional (la original sigue disponible en UI secundaria). */
@@ -129,19 +129,18 @@ export function executiveStakeholderRole(role: string): string {
   return role;
 }
 
-/** Código de bloqueo Readiness → mensaje operacional (código sigue mostrándose aparte). */
+/** Bloqueos operativos → lenguaje claro en superficie (detalle técnico queda abajo). */
 export function executiveReadinessBlocking(code: string): string {
   const map: Record<string, string> = {
-    brief_not_approved: 'Brief sin la aprobación exigida por su empresa.',
-    revision_archived: 'La revisión metodológica está archivada.',
-    schema_validation_missing: 'Falta comprobación de consistencia del cuestionario.',
-    schema_validation_failed: 'La comprobación de consistencia del cuestionario no fue superada.',
-    schema_validation_stale:
-      'La comprobación de consistencia está desactualizada respecto al contenido actual.',
-    qa_run_missing: 'Falta una corrida de control de calidad cuando la política la exige.',
-    qa_stop_present: 'Hay hallazgos de control de calidad tipo «stop» pendientes.',
-    qa_fix_now_present: 'Hay hallazgos de control de calidad «acción inmediata» pendientes.',
-    signatory_grants_not_loaded: 'No se pudieron cargar los permisos de firmas.',
+    brief_not_approved: 'Falta cerrar el brief como lo pide su empresa.',
+    revision_archived: 'Esta versión está archivada; trabaje sobre una versión activa.',
+    schema_validation_missing: 'Falta una revisión automática del cuestionario.',
+    schema_validation_failed: 'La última revisión automática marcó puntos por corregir.',
+    schema_validation_stale: 'Hubo cambios después de la última revisión automática.',
+    qa_run_missing: 'Falta una revisión de calidad según su proceso.',
+    qa_stop_present: 'Hay temas de calidad marcados como prioritarios.',
+    qa_fix_now_present: 'Hay temas de calidad que piden acción inmediata.',
+    signatory_grants_not_loaded: 'No pudimos cargar las firmas configuradas.',
   };
   if (map[code]) {
     return map[code];
@@ -184,16 +183,16 @@ export function executiveQaConsistencySummaryGuided(d: QaConsistencySnapshot): s
   if (d.last_validation_ok === false) {
     const n = d.last_validation_issue_count;
     return n != null
-      ? `Detectamos ${n} tema(s) en la última comprobación automática que merecen su revisión.`
-      : 'La última comprobación automática necesita su revisión antes de dar por cerrado el flujo.';
+      ? `Recomendaciones: ${n} punto(s) detectado(s) en la última revisión automática.`
+      : 'La última revisión automática sugiere dar una pasada antes de publicar.';
   }
   if (d.last_validation_ok === true) {
-    return 'La última comprobación automática está en orden para este borrador.';
+    return 'Última revisión automática: sin alertas graves.';
   }
   if (d.last_validation_at) {
-    return 'Hay una comprobación reciente; revise en el paso «Revisión» que encaje con lo que quiere llevar a campo.';
+    return 'Hay una revisión reciente; confirme en «Revisión» que coincide con lo que quiere en campo.';
   }
-  return 'Aún no registramos una comprobación automática para este borrador.';
+  return 'Aún no hay revisión automática registrada para esta versión.';
 }
 
 /** Etiqueta legible para filas de KPI en scoring. */

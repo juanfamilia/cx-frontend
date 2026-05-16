@@ -70,7 +70,7 @@ export class FieldShellComponent implements OnInit, OnDestroy {
       { label: 'Control del proyecto', link: `${base}/dashboard`, fragment: undefined },
       { label: 'Hallazgos', link: `${base}/findings`, fragment: undefined },
       { label: 'Métricas y scoring', link: `${base}/scoring`, fragment: undefined },
-      { label: 'PRE-FIELD', link: `${base}/pre-field`, fragment: undefined },
+      { label: 'Antes de campo', link: `${base}/pre-field`, fragment: undefined },
       { label: 'Resumen ejecutivo', link: `${base}/executive-summary`, fragment: undefined },
     ];
   });

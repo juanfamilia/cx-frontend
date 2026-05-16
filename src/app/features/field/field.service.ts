@@ -200,6 +200,9 @@ export interface StudyIntelligenceJourneyPhasePublic {
   title: string;
   narrative_summary?: string | null;
   block_ids: string[];
+  /** Arco experiencial (entrada, confianza, exploración / fricción, …); distinto de la fase estructural. */
+  experience_arc_key?: string | null;
+  experience_arc_title?: string | null;
 }
 
 export interface StudyIntelligenceParticipantJourneyPublic {
@@ -536,6 +539,8 @@ export interface FieldProjectOverviewRow {
   tabular_row_count: number | null;
   /** Presente en GET /projects/{id}/overview; en listado multi-proyecto suele ir vacío. */
   top_findings?: FieldFinding[];
+  /** Drill-down: último bundle Study Intelligence persistido para el estudio vinculado (PRE-FIELD lineage). */
+  study_intelligence?: StudyIntelligenceBundlePublic | null;
 }
 
 export interface EndClient {

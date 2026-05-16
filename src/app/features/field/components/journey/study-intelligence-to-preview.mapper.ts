@@ -71,7 +71,9 @@ export function mapStudyIntelligenceBundleToPreview(
       }
     }
 
-    const narrative = (ph.narrative_summary ?? '').trim() || ph.title;
+    const narrative = [ph.experience_arc_title, (ph.narrative_summary ?? '').trim() || ph.title]
+      .filter(Boolean)
+      .join(' — ');
     const blockObjective =
       bids.length > 0
         ? `Etapa con ${bids.length} bloque(s) enlazado(s) del borrador actual.`
