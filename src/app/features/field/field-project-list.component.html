@@ -167,12 +167,16 @@
                       (click)="$event.stopPropagation()"
                       >Tablero operativo</a
                     >
+                    @if (fieldOverviewAllowsPrefield(row)) {
                     <a
                       class="text-[0.7rem] font-semibold text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400"
                       [routerLink]="['/field/project', row.project.id, 'pre-field']"
                       (click)="$event.stopPropagation()"
                       >Instrumento</a
                     >
+                    } @else {
+                    <span class="text-[0.65rem] text-slate-500 dark:text-slate-400">En ejecución</span>
+                    }
                   </div>
                 </div>
               </div>
@@ -221,11 +225,13 @@
               <button type="button" class="field-btn-secondary" (click)="openOperationalDrawerFromCommand()">
                 Panel operativo completo
               </button>
+              @if (fieldOverviewAllowsPrefield(selRow)) {
               <a
                 class="field-btn-secondary inline-flex cursor-pointer items-center justify-center no-underline"
                 [routerLink]="['/field/project', selRow.project.id, 'pre-field']">
                 Antes de campo
               </a>
+              }
             </div>
           </div>
 

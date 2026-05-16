@@ -3,7 +3,7 @@
     <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Siete Field</p>
     <h1 class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">Resumen de proyectos</h1>
     <p class="mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-300">
-      Prioridades abajo · Diseño previo al campo en la pestaña Instrumento.
+      Prioridades abajo · Antes de campo solo en proyectos en <strong class="text-slate-800 dark:text-slate-100">borrador</strong>.
     </p>
     <app-field-primary-nav-tabs class="mt-5" />
   </header>
@@ -59,7 +59,7 @@
             <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Avance</th>
             <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Riesgo</th>
             <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Hallazgos críticos</th>
-            <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Instrumento</th>
+            <th class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">Antes de campo</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -75,11 +75,15 @@
               </td>
               <td class="px-4 py-3 tabular-nums">{{ criticalOpen(row) }}</td>
               <td class="px-4 py-3" (click)="$event.stopPropagation()">
+                @if (fieldOverviewAllowsPrefield(row)) {
                 <a
                   [routerLink]="['/field/project', row.project.id, 'pre-field']"
                   class="text-sm font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
                   >Antes de campo</a
                 >
+                } @else {
+                <span class="text-xs text-slate-500 dark:text-slate-400">En ejecución</span>
+                }
               </td>
             </tr>
           }

@@ -20,7 +20,7 @@ import { FieldRiskBadgeComponent } from './components/field-risk-badge.component
 import { FieldPrimaryNavTabsComponent } from './components/field-primary-nav-tabs.component';
 import { companyDisplayLabel } from './field-company.helpers';
 import { DoobloCompanyConfig, FieldProjectOverviewRow, FieldService } from './field.service';
-import { formatCompletionRatePct, healthToRiskLevel } from './field-ui.helpers';
+import { formatCompletionRatePct, healthToRiskLevel, fieldOverviewAllowsPrefield } from './field-ui.helpers';
 
 @Component({
   selector: 'app-field-project-selector',
@@ -42,6 +42,7 @@ export class FieldProjectSelectorComponent implements OnInit {
   private readonly companiesSvc = inject(CompaniesService);
 
   readonly companyDisplayLabel = companyDisplayLabel;
+  readonly fieldOverviewAllowsPrefield = fieldOverviewAllowsPrefield;
 
   readonly user = this.auth.getCurrentUser();
   readonly isSuperAdmin = this.user.role === 0;

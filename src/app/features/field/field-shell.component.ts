@@ -21,6 +21,7 @@ import {
   healthExecutiveLabel,
   healthToRiskLevel,
   executiveHealthReason,
+  fieldOverviewAllowsPrefield,
   openSeverityCount,
 } from './field-ui.helpers';
 
@@ -43,6 +44,7 @@ export class FieldShellComponent implements OnInit, OnDestroy {
   private readonly fieldSvc = inject(FieldService);
 
   readonly executiveHealthReason = executiveHealthReason;
+  readonly fieldOverviewAllowsPrefield = fieldOverviewAllowsPrefield;
 
   private headerSub?: Subscription;
 
@@ -66,11 +68,14 @@ export class FieldShellComponent implements OnInit, OnDestroy {
       return [];
     }
     const base = `/field/project/${id}`;
+    const prefieldTab = fieldOverviewAllowsPrefield(this.overviewRow())
+      ? [{ label: 'Antes de campo', link: `${base}/pre-field`, fragment: undefined }]
+      : [];
     return [
       { label: 'Control del proyecto', link: `${base}/dashboard`, fragment: undefined },
       { label: 'Hallazgos', link: `${base}/findings`, fragment: undefined },
       { label: 'Métricas y scoring', link: `${base}/scoring`, fragment: undefined },
-      { label: 'Antes de campo', link: `${base}/pre-field`, fragment: undefined },
+      ...prefieldTab,
       { label: 'Resumen ejecutivo', link: `${base}/executive-summary`, fragment: undefined },
     ];
   });

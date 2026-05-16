@@ -16,6 +16,7 @@ import {
 import {
   formatCompletionRatePct,
   executiveHealthReason,
+  fieldOverviewAllowsPrefield,
   healthExecutiveLabel,
   healthToRiskLevel,
   openSeverityCount,
@@ -49,6 +50,7 @@ export class FieldControlDashboardComponent implements OnDestroy {
   readonly approvalBusy = signal(false);
 
   readonly executiveHealthReason = executiveHealthReason;
+  readonly fieldOverviewAllowsPrefield = fieldOverviewAllowsPrefield;
 
   private sub?: Subscription;
 

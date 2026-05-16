@@ -195,6 +195,54 @@ export function executiveQaConsistencySummaryGuided(d: QaConsistencySnapshot): s
   return 'Aún no hay revisión automática registrada para esta versión.';
 }
 
+/**
+ * PRE-FIELD solo para proyectos nuevos: borrador y sin operación/campo iniciada.
+ * Usar cuando solo se tiene `FieldProject` (p. ej. listado plano de proyectos).
+ */
+export function fieldProjectAllowsPrefield(
+  project: {
+    status?: string | null;
+    last_execution_sync_at?: string | null;
+  } | null | undefined
+): boolean {
+  if (project == null) {
+    return true;
+  }
+  if ((project.status ?? '').trim().toLowerCase() !== 'draft') {
+    return false;
+  }
+  const sync = project.last_execution_sync_at;
+  if (sync != null && String(sync).trim() !== '') {
+    return false;
+  }
+  return true;
+}
+
+/** Subconjunto de overview necesario para la puerta PRE-FIELD. */
+export type FieldOverviewPrefieldSignals = {
+  project: { status?: string | null; last_execution_sync_at?: string | null };
+  surveys_linked_count?: number;
+  last_csv_import_at?: string | null;
+};
+
+/** Misma regla con señales del overview (encuestas vinculadas, import CSV). */
+export function fieldOverviewAllowsPrefield(row: FieldOverviewPrefieldSignals | null | undefined): boolean {
+  if (row == null) {
+    return true;
+  }
+  if (!fieldProjectAllowsPrefield(row.project)) {
+    return false;
+  }
+  if ((row.surveys_linked_count ?? 0) > 0) {
+    return false;
+  }
+  const csvAt = row.last_csv_import_at;
+  if (csvAt != null && String(csvAt).trim() !== '') {
+    return false;
+  }
+  return true;
+}
+
 /** Etiqueta legible para filas de KPI en scoring. */
 export function metricCodeExecutiveLabel(metricCode: string): string {
   const c = (metricCode || '').trim();

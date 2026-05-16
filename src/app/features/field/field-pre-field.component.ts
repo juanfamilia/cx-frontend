@@ -35,6 +35,8 @@ import {
   executiveQaConsistencySummaryGuided,
   executiveReadinessBlocking,
   executiveStakeholderRole,
+  fieldOverviewAllowsPrefield,
+  fieldProjectAllowsPrefield,
 } from './field-ui.helpers';
 
 import { FieldParticipantJourneyPreviewComponent } from './components/journey/field-participant-journey-preview.component';
@@ -1442,6 +1444,16 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.fieldSvc.getProjectOverview(projectId, 1).subscribe({
       next: row => {
+        if (!fieldOverviewAllowsPrefield(row)) {
+          this.loading.set(false);
+          this.toast.showToast(
+            'info',
+            'Field',
+            'Antes de campo es solo para proyectos nuevos (sin ejecución en marcha). Use el tablero y Operaciones para este proyecto.'
+          );
+          this.router.navigate(['/field/project', projectId, 'dashboard'], { replaceUrl: true });
+          return;
+        }
         this.contextProjectLabel.set(row.project.name);
         this.projectCompanyId.set(row.project.company_id);
         this.loading.set(false);
@@ -1488,7 +1500,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       clients: this.fieldSvc.listEndClients(companyId),
     }).subscribe({
       next: ({ projects, clients }) => {
-        this.projectsPicklist.set(projects);
+        this.projectsPicklist.set(projects.filter(p => fieldProjectAllowsPrefield(p)));
         this.clientsPicklist.set(clients);
         this.cdr.markForCheck();
       },
