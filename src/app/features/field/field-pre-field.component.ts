@@ -36,6 +36,16 @@ import {
   executiveStakeholderRole,
 } from './field-ui.helpers';
 
+import { FieldParticipantJourneyPreviewComponent } from './components/journey/field-participant-journey-preview.component';
+import {
+  buildParticipantJourneyPreview,
+  extractBlockTitlesFromSpec,
+  journeyStudyFocusLine,
+  phaseIndexForBlockTitle,
+  type ParticipantJourneyPreviewModel,
+} from './components/journey/participant-journey-preview.helper';
+import type { ParticipantJourneyInput } from './components/journey/participant-journey.types';
+
 /** Valores de `study_type` del diseño del cuestionario (filtro de catálogo). */
 const STUDY_TYPE_OPTIONS: readonly { value: string; label: string }[] = [
   { value: '', label: 'Todos' },
@@ -56,7 +66,7 @@ type PrefieldProductStep = 'brief' | 'methodology' | 'questionnaire' | 'review' 
 @Component({
   selector: 'app-field-pre-field',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgClass],
+  imports: [CommonModule, FormsModule, NgClass, FieldParticipantJourneyPreviewComponent],
   templateUrl: './field-pre-field.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -86,10 +96,10 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
 
   readonly productFlowSteps: readonly { id: PrefieldProductStep; label: string }[] = [
     { id: 'brief', label: 'Brief' },
-    { id: 'methodology', label: 'Metodología' },
+    { id: 'methodology', label: 'Enfoque' },
     { id: 'questionnaire', label: 'Cuestionario' },
     { id: 'review', label: 'Revisión' },
-    { id: 'ready', label: 'Listo para campo' },
+    { id: 'ready', label: 'Listo' },
   ];
 
   readonly loading = signal(false);
@@ -119,6 +129,10 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   readonly detailWaivers = signal<FieldFrameworkWaiverPublic[]>([]);
   readonly detailWaiversLoading = signal(false);
   readonly readinessGate = signal<FieldReadinessGatePublic | null>(null);
+
+  /** Spec cargado para preview del recorrido (revisión actual), sin depender de abrir «Afinar». */
+  readonly previewRevisionSpec = signal<FieldInstrumentRevisionWithSpec | null>(null);
+  readonly previewSpecLoading = signal(false);
 
   readonly waiverSubmitting = signal(false);
 
@@ -205,17 +219,22 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
         }
       }
     }
-    if (step === 'ready' && this.phase() === 'instrument') {
-      const cur = this.currentRevision();
-      if (cur != null) {
-        this.reloadReadinessForRevision(cur.id);
-      }
-    }
     if (step === 'questionnaire' && this.phase() === 'instrument') {
       const cur = this.currentRevision();
       if (cur != null) {
         this.reloadReadinessForRevision(cur.id);
       }
+      this.ensurePreviewSpecLoaded();
+    }
+    if (step === 'review' && this.phase() === 'instrument') {
+      this.ensurePreviewSpecLoaded();
+    }
+    if (step === 'ready' && this.phase() === 'instrument') {
+      const cur = this.currentRevision();
+      if (cur != null) {
+        this.reloadReadinessForRevision(cur.id);
+      }
+      this.ensurePreviewSpecLoaded();
     }
     this.cdr.markForCheck();
   }
@@ -340,8 +359,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       out.push({
         id: 'ins-brief-sparse',
         tone: 'warn',
-        message:
-          'El brief todavía se siente liviano en contenido. Unas líneas más sobre público, hipótesis y decisiones esperadas suelen ahorrar vueltas cuando el cuestionario ya está en marcha.',
+        message: 'El brief aún está muy escueto: un poco más de contexto ahora evita malentendidos después.',
         applyLabel: 'Ir al brief',
         showApply: true,
       });
@@ -351,8 +369,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       out.push({
         id: 'ins-brief-draft',
         tone: 'warn',
-        message:
-          'Mientras el brief queda en borrador, es fácil que cliente y equipo interpreten cosas distintas. Si puede, cierre expectativas aquí antes de invertir horas en redacción de campo.',
+        message: 'El brief sigue en borrador: conviene alinear a equipo y cliente antes de pulir el cuestionario.',
         applyLabel: 'Ir al brief',
         showApply: true,
       });
@@ -361,22 +378,21 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     const cur = this.currentRevision();
     const d = this.detailRevision();
     const qaTarget = d?.id === cur?.id ? d : cur;
-    const titlesForHeuristics = this.detailRevision() ? this.rawInstrumentBlockTitles() : [];
+    const titlesForHeuristics = this.rawInstrumentBlockTitles();
 
     if (titlesForHeuristics.length >= 9 && !skip.has('ins-fatigue')) {
       out.push({
         id: 'ins-fatigue',
         tone: 'warn',
-        message:
-          'Hay bastantes bloques visibles en este borrador: si el tiempo con la persona es acotado, conviene priorizar lo esencial y recortar lo que no cambiaría una decisión.',
-        applyLabel: 'Revisar flujo',
+        message: 'Hay muchos bloques: si el tiempo con quien responde es corto, priorice lo que sí mueve una decisión.',
+        applyLabel: 'Revisar el flujo',
         showApply: true,
       });
     }
 
     let demoEarly = false;
     titlesForHeuristics.forEach((title, idx) => {
-      const ix = FieldPreFieldComponent.phaseIndexForBlockTitle(title);
+      const ix = phaseIndexForBlockTitle(title);
       if (ix === 4 && titlesForHeuristics.length >= 4 && idx < Math.floor(titlesForHeuristics.length / 2)) {
         demoEarly = true;
       }
@@ -385,8 +401,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       out.push({
         id: 'ins-demographics-order',
         tone: 'warn',
-        message:
-          'Los datos de perfil aparecen bastante al inicio del relato. Cuando la guía lo permita, suele funcionar mejor dejarlos para después del bloque de experiencia: la persona primero cuenta, luego se clasifica.',
+        message: 'Los datos de perfil están muy arriba en el flujo; suele funcionar mejor después de la experiencia.',
         applyLabel: 'Ver en revisión',
         showApply: true,
       });
@@ -402,7 +417,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
           id: 'ins-induced-soft',
           tone: 'warn',
           message:
-            'Hay una formulación que invita a responder muy bien antes de haber contado la experiencia: puede inflar satisfacción sin querer. Vale la pena moverla o suavizar el tono.',
+            'Una pregunta muy «positiva» aparece antes de la experiencia; puede sesgar la respuesta. Considere moverla o suavizarla.',
           applyLabel: 'Revisar redacción',
           showApply: true,
         });
@@ -413,8 +428,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       out.push({
         id: 'ins-qa-fail',
         tone: 'warn',
-        message:
-          'La última pasada automática encontró fricción en este borrador: saltos confusos, redacciones ambiguas o incoherencias. No es veredicto humano, pero sí una lista corta de donde mirar primero.',
+        message: 'La última revisión automática marcó puntos a mirar (orden, redacción o saltos). Vale una pasada humana.',
         applyLabel: 'Revisar ahora',
         showApply: true,
       });
@@ -429,8 +443,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       out.push({
         id: 'ins-qa-ok',
         tone: 'ok',
-        message:
-          'La última pasada automática no marcó alertas graves: buena señal. Le sugerimos igual una lectura humana— piense en alguien cansado, con poco tiempo, leyendo esto en un celular.',
+        message: 'La última revisión automática no marcó problemas graves. Una lectura rápida en celular sigue ayudando.',
         applyLabel: 'Abrir revisión',
         showApply: true,
       });
@@ -443,8 +456,8 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       out.push({
         id: 'ins-readiness-block',
         tone: 'warn',
-        message: `Antes de llamar a Operaciones conviene cerrar esto en equipo: ${hint} Si ya está resuelto en otro canal, use la revisión para confirmar que quedó reflejado.`,
-        applyLabel: 'Ver detalle',
+        message: `Antes de salir a campo: ${hint}`,
+        applyLabel: 'Siguiente paso',
         showApply: true,
       });
     }
@@ -452,99 +465,105 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     return out.slice(0, 5);
   }
 
-  private static readonly PARTICIPANT_PHASES: readonly { label: string; story: string }[] = [
-    {
-      label: 'Introducción',
-      story: 'Saludo honesto, por qué lo contactamos y qué haremos con lo que cuente— sin prometer lo que el estudio no puede cumplir.',
-    },
-    {
-      label: 'Screening',
-      story: 'Preguntas cortas para confirmar que encaja el perfil; mejor decepcionar temprano que forzar una conversación irrelevante.',
-    },
-    {
-      label: 'Experiencia',
-      story: 'El corazón del estudio: qué hizo, qué sintió, qué recuerda. Aquí es donde suele vivir la decisión de negocio.',
-    },
-    {
-      label: 'Satisfacción',
-      story: 'Cierre evaluativo con la cabeza ya cargada de contexto: recomendaría, repetiría, qué destacaría.',
-    },
-    {
-      label: 'Demográficos',
-      story: 'Perfil para cruzar resultados; si va al final, molesta menos y el relato fluye antes.',
-    },
-    { label: 'Cierre', story: 'Gracias claras, siguiente paso si lo hay, y sensación de que el tiempo fue respetado.' },
-  ];
-
-  private static phaseIndexForBlockTitle(title: string): number {
-    const t = title.toLowerCase();
-    const tests: { i: number; keys: string[] }[] = [
-      { i: 0, keys: ['intro', 'bienven', 'contexto', 'propósito', 'proposito', 'calibr'] },
-      { i: 1, keys: ['screen', 'filt', 'elegib', 'cuota', 'recruit', 'target'] },
-      { i: 2, keys: ['experien', 'jornada', 'uso', 'touch', 'compra', 'visita', 'interacc'] },
-      { i: 3, keys: ['satisf', 'nps', 'csat', 'recomen', 'valoración', 'valoracion'] },
-      { i: 4, keys: ['demográf', 'demograf', 'socio', 'edad', 'género', 'genero', 'ingreso', 'perfil'] },
-      { i: 5, keys: ['cierre', 'desped', 'thank', 'gracia', 'final'] },
-    ];
-    for (const { i, keys } of tests) {
-      if (keys.some(k => t.includes(k))) {
-        return i;
-      }
+  /** Borrador activo + spec en preview; si abrió «Afinar», prioriza ese detalle cuando coincide con la versión actual. */
+  specSourceForCurrentRevision(): FieldInstrumentRevisionWithSpec | null {
+    const cur = this.currentRevision();
+    if (cur == null) {
+      return null;
     }
-    return -1;
+    const d = this.detailRevision();
+    if (d?.id === cur.id) {
+      return d;
+    }
+    const p = this.previewRevisionSpec();
+    if (p?.id === cur.id) {
+      return p;
+    }
+    return null;
   }
 
-  private rawInstrumentBlockTitles(): string[] {
+  private ensurePreviewSpecLoaded(): void {
+    const cur = this.currentRevision();
+    const cid = this.projectCompanyId();
+    if (cur == null || cid == null) {
+      return;
+    }
     const d = this.detailRevision();
-    const spec = d?.spec as Record<string, unknown> | undefined | null;
-    if (!spec || typeof spec !== 'object') {
-      return [];
+    if (d?.id === cur.id) {
+      this.previewRevisionSpec.set(d);
+      return;
     }
-    let arr: unknown[] | null = null;
-    for (const k of ['blocks', 'sections', 'pages', 'items']) {
-      const v = spec[k];
-      if (Array.isArray(v) && v.length > 0) {
-        arr = v;
-        break;
-      }
+    if (this.previewRevisionSpec()?.id === cur.id) {
+      return;
     }
-    if (!arr) {
-      return [];
+    if (this.previewSpecLoading()) {
+      return;
     }
-    return arr.slice(0, 40).map((raw, i) => {
-      if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-        const o = raw as Record<string, unknown>;
-        const s = String(o['title'] ?? o['name'] ?? o['label'] ?? o['heading'] ?? '').trim();
-        return s || `momento_${i + 1}`;
-      }
-      return `momento_${i + 1}`;
+    this.previewSpecLoading.set(true);
+    const cq = this.companyQueryForApi(cid);
+    this.fieldSvc.getInstrumentRevision(cur.id, cq).subscribe({
+      next: row => {
+        this.previewRevisionSpec.set(row);
+        this.previewSpecLoading.set(false);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.previewSpecLoading.set(false);
+        this.previewRevisionSpec.set(null);
+        this.cdr.markForCheck();
+      },
     });
   }
 
-  /** Relato del participante (6 momentos); no expone nombres internos del borrador en superficie. */
-  participantJourneyCards(): readonly { label: string; story: string; hasSignal: boolean }[] {
-    const titles = this.rawInstrumentBlockTitles();
-    const counts = [0, 0, 0, 0, 0, 0];
-    let rr = 0;
-    for (const title of titles) {
-      let ix = FieldPreFieldComponent.phaseIndexForBlockTitle(title);
-      if (ix < 0) {
-        ix = rr % 6;
-        rr++;
-      }
-      counts[ix]++;
+  private maybeRefreshPreviewSpec(): void {
+    const cur = this.currentRevision();
+    if (cur == null) {
+      this.previewRevisionSpec.set(null);
+      return;
     }
-    const hasAny = titles.length > 0;
-    return FieldPreFieldComponent.PARTICIPANT_PHASES.map((p, i) => ({
-      label: p.label,
-      story: p.story,
-      hasSignal: hasAny && counts[i] > 0,
-    }));
+    const cached = this.previewRevisionSpec();
+    if (cached != null && cached.id !== cur.id) {
+      this.previewRevisionSpec.set(null);
+    }
+    const step = this.productStep();
+    if (
+      this.phase() === 'instrument' &&
+      (step === 'questionnaire' || step === 'review' || step === 'ready')
+    ) {
+      this.ensurePreviewSpecLoaded();
+    }
   }
 
-  /** Solo compatibilidad / uso futuro; la UI usa `participantJourneyCards`. */
-  instrumentPreviewBlocks(): readonly { title: string }[] {
-    return this.rawInstrumentBlockTitles().slice(0, 14).map(t => ({ title: t }));
+  private buildParticipantJourneyInput(): ParticipantJourneyInput {
+    const row = this.specSourceForCurrentRevision();
+    const titles = extractBlockTitlesFromSpec(row?.spec as Record<string, unknown> | undefined);
+    const cur = this.currentRevision();
+    const rg = this.readinessGate();
+    return {
+      briefPayload: this.brief()?.payload_json ?? null,
+      guidedObjective: this.briefGuidedObjective,
+      guidedBusinessQuestion: this.briefGuidedBusinessQuestion,
+      guidedAudience: this.briefGuidedAudience,
+      guidedMarket: this.briefGuidedMarket,
+      guidedExpectedOutcome: this.briefGuidedExpectedOutcome,
+      blockTitles: titles,
+      qaLastOk: cur?.last_validation_ok ?? null,
+      qaIssueCount: cur?.last_validation_issue_count ?? null,
+      readinessBlockingFirstCode: rg?.blocking_codes?.length ? rg.blocking_codes[0] : null,
+    };
+  }
+
+  participantJourneyPreviewModel(): ParticipantJourneyPreviewModel {
+    return buildParticipantJourneyPreview(this.buildParticipantJourneyInput());
+  }
+
+  participantJourneyFocusLine(): string {
+    return journeyStudyFocusLine(this.buildParticipantJourneyInput());
+  }
+
+  private rawInstrumentBlockTitles(): string[] {
+    const row = this.specSourceForCurrentRevision();
+    return extractBlockTitlesFromSpec(row?.spec as Record<string, unknown> | undefined);
   }
 
   readyCheckBriefDone(): boolean {
@@ -683,19 +702,19 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   readinessAggregateExecutiveLabel(status: string): string {
     const x = (status || '').toLowerCase();
     if (x === 'ready') {
-      return 'Listo para despliegue';
+      return 'Listo para salir a campo';
     }
     if (x === 'blocked') {
-      return 'Bloqueado';
+      return 'Hay algo por cerrar';
     }
     if (x === 'pending_signatures') {
-      return 'Pendiente de firmas';
+      return 'Faltan firmas';
     }
     if (x === 'approved') {
       return 'Aprobado';
     }
     if (x === 'pending') {
-      return 'En evaluación';
+      return 'En revisión';
     }
     return status || '—';
   }
@@ -707,9 +726,9 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     }
     if (br.approval_state === 'approved_internal') {
       if (pol?.require_brief_approved) {
-        return 'Puede faltar el visto bueno del cliente según su proceso interno.';
+        return 'Puede faltar el visto bueno del cliente.';
       }
-      return 'Brief listo según política de Readiness de la empresa.';
+      return 'Brief al día según lo que pide su empresa.';
     }
     if (br.approval_state === 'draft') {
       const parts: string[] = ['Definir y guardar el contenido del brief.'];
@@ -726,7 +745,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       case 'draft':
         return 'Investigación / diseño: completar brief y solicitar aprobación interna.';
       case 'approved_internal':
-        return 'Dirección de cuenta o cliente: visto bueno final si su gobierno lo exige.';
+        return 'Cuenta o cliente: visto bueno final si su proceso lo pide.';
       case 'approved':
         return 'Sin acción requerida en brief.';
       default:
@@ -1088,7 +1107,7 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     }
     const rationale = this.waiverRationale.trim();
     if (rationale.length < 5) {
-      this.toast.showToast('warn', 'PRE-FIELD', 'Indique el motivo del waiver (auditoría).');
+      this.toast.showToast('warn', 'PRE-FIELD', 'Indique el motivo (obligatorio para dejar constancia).');
       return;
     }
     let waived: unknown[] | Record<string, unknown> | null | undefined = undefined;
@@ -1207,6 +1226,8 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
           this.detailWaivers.set([]);
           this.readinessGate.set(null);
         }
+        this.maybeRefreshPreviewSpec();
+        this.cdr.markForCheck();
       },
       error: () =>
         this.toast.showToast('error', 'PRE-FIELD', 'No se pudieron cargar las revisiones del instrumento.'),
@@ -1233,6 +1254,10 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       next: row => {
         this.detailRevision.set(row);
         this.detailLoading.set(false);
+        const cur = this.currentRevision();
+        if (cur?.id === revisionId) {
+          this.previewRevisionSpec.set(row);
+        }
         this.reloadWaiversForRevision(revisionId);
         this.reloadReadinessForRevision(revisionId);
         this.cdr.markForCheck();

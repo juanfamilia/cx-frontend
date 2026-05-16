@@ -1,0 +1,63 @@
+<article
+  class="flex h-full flex-col rounded-3xl border p-8 transition-all duration-300 md:p-9"
+  [ngClass]="cardShell(phase().uiState)">
+  <header class="flex flex-wrap items-start justify-between gap-4">
+    <div class="min-w-0 flex-1">
+      <h3 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+        {{ phase().title }}
+      </h3>
+      <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+        {{ phase().narrative }}
+      </p>
+    </div>
+    @if (phase().uiState === 'rich') {
+      <span
+        class="shrink-0 rounded-full bg-indigo-600/10 px-3 py-1 text-xs font-medium text-indigo-800 dark:bg-indigo-400/15 dark:text-indigo-200">
+        En su borrador
+      </span>
+    }
+  </header>
+
+  <p class="mt-6 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+    {{ phase().blockObjective }}
+  </p>
+
+  @if (phase().expectedRisk || phase().fatiguePotential || phase().emotionalSensitivity) {
+    <div class="mt-6 flex flex-wrap gap-2">
+      @if (phase().expectedRisk) {
+        <span [class]="badgeClass('risk')">Riesgo esperado</span>
+      }
+      @if (phase().fatiguePotential) {
+        <span [class]="badgeClass('fatigue')">Fatiga {{ phase().fatiguePotential }}</span>
+      }
+      @if (phase().emotionalSensitivity) {
+        <span [class]="badgeClass('emotion')">Sensibilidad {{ phase().emotionalSensitivity }}</span>
+      }
+    </div>
+    @if (phase().expectedRisk) {
+      <p class="mt-3 text-sm leading-snug text-slate-600 dark:text-slate-400">{{ phase().expectedRisk }}</p>
+    }
+  }
+
+  @if (phase().automaticSignals.length > 0) {
+    <div class="mt-8 space-y-3 border-t border-slate-200/70 pt-6 dark:border-slate-600/80">
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Señales</p>
+      <ul class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+        @for (s of phase().automaticSignals; track s) {
+          <li class="flex gap-2">
+            <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500 dark:bg-indigo-400" aria-hidden="true"></span>
+            <span>{{ s }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (phase().contextualInsights.length > 0) {
+    <div class="mt-8 space-y-3">
+      @for (ins of phase().contextualInsights; track ins.text) {
+        <field-contextual-insight-card [message]="ins.text" [tone]="ins.tone" />
+      }
+    </div>
+  }
+</article>

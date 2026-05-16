@@ -1,20 +1,17 @@
 <section class="space-y-8">
   <div>
     <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
-      PRE-FIELD · Antes de campo
+      Antes de campo · con ayuda de 7Field
     </p>
     @if (phase() === 'setup') {
-      <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">Paso 1 — Objetivo y proyecto</h2>
-      <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-        Antes de plantillas y borradores, ancle <strong class="text-slate-800 dark:text-slate-100">qué problema de negocio</strong> resuelve este instrumento y en qué proyecto Field vive.
-        El instrumento se guarda en un <strong class="text-slate-800 dark:text-slate-100">estudio de proyecto</strong> dentro de Siete Field: carpeta lógica del diseño, separada de SurveyToGo o del CSV.
-        Si aún no existía, la creamos y enlazamos aquí para que no tenga que cazar IDs en otro menú.
+      <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">Prepare su estudio</h2>
+      <p class="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+        Qué quiere resolver y en qué proyecto vive el diseño. Nosotros enlazamos el resto.
       </p>
     } @else {
-      <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">7Field le guía antes de campo</h2>
-      <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-        Cinco pasos con un objetivo cada uno. Lo necesario para decidir y avanzar va primero; el resto técnico está al
-        final, agrupado solo si lo necesita. Piénselo como un copilot que le ordena la mesa, no como otro formulario interminable.
+      <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">7Field le acompaña antes de campo</h2>
+      <p class="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+        Brief → enfoque → cuestionario → revisión → listo. Un paso a la vez.
       </p>
     }
   </div>
@@ -103,10 +100,7 @@
             </select>
           </label>
         </div>
-        <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">
-          Crearemos el estudio de proyecto y el proyecto Field enlazados entre sí; después podrá seguir con plantillas y
-          borradores del instrumento.
-        </p>
+        <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">Seguimos con el cuestionario en el siguiente paso.</p>
       }
 
       <div class="mt-6">
@@ -115,7 +109,7 @@
           class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
           [disabled]="setupSubmitting() || loading()"
           (click)="submitSetup()">
-          {{ setupSubmitting() ? 'Guardando…' : 'Siguiente: instrumento y PRE-FIELD' }}
+          {{ setupSubmitting() ? 'Guardando…' : 'Siguiente: instrumento' }}
         </button>
       </div>
     </div>
@@ -132,9 +126,7 @@
             Sin objetivo indicado en el paso anterior— puede volver a «Objetivo y proyecto» cuando quiera a completarlo.
           </p>
         }
-        <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
-          Este resumen lo acompaña en cada paso para que usted y su equipo no pierdan el hilo de qué problema están resolviendo.
-        </p>
+        <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">Su equipo verá este mismo foco en cada paso.</p>
         <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
           Proyecto Field:
           <span class="font-medium">{{ contextProjectLabel() || ('#' + projectId()) }}</span>
@@ -152,7 +144,7 @@
 
     <nav
       class="mt-8 flex flex-wrap gap-3 rounded-xl border border-slate-200 bg-white/90 p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/40"
-      aria-label="Pasos PRE-FIELD">
+      aria-label="Pasos antes de campo">
       @for (s of productFlowSteps; track s.id) {
         <button
           type="button"
@@ -164,40 +156,37 @@
       }
     </nav>
 
-    <p class="mt-5 max-w-3xl text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-      <span class="font-semibold text-indigo-700 dark:text-indigo-300">Aquí no está solo.</span>
-      Use estos pasos como una conversación guiada con su equipo: puede saltar adelante o atrás cuando lo necesite; lo importante es saber qué decidir en cada pantalla.
+    <p class="mt-8 max-w-xl text-sm text-slate-500 dark:text-slate-400">
+      <span class="font-semibold text-indigo-700 dark:text-indigo-300">Siga el orden que prefiera.</span>
+      Cada paso le dice qué hacer ahora.
     </p>
 
     @switch (productStep()) {
       @case ('brief') {
         <div
-          class="mt-8 rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-7 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
+          class="mt-12 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-8 md:px-8 md:py-9 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
           <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Brief</p>
-          <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">Define qué quieres aprender y para quién.</p>
-          <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Aquí se alinea el negocio: preguntas, público y resultado esperado. Las aprobaciones también viven aquí para que nadie llegue a campo a ciegas.
-            Si la historia del estudio está clara en esta página, todo lo demás— cuestionario, QA y Operaciones— es más fácil de defender.
+          <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">¿Qué necesita aprender y para quién?</p>
+          <p class="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Alinee equipo y cliente aquí. Las aprobaciones viven en esta misma pantalla.
           </p>
         </div>
 
-        <div class="mt-10 space-y-10">
+        <div class="mt-12 space-y-12">
           @if (readinessPolicy()?.require_brief_approved && !briefMeetsReadinessPolicy()) {
             <div
               class="rounded-xl border border-amber-300/90 bg-amber-50 px-5 py-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
-              <p class="font-semibold">Antes de campo, su proceso suele pedir el brief cerrado</p>
+              <p class="font-semibold">Su proceso pide el brief cerrado antes de campo</p>
               <p class="mt-2 leading-relaxed">
-                Estado del brief:
+                Estado:
                 <span class="font-semibold">{{ brief() ? briefStateLabel(brief()!.approval_state) : '—' }}</span>.
-                Complete aquí las aprobaciones o coordine con quien corresponda— así nadie llega sorprendido a Operaciones.
+                Cierre aprobaciones aquí o coordine con quien corresponda.
               </p>
             </div>
           }
 
           @if (policyLoading()) {
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-              Revisando cómo suele trabajar su empresa con brief y campo…
-            </p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Un momento…</p>
           }
 
           @if (briefLoading()) {
@@ -208,7 +197,7 @@
                 <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-6 dark:border-slate-700">
                   <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                      Estado del brief y quién debe moverse
+                      Brief · estado y siguiente paso
                     </p>
                     <div class="mt-3 flex flex-wrap items-center gap-2">
                       <span
@@ -229,11 +218,11 @@
                     }
                     <dl class="mt-6 grid gap-5 text-sm leading-relaxed text-slate-700 dark:text-slate-300 sm:grid-cols-2">
                       <div>
-                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400">Qué falta</dt>
+                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400">Por hacer</dt>
                         <dd class="mt-1">{{ briefWhatsMissingExecutive(br) }}</dd>
                       </div>
                       <div>
-                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400">Quién debe actuar</dt>
+                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400">Quién mueve esto</dt>
                         <dd class="mt-1">{{ briefWhoActsExecutive(br) }}</dd>
                       </div>
                     </dl>
@@ -253,10 +242,8 @@
 
                 <div class="mt-8 space-y-5">
                   <div>
-                    <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Lo que queremos capturar</p>
-                    <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                      En lenguaje llano; lo consolidamos en el brief del estudio. Si necesita el detalle crudo, está al final en «Detalles técnicos».
-                    </p>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">En palabras simples</p>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Lo técnico queda al final, colapsado.</p>
                   </div>
                   <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
                     Pregunta o decisión de negocio
@@ -362,26 +349,24 @@
 
       @case ('methodology') {
         <div
-          class="mt-8 rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-7 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
-          <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Metodología</p>
-          <p class="mt-1 text-lg font-bold text-slate-900 dark:text-slate-50">
-            Te recomendamos la mejor estructura para este estudio.
-          </p>
-          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            Elija un punto de partida coherente con el tipo de estudio; después lo refinará como documento vivo en «Cuestionario». Nosotros sugerimos estructura— usted mantiene el criterio metodológico.
+          class="mt-12 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-8 md:px-8 md:py-9 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
+          <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Enfoque</p>
+          <p class="mt-2 text-lg font-bold text-slate-900 dark:text-slate-50">Prepare su estudio</p>
+          <p class="mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+            Elija un punto de partida por tipo de estudio. Lo pulimos después en «Cuestionario».
           </p>
         </div>
 
-        <div class="mt-10 space-y-6">
+        <div class="mt-12 space-y-8">
           <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-6 md:p-8 dark:border-slate-600 dark:bg-slate-950/30">
             <div class="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Nuevo borrador del cuestionario</h3>
+              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Nueva versión del cuestionario</h3>
             </div>
             <p class="mt-2 rounded-lg bg-white/80 px-3 py-2 text-xs leading-relaxed text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/50 dark:text-slate-300 dark:ring-slate-600">
               {{ selectedTemplateSummary() }}
             </p>
-            <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              Si no está seguro de la plantilla, elija la sugerida y ajústela después: el objetivo en este momento es salir del papel en blanco con algo que su equipo pueda criticar con datos.
+            <p class="mt-4 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
+              ¿Duda entre plantillas? Elija la sugerida y ajuste después.
             </p>
             <div class="mt-4 grid gap-4 md:grid-cols-2">
               <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
@@ -433,7 +418,7 @@
                 class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                 [disabled]="saving()"
                 (click)="submitCreate()">
-                {{ saving() ? 'Creando…' : 'Crear borrador y pasar al cuestionario' }}
+                {{ saving() ? 'Creando…' : 'Crear versión y continuar' }}
               </button>
             </div>
           </div>
@@ -442,17 +427,20 @@
 
       @case ('questionnaire') {
         <div
-          class="mt-8 rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-7 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
+          class="mt-12 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-8 md:px-8 md:py-9 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
           <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Cuestionario</p>
-          <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">
-            Piensa en la historia que vivirá quien responde.
-          </p>
-          <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            No necesita un constructor enorme aquí: solo claridad sobre la <strong class="text-slate-800 dark:text-slate-100">versión actual</strong>
-            y cómo se siente el relato. Lo denso queda disponible al final, colapsado.
-            Cuando dude, pregúntese si una persona real entendería por qué viene cada bloque después del anterior— si la respuesta es no, el orden o la redacción probablemente piden cariño.
+          <p class="mt-2 text-xl font-bold text-slate-900 dark:text-slate-50">La historia que vivirá quien responde</p>
+          <p class="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Una pantalla por la <strong class="text-slate-800 dark:text-slate-100">versión actual</strong>. Lo pesado va abajo, cerrado.
           </p>
         </div>
+
+        <field-participant-journey-preview
+          class="mt-14 block"
+          [model]="participantJourneyPreviewModel()"
+          [studyFocusLine]="participantJourneyFocusLine()"
+          [loading]="previewSpecLoading()"
+          [hasRevision]="!!currentRevision()" />
 
         <ng-container *ngTemplateOutlet="prefieldInsightsPanel" />
 
@@ -480,45 +468,21 @@
                     type="button"
                     class="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                     (click)="detailRevision()?.id === cur.id ? closeRevisionDetail() : openRevisionWorkspace(cur.id)">
-                    {{ detailRevision()?.id === cur.id ? 'Cerrar acompañamiento' : 'Preparar esta versión conmigo' }}
+                    {{ detailRevision()?.id === cur.id ? 'Cerrar vista' : 'Afinar esta versión conmigo' }}
                   </button>
                 </div>
               </div>
 
               @if (detailRevision()?.id === cur.id) {
                 <div class="mt-10">
-                  <p class="text-base font-semibold text-slate-900 dark:text-slate-50">El relato del participante</p>
-                  <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                    No mostramos nombres internos ni armazón técnica: solo cómo se divide la conversación en momentos que una persona puede seguir sin manual.
+                  <p class="text-base font-semibold text-slate-900 dark:text-slate-50">Detalle del borrador</p>
+                  <p class="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
+                    Texto técnico y revisiones en los paneles inferiores. El relato del participante está arriba.
                   </p>
-                  <div class="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                    @for (step of participantJourneyCards(); track step.label) {
-                      <div
-                        class="rounded-xl border px-5 py-5 shadow-sm transition-colors dark:border-slate-600"
-                        [ngClass]="{
-                          'border-indigo-200 bg-indigo-50/50 dark:border-indigo-900/50 dark:bg-indigo-950/25':
-                            step.hasSignal,
-                          'border-slate-200/90 bg-white dark:border-slate-700 dark:bg-slate-950/20':
-                            !step.hasSignal,
-                        }">
-                        <p class="text-sm font-bold text-slate-900 dark:text-slate-50">{{ step.label }}</p>
-                        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ step.story }}</p>
-                        @if (step.hasSignal) {
-                          <p class="mt-4 text-xs font-semibold text-indigo-800 dark:text-indigo-200">
-                            Hay contenido que encaja aquí en su borrador
-                          </p>
-                        } @else {
-                          <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">
-                            Sin señales claras todavía— puede completarlo con su equipo en la herramienta de campo.
-                          </p>
-                        }
-                      </div>
-                    }
-                  </div>
                 </div>
               } @else {
-                <p class="mt-8 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                  Pulse <strong class="text-slate-800 dark:text-slate-100">Preparar esta versión conmigo</strong> para ver el acompañamiento, ideas útiles según lo cargado y cómo se siente el relato de punta a punta.
+                <p class="mt-8 max-w-lg text-sm text-slate-600 dark:text-slate-400">
+                  Pulse <strong class="text-slate-800 dark:text-slate-100">Afinar esta versión conmigo</strong> para recomendaciones y vista del relato.
                 </p>
               }
             </div>
@@ -526,13 +490,13 @@
             <div class="px-6 py-14 text-center">
               <p class="text-sm font-medium text-slate-800 dark:text-slate-100">Aún no hay una versión del cuestionario</p>
               <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                Vaya a «Metodología» para crear el primer borrador; volverá aquí para darle forma como experiencia. No tiene que quedar perfecto en el primer intento— solo sustancialmente discutible con su equipo.
+                Cree una primera versión en «Enfoque».
               </p>
               <button
                 type="button"
                 class="mt-8 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                 (click)="setProductStep('methodology')">
-                Ir a Metodología
+                Ir a Enfoque
               </button>
             </div>
           }
@@ -557,7 +521,7 @@
                       type="button"
                       class="text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
                       (click)="openHistoricalRevision(rev.id)">
-                      Abrir en Revisión
+                      Revisar esta versión
                     </button>
                   </div>
                 }
@@ -576,16 +540,20 @@
 
       @case ('review') {
         <div
-          class="mt-8 rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-7 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
+          class="mt-12 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 px-6 py-8 md:px-8 md:py-9 dark:border-indigo-900/40 dark:from-indigo-950/35 dark:via-slate-900/50 dark:to-slate-900/80">
           <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Revisión</p>
-          <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">
-            Pulir detalles antes de que salga a campo.
-          </p>
-          <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Espacio para resolver dudas de equipo, acuerdos explícitos y coherencia del relato— sin convertir esto en otro constructor de encuestas.
-            Piénselo como una última lectura en voz alta: ¿suena negociable, humano y alineado con lo que prometió en el brief?
+          <p class="mt-2 text-xl font-bold text-slate-900 dark:text-slate-50">Última pasada antes de campo</p>
+          <p class="mt-4 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+            Revise el flujo con calma. Aquí no se diseña como en un builder enorme.
           </p>
         </div>
+
+        <field-participant-journey-preview
+          class="mt-14 block"
+          [model]="participantJourneyPreviewModel()"
+          [studyFocusLine]="participantJourneyFocusLine()"
+          [loading]="previewSpecLoading()"
+          [hasRevision]="!!currentRevision()" />
 
         <ng-container *ngTemplateOutlet="prefieldInsightsPanel" />
 
@@ -594,9 +562,9 @@
             <div
               class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 px-6 py-12 text-center dark:border-slate-600 dark:bg-slate-950/30">
               <p class="text-base font-semibold text-slate-800 dark:text-slate-100">Elija la versión que quiere afinar</p>
-              <p class="mt-3 max-w-lg mx-auto text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                En «Cuestionario», pulse <strong class="text-slate-800 dark:text-slate-100">Preparar esta versión conmigo</strong>
-                o recupere algo del historial. Si llegó aquí sin abrir un borrador, no hay problema: volver atrás no borra lo ya guardado.
+              <p class="mt-3 max-w-lg mx-auto text-sm text-slate-600 dark:text-slate-400">
+                En «Cuestionario», pulse <strong class="text-slate-800 dark:text-slate-100">Afinar esta versión conmigo</strong>
+                o elija una versión del historial.
               </p>
               <button
                 type="button"
@@ -613,30 +581,29 @@
 
       @case ('ready') {
         <div
-          class="mt-10 rounded-2xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50 via-white to-indigo-50/80 px-8 py-8 dark:border-emerald-900/35 dark:from-emerald-950/25 dark:via-slate-900/60 dark:to-indigo-950/25">
-          <p class="text-xs font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">Listo para campo</p>
-          <p class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">Un último vistazo antes de coordinar</p>
-          <p class="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Celebre lo ya avanzado con su equipo; si algo falta, es mejor saberlo aquí que en medio del levantamiento.
-            Esta pantalla resume lo que vemos desde PRE-FIELD— úsela para coordinar la conversación con Operaciones sin sorpresas de último minuto.
+          class="mt-14 rounded-2xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50 via-white to-indigo-50/80 px-8 py-9 dark:border-emerald-900/35 dark:from-emerald-950/25 dark:via-slate-900/60 dark:to-indigo-950/25">
+          <p class="text-xs font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">Listo</p>
+          <p class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">¿Todo listo para salir a campo?</p>
+          <p class="mt-4 max-w-xl text-sm text-slate-600 dark:text-slate-300">
+            Revise el checklist. Si falta algo, mejor saberlo ahora.
           </p>
         </div>
 
-        <div class="mt-10 rounded-2xl border border-slate-200 bg-white px-8 py-10 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
+        <div class="mt-12 rounded-2xl border border-slate-200 bg-white px-8 py-10 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
           <ul class="space-y-6 text-base leading-snug">
             <li class="flex gap-4">
               <span class="select-none text-xl shrink-0" aria-hidden="true">{{
                 readyBriefStatus() === 'ok' ? '✅' : '⚠️'
               }}</span>
               <div>
-                <p class="font-semibold text-slate-900 dark:text-slate-50">Brief aprobado</p>
+                <p class="font-semibold text-slate-900 dark:text-slate-50">Brief cerrado</p>
                 @if (readyBriefStatus() !== 'ok') {
                   <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                    Falta alinear aprobaciones según cómo trabaja su empresa.
+                    Falta alinear aprobaciones según su proceso.
                   </p>
                 } @else {
                   <p class="mt-1 text-sm text-emerald-800 dark:text-emerald-200/90">
-                    Buena señal: el brief muestra el acuerdo formal que su proceso suele pedir antes de salir a campo.
+                    Acuerdos formales listos para esta etapa.
                   </p>
                 }
               </div>
@@ -646,14 +613,14 @@
                 readyFlowStatus() === 'ok' ? '✅' : '⚠️'
               }}</span>
               <div>
-                <p class="font-semibold text-slate-900 dark:text-slate-50">Flujo revisado</p>
+                <p class="font-semibold text-slate-900 dark:text-slate-50">Coordinación con campo</p>
                 @if (readyFlowStatus() !== 'ok') {
                   <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                    Aún hay fricción operativa o falta cerrar conversaciones con Operaciones.
+                    Falta cerrar algo con su equipo de campo.
                   </p>
                 } @else {
                   <p class="mt-1 text-sm text-emerald-800 dark:text-emerald-200/90">
-                    Desde PRE-FIELD no vemos bloqueos operativos explícitos en la lectura compartida— coordinación debería ser conversación, no rescate.
+                    Sin trabas claras desde esta vista.
                   </p>
                 }
               </div>
@@ -663,14 +630,14 @@
                 readyQaStatus() === 'ok' ? '✅' : '⚠️'
               }}</span>
               <div>
-                <p class="font-semibold text-slate-900 dark:text-slate-50">Validación QA</p>
+                <p class="font-semibold text-slate-900 dark:text-slate-50">Revisión automática</p>
                 @if (readyQaStatus() !== 'ok') {
                   <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                    Falta validación QA en la versión actual del cuestionario (o aún no aplica en este borrador).
+                    Pendiente o no aplica aún en esta versión.
                   </p>
                 } @else {
                   <p class="mt-1 text-sm text-emerald-800 dark:text-emerald-200/90">
-                    La última pasada automática sobre la versión visible fue favorable; siga confiando en una revisión humana para tono y negocio.
+                    Sin alertas graves en la última pasada automática.
                   </p>
                 }
               </div>
@@ -679,7 +646,7 @@
 
           @if (readinessGate(); as rgReady) {
             <p class="mt-10 text-center text-sm text-slate-600 dark:text-slate-400">
-              Lectura compartida con Operaciones:
+              Estado con su equipo:
               <span class="font-semibold text-slate-800 dark:text-slate-100">{{
                 readinessAggregateExecutiveLabel(rgReady.aggregate_status)
               }}</span>
@@ -697,13 +664,12 @@
               type="button"
               class="rounded-xl border-2 border-indigo-400 bg-white px-8 py-3.5 text-sm font-bold text-indigo-900 hover:bg-indigo-50 dark:border-indigo-600 dark:bg-slate-900 dark:text-indigo-100 dark:hover:bg-indigo-950/40"
               (click)="onSendToOperationsClick()">
-              Enviar a Operaciones
+              Compartir con equipo de campo
             </button>
           </div>
 
-          <p class="mt-8 text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-            Estos envíos se conectarán a su proceso cuando esté definido; el valor de 7Field está en gobernar la operación,
-            no en sustituir su herramienta de campo. Si solo necesita dejar constancia interna por ahora, puede usar el botón que mejor encaje con cómo trabaja su empresa.
+          <p class="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
+            Cuando conecten procesos internos, estos botones quedarán atados a su flujo real.
           </p>
         </div>
       }
@@ -765,11 +731,11 @@
                 <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.status }}</dd>
               </div>
               <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Plantilla (id técnico)</dt>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Plantilla (referencia)</dt>
                 <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.framework_template_id || '—' }}</dd>
               </div>
               <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Versión declarada del instrumento</dt>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Versión de referencia</dt>
                 <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.instrument_spec_version_declared || '—' }}</dd>
               </div>
               <div>
@@ -777,7 +743,7 @@
                 <dd class="mt-0.5 font-mono text-[11px]">{{ shortHash(dTech.brief_snapshot_hash, 14) }}</dd>
               </div>
               <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Versión catálogo framework</dt>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Catálogo de plantillas</dt>
                 <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.framework_catalog_version || '—' }}</dd>
               </div>
               <div>
@@ -785,7 +751,7 @@
                 <dd class="mt-0.5 font-mono text-[11px]">{{ shortHash(dTech.content_hash, 16) }}</dd>
               </div>
               <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Último paquete de consistencia</dt>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Última revisión automática (ref.)</dt>
                 <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.last_ruleset_version || '—' }}</dd>
               </div>
             </dl>
@@ -828,10 +794,10 @@
                     <th class="px-3 py-2 font-semibold">Etiqueta</th>
                     <th class="px-3 py-2 font-semibold">Estado API</th>
                     <th class="px-3 py-2 font-semibold">Plantilla</th>
-                    <th class="px-3 py-2 font-semibold">Versión declarada</th>
+                    <th class="px-3 py-2 font-semibold">Versión (ref.)</th>
                     <th class="px-3 py-2 font-semibold">Brief al crear</th>
                     <th class="px-3 py-2 font-semibold">Catálogo</th>
-                    <th class="px-3 py-2 font-semibold">Consistencia</th>
+                    <th class="px-3 py-2 font-semibold">Últ. revisión</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-950/30">
@@ -859,10 +825,8 @@
 <ng-template #prefieldInsightsPanel>
   @if (contextualInsights().length > 0) {
     <div class="mt-10 rounded-2xl border border-slate-200/90 bg-white px-6 py-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-      <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Asistente de preparación</p>
-      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        Leyemos lo que ya cargó y le sugerimos el siguiente movimiento razonable. Nada de esto sustituye su criterio— puede ignorar con tranquilidad lo que no aplique.
-      </p>
+      <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Lo que detectamos</p>
+      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Recomendaciones breves. Puede ignorar lo que no aplique.</p>
       <ul class="mt-6 space-y-4">
         @for (ins of contextualInsights(); track ins.id) {
           <li
@@ -904,7 +868,7 @@
       <div class="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p class="text-xs font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200">
-            Acompañamiento del borrador
+            Antes de publicar
           </p>
           <p class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-50">{{ d.revision_label }}</p>
           <div class="mt-2 flex flex-wrap items-center gap-2">
@@ -929,7 +893,7 @@
         <div
           class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-600 dark:bg-slate-950/50">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">¿Listo para coordinar con Operaciones?</p>
+            <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">¿Todo listo para salir a campo?</p>
             <span
               class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide"
               [ngClass]="readinessAggregateBadgeClass(rg.aggregate_status)">
@@ -937,7 +901,7 @@
             </span>
           </div>
           @if (rg.blocking_codes.length) {
-            <p class="mt-3 text-xs font-semibold text-amber-800 dark:text-amber-200">Qué puede estar frenando el paso a campo</p>
+            <p class="mt-3 text-xs font-semibold text-amber-800 dark:text-amber-200">Aspectos por revisar</p>
             <ul class="mt-2 space-y-2 text-sm text-slate-800 dark:text-slate-100">
               @for (c of rg.blocking_codes; track c) {
                 <li class="rounded-lg border border-amber-200/80 bg-amber-50/80 px-3 py-2 dark:border-amber-900/40 dark:bg-amber-950/25">
@@ -951,12 +915,12 @@
             </p>
           } @else {
             <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">
-              No hay bloqueos registrados en esta evaluación. Si el estado aún no es «listo», revise firmas o políticas pendientes con su equipo.
+              Sin trabas registradas aquí. Si algo sigue pendiente, suele ser firmas o acuerdos internos.
             </p>
           }
           @if (rg.missing_roles.length) {
             <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Quién debe intervenir (roles pendientes)
+              Quién puede cerrar esto
             </p>
             <ul class="mt-2 flex flex-wrap gap-2">
               @for (role of rg.missing_roles; track role) {
@@ -969,15 +933,15 @@
           }
         </div>
       } @else {
-        <p class="mt-4 rounded-lg border border-slate-200 bg-white px-4 py-4 text-sm leading-relaxed text-slate-600 dark:border-slate-600 dark:bg-slate-950/40 dark:text-slate-400">
-          Aún no tenemos una lectura compartida con Operaciones para esta versión (puede estar cargando).
+        <p class="mt-4 rounded-lg border border-slate-200 bg-white px-4 py-4 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-950/40 dark:text-slate-400">
+          Aún no hay estado compartido para esta versión (puede estar cargando).
         </p>
       }
 
       <div class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 dark:border-slate-600 dark:bg-slate-950/40">
-        <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Excepciones metodológicas registradas</p>
-        <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-          Acuerdos formales para apartarse del marco estándar. La definición técnica completa está en «Detalles técnicos».
+        <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Acuerdos fuera del guión habitual</p>
+        <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+          Decisiones explícitas apartadas del estándar. Detalle técnico abajo.
         </p>
         @if (detailWaiversLoading()) {
           <p class="mt-2 text-xs text-slate-500">Cargando…</p>
@@ -1000,9 +964,9 @@
       @if (d.status === 'draft') {
         <div
           class="mt-5 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-4 dark:border-slate-600 dark:bg-slate-950/25">
-          <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Registrar excepción</p>
-          <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-            Motivo obligatorio para auditoría. El JSON opcional de secciones queda reflejado en «Detalles técnicos» tras guardar.
+          <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Registrar acuerdo especial</p>
+          <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+            Motivo obligatorio. Detalle opcional en «Detalles técnicos» tras guardar.
           </p>
           <label class="mt-3 block text-xs font-medium text-slate-800 dark:text-slate-100">
             Motivo acordado
@@ -1013,7 +977,7 @@
           </label>
           <details class="mt-3">
             <summary class="cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-400">
-              JSON opcional de secciones relevadas
+            Detalle opcional (solo técnicos)
             </summary>
             <textarea
               rows="3"
