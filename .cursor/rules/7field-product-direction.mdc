@@ -21,7 +21,7 @@ alwaysApply: true
 
 **Doc maestro:** `cx-backend` → `docs/7FIELD_ARCHITECTURE_SCOPE_AND_TRACTION_V1.md` § Dirección de producto…
 
----
+**Motor inteligencia estudio (backend):** `cx-backend` → `docs/7FIELD_BACKEND_INTELLIGENCE_ENGINE_V1.md` — la IA/guidance “consultor + metodología + ops” se materializa en servidor (`app/study_intelligence/`); Angular solo consume APIs.
 
 ## Contrato análisis ↔ UI
 
