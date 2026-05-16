@@ -1,44 +1,26 @@
 ---
-description: 7Field obligatorio — producto/UX/IA/Journey Intelligence + Angular + Python antes de ampliar superficie
+description: 7Field — orden Cursor 1→9 (ejecución) + normas producto/UX/Angular
 alwaysApply: true
 ---
 
-# 7Field — dirección obligatoria
+# 7Field — cómo trabajar en Cursor
 
-Fuente canónica en **cx-backend**: `docs/7FIELD_ARCHITECTURE_SCOPE_AND_TRACTION_V1.md` § **Dirección de producto, UX/UI y criterio técnico**.
+**Secuencia obligatoria (no saltar fases):** en repo **cx-backend** → `docs/7FIELD_CURSOR_EXECUTION_SEQUENCE_V1.md`
 
-## Lo que NO somos
+1. **Journey Intelligence** — preview recorrido, bloques sensibles, fatiga, abandono esperado, riesgos, narrativa participante, prioridades en FIELD; tarjetas/señales premium; **no** builders complejos; IA solo datos reales (brief/spec/readiness), **no fake AI**; componentes pequeños + `signals`/`computed` + `field-*`.
+2. **Preview visual cuestionario** — **no** drag/drop; cards por fase, flow, storytelling, highlights; demo: “entiendo el recorrido en segundos”.
+3. **Continuidad PRE-FIELD → FIELD** — contexto en modelo/API/UI; cada vista: *¿qué significa para este estudio?* **No** dashboards genéricos.
+4. **IA consultiva** — corta, riesgos, redacción, fatiga, gaps, próximos pasos; **no** jerga tipo pipeline/schema/validator/rule package en superficie.
+5. **UX** — menos densidad; una acción principal; cards/summaries.
+6. **Progressive disclosure** — técnico solo en **Detalles técnicos**.
+7. **Angular** — smart/dumb; sin mega-templates; build limpio.
+8. **Backend/Python** — heurísticas y servicios pequeños cuando aporte valor visible (repo cx-backend).
+9. **Priorizar solo si** genera: entiende mi estudio / ayuda pensar / ayuda ejecutar / premium / menos dependencia seniors / avanzado pero fácil.
 
-No otro Qualtrics / SurveyMonkey / Dooblo / builder genérico / pantalla de captura. No competir en tipos de pregunta ni scripting infinito.
+---
 
-## Tesis
+## Norma de producto (recordatorio)
 
-**Capa inteligente:** preparación + ejecución + supervisión. Flujo **pensamiento → preparación → ejecución → supervisión → aprendizaje**. **PRE-FIELD ↔ FIELD** un solo flujo; intención **viva** en campo (moat).
+Doc maestro en **cx-backend:** `docs/7FIELD_ARCHITECTURE_SCOPE_AND_TRACTION_V1.md` § **Dirección de producto, UX/UI y criterio técnico**.
 
-## UX superficie
-
-Progressive disclosure **siempre**. JSON, hashes, lineage, QA packages → **Detalles técnicos**. Superficie: lenguaje humano, un objetivo por pantalla, más espacio/tarjetas/narrativa; **menos tablas/badges/estados técnicos**. Tono **editorial**, no consola enterprise.
-
-Percepción: “piensa mejor” → “ejecuta mejor”; no “operando un sistema complejo”.
-
-**PRE-FIELD:** copiloto metodológico — **no** builder protagonista. **FIELD:** continuidad contextual y supervisión alineada — **no** solo monitoreo.
-
-## IA
-
-Consultiva, contextual, metodológica, operacional, accionables — **seniority encapsulado**. No chatbot infinito, generación descontrolada, estudios autónomos, caos mágico.
-
-## Journey Intelligence
-
-No drag/drop/builder gigante como wow. Sí: brief → estructura → recorrido participante → riesgos → sugerencias → campo → FIELD con contexto.
-
-## Angular (este repo)
-
-Smart + dumb; componentes pequeños; copy en helpers; signals/`computed` limpios. Primitivas objetivo: `field-hero-card`, `field-guided-step`, `field-insight-card`, `field-empty-state`, `field-checklist`, `field-next-step-banner`. Evitar mega-templates `@if`, IA en HTML, tablas complejas en superficie, Tailwind repetido caótico.
-
-## Backend / IA (cx-backend)
-
-No IA que reemplace criterio humano ni gates. Preferir heurísticas, señales auditables, servicios pequeños, prompts acotados, reglas explícitas + IA contextual — no pipelines gigantes prematuros.
-
-## Checklist antes de cualquier feature
-
-¿Piensa mejor? ¿Ejecuta mejor? ¿Continuidad PRE-FIELD ↔ FIELD? ¿Simple en superficie? ¿Premium/inteligente? ¿Demo creíble en menos de ~3 minutos? Si no, no ensanchar.
+No Qualtrics/SurveyMonkey/Dooblo/builder/captura. Capa inteligente; PRE-FIELD ↔ FIELD continuo. Superficie humana y editorial; Detalles técnicos para JSON/lineage/hashes/QA. Journey Intelligence antes que drag/drop. Primitivas `field-*`; evitar tablas complejas en primera clase.
