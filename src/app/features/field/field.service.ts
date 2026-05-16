@@ -262,6 +262,8 @@ export interface StudyIntelligenceInsightCardPublic {
 export interface StudyIntelligenceBundlePublic {
   engine_version: string;
   ruleset_versions: string[];
+  /** Fila `field_participant_journeys` tras persistir snapshot (si hubo éxito). */
+  participant_journey_snapshot_id?: number | null;
   participant_journey?: StudyIntelligenceParticipantJourneyPublic | null;
   operational_risks: StudyIntelligenceOperationalRiskPublic[];
   methodological_signals: StudyIntelligenceMethodologicalSignalPublic[];
