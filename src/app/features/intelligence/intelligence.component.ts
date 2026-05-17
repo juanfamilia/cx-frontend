@@ -2,6 +2,8 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { ShareToasterService } from '@core/services/toast.service';
 import { environment } from '@env/environment';
@@ -10,6 +12,8 @@ import {
   Insight,
   InsightSummary,
   InsightTrends,
+  PlatformMemoryEnvelope,
+  PlatformSignalPublic,
   TopAction,
 } from './intelligence.service';
 import { ExecutiveEvidenceComponent } from '../clips/executive-evidence.component';
@@ -25,7 +29,7 @@ interface ActionPlanSummary {
 @Component({
   selector: 'app-intelligence',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageHeaderComponent, ExecutiveEvidenceComponent],
+  imports: [CommonModule, FormsModule, RouterLink, PageHeaderComponent, ExecutiveEvidenceComponent],
   templateUrl: './intelligence.component.html',
 })
 export class IntelligenceComponent implements OnInit {
@@ -38,9 +42,12 @@ export class IntelligenceComponent implements OnInit {
   trends = signal<InsightTrends | null>(null);
   topActions = signal<TopAction[]>([]);
   actionPlanSummary = signal<ActionPlanSummary | null>(null);
+  platformMemory = signal<PlatformMemoryEnvelope | null>(null);
+  platformMemoryReady = signal(false);
   loading = signal(true);
   selectedSeverity = signal<string>('');
   unreadOnly = signal(false);
+  signalDomainFilter = signal<string>('');
 
   selectedEvaluationId = signal<number | null>(null);
   showEvidencePanel = signal(false);
@@ -51,6 +58,16 @@ export class IntelligenceComponent implements OnInit {
     { value: 'high', label: 'Importante', activeClass: 'bg-orange-500 text-white border-orange-500' },
     { value: 'medium', label: 'En seguimiento', activeClass: 'bg-yellow-400 text-gray-900 border-yellow-400' },
     { value: 'low', label: 'Informativo', activeClass: 'bg-blue-500 text-white border-blue-500' },
+  ];
+
+  readonly signalDomainFilters = [
+    { value: '', label: 'Todos' },
+    { value: 'pre_field', label: 'PRE-FIELD' },
+    { value: 'field', label: 'Field' },
+    { value: 'cx', label: 'CX' },
+    { value: 'ins', label: 'InS' },
+    { value: 'clever', label: 'Clever' },
+    { value: 'perfil', label: 'Perfil' },
   ];
 
   filteredInsights = computed(() => {
@@ -65,6 +82,16 @@ export class IntelligenceComponent implements OnInit {
   });
 
   unreadCount = computed(() => this.insights().filter(i => !i.is_read).length);
+
+  filteredPlatformSignals = computed(() => {
+    const env = this.platformMemory();
+    const list = env?.recent_signals ?? [];
+    const d = this.signalDomainFilter();
+    if (!d) {
+      return list;
+    }
+    return list.filter((s) => s.source_domain === d);
+  });
 
   planStatusItems = computed(() => {
     const s = this.actionPlanSummary();
@@ -83,6 +110,7 @@ export class IntelligenceComponent implements OnInit {
 
   loadData(): void {
     this.loading.set(true);
+    this.platformMemoryReady.set(false);
 
     this.intelligenceService.getInsightsSummary().subscribe({
       next: (data) => this.summary.set(data),
@@ -103,6 +131,14 @@ export class IntelligenceComponent implements OnInit {
       next: (response) => this.topActions.set(response.top_actions || []),
       error: () => this.topActions.set([]),
     });
+
+    this.intelligenceService
+      .getPlatformMemory()
+      .pipe(finalize(() => this.platformMemoryReady.set(true)))
+      .subscribe({
+        next: (env) => this.platformMemory.set(env),
+        error: () => this.platformMemory.set(null),
+      });
 
     this.http.get<{ data: { status: string; due_date?: string | null }[]; pagination: { total: number } }>(`${environment.apiUrl}action-plans/?limit=200`).subscribe({
       next: (res) => {
@@ -130,6 +166,65 @@ export class IntelligenceComponent implements OnInit {
 
   toggleUnreadOnly(): void {
     this.unreadOnly.set(!this.unreadOnly());
+  }
+
+  setSignalDomainFilter(domain: string): void {
+    this.signalDomainFilter.set(this.signalDomainFilter() === domain ? '' : domain);
+  }
+
+  domainBadgeClass(domain: string): string {
+    const map: Record<string, string> = {
+      pre_field: 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200',
+      field: 'bg-amber-100 text-amber-900 dark:bg-amber-900/35 dark:text-amber-200',
+      cx: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200',
+      ins: 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200',
+      clever: 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/40 dark:text-fuchsia-200',
+      perfil: 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100',
+    };
+    return map[domain] ?? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200';
+  }
+
+  domainShortLabel(domain: string): string {
+    const map: Record<string, string> = {
+      pre_field: 'PRE-FIELD',
+      field: 'Field',
+      cx: 'CX',
+      ins: 'InS',
+      clever: 'Clever',
+      perfil: 'Perfil',
+    };
+    return map[domain] ?? domain;
+  }
+
+  numericPayloadField(payload: Record<string, unknown>, key: string): number | null {
+    const v = payload[key];
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      return v;
+    }
+    if (typeof v === 'string' && v.trim() !== '') {
+      const n = Number.parseInt(v, 10);
+      return Number.isFinite(n) ? n : null;
+    }
+    return null;
+  }
+
+  evaluationLinkId(signal: PlatformSignalPublic): number | null {
+    return this.numericPayloadField(signal.payload ?? {}, 'evaluation_id');
+  }
+
+  fieldProjectLinkId(signal: PlatformSignalPublic): number | null {
+    if (signal.field_project_id != null && Number.isFinite(signal.field_project_id)) {
+      return signal.field_project_id;
+    }
+    return this.numericPayloadField(signal.payload ?? {}, 'field_project_id');
+  }
+
+  signalPayloadJson(signal: PlatformSignalPublic): string {
+    try {
+      return JSON.stringify(signal.payload ?? {}, null, 2);
+    } catch {
+      return '{}';
+    }
   }
 
   markAsRead(insight: Insight): void {

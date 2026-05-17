@@ -218,6 +218,104 @@
     <!-- SIDEBAR (1/3) -->
     <div class="space-y-5">
 
+      <!-- Señales cross-dominio (platform_signal_events) -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden">
+        <div class="px-5 py-4 border-b dark:border-gray-700">
+          <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Señales del sistema</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            Línea de tiempo cross-dominio (PRE-FIELD · Field · CX…)
+          </p>
+        </div>
+        @if (!platformMemoryReady()) {
+          <div class="p-8 flex flex-col items-center gap-3">
+            <div class="w-8 h-8 rounded-full border-2 border-primary-500 border-t-transparent animate-spin"></div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Cargando memoria de plataforma…</p>
+          </div>
+        } @else {
+          @if (platformMemory(); as mem) {
+            @if (mem.company_id == null) {
+              <div class="px-5 py-6">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Sin tenant activo: no hay señales recientes que mostrar.
+                </p>
+              </div>
+            } @else {
+              <div class="px-5 pt-3 pb-2 flex flex-wrap gap-1.5 border-b dark:border-gray-700/80">
+                @for (df of signalDomainFilters; track df.value) {
+                  <button
+                    type="button"
+                    (click)="setSignalDomainFilter(df.value)"
+                    class="px-2.5 py-1 text-xs font-medium rounded-full border transition"
+                    [ngClass]="signalDomainFilter() === df.value
+                      ? 'border-primary-500 bg-primary-500 text-white'
+                      : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                    {{ df.label }}
+                  </button>
+                }
+              </div>
+              <div class="p-5 space-y-3 max-h-[28rem] overflow-y-auto">
+                @if (filteredPlatformSignals().length === 0) {
+                  <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-6">
+                    No hay señales recientes con este filtro.
+                  </p>
+                }
+                @for (sig of filteredPlatformSignals(); track sig.id) {
+                  <div class="rounded-xl border border-gray-100 dark:border-gray-700 p-3 space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                      <span
+                        class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide"
+                        [ngClass]="domainBadgeClass(sig.source_domain)">
+                        {{ domainShortLabel(sig.source_domain) }}
+                      </span>
+                      @if (sig.severity) {
+                        <span class="text-[10px] uppercase text-gray-400 shrink-0">{{ sig.severity }}</span>
+                      }
+                    </div>
+                    <code class="text-[11px] text-gray-500 dark:text-gray-400 block truncate" [title]="sig.signal_code">
+                      {{ sig.signal_code }}
+                    </code>
+                    <p class="text-sm text-gray-800 dark:text-gray-200 leading-snug">
+                      {{ sig.summary }}
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                      @if (evaluationLinkId(sig); as evId) {
+                        <a
+                          [routerLink]="['/evaluations/detail', evId]"
+                          class="font-medium text-primary-600 dark:text-primary-400 hover:underline">
+                          Ver evaluación
+                        </a>
+                      }
+                      @if (fieldProjectLinkId(sig); as fpId) {
+                        <a
+                          [routerLink]="['/field/project', fpId, 'dashboard']"
+                          class="font-medium text-primary-600 dark:text-primary-400 hover:underline">
+                          Proyecto Field
+                        </a>
+                      }
+                    </div>
+                    <details class="group">
+                      <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300 select-none">
+                        Payload JSON
+                      </summary>
+                      <pre class="mt-2 text-[10px] leading-relaxed bg-gray-50 dark:bg-gray-900/80 rounded-lg p-2 overflow-x-auto text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-all">{{ signalPayloadJson(sig) }}</pre>
+                    </details>
+                    <p class="text-[10px] text-gray-400">
+                      {{ sig.created_at | date:'d MMM yyyy, HH:mm' }}
+                    </p>
+                  </div>
+                }
+              </div>
+            }
+          } @else {
+            <div class="px-5 py-6">
+              <p class="text-sm text-amber-700 dark:text-amber-400">
+                No se pudo cargar la memoria de plataforma. Revisa la conexión o vuelve a intentar.
+              </p>
+            </div>
+          }
+        }
+      </div>
+
       <!-- Planes de mejora breakdown -->
       @if (actionPlanSummary()) {
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden">
