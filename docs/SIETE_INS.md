@@ -2,6 +2,8 @@
 
 Ruta: **`/ins`** (lazy). Requiere sesión y, salvo rol **0**, empresa con **`siete_ins_enabled`** en backend (`GET /api/v1/ins/access`).
 
+**Continuidad ecosistema:** InS forma parte de Siete Inteligencia Creativa; cuando existan contratos y vínculos en datos, debe alinearse con la intención metodológica y señales compartidas con Field/CX — ver en **cx-backend** `docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md` §10.
+
 ## Archivos
 
 | Área | Archivo |

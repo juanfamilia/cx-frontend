@@ -1,12 +1,18 @@
 # Ecosistema Siete (front)
 
-**Criterios de plataforma y contrato mínimo (v1):** documento canónico en el repositorio **cx-backend**: `docs/SIETE_PLATFORM_MINIMUM_CONTRACT_V1.md`
+**Visión:** Siete Inteligencia Creativa **no** es una colección de pantallas aisladas: Field, CX, InS, Clever y Perfil comparten **contexto, identidad, lenguaje, señales y memoria metodológica**. La UI en Angular debe reflejar esa continuidad; criterios transversales en el repositorio **cx-backend**: `docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md`.
+
+**Índice ampliado tenant / productos / API:** `docs/ECOSYSTEM_SIETE.md` en **cx-backend**.
+
+**Criterios de plataforma y contrato mínimo (v1):** `docs/SIETE_PLATFORM_MINIMUM_CONTRACT_V1.md` en **cx-backend**.
 
 **7Field — hallazgos, gobierno de reglas y Clever:** `docs/7FIELD_FINDINGS_GOVERNANCE_AND_EXEC_INTEL_V1.md` en **cx-backend**.
 
 **7Field — prioridades comerciales (Auto QA, Backcheck Intelligence, Cost of Error, narrativa inevitable):** `docs/7FIELD_COMMERCIAL_STRATEGY_V1.md` en **cx-backend**.
 
 **7Field — plan de arquitectura, alcance y tracción (arranque código):** `docs/7FIELD_ARCHITECTURE_SCOPE_AND_TRACTION_V1.md` en **cx-backend**.
+
+**7Field — dirección de experiencia unificada y checklist PR:** `docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md` en **cx-backend**.
 
 **7Field — decisiones estructurales cerradas (motor reglas, Study, Auto QA v1, Readiness, Clever):** `docs/7FIELD_STRUCTURAL_DECISIONS_V1.md` en **cx-backend**.
 

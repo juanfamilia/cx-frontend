@@ -1,36 +1,62 @@
 ---
-description: 7Field — ejecución 1→9 + metodología/UX/gold standards + checklist pantalla
+description: Siete Inteligencia Creativa — ecosistema Field/CX/InS/Clever/Perfil; Angular solo presentación; alinear con docs cx-backend
 alwaysApply: true
 ---
 
-# 7Field — cómo trabajar en Cursor
+# Siete Inteligencia Creativa — frontend (Angular)
 
-**Secuencia obligatoria:** en **cx-backend** → `docs/7FIELD_CURSOR_EXECUTION_SEQUENCE_V1.md`
+Este repo es la **capa de presentación** del ecosistema Siete. La **inteligencia metodológica vive en `cx-backend` (FastAPI)**; aquí solo **humanizamos** respuestas API (cards, narrativa, progressive disclosure).
 
-1. Journey Intelligence · 2. Preview visual · 3. Continuidad PRE-FIELD→FIELD · 4. IA consultiva · 5. UX premium · 6. Progressive disclosure · 7. Angular dedicado · 8. Python/heurísticas · 9. Solo si genera percepción clara de valor.
+**Documentos canónicos** (en monorepo backend):
 
----
-
-## Territorio (no solo otro software)
-
-**Metodología investigación** + **UX moderna** + **operational intelligence** + **copilots IA** + **storytelling visual**. Sensación: investigación **2026**, no ERP ni panel admin.
-
-**Patrones UX a estudiar (no copiar):** Notion AI, Linear, Stripe, Dovetail, Maze, Airtable Interfaces, FigJam/Figma Slides.
-
-**Patrones metodológicos:** Ipsos, Kantar, NielsenIQ, Gallup, Bain CX, XM Institute, Forrester, ESOMAR, MRS, UX research, JTBD, CX maturity → en producto = guidance aplicado, no manual académico.
-
-**Doc maestro:** `cx-backend` → `docs/7FIELD_ARCHITECTURE_SCOPE_AND_TRACTION_V1.md` § Dirección de producto…
-
-**Motor inteligencia estudio (backend):** `cx-backend` → `docs/7FIELD_BACKEND_INTELLIGENCE_ENGINE_V1.md` — la IA/guidance “consultor + metodología + ops” se materializa en servidor (`app/study_intelligence/`); Angular solo consume APIs.
-
-## Contrato análisis ↔ UI
-
-**Backend (`cx-backend`):** motor de análisis (longitud, fatiga, sesgo, redundancia, orden, consistencia, cobertura metodológica, validaciones, riesgos operacionales) — ver doc maestro § contrato.
-
-**Este repo (Angular):** **traducir experiencia** — consumir `StudyIntelligenceBundlePublic` vía `GET .../instrument-revisions/{id}/study-intelligence`; mapear a UI; **no** duplicar heurísticas ni scoring en helpers (solo fallback neutro si falla la API). **«Recomendación actual»** (motor dinámico) ≠ **«Última validación guardada» / Readiness** (oficial) — ver `cx-backend/docs/7FIELD_BACKEND_INTELLIGENCE_ENGINE_V1.md` §1.1.
+- `cx-backend/docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md`
+- `cx-backend/docs/SIETE_PLATFORM_MINIMUM_CONTRACT_V1.md`
+- `cx-backend/docs/ECOSYSTEM_SIETE.md`
+- `cx-backend/docs/7FIELD_ARCHITECTURE_SCOPE_AND_TRACTION_V1.md`
+- `cx-backend/docs/7FIELD_CURSOR_EXECUTION_SEQUENCE_V1.md`
+- `cx-backend/docs/7FIELD_BACKEND_INTELLIGENCE_ENGINE_V1.md`
+- `cx-backend/docs/7FIELD_FINDINGS_GOVERNANCE_AND_EXEC_INTEL_V1.md`
+- `cx-backend/docs/7FIELD_COMMERCIAL_STRATEGY_V1.md`
+- `cx-backend/docs/7FIELD_STRUCTURAL_DECISIONS_V1.md`
 
 ---
 
-## Checklist pantalla
+## Ecosistema (no pantallas sueltas)
 
-¿Piensa mejor? ¿Ejecuta mejor? ¿Continuidad? ¿Premium/inteligente? ¿Menos complejidad visible? ¿Demo ~3 min con confianza? Si no → iterar.
+Productos: **Field** (PRE-FIELD diseño + FIELD ejecución), **CX**, **InS**, **Clever**, **Perfil**. Comparten contexto, identidad, lenguaje visual, señales y **memoria metodológica**. No construimos otro Qualtrics/builder/EMS.
+
+**Continuidad:** FIELD debe reflejar intención creada en PRE-FIELD; a futuro CX / InS / Clever / Perfil consumen el mismo hilo metodológico cuando las APIs lo expongan — **no duplicar heurísticas en TypeScript**.
+
+---
+
+## Reglas Angular
+
+- Componentes por **intención de usuario**; contenedores pequeños; presentation-first.
+- `signals` / `computed` para estado derivado; **no** motor de análisis del instrumento en helpers salvo fallback neutro si falla API.
+- Consumir bundles tipados (p. ej. `StudyIntelligenceBundlePublic`) desde `GET .../study-intelligence`; **«Recomendación actual»** (motor vivo) ≠ **Readiness / validación oficial** — ver backend §1.1 motor inteligencia.
+
+---
+
+## UX
+
+Premium, limpia, humana; una pantalla ≈ una pregunta mental; menos tablas; más narrativa y tarjetas; jerga técnica relegada a **Detalles técnicos**. Referencias de sensación: Linear, Notion, Stripe, Vercel, Intercom, Pitch.
+
+---
+
+## IA en UI
+
+Solo **consultiva** y basada en datos del servidor; nunca “magia” ni texto que parezca inferido en cliente sin API.
+
+---
+
+## Infra y secretos
+
+**No asumir** Redis, workers, env de deploy ni keys. Si hace falta para una feature, **pedir explícitamente** al equipo antes de improvisar.
+
+---
+
+## Checklist rápido
+
+¿Piensa mejor? ¿Ejecuta mejor? ¿Continuidad PRE-FIELD ↔ FIELD (y ecosistema)? ¿Simple percibido? ¿Premium/inteligente? ¿Wow ~3 min?
+
+**Secuencia implementación Field:** `cx-backend/docs/7FIELD_CURSOR_EXECUTION_SEQUENCE_V1.md` (1→9).

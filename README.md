@@ -1,16 +1,24 @@
-# CX FRONTEND - Vesion 1.0.0
+# CX Frontend — Siete
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.5.
+Cliente **Angular** del **ecosistema Siete Inteligencia Creativa** (Field, CX, InS, Clever, Perfil). La **inteligencia metodológica** se obtiene del backend **`cx-backend`** (FastAPI); este repo se limita a **presentación**, navegación y UX premium.
+
+**Documentación de producto y contrato (monorepo backend):**
+
+- `cx-backend/docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md`
+- `cx-backend/docs/SIETE_PLATFORM_MINIMUM_CONTRACT_V1.md`
+- `cx-backend/docs/ECOSYSTEM_SIETE.md`
+
+Reglas de trabajo Cursor: `.cursor/rules/7field-product-direction.mdc`.
+
+---
 
 ## Development server
-
-To start a local development server, run:
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.5. With the server running, open `http://localhost:4200/` — the app reloads when source files change.
 
 ## Code scaffolding
 
