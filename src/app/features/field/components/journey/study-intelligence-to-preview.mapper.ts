@@ -25,6 +25,18 @@ function toneFromInsightPriority(priority: string): JourneyInsightTone {
   }
 }
 
+/** Severidades motor → tono de tarjeta (sin duplicar reglas del backend). */
+function toneFromSignalSeverity(severity: string): JourneyInsightTone {
+  const s = (severity || '').toLowerCase();
+  if (s === 'error' || s === 'critical' || s === 'stop') {
+    return 'caution';
+  }
+  if (s === 'warn' || s === 'warning' || s === 'fix_now') {
+    return 'observe';
+  }
+  return 'bright';
+}
+
 function fatigueEs(level: string): 'baja' | 'media' | 'alta' | null {
   switch (level.toLowerCase()) {
     case 'low':
@@ -38,16 +50,66 @@ function fatigueEs(level: string): 'baja' | 'media' | 'alta' | null {
   }
 }
 
+const FATIGUE_RANK = { baja: 1, media: 2, alta: 3 } as const;
+
+function fatigueRank(v: 'baja' | 'media' | 'alta' | null): number {
+  if (!v) {
+    return 0;
+  }
+  return FATIGUE_RANK[v];
+}
+
+function fatigueFromRank(r: number): 'baja' | 'media' | 'alta' | null {
+  if (r >= 3) {
+    return 'alta';
+  }
+  if (r === 2) {
+    return 'media';
+  }
+  if (r === 1) {
+    return 'baja';
+  }
+  return null;
+}
+
 export function mapStudyIntelligenceBundleToPreview(
-  bundle: StudyIntelligenceBundlePublic
+  bundle: StudyIntelligenceBundlePublic,
 ): ParticipantJourneyPreviewModel {
   const pj = bundle.participant_journey;
   const phasesRaw = pj?.phases?.length ? [...pj.phases].sort((a, b) => a.order_index - b.order_index) : [];
 
-  const globalInsights = bundle.insight_cards.map(card => ({
-    text: [card.headline, card.body].filter(Boolean).join(' — '),
-    tone: toneFromInsightPriority(card.priority),
-  }));
+  const seenInsight = new Set<string>();
+  const globalInsights: { text: string; tone: JourneyInsightTone }[] = [];
+
+  const pushInsight = (text: string, tone: JourneyInsightTone) => {
+    const t = text.trim();
+    if (!t || seenInsight.has(t)) {
+      return;
+    }
+    seenInsight.add(t);
+    globalInsights.push({ text: t, tone });
+  };
+
+  for (const card of bundle.insight_cards) {
+    pushInsight([card.headline, card.body].filter(Boolean).join(' — '), toneFromInsightPriority(card.priority));
+  }
+
+  for (const r of bundle.operational_risks) {
+    pushInsight(r.message_human, 'caution');
+  }
+
+  for (const s of bundle.methodological_signals) {
+    if (!s.linked_block_id) {
+      pushInsight(s.message_human, toneFromSignalSeverity(s.severity));
+    }
+  }
+
+  for (const f of bundle.fatigue_risks) {
+    if (!f.linked_block_id) {
+      const conv = fatigueEs(f.level);
+      pushInsight(f.message_human, conv === 'alta' ? 'caution' : 'observe');
+    }
+  }
 
   const methodologicalByBlock = new Map<string, string[]>();
   for (const s of bundle.methodological_signals) {
@@ -58,6 +120,23 @@ export function mapStudyIntelligenceBundleToPreview(
     const arr = methodologicalByBlock.get(bid) ?? [];
     arr.push(s.message_human);
     methodologicalByBlock.set(bid, arr);
+  }
+
+  let unlinkedFatigueBest: 'baja' | 'media' | 'alta' | null = null;
+  let unlinkedFatigueRank = 0;
+  for (const f of bundle.fatigue_risks) {
+    if (f.linked_block_id) {
+      continue;
+    }
+    const conv = fatigueEs(f.level);
+    if (!conv) {
+      continue;
+    }
+    const r = FATIGUE_RANK[conv];
+    if (r > unlinkedFatigueRank) {
+      unlinkedFatigueRank = r;
+      unlinkedFatigueBest = conv;
+    }
   }
 
   const phases: JourneyPhasePreview[] = phasesRaw.map(ph => {
@@ -88,8 +167,7 @@ export function mapStudyIntelligenceBundleToPreview(
     }
 
     let fatiguePotential: 'baja' | 'media' | 'alta' | null = null;
-    const rank = { baja: 1, media: 2, alta: 3 } as const;
-    let fatigueRank = 0;
+    let fatigueRankMax = 0;
     for (const f of bundle.fatigue_risks) {
       if (f.linked_block_id && !bidSet.has(f.linked_block_id)) {
         continue;
@@ -101,15 +179,25 @@ export function mapStudyIntelligenceBundleToPreview(
       if (!conv) {
         continue;
       }
-      const r = rank[conv];
-      if (r > fatigueRank) {
-        fatigueRank = r;
+      const r = FATIGUE_RANK[conv];
+      if (r > fatigueRankMax) {
+        fatigueRankMax = r;
         fatiguePotential = conv;
       }
     }
 
     let emotionalSensitivity: 'baja' | 'media' | 'alta' | null = null;
-    if (bundle.sensitivity_areas.length > 0 && ph.phase_key === 'experience') {
+    for (const sa of bundle.sensitivity_areas) {
+      const ids = sa.linked_block_ids ?? [];
+      if (ids.length === 0) {
+        continue;
+      }
+      if (ids.some(id => bidSet.has(id))) {
+        emotionalSensitivity = 'media';
+        break;
+      }
+    }
+    if (!emotionalSensitivity && bundle.sensitivity_areas.length > 0 && ph.phase_key === 'experience') {
       emotionalSensitivity = 'media';
     }
 
@@ -133,6 +221,14 @@ export function mapStudyIntelligenceBundleToPreview(
       uiState,
     };
   });
+
+  const expIdx = phases.findIndex(p => p.id === 'experience');
+  if (expIdx >= 0 && unlinkedFatigueBest != null) {
+    const cur = phases[expIdx];
+    const mergedR = Math.max(fatigueRank(cur.fatiguePotential), fatigueRank(unlinkedFatigueBest));
+    const mergedPot = fatigueFromRank(mergedR);
+    phases[expIdx] = { ...cur, fatiguePotential: mergedPot };
+  }
 
   return { phases, globalInsights };
 }

@@ -147,4 +147,18 @@ export class FieldShellComponent implements OnInit, OnDestroy {
   shellClientLabel(): string {
     return this.overviewRow()?.client_display_name?.trim() || '';
   }
+
+  /** Prioridad contextual Journey Intelligence (preview ejecutivo en cabecera del proyecto). */
+  shellStudyIntelligenceHeadline(): string | null {
+    const si = this.overviewRow()?.study_intelligence;
+    if (!si) {
+      return null;
+    }
+    const h = si.insight_cards?.[0]?.headline?.trim();
+    if (h) {
+      return h;
+    }
+    const op = si.operational_risks?.[0]?.message_human?.trim();
+    return op || null;
+  }
 }

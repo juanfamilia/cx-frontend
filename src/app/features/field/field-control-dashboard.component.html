@@ -34,6 +34,14 @@
     }
   </div>
 
+  @if (safeDashboardProjectId(); as dashPid) {
+    <field-project-journey-context-panel
+      class="mt-5 block"
+      [bundle]="overview()?.study_intelligence"
+      [projectId]="dashPid"
+      [allowPrefieldLink]="fieldOverviewAllowsPrefield(overview())" />
+  }
+
   <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
     <app-field-kpi-card
       title="Avance muestral"

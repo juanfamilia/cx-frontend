@@ -8,6 +8,7 @@ import { ShareToasterService } from '@core/services/toast.service';
 import { FieldFindingCardComponent } from './components/field-finding-card.component';
 import { FieldKpiCardComponent } from './components/field-kpi-card.component';
 import { FieldRiskBadgeComponent } from './components/field-risk-badge.component';
+import { FieldProjectJourneyContextPanelComponent } from './components/journey/field-project-journey-context-panel.component';
 import {
   FieldFinding,
   FieldProjectOverviewRow,
@@ -34,6 +35,7 @@ import { FieldRiskUiLevel } from './components/field-risk-badge.component';
     FieldKpiCardComponent,
     FieldRiskBadgeComponent,
     FieldFindingCardComponent,
+    FieldProjectJourneyContextPanelComponent,
   ],
   templateUrl: './field-control-dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
