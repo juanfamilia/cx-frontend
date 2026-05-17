@@ -46,6 +46,50 @@ export interface TopAction {
   frequency: number;
 }
 
+/** Envelope del cerebro compartido — GET /intelligence/platform-memory */
+export interface ProductFlags {
+  cx: boolean;
+  ins: boolean;
+  field: boolean;
+  clever: boolean;
+  perfil: boolean;
+}
+
+export interface DomainLens {
+  domain: string;
+  title: string;
+  focus: string[];
+  enabled_for_tenant: boolean;
+}
+
+export interface SharedPrimitive {
+  code: string;
+  description: string;
+}
+
+export interface CrossFeedChannel {
+  source: string;
+  sink: string;
+  status: string;
+  examples: string[];
+}
+
+export interface TenantOperationalFootprint {
+  field_study_count: number;
+  field_project_count: number;
+  ins_study_count: number;
+}
+
+export interface PlatformMemoryEnvelope {
+  schema_version: string;
+  company_id: number | null;
+  products: ProductFlags;
+  lenses: DomainLens[];
+  shared_primitives: SharedPrimitive[];
+  cross_feed_channels: CrossFeedChannel[];
+  footprint: TenantOperationalFootprint;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -88,5 +132,13 @@ export class IntelligenceService {
 
   markInsightAsRead(insightId: number): Observable<Insight> {
     return this.http.put<Insight>(`${this.baseUrl}insights/${insightId}/read`, {});
+  }
+
+  getPlatformMemory(companyId?: number): Observable<PlatformMemoryEnvelope> {
+    let params = new HttpParams();
+    if (companyId != null) {
+      params = params.set('company_id', companyId.toString());
+    }
+    return this.http.get<PlatformMemoryEnvelope>(`${this.baseUrl}platform-memory`, { params });
   }
 }
