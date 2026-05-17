@@ -1,15 +1,19 @@
 ---
-description: Siete Inteligencia Creativa — ecosistema Field/CX/InS/Clever/Perfil; Angular solo presentación; alinear con docs cx-backend
+description: Siete — memoria viva; Angular solo experiencia y copiloto visual; Cursor implementa; docs en cx-backend
 alwaysApply: true
 ---
 
 # Siete Inteligencia Creativa — frontend (Angular)
 
-Este repo es la **capa de presentación** del ecosistema Siete. La **inteligencia metodológica vive en `cx-backend` (FastAPI)**; aquí solo **humanizamos** respuestas API (cards, narrativa, progressive disclosure).
+## Tesis
 
-**Documentos canónicos** (en monorepo backend):
+**Siete es memoria metodológica viva**, no pantallas enganchadas a APIs sueltas. Este repo es **presentación y narrativa** sobre inteligencia que vive en **`cx-backend` (FastAPI)**.
 
-- `cx-backend/docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md`
+**FIELD** debe reflejar **intención y riesgos persistidos desde PRE-FIELD** (signals, journey, expectativas) — el front **muestra** bundles coherentes; **no** reinventa metodología en TypeScript.
+
+**Documentos canónicos** (monorepo backend):
+
+- `cx-backend/docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md` (§0, §7 frontend, §9 checklist, §9bis Cursor)
 - `cx-backend/docs/SIETE_PLATFORM_MINIMUM_CONTRACT_V1.md`
 - `cx-backend/docs/ECOSYSTEM_SIETE.md`
 - `cx-backend/docs/7FIELD_ARCHITECTURE_SCOPE_AND_TRACTION_V1.md`
@@ -21,42 +25,41 @@ Este repo es la **capa de presentación** del ecosistema Siete. La **inteligenci
 
 ---
 
-## Ecosistema (no pantallas sueltas)
+## Rol de Cursor vs producto
 
-Productos: **Field** (PRE-FIELD diseño + FIELD ejecución), **CX**, **InS**, **Clever**, **Perfil**. Comparten contexto, identidad, lenguaje visual, señales y **memoria metodológica**. No construimos otro Qualtrics/builder/EMS.
+**Implementar** UI/navegación según docs y criterio ya fijado.
 
-**Continuidad:** FIELD debe reflejar intención creada en PRE-FIELD; a futuro CX / InS / Clever / Perfil consumen el mismo hilo metodológico cuando las APIs lo expongan — **no duplicar heurísticas en TypeScript**.
+**No sustituir** decisiones de producto, UX, moat, copy estratégico o continuidad PRE-FIELD ↔ FIELD: si no está en doc o ticket, **escalar**.
 
 ---
 
-## Reglas Angular
+## Responsabilidad Angular
+
+- Experiencia, navegación, **copiloto visual**, visualización, interacción humana, **storytelling operacional**.
+- **No:** scoring principal, heurísticas metodológicas centrales, ni duplicar políticas del servidor.
+
+## Reglas técnicas
 
 - Componentes por **intención de usuario**; contenedores pequeños; presentation-first.
 - `signals` / `computed` para estado derivado; **no** motor de análisis del instrumento en helpers salvo fallback neutro si falla API.
-- Consumir bundles tipados (p. ej. `StudyIntelligenceBundlePublic`) desde `GET .../study-intelligence`; **«Recomendación actual»** (motor vivo) ≠ **Readiness / validación oficial** — ver backend §1.1 motor inteligencia.
-
----
+- Consumir bundles tipados desde APIs de intelligence/study; **«Recomendación actual»** ≠ **Readiness oficial** — ver motor backend §1.1.
 
 ## UX
 
-Premium, limpia, humana; una pantalla ≈ una pregunta mental; menos tablas; más narrativa y tarjetas; jerga técnica relegada a **Detalles técnicos**. Referencias de sensación: Linear, Notion, Stripe, Vercel, Intercom, Pitch.
-
----
+Premium, limpia, humana; una pantalla ≈ una pregunta mental; progressive disclosure; referencias de sensación: Linear, Notion, Stripe, Vercel, Intercom, Pitch.
 
 ## IA en UI
 
-Solo **consultiva** y basada en datos del servidor; nunca “magia” ni texto que parezca inferido en cliente sin API.
+Solo **consultiva** y datos del servidor; nunca “magia” inferida solo en cliente.
 
----
+## Infra
 
-## Infra y secretos
+No asumir workers, env de deploy ni keys; pedir confirmación antes de improvisar.
 
-**No asumir** Redis, workers, env de deploy ni keys. Si hace falta para una feature, **pedir explícitamente** al equipo antes de improvisar.
+## Checklist
 
----
+Alineado a `cx-backend/docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md` §9.
 
-## Checklist rápido
+## Secuencia Field
 
-¿Piensa mejor? ¿Ejecuta mejor? ¿Continuidad PRE-FIELD ↔ FIELD (y ecosistema)? ¿Simple percibido? ¿Premium/inteligente? ¿Wow ~3 min?
-
-**Secuencia implementación Field:** `cx-backend/docs/7FIELD_CURSOR_EXECUTION_SEQUENCE_V1.md` (1→9).
+`cx-backend/docs/7FIELD_CURSOR_EXECUTION_SEQUENCE_V1.md` (1→9).

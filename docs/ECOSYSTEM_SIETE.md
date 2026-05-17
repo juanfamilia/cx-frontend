@@ -1,6 +1,6 @@
 # Ecosistema Siete (front)
 
-**Visión:** Siete Inteligencia Creativa **no** es una colección de pantallas aisladas: Field, CX, InS, Clever y Perfil comparten **contexto, identidad, lenguaje, señales y memoria metodológica**. La UI en Angular debe reflejar esa continuidad; criterios transversales en el repositorio **cx-backend**: `docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md`.
+**Visión:** Siete Inteligencia Creativa **no** es una colección de pantallas aisladas ni APIs sin continuidad: Field, CX, InS, Clever y Perfil son **vistas** sobre **memoria metodológica viva** (contexto, identidad, lenguaje, señales compartidas). La UI en Angular debe reflejar eso; criterios transversales en **cx-backend**: `docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md`.
 
 **Índice ampliado tenant / productos / API:** `docs/ECOSYSTEM_SIETE.md` en **cx-backend**.
 
