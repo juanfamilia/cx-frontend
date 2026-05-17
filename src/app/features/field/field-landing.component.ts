@@ -4,15 +4,19 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  computed,
   effect,
   inject,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 
 import { AuthService } from '@core/services/auth.service';
 import { ShareToasterService } from '@core/services/toast.service';
 import { CompaniesService } from '@pages/companies/companies.service';
+
+import { IntelligenceService, PlatformSignalPublic } from '../intelligence/intelligence.service';
 
 import {
   DoobloFailedCustomer,
@@ -36,6 +40,7 @@ export class FieldLandingComponent implements OnInit {
   private readonly fieldSvc = inject(FieldService);
   private readonly toast = inject(ShareToasterService);
   private readonly companiesSvc = inject(CompaniesService);
+  private readonly intelligenceSvc = inject(IntelligenceService);
   readonly tenantCtx = inject(FieldTenantContextService);
 
   /** Si el usuario cierra el pulso, no volver a abrirlo hasta cambio de empresa o nuevo catálogo útil. */
@@ -43,6 +48,14 @@ export class FieldLandingComponent implements OnInit {
 
   readonly user = this.auth.getCurrentUser();
   readonly isSuperAdmin = this.user.role === 0;
+
+  /** Tenant efectivo (signal): superadmin usa `FieldTenantContextService`; resto `user.company_id`. */
+  readonly scopedCompanyId = computed(() =>
+    this.isSuperAdmin ? this.tenantCtx.selectedCompanyId() : this.user.company_id ?? null,
+  );
+
+  readonly fieldStripSignals = signal<PlatformSignalPublic[]>([]);
+  readonly fieldStripSignalsReady = signal(false);
 
   readonly doobloCompanyContext = signal<DoobloCompanyConfig | null>(null);
   readonly doobloCredentialsLoading = signal(false);
@@ -71,6 +84,28 @@ export class FieldLandingComponent implements OnInit {
         return;
       }
       this.pulseSectionExpanded.set(true);
+    });
+
+    effect(() => {
+      const cid = this.scopedCompanyId();
+      if (cid == null || cid <= 0) {
+        this.fieldStripSignalsReady.set(true);
+        this.fieldStripSignals.set([]);
+        return;
+      }
+      this.fieldStripSignalsReady.set(false);
+      this.intelligenceSvc
+        .getPlatformMemory(cid)
+        .pipe(finalize(() => this.fieldStripSignalsReady.set(true)))
+        .subscribe({
+          next: (env) => {
+            const allow = new Set(['pre_field', 'field']);
+            this.fieldStripSignals.set(
+              (env.recent_signals ?? []).filter((s) => allow.has(s.source_domain)).slice(0, 10),
+            );
+          },
+          error: () => this.fieldStripSignals.set([]),
+        });
     });
   }
 
@@ -103,10 +138,18 @@ export class FieldLandingComponent implements OnInit {
   }
 
   effectiveCompanyId(): number | null {
-    if (this.isSuperAdmin) {
-      return this.tenantCtx.selectedCompanyId();
-    }
-    return this.user.company_id ?? null;
+    return this.scopedCompanyId();
+  }
+
+  stripDomainLabel(domain: string): string {
+    const map: Record<string, string> = { pre_field: 'PRE-FIELD', field: 'Field' };
+    return map[domain] ?? domain;
+  }
+
+  stripDomainBadgeClass(domain: string): string {
+    return domain === 'field'
+      ? 'bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200'
+      : 'bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-200';
   }
 
   private loadFieldDoobloCompanyContext(): void {

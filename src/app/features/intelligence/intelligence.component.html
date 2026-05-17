@@ -12,6 +12,25 @@
     </div>
   } @else {
 
+  @if (isSuperAdmin && companiesList().length > 0) {
+    <div class="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:flex-row sm:items-end sm:justify-between">
+      <label class="block flex-1 text-sm font-semibold text-gray-800 dark:text-gray-100">
+        Empresa (tenant)
+        <select
+          class="mt-1 block w-full max-w-md rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+          [ngModel]="tenantCtx.selectedCompanyId()"
+          (ngModelChange)="tenantCtx.setSelectedCompanyId($event)">
+          @for (co of companiesList(); track co.id) {
+            <option [ngValue]="co.id">{{ companyDisplayLabel(co) }}</option>
+          }
+        </select>
+      </label>
+      <p class="max-w-md text-xs leading-snug text-gray-500 dark:text-gray-400">
+        Misma empresa activa que en <strong class="text-gray-700 dark:text-gray-300">Field → Fuentes</strong>. Las señales del sistema se cargan para ese tenant.
+      </p>
+    </div>
+  }
+
   <!-- ─── RESUMEN EJECUTIVO ─────────────────────────────────────── -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 

@@ -26,6 +26,61 @@
     </div>
   </header>
 
+  @if (effectiveCompanyId() != null) {
+    <section
+      class="mt-5 rounded-xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/40"
+      aria-label="Señales recientes Field">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2 dark:border-slate-700/80">
+        <h2 class="text-[0.65rem] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+          Actividad reciente · PRE-FIELD y Field
+        </h2>
+        <a
+          routerLink="/intelligence"
+          class="text-[0.65rem] font-semibold uppercase tracking-wide text-indigo-600 hover:underline dark:text-indigo-400">
+          Centro de alertas →
+        </a>
+      </div>
+      @if (!fieldStripSignalsReady()) {
+        <div class="flex items-center gap-2 py-4 text-xs text-slate-500 dark:text-slate-400">
+          <span
+            class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent"></span>
+          Cargando señales…
+        </div>
+      } @else if (fieldStripSignals().length === 0) {
+        <p class="py-3 text-xs text-slate-500 dark:text-slate-400">
+          Sin señales recientes de instrumento u operación de campo para esta empresa.
+        </p>
+      } @else {
+        <ul
+          class="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          @for (sig of fieldStripSignals(); track sig.id) {
+            <li
+              class="max-w-[min(100%,18rem)] shrink-0 rounded-lg border border-slate-200 bg-slate-50/90 px-3 py-2 dark:border-slate-600 dark:bg-slate-800/50">
+              <div class="flex flex-wrap items-center gap-2">
+                <span
+                  class="rounded px-1.5 py-0.5 text-[0.6rem] font-bold uppercase"
+                  [ngClass]="stripDomainBadgeClass(sig.source_domain)">
+                  {{ stripDomainLabel(sig.source_domain) }}
+                </span>
+                @if (sig.severity) {
+                  <span class="text-[0.55rem] uppercase text-slate-400">{{ sig.severity }}</span>
+                }
+              </div>
+              <p
+                class="mt-1 line-clamp-2 text-xs leading-snug text-slate-800 dark:text-slate-100"
+                [title]="sig.summary">
+                {{ sig.summary }}
+              </p>
+              <p class="mt-1 truncate font-mono text-[0.6rem] text-slate-400" [title]="sig.signal_code">
+                {{ sig.signal_code }}
+              </p>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+
   @if (effectiveCompanyId() == null) {
     <p class="mt-4 text-sm text-amber-700 dark:text-amber-300">
       No hay empresa seleccionada. Compruebe su usuario o permisos de superadministrador.

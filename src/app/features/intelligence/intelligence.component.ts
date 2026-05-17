@@ -1,12 +1,17 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { AuthService } from '@core/services/auth.service';
+import { CompaniesService } from '@pages/companies/companies.service';
+import { Company } from '@interfaces/company';
 import { PageHeaderComponent } from '@shared/ui/page-header/page-header.component';
 import { ShareToasterService } from '@core/services/toast.service';
 import { environment } from '@env/environment';
+import { FieldTenantContextService } from '../field/field-tenant-context.service';
+import { companyDisplayLabel } from '../field/field-company.helpers';
 import {
   IntelligenceService,
   Insight,
@@ -36,6 +41,15 @@ export class IntelligenceComponent implements OnInit {
   private intelligenceService = inject(IntelligenceService);
   private toastService = inject(ShareToasterService);
   private http = inject(HttpClient);
+  private auth = inject(AuthService);
+  private companiesSvc = inject(CompaniesService);
+  readonly tenantCtx = inject(FieldTenantContextService);
+
+  readonly user = this.auth.getCurrentUser();
+  readonly isSuperAdmin = this.user.role === 0;
+  readonly companyDisplayLabel = companyDisplayLabel;
+
+  companiesList = signal<Company[]>([]);
 
   insights = signal<Insight[]>([]);
   summary = signal<InsightSummary | null>(null);
@@ -104,13 +118,35 @@ export class IntelligenceComponent implements OnInit {
     ];
   });
 
+  constructor() {
+    effect(() => {
+      if (!this.isSuperAdmin) {
+        return;
+      }
+      void this.tenantCtx.selectedCompanyId();
+      this.reloadPlatformMemory();
+    });
+  }
+
   ngOnInit(): void {
     this.loadData();
+    if (this.isSuperAdmin) {
+      this.companiesSvc.getAll(0, 100).subscribe({
+        next: (res) => {
+          this.companiesList.set(res.data ?? []);
+          if (this.tenantCtx.selectedCompanyId() == null && res.data?.length) {
+            this.tenantCtx.setSelectedCompanyId(res.data[0].id);
+          }
+        },
+        error: () => this.companiesList.set([]),
+      });
+    } else {
+      this.reloadPlatformMemory();
+    }
   }
 
   loadData(): void {
     this.loading.set(true);
-    this.platformMemoryReady.set(false);
 
     this.intelligenceService.getInsightsSummary().subscribe({
       next: (data) => this.summary.set(data),
@@ -132,14 +168,6 @@ export class IntelligenceComponent implements OnInit {
       error: () => this.topActions.set([]),
     });
 
-    this.intelligenceService
-      .getPlatformMemory()
-      .pipe(finalize(() => this.platformMemoryReady.set(true)))
-      .subscribe({
-        next: (env) => this.platformMemory.set(env),
-        error: () => this.platformMemory.set(null),
-      });
-
     this.http.get<{ data: { status: string; due_date?: string | null }[]; pagination: { total: number } }>(`${environment.apiUrl}action-plans/?limit=200`).subscribe({
       next: (res) => {
         const items = res.data || [];
@@ -158,6 +186,23 @@ export class IntelligenceComponent implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  /** Superadmin: `company_id` en query alinea con Field/InS (`FieldTenantContextService`). */
+  private reloadPlatformMemory(): void {
+    let queryCompanyId: number | undefined;
+    if (this.isSuperAdmin) {
+      const id = this.tenantCtx.selectedCompanyId();
+      queryCompanyId = id != null && id > 0 ? id : undefined;
+    }
+    this.platformMemoryReady.set(false);
+    this.intelligenceService
+      .getPlatformMemory(queryCompanyId)
+      .pipe(finalize(() => this.platformMemoryReady.set(true)))
+      .subscribe({
+        next: (env) => this.platformMemory.set(env),
+        error: () => this.platformMemory.set(null),
+      });
   }
 
   setSeverityFilter(severity: string): void {
