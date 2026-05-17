@@ -80,6 +80,21 @@ export interface TenantOperationalFootprint {
   ins_study_count: number;
 }
 
+export interface PlatformSignalPublic {
+  id: number;
+  company_id: number;
+  source_domain: string;
+  signal_code: string;
+  severity: string | null;
+  summary: string;
+  payload: Record<string, unknown>;
+  field_study_id: number | null;
+  field_project_id: number | null;
+  ins_study_id: number | null;
+  created_by_user_id: number | null;
+  created_at: string;
+}
+
 export interface PlatformMemoryEnvelope {
   schema_version: string;
   company_id: number | null;
@@ -88,6 +103,18 @@ export interface PlatformMemoryEnvelope {
   shared_primitives: SharedPrimitive[];
   cross_feed_channels: CrossFeedChannel[];
   footprint: TenantOperationalFootprint;
+  recent_signals: PlatformSignalPublic[];
+}
+
+export interface PlatformSignalCreateBody {
+  source_domain: string;
+  signal_code: string;
+  summary: string;
+  severity?: string | null;
+  payload?: Record<string, unknown>;
+  field_study_id?: number | null;
+  field_project_id?: number | null;
+  ins_study_id?: number | null;
 }
 
 @Injectable({
@@ -140,5 +167,18 @@ export class IntelligenceService {
       params = params.set('company_id', companyId.toString());
     }
     return this.http.get<PlatformMemoryEnvelope>(`${this.baseUrl}platform-memory`, { params });
+  }
+
+  createPlatformSignal(
+    body: PlatformSignalCreateBody,
+    companyId?: number,
+  ): Observable<PlatformSignalPublic> {
+    let params = new HttpParams();
+    if (companyId != null) {
+      params = params.set('company_id', companyId.toString());
+    }
+    return this.http.post<PlatformSignalPublic>(`${this.baseUrl}platform-signals`, body, {
+      params,
+    });
   }
 }
