@@ -4,12 +4,13 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { FieldMetric, FieldProjectOverviewRow, FieldService } from './field.service';
-import { metricCodeExecutiveLabel } from './field-ui.helpers';
+import { FieldProjectJourneyContextPanelComponent } from './components/journey/field-project-journey-context-panel.component';
+import { fieldOverviewAllowsPrefield, metricCodeExecutiveLabel } from './field-ui.helpers';
 
 @Component({
   selector: 'app-field-scoring-breakdown',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FieldProjectJourneyContextPanelComponent],
   templateUrl: './field-scoring-breakdown.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -23,6 +24,7 @@ export class FieldScoringBreakdownComponent implements OnDestroy {
   readonly loading = signal(true);
 
   readonly metricExecutiveLabel = metricCodeExecutiveLabel;
+  readonly fieldOverviewAllowsPrefield = fieldOverviewAllowsPrefield;
 
   constructor() {
     this.routeSub = this.route.parent!.paramMap.subscribe(p => {
@@ -31,7 +33,7 @@ export class FieldScoringBreakdownComponent implements OnDestroy {
         return;
       }
       this.loading.set(true);
-      this.fieldSvc.getProjectOverview(id, 4).subscribe({
+      this.fieldSvc.getProjectOverview(id, 8).subscribe({
         next: row => {
           this.overview.set(row);
           this.loading.set(false);

@@ -1,0 +1,135 @@
+<div
+  class="border-t border-slate-200 bg-gradient-to-b from-indigo-50/40 to-slate-50/90 px-6 py-6 dark:border-slate-700 dark:from-indigo-950/20 dark:to-slate-900/70">
+  @let d = revision();
+  <div class="flex flex-wrap items-start justify-between gap-2">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200">
+        Antes de publicar — lectura guiada
+      </p>
+      <p class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-50">{{ d.revision_label }}</p>
+      <div class="mt-2 flex flex-wrap items-center gap-2">
+        <span
+          class="rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide bg-white text-slate-800 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-600">
+          {{ lifecycleLabel(d.status) }}
+        </span>
+      </div>
+      <p class="mt-3 max-w-3xl text-sm text-slate-700 dark:text-slate-300">
+        {{ qaGuidedSummary(d) }}
+      </p>
+    </div>
+    <button
+      type="button"
+      class="text-xs font-semibold text-slate-600 underline hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+      (click)="closed.emit()">
+      Cerrar
+    </button>
+  </div>
+
+  @if (readinessGate(); as rg) {
+    <div
+      class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-600 dark:bg-slate-950/50">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">¿Listo desde el punto de vista de su proceso?</p>
+        <span
+          class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide"
+          [ngClass]="readinessBadgeClass(rg.aggregate_status)">
+          {{ readinessLabel(rg.aggregate_status) }}
+        </span>
+      </div>
+      @if (rg.blocking_codes.length) {
+        <p class="mt-3 text-xs font-semibold text-amber-800 dark:text-amber-200">Lo que marca el servidor</p>
+        <ul class="mt-2 space-y-2 text-sm text-slate-800 dark:text-slate-100">
+          @for (c of rg.blocking_codes; track c) {
+            <li class="rounded-lg border border-amber-200/80 bg-amber-50/80 px-3 py-2 dark:border-amber-900/40 dark:bg-amber-950/25">
+              {{ readinessBlockingHuman(c) }}
+            </li>
+          }
+        </ul>
+        <p class="mt-3 text-xs text-slate-600 dark:text-slate-400">
+          <span class="font-semibold">Siguiente paso:</span>
+          trabaje el primer punto con quien corresponda en brief, calidad o firmas según lo que muestra esta lista (viene del
+          estado guardado).
+        </p>
+      } @else {
+        <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">
+          La revisión registrada aquí no lista trabas nuevas; si algo queda pendiente, suele ser acuerdos o firmas fuera de
+          esta pantalla.
+        </p>
+      }
+      @if (rg.missing_roles.length) {
+        <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          Quién falta configurar para cerrar
+        </p>
+        <ul class="mt-2 flex flex-wrap gap-2">
+          @for (role of rg.missing_roles; track role) {
+            <li
+              class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-100">
+              {{ stakeholderRole(role) }}
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  } @else {
+    <p class="mt-4 rounded-lg border border-slate-200 bg-white px-4 py-4 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-950/40 dark:text-slate-400">
+      Esperando estado de preparación cargado desde el servidor para esta versión.
+    </p>
+  }
+
+  <div class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 dark:border-slate-600 dark:bg-slate-950/40">
+    <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Acuerdos explícitos aparte del estándar</p>
+    <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+      Lo que aquí aparece llega desde el servidor. El detalle en formato técnico sigue abajo en «Detalles técnicos».
+    </p>
+    @if (detailWaiversLoading()) {
+      <p class="mt-2 text-xs text-slate-500">Cargando…</p>
+    } @else if (detailWaivers().length === 0) {
+      <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">Nada registrado aún como excepción.</p>
+    } @else {
+      <ul class="mt-3 space-y-3">
+        @for (w of detailWaivers(); track w.id) {
+          <li class="rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/40">
+            <p class="text-sm text-slate-800 dark:text-slate-100">{{ w.rationale }}</p>
+            <p class="mt-1 tabular-nums text-xs text-slate-500 dark:text-slate-400">
+              {{ w.created_at | date: 'short' }}
+            </p>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  @if (draftStatus()) {
+    <div class="mt-5 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-4 dark:border-slate-600 dark:bg-slate-950/25">
+      <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Registrar otro acuerdo</p>
+      <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+        Motivo claro obligatorio; el formato adicional sólo cuando operaciones lo pida — queda disponible después en detalle
+        técnico.
+      </p>
+      <label class="mt-3 block text-xs font-medium text-slate-800 dark:text-slate-100">
+        Motivo acordado
+        <textarea
+          rows="2"
+          class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+          [(ngModel)]="waiverRationale"></textarea>
+      </label>
+      <details class="mt-3">
+        <summary class="cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-400">
+          Detalle adicional sólo técnico
+        </summary>
+        <textarea
+          rows="3"
+          class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+          [(ngModel)]="waiverSectionsJson"
+          placeholder='Ej. {{ "{}" }} o ["bloque_a"]'></textarea>
+      </details>
+      <button
+        type="button"
+        class="mt-4 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+        [disabled]="waiverSubmitting()"
+        (click)="waiverSubmitted.emit()">
+        {{ waiverSubmitting() ? 'Enviando…' : 'Registrar excepción' }}
+      </button>
+    </div>
+  }
+</div>

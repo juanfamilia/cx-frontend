@@ -24,14 +24,26 @@ export interface ParticipantJourneyInput {
   readonly guidedAudience: string;
   readonly guidedMarket: string;
   readonly guidedExpectedOutcome: string;
-  readonly blockTitles: readonly string[];
   readonly qaLastOk: boolean | null;
   readonly qaIssueCount: number | null;
   readonly readinessBlockingFirstCode: string | null;
+}
+
+/** KPIs humanos derivados de `contextual_scores` del motor (sin exponer JSON crudo). */
+export interface JourneyMetricsChip {
+  readonly label: string;
+  readonly value: string;
+  readonly tone: JourneyInsightTone;
 }
 
 /** Vista preview — lo construye el mapper desde `StudyIntelligenceBundlePublic` o fallback mínimo. */
 export interface ParticipantJourneyPreviewModel {
   readonly phases: readonly JourneyPhasePreview[];
   readonly globalInsights: readonly { readonly text: string; readonly tone: JourneyInsightTone }[];
+  /** Resumen de estructura/carga/QA instantáneo desde el bundle (progressive disclosure opcional abajo). */
+  readonly journeyMetrics: readonly JourneyMetricsChip[];
+  /** Títulos de fase en orden — storytelling instantáneo (“A → B → C”). */
+  readonly narrativeSpine: string | null;
+  /** Destacados muy cortos priorizados por el motor (lectura en segundos). */
+  readonly glanceHighlights: readonly string[];
 }

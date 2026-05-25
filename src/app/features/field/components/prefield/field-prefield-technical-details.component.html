@@ -1,0 +1,185 @@
+<details
+  class="rounded-2xl border border-slate-200 bg-slate-50/90 dark:border-slate-700 dark:bg-slate-950/50">
+  <summary class="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
+    Detalles técnicos
+  </summary>
+  <div class="space-y-8 border-t border-slate-200 px-4 pb-5 pt-4 dark:border-slate-700">
+    @if (brief(); as brTech) {
+      <section>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          Brief persistido
+        </p>
+        <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+          La edición guiada está arriba. Despliegue esto solo para revisar huella y cuerpo enviados al servidor.
+        </p>
+        <details
+          class="mt-3 rounded-xl border border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-900/40">
+          <summary class="cursor-pointer select-none px-3 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-100">
+            Brief · huella y formato crudo del payload
+          </summary>
+          <div class="space-y-4 border-t border-slate-200 px-3 pb-4 pt-3 dark:border-slate-600">
+            <p class="text-xs text-slate-600 dark:text-slate-400">
+              Huella del cuerpo
+              <span class="ml-1 font-mono text-[11px] text-slate-800 dark:text-slate-200">{{
+                snippet(brTech.body_hash, 14)
+              }}</span>
+            </p>
+            <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+              Contenido (formato servidor)
+              <textarea
+                rows="8"
+                class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs leading-relaxed text-slate-900 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                [(ngModel)]="briefPayloadText"
+                [readonly]="brTech.approval_state !== 'draft'"
+                [attr.aria-readonly]="brTech.approval_state !== 'draft'"></textarea>
+            </label>
+            <label class="block text-sm font-medium text-slate-800 dark:text-slate-100">
+              Índice de completitud 0–100 (opcional)
+              <input
+                type="text"
+                inputmode="decimal"
+                class="mt-1 block w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                [(ngModel)]="briefCompletenessStr"
+                [readonly]="brTech.approval_state !== 'draft'"
+                placeholder="Ej. 72" />
+            </label>
+            @if (brTech.approval_state === 'draft') {
+              <button
+                type="button"
+                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                [disabled]="briefSaving()"
+                (click)="saveBriefRequested.emit()">
+                {{ briefSaving() ? 'Guardando…' : 'Guardar brief desde aquí' }}
+              </button>
+            }
+          </div>
+        </details>
+      </section>
+    }
+
+    @if (detailRevision(); as dTech) {
+      <section>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          Borrador abierto
+        </p>
+        <details class="mt-2 rounded-xl border border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-900/40">
+          <summary class="cursor-pointer select-none px-3 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-100">
+            Huellas, metadatos de versión e instrumento (formato servidor)
+          </summary>
+          <div class="space-y-4 border-t border-slate-200 px-3 pb-4 pt-3 dark:border-slate-600">
+            <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">{{ dTech.revision_label }}</p>
+            <dl class="grid gap-3 text-xs text-slate-700 sm:grid-cols-2 dark:text-slate-300">
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Estado en sistema</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.status }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Plantilla (referencia)</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.framework_template_id || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Versión declarada</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.instrument_spec_version_declared || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Brief al crear la revisión</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ snippet(dTech.brief_snapshot_hash, 14) }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Catálogo plantillas</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.framework_catalog_version || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Huella del contenido</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ snippet(dTech.content_hash, 16) }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-slate-500 dark:text-slate-400">Última pasada automática (ref.)</dt>
+                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.last_ruleset_version || '—' }}</dd>
+              </div>
+            </dl>
+            <details class="rounded-lg border border-slate-200 dark:border-slate-600">
+              <summary class="cursor-pointer px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Instrumento · cuerpo completo
+              </summary>
+              <pre
+                class="max-h-[min(70vh,28rem)] overflow-auto rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs leading-relaxed text-slate-800 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-200">{{ dTech.spec | json }}</pre>
+            </details>
+          </div>
+        </details>
+      </section>
+    }
+
+    @if (detailWaivers().length > 0) {
+      <section>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          Excepciones registradas
+        </p>
+        <details
+          class="mt-3 rounded-xl border border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-900/40">
+          <summary class="cursor-pointer select-none px-3 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-100">
+            Fragmentos técnicos de excepciones
+          </summary>
+          <ul class="space-y-3 border-t border-slate-200 px-3 pb-4 pt-3 dark:border-slate-600">
+            @for (w of detailWaivers(); track w.id) {
+              <li class="rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/40">
+                <p class="text-xs text-slate-500 dark:text-slate-400">ID {{ w.id }} · {{ w.created_at | date: 'short' }}</p>
+                @if (w.waived_sections_json != null) {
+                  <details class="mt-2">
+                    <summary class="cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-400">
+                      Ver formato registrado
+                    </summary>
+                    <pre
+                      class="mt-2 max-h-40 overflow-auto rounded border border-slate-100 bg-white p-2 font-mono text-[10px] text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">{{ w.waived_sections_json | json }}</pre>
+                  </details>
+                } @else {
+                  <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Sin fragmento técnico adjunto.</p>
+                }
+              </li>
+            }
+          </ul>
+        </details>
+      </section>
+    }
+
+    @if (revisions().length > 0) {
+      <section>
+        <details class="rounded-xl border border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-900/40">
+          <summary class="cursor-pointer select-none px-3 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-100">
+            Tabla de referencia · todas las revisiones
+          </summary>
+          <div class="border-t border-slate-200 px-3 pb-4 pt-3 dark:border-slate-600">
+            <div class="mt-2 overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+              <table class="min-w-full divide-y divide-slate-200 text-left text-xs dark:divide-slate-700">
+                <thead class="bg-slate-100 dark:bg-slate-900/80">
+                  <tr>
+                    <th class="px-3 py-2 font-semibold">Etiqueta</th>
+                    <th class="px-3 py-2 font-semibold">Estado</th>
+                    <th class="px-3 py-2 font-semibold">Plantilla</th>
+                    <th class="px-3 py-2 font-semibold">Versión (ref.)</th>
+                    <th class="px-3 py-2 font-semibold">Brief al crear</th>
+                    <th class="px-3 py-2 font-semibold">Catálogo</th>
+                    <th class="px-3 py-2 font-semibold">Últ. revisión</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-950/30">
+                  @for (rev of revisions(); track rev.id) {
+                    <tr>
+                      <td class="px-3 py-2 font-medium">{{ rev.revision_label }}</td>
+                      <td class="px-3 py-2 font-mono text-[10px] text-slate-600">{{ rev.status }}</td>
+                      <td class="px-3 py-2 font-mono text-[10px]">{{ rev.framework_template_id || '—' }}</td>
+                      <td class="px-3 py-2">{{ rev.instrument_spec_version_declared || '—' }}</td>
+                      <td class="px-3 py-2 font-mono text-[10px]">{{ snippet(rev.brief_snapshot_hash, 12) }}</td>
+                      <td class="px-3 py-2 font-mono text-[10px]">{{ rev.framework_catalog_version || '—' }}</td>
+                      <td class="px-3 py-2 font-mono text-[10px]">{{ rev.last_ruleset_version || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+      </section>
+    }
+  </div>
+</details>

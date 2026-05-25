@@ -6,16 +6,25 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { FieldFindingCardComponent } from './components/field-finding-card.component';
+import { FieldProjectJourneyContextPanelComponent } from './components/journey/field-project-journey-context-panel.component';
 import {
   FieldRiskBadgeComponent,
   FieldRiskUiLevel,
 } from './components/field-risk-badge.component';
-import { FieldFinding, FieldService } from './field.service';
+import { FieldFinding, FieldProjectOverviewRow, FieldService } from './field.service';
+import { fieldOverviewAllowsPrefield } from './field-ui.helpers';
 
 @Component({
   selector: 'app-field-findings-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, FieldRiskBadgeComponent, FieldFindingCardComponent, RouterLink],
+  imports: [
+    CommonModule,
+    FormsModule,
+    FieldRiskBadgeComponent,
+    FieldFindingCardComponent,
+    RouterLink,
+    FieldProjectJourneyContextPanelComponent,
+  ],
   templateUrl: './field-findings-list-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -23,8 +32,11 @@ export class FieldFindingsListPageComponent implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly fieldSvc = inject(FieldService);
 
+  readonly fieldOverviewAllowsPrefield = fieldOverviewAllowsPrefield;
+
   private readonly routeSub: Subscription;
 
+  readonly overview = signal<FieldProjectOverviewRow | null>(null);
   readonly all = signal<FieldFinding[]>([]);
   readonly loading = signal(true);
   readonly severityFilter = signal<string>('');
@@ -56,6 +68,11 @@ export class FieldFindingsListPageComponent implements OnDestroy {
         return;
       }
       this.loading.set(true);
+      this.overview.set(null);
+      this.fieldSvc.getProjectOverview(id, 8).subscribe({
+        next: row => this.overview.set(row),
+        error: () => this.overview.set(null),
+      });
       this.fieldSvc.listDecisionLayerFindings(id, null, 200).subscribe({
         next: rows => {
           this.all.set(rows);

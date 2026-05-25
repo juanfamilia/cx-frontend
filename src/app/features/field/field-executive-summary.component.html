@@ -23,23 +23,88 @@
         @if (sec.risks !== undefined) {
           <section>
             <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Riesgos</h3>
-            <pre class="mt-2 overflow-x-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-xs dark:bg-slate-950/50">{{ sec.risks | json }}</pre>
+            @if (isString(sec.risks)) {
+              <p class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                {{ sec.risks }}
+              </p>
+            } @else {
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Contenido estructurado devuelto por Clever. Despliegue solo si necesita la respuesta técnica.
+              </p>
+              <details class="mt-2 rounded-lg border border-slate-200 bg-slate-50/80 dark:border-slate-600 dark:bg-slate-950/40">
+                <summary
+                  class="cursor-pointer select-none px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Respuesta técnica (JSON)
+                </summary>
+                <pre
+                  class="mt-0 max-h-[min(50vh,20rem)] overflow-auto whitespace-pre-wrap border-t border-slate-200 p-3 text-xs dark:border-slate-600 dark:bg-slate-950/50">{{
+                  sec.risks | json
+                }}</pre>
+              </details>
+            }
           </section>
         }
         @if (sec.impact !== undefined) {
           <section>
             <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Impacto</h3>
-            <pre class="mt-2 overflow-x-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-xs dark:bg-slate-950/50">{{ sec.impact | json }}</pre>
+            @if (isString(sec.impact)) {
+              <p class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                {{ sec.impact }}
+              </p>
+            } @else {
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Contenido estructurado devuelto por Clever. Despliegue solo si necesita la respuesta técnica.
+              </p>
+              <details class="mt-2 rounded-lg border border-slate-200 bg-slate-50/80 dark:border-slate-600 dark:bg-slate-950/40">
+                <summary
+                  class="cursor-pointer select-none px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Respuesta técnica (JSON)
+                </summary>
+                <pre
+                  class="mt-0 max-h-[min(50vh,20rem)] overflow-auto whitespace-pre-wrap border-t border-slate-200 p-3 text-xs dark:border-slate-600 dark:bg-slate-950/50">{{
+                  sec.impact | json
+                }}</pre>
+              </details>
+            }
           </section>
         }
         @if (sec.recommendations !== undefined) {
           <section>
             <h3 class="text-sm font-bold text-slate-900 dark:text-slate-50">Recomendaciones</h3>
-            <pre class="mt-2 overflow-x-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-xs dark:bg-slate-950/50">{{ sec.recommendations | json }}</pre>
+            @if (isString(sec.recommendations)) {
+              <p class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                {{ sec.recommendations }}
+              </p>
+            } @else {
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Contenido estructurado devuelto por Clever. Despliegue solo si necesita la respuesta técnica.
+              </p>
+              <details class="mt-2 rounded-lg border border-slate-200 bg-slate-50/80 dark:border-slate-600 dark:bg-slate-950/40">
+                <summary
+                  class="cursor-pointer select-none px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Respuesta técnica (JSON)
+                </summary>
+                <pre
+                  class="mt-0 max-h-[min(50vh,20rem)] overflow-auto whitespace-pre-wrap border-t border-slate-200 p-3 text-xs dark:border-slate-600 dark:bg-slate-950/50">{{
+                  sec.recommendations | json
+                }}</pre>
+              </details>
+            }
           </section>
         }
         @if (!sec.hasStructured) {
-          <pre class="overflow-x-auto whitespace-pre-wrap text-xs">{{ pl | json }}</pre>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Sin secciones estándar en la respuesta. El cuerpo completo queda en formato técnico.
+          </p>
+          <details class="rounded-lg border border-slate-200 bg-slate-50/80 dark:border-slate-600 dark:bg-slate-950/40">
+            <summary class="cursor-pointer select-none px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Cuerpo completo (JSON)
+            </summary>
+            <pre
+              class="mt-0 max-h-[min(60vh,24rem)] overflow-auto whitespace-pre-wrap border-t border-slate-200 p-3 text-xs dark:border-slate-600 dark:bg-slate-950/50">{{
+              pl | json
+            }}</pre>
+          </details>
         }
       </div>
     }

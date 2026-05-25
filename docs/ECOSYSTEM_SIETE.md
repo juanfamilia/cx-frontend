@@ -2,7 +2,9 @@
 
 **Visión:** Siete Inteligencia Creativa **no** es una colección de pantallas aisladas ni APIs sin continuidad: Field, CX, InS, Clever y Perfil son **vistas** sobre **memoria metodológica viva** (contexto, identidad, lenguaje, señales compartidas). La UI en Angular debe reflejar eso; criterios transversales en **cx-backend**: `docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md`.
 
-**Índice ampliado tenant / productos / API:** `docs/ECOSYSTEM_SIETE.md` en **cx-backend**.
+**Índice backend (tenant, flags, API y mapa de lectura ordenado):** `docs/ECOSYSTEM_SIETE.md` en **cx-backend**.
+
+**Arquitectura por solución (capa común + diferenciación módulos):** `docs/SIETE_SOLUTIONS_ARCHITECTURE_V1.md` en **cx-backend**.
 
 **Criterios de plataforma y contrato mínimo (v1):** `docs/SIETE_PLATFORM_MINIMUM_CONTRACT_V1.md` en **cx-backend**.
 

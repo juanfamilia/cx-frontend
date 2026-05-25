@@ -71,6 +71,11 @@ export class FieldExecutiveSummaryComponent implements OnDestroy {
     return v != null && typeof v === 'object' ? (v as Record<string, unknown>) : null;
   }
 
+  /** Superficie primera clase: texto plano si Clever devolvió string; si no, sintesis + JSON en disclosure. */
+  isString(v: unknown): v is string {
+    return typeof v === 'string';
+  }
+
   summarySections(pl: unknown): {
     risks?: unknown;
     impact?: unknown;

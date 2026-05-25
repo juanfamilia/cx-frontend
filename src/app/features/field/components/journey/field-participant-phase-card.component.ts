@@ -14,6 +14,12 @@ import type { JourneyPhasePreview } from './participant-journey.types';
 export class FieldParticipantPhaseCardComponent {
   readonly phase = input.required<JourneyPhasePreview>();
 
+  /** Borde lateral cuando hay señales automáticas o abandono esperado — destacado sin gritar. */
+  protected phaseAccentSignals(): boolean {
+    const p = this.phase();
+    return !!(p.expectedRisk || p.automaticSignals.length > 0);
+  }
+
   protected cardShell(state: JourneyPhasePreview['uiState']): Record<string, boolean> {
     return {
       'border-indigo-200/80 bg-gradient-to-br from-indigo-50/70 via-white to-white shadow-md dark:border-indigo-900/45 dark:from-indigo-950/35 dark:via-slate-900/70 dark:to-slate-900/85':

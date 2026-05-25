@@ -195,6 +195,66 @@ export function executiveQaConsistencySummaryGuided(d: QaConsistencySnapshot): s
   return 'Aún no hay revisión automática registrada para esta versión.';
 }
 
+/** Estado de ciclo de vida de una revisión (solo etiqueta ejecutiva). */
+export function revisionLifecycleLabel(status: string): string {
+  const u = (status || '').toLowerCase();
+  if (u === 'draft') {
+    return 'Borrador';
+  }
+  if (u === 'active') {
+    return 'Activa';
+  }
+  if (u === 'archived') {
+    return 'Archivada';
+  }
+  return status || '—';
+}
+
+/** Agregado Readiness en lenguaje de negocio. */
+export function readinessAggregateSurfaceLabel(status: string): string {
+  const x = (status || '').toLowerCase();
+  if (x === 'ready') {
+    return 'Listo para salir a campo';
+  }
+  if (x === 'blocked') {
+    return 'Hay algo por cerrar';
+  }
+  if (x === 'pending_signatures') {
+    return 'Faltan firmas';
+  }
+  if (x === 'approved') {
+    return 'Aprobado';
+  }
+  if (x === 'pending') {
+    return 'En revisión';
+  }
+  return status || '—';
+}
+
+export function readinessAggregateBadgeNgClass(status: string): Record<string, boolean> {
+  const x = (status || '').toLowerCase();
+  return {
+    'bg-emerald-100 text-emerald-900 dark:bg-emerald-950/45 dark:text-emerald-200':
+      x === 'ready' || x === 'approved',
+    'bg-amber-100 text-amber-950 dark:bg-amber-950/35 dark:text-amber-100':
+      x === 'blocked' || x === 'pending_signatures',
+    'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100':
+      x !== 'ready' &&
+      x !== 'approved' &&
+      x !== 'blocked' &&
+      x !== 'pending_signatures',
+  };
+}
+
+/** Recorte visible de huella u otro token largo (solo formato de pantalla). */
+export function formatHashSnippet(value: string | null | undefined, len = 10): string {
+  const v = (value ?? '').trim();
+  if (!v) {
+    return '—';
+  }
+  return v.length <= len ? v : `${v.slice(0, len)}…`;
+}
+
 /**
  * PRE-FIELD solo para proyectos nuevos: borrador y sin operación/campo iniciada.
  * Usar cuando solo se tiene `FieldProject` (p. ej. listado plano de proyectos).

@@ -118,6 +118,14 @@ export interface FieldInstrumentRevisionWithSpec extends FieldInstrumentRevision
 }
 
 /** Brief PRE-FIELD ligado al estudio. */
+export interface FieldBriefConsultHintPublic {
+  id: string;
+  tone: 'warn' | 'ok';
+  message: string;
+  apply_label: string;
+  show_apply: boolean;
+}
+
 export interface FieldStudyBriefPublic {
   study_id: number;
   company_id: number;
@@ -130,6 +138,8 @@ export interface FieldStudyBriefPublic {
   approved_client_at: string | null;
   body_hash: string;
   updated_at: string;
+  brief_density_band?: 'unknown' | 'thin' | 'adequate' | 'rich';
+  consultive_hints?: FieldBriefConsultHintPublic[];
 }
 
 export interface FieldStudyBriefPatchBody {

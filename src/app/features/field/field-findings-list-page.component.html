@@ -16,6 +16,15 @@
       >
     </p>
   }
+
+  @if (safeProjectId(); as fjPid) {
+    <field-project-journey-context-panel
+      class="mt-4 block"
+      [bundle]="overview()?.study_intelligence"
+      [projectId]="fjPid"
+      [allowPrefieldLink]="fieldOverviewAllowsPrefield(overview())" />
+  }
+
   <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">
     Lista corta para cerrar conversaciones con campo.
   </p>

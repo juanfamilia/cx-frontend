@@ -1,0 +1,86 @@
+<section
+  [attr.aria-label]="
+    variant() === 'full' ? 'Flujo visual del recorrido del participante' : 'Resumen del flujo por fases'
+  ">
+  <p
+    class="font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+    [class.text-xs]="variant() === 'full'"
+    [class.text-[0.65rem]]="variant() === 'compact'">
+    Flujo del recorrido
+  </p>
+  <p
+    class="mt-1 text-slate-600 dark:text-slate-400"
+    [class.text-sm]="variant() === 'full'"
+    [class.text-[0.65rem]]="variant() === 'compact'">
+    De izquierda a derecha: el orden en que quien responde vive el estudio. Las señales de alerta se reflejan en el
+    punto del flujo.
+  </p>
+
+  <div
+    class="mt-4 flex flex-col gap-6 md:flex-row md:flex-wrap md:items-start md:justify-center md:gap-x-1 md:gap-y-4 lg:justify-between">
+    @for (ph of phases(); track ph.id; let i = $index; let last = $last) {
+      <div class="flex flex-col md:flex-row md:items-center md:gap-1 lg:gap-2">
+        <div
+          class="flex gap-3 md:flex-col md:items-center md:text-center"
+          [class.md:max-w-[13rem]]="variant() === 'full'"
+          [class.md:max-w-[9rem]]="variant() === 'compact'">
+          <div
+            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold md:mx-auto"
+            [ngClass]="dotClass(ph)">
+            {{ i + 1 }}
+          </div>
+          <div class="min-w-0 flex-1 md:w-full">
+            <p
+              class="font-semibold leading-tight text-slate-900 dark:text-slate-50"
+              [class.text-sm]="variant() === 'compact'"
+              [class.text-base]="variant() === 'full'">
+              {{ ph.title }}
+            </p>
+            @if (variant() === 'full') {
+              <p class="mt-2 line-clamp-3 text-sm leading-snug text-slate-600 dark:text-slate-400">
+                {{ ph.narrative }}
+              </p>
+            }
+            <div class="mt-2 flex flex-wrap gap-1.5 md:justify-center">
+              @if (ph.expectedRisk) {
+                <span
+                  class="rounded-full bg-amber-100 px-2 py-0.5 text-[0.65rem] font-semibold text-amber-900 dark:bg-amber-900/45 dark:text-amber-100"
+                  [attr.title]="ph.expectedRisk">
+                  Abandono
+                </span>
+              }
+              @if (ph.fatiguePotential) {
+                <span
+                  class="rounded-full bg-violet-100 px-2 py-0.5 text-[0.65rem] font-semibold text-violet-900 dark:bg-violet-900/45 dark:text-violet-100">
+                  Fatiga {{ ph.fatiguePotential }}
+                </span>
+              }
+              @if (ph.emotionalSensitivity) {
+                <span
+                  class="rounded-full bg-rose-100 px-2 py-0.5 text-[0.65rem] font-semibold text-rose-900 dark:bg-rose-900/45 dark:text-rose-100">
+                  Sensible
+                </span>
+              }
+              @if (ph.uiState === 'rich') {
+                <span
+                  class="rounded-full bg-indigo-100 px-2 py-0.5 text-[0.65rem] font-semibold text-indigo-900 dark:bg-indigo-900/40 dark:text-indigo-100">
+                  En borrador
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+        @if (!last) {
+          <div
+            class="flex items-center justify-center py-1 md:min-h-0 md:self-start md:px-1 md:pt-[1.35rem]"
+            aria-hidden="true">
+            <span
+              class="text-lg font-semibold text-indigo-300 dark:text-indigo-600 md:text-xl md:leading-none md:text-indigo-400">
+              →
+            </span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

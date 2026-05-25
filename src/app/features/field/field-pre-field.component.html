@@ -457,7 +457,7 @@
                   <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">
                     Estado visible para su equipo:
                     <span class="font-semibold text-slate-800 dark:text-slate-100">{{
-                      revisionExecutiveStatus(cur.status)
+                      revisionLifecycleLabel(cur.status)
                     }}</span>
                   </p>
                   <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -502,20 +502,20 @@
             </div>
           }
 
-          @if (revisionHistory().length > 0) {
+          @if (revisionHistoryOlder().length > 0) {
             <details class="group border-t border-slate-100 dark:border-slate-700">
               <summary
                 class="cursor-pointer list-none px-6 py-5 text-sm font-semibold text-indigo-700 hover:bg-slate-50 dark:text-indigo-300 dark:hover:bg-slate-800/80 [&::-webkit-details-marker]:hidden">
-                Ver historial ({{ revisionHistory().length }} versión(es) anterior(es))
+                Ver historial ({{ revisionHistoryOlder().length }} versión(es) anterior(es))
               </summary>
               <div class="space-y-3 border-t border-slate-100 px-6 pb-8 pt-4 dark:border-slate-700">
-                @for (rev of revisionHistory(); track rev.id) {
+                @for (rev of revisionHistoryOlder(); track rev.id) {
                   <div
                     class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3 text-sm dark:border-slate-600 dark:bg-slate-950/30">
                     <div>
                       <p class="font-medium text-slate-900 dark:text-slate-50">{{ rev.revision_label }}</p>
                       <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                        {{ revisionExecutiveStatus(rev.status) }} · {{ rev.updated_at | date: 'short' }}
+                        {{ revisionLifecycleLabel(rev.status) }} · {{ rev.updated_at | date: 'short' }}
                       </p>
                     </div>
                     <button
@@ -650,7 +650,7 @@
             <p class="mt-10 text-center text-sm text-slate-600 dark:text-slate-400">
               Estado con su equipo:
               <span class="font-semibold text-slate-800 dark:text-slate-100">{{
-                readinessAggregateExecutiveLabel(rgReady.aggregate_status)
+                readinessAggregateSurfaceLabel(rgReady.aggregate_status)
               }}</span>
             </p>
           }
@@ -677,328 +677,37 @@
       }
     }
 
-    <details
-      class="mt-14 rounded-2xl border border-slate-200 bg-slate-50/90 dark:border-slate-700 dark:bg-slate-950/50">
-      <summary class="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
-        Detalles técnicos
-      </summary>
-      <div class="space-y-8 border-t border-slate-200 px-4 pb-5 pt-4 dark:border-slate-700">
-        @if (brief(); as brTech) {
-          <section>
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Brief persistido</p>
-            <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
-              Objeto JSON enviado al servidor; huella actual
-              <span class="ml-1 font-mono text-[11px]">{{ shortHash(brTech.body_hash, 14) }}</span>
-            </p>
-            <label class="mt-3 block text-sm font-medium text-slate-800 dark:text-slate-100">
-              Payload (JSON)
-              <textarea
-                rows="8"
-                class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs leading-relaxed text-slate-900 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-                [(ngModel)]="briefPayloadText"
-                [readonly]="brTech.approval_state !== 'draft'"
-                [attr.aria-readonly]="brTech.approval_state !== 'draft'"></textarea>
-            </label>
-            <label class="mt-4 block text-sm font-medium text-slate-800 dark:text-slate-100">
-              Completitud 0–100 (opcional)
-              <input
-                type="text"
-                inputmode="decimal"
-                class="mt-1 block w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-                [(ngModel)]="briefCompletenessStr"
-                [readonly]="brTech.approval_state !== 'draft'"
-                placeholder="Ej. 72" />
-            </label>
-            @if (brTech.approval_state === 'draft') {
-              <button
-                type="button"
-                class="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
-                [disabled]="briefSaving()"
-                (click)="saveBriefPayload()">
-                {{ briefSaving() ? 'Guardando…' : 'Guardar brief (JSON / completitud)' }}
-              </button>
-            }
-          </section>
-        }
-
-        @if (detailRevision(); as dTech) {
-          <section>
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Borrador abierto · metadatos y especificación
-            </p>
-            <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">{{ dTech.revision_label }}</p>
-            <dl class="mt-3 grid gap-3 text-xs text-slate-700 sm:grid-cols-2 dark:text-slate-300">
-              <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Estado en API</dt>
-                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.status }}</dd>
-              </div>
-              <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Plantilla (referencia)</dt>
-                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.framework_template_id || '—' }}</dd>
-              </div>
-              <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Versión de referencia</dt>
-                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.instrument_spec_version_declared || '—' }}</dd>
-              </div>
-              <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Brief al crear la revisión</dt>
-                <dd class="mt-0.5 font-mono text-[11px]">{{ shortHash(dTech.brief_snapshot_hash, 14) }}</dd>
-              </div>
-              <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Catálogo de plantillas</dt>
-                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.framework_catalog_version || '—' }}</dd>
-              </div>
-              <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Huella contenido revisión</dt>
-                <dd class="mt-0.5 font-mono text-[11px]">{{ shortHash(dTech.content_hash, 16) }}</dd>
-              </div>
-              <div>
-                <dt class="font-medium text-slate-500 dark:text-slate-400">Última revisión automática (ref.)</dt>
-                <dd class="mt-0.5 font-mono text-[11px]">{{ dTech.last_ruleset_version || '—' }}</dd>
-              </div>
-            </dl>
-            <p class="mt-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Especificación completa (JSON)</p>
-            <pre
-              class="mt-2 max-h-[min(70vh,28rem)] overflow-auto rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs leading-relaxed text-slate-800 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-200">{{ dTech.spec | json }}</pre>
-          </section>
-        }
-
-        @if (detailWaivers().length > 0) {
-          <section>
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Excepciones · JSON registrado
-            </p>
-            <ul class="mt-3 space-y-3">
-              @for (w of detailWaivers(); track w.id) {
-                <li class="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900/40">
-                  <p class="text-xs text-slate-500 dark:text-slate-400">ID {{ w.id }} · {{ w.created_at | date: 'short' }}</p>
-                  @if (w.waived_sections_json != null) {
-                    <pre
-                      class="mt-2 max-h-40 overflow-auto rounded border border-slate-100 bg-slate-50 p-2 font-mono text-[10px] text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">{{ w.waived_sections_json | json }}</pre>
-                  } @else {
-                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Sin JSON de secciones adjunto.</p>
-                  }
-                </li>
-              }
-            </ul>
-          </section>
-        }
-
-        @if (revisions().length > 0) {
-          <section>
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Tabla técnica · todas las revisiones
-            </p>
-            <div class="mt-2 overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
-              <table class="min-w-full divide-y divide-slate-200 text-left text-xs dark:divide-slate-700">
-                <thead class="bg-slate-100 dark:bg-slate-900/80">
-                  <tr>
-                    <th class="px-3 py-2 font-semibold">Etiqueta</th>
-                    <th class="px-3 py-2 font-semibold">Estado API</th>
-                    <th class="px-3 py-2 font-semibold">Plantilla</th>
-                    <th class="px-3 py-2 font-semibold">Versión (ref.)</th>
-                    <th class="px-3 py-2 font-semibold">Brief al crear</th>
-                    <th class="px-3 py-2 font-semibold">Catálogo</th>
-                    <th class="px-3 py-2 font-semibold">Últ. revisión</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-950/30">
-                  @for (rev of revisions(); track rev.id) {
-                    <tr>
-                      <td class="px-3 py-2 font-medium">{{ rev.revision_label }}</td>
-                      <td class="px-3 py-2 font-mono text-[10px] text-slate-600">{{ rev.status }}</td>
-                      <td class="px-3 py-2 font-mono text-[10px]">{{ rev.framework_template_id || '—' }}</td>
-                      <td class="px-3 py-2">{{ rev.instrument_spec_version_declared || '—' }}</td>
-                      <td class="px-3 py-2 font-mono text-[10px]">{{ shortHash(rev.brief_snapshot_hash, 12) }}</td>
-                      <td class="px-3 py-2 font-mono text-[10px]">{{ rev.framework_catalog_version || '—' }}</td>
-                      <td class="px-3 py-2 font-mono text-[10px]">{{ rev.last_ruleset_version || '—' }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </section>
-        }
-      </div>
-    </details>
+    <field-prefield-technical-details
+      class="mt-14 block"
+      [brief]="brief()"
+      [detailRevision]="detailRevision()"
+      [revisions]="revisions()"
+      [detailWaivers]="detailWaivers()"
+      [(briefPayloadText)]="briefPayloadText"
+      [(briefCompletenessStr)]="briefCompletenessStr"
+      [briefSaving]="briefSaving()"
+      (saveBriefRequested)="saveBriefPayload()" />
   }
 </section>
 
 <ng-template #prefieldInsightsPanel>
-  @if (contextualInsights().length > 0) {
-    <div class="mt-10 rounded-2xl border border-slate-200/90 bg-white px-6 py-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-      <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Brief y validación guardada</p>
-      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Incluye brief y <strong class="font-medium text-slate-600 dark:text-slate-300">última validación de esquema</strong> persistida en la revisión, más Readiness cuando aplique. Es independiente de la
-        <strong class="font-medium text-slate-600 dark:text-slate-300">«Recomendación actual»</strong> del recorrido participante (motor dinámico).
-      </p>
-      <ul class="mt-6 space-y-4">
-        @for (ins of contextualInsights(); track ins.id) {
-          <li
-            class="flex flex-wrap items-start gap-4 rounded-xl border px-4 py-4 text-sm leading-relaxed dark:border-slate-600"
-            [ngClass]="{
-              'border-amber-200/90 bg-amber-50/70 text-amber-950 dark:border-amber-900/45 dark:bg-amber-950/20 dark:text-amber-50':
-                ins.tone === 'warn',
-              'border-emerald-200/90 bg-emerald-50/70 text-emerald-950 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-50':
-                ins.tone === 'ok',
-            }">
-            <p class="min-w-0 flex-1">{{ ins.message }}</p>
-            <div class="flex shrink-0 flex-wrap gap-2">
-              @if (ins.showApply) {
-                <button
-                  type="button"
-                  class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400"
-                  (click)="applyInsight(ins.id)">
-                  {{ ins.applyLabel }}
-                </button>
-              }
-              <button
-                type="button"
-                class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-                (click)="dismissInsight(ins.id)">
-                Ignorar
-              </button>
-            </div>
-          </li>
-        }
-      </ul>
-    </div>
-  }
+  <field-prefield-contextual-insights
+    [insights]="contextualInsightRows()"
+    (apply)="applyInsight($event)"
+    (dismiss)="dismissInsight($event)" />
 </ng-template>
 
 <ng-template #revisionDetailPanel>
   @if (detailRevision(); as d) {
-    <div
-      class="border-t border-slate-200 bg-gradient-to-b from-indigo-50/40 to-slate-50/90 px-6 py-6 dark:border-slate-700 dark:from-indigo-950/20 dark:to-slate-900/70">
-      <div class="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200">
-            Antes de publicar
-          </p>
-          <p class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-50">{{ d.revision_label }}</p>
-          <div class="mt-2 flex flex-wrap items-center gap-2">
-            <span
-              class="rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide bg-white text-slate-800 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-600">
-              {{ revisionExecutiveStatus(d.status) }}
-            </span>
-          </div>
-          <p class="mt-3 max-w-3xl text-sm text-slate-700 dark:text-slate-300">
-            {{ executiveQaConsistencySummaryGuided(d) }}
-          </p>
-        </div>
-        <button
-          type="button"
-          class="text-xs font-semibold text-slate-600 underline hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-          (click)="closeRevisionDetail()">
-          Cerrar
-        </button>
-      </div>
-
-      @if (readinessGate(); as rg) {
-        <div
-          class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-600 dark:bg-slate-950/50">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">¿Todo listo para salir a campo?</p>
-            <span
-              class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide"
-              [ngClass]="readinessAggregateBadgeClass(rg.aggregate_status)">
-              {{ readinessAggregateExecutiveLabel(rg.aggregate_status) }}
-            </span>
-          </div>
-          @if (rg.blocking_codes.length) {
-            <p class="mt-3 text-xs font-semibold text-amber-800 dark:text-amber-200">Aspectos por revisar</p>
-            <ul class="mt-2 space-y-2 text-sm text-slate-800 dark:text-slate-100">
-              @for (c of rg.blocking_codes; track c) {
-                <li class="rounded-lg border border-amber-200/80 bg-amber-50/80 px-3 py-2 dark:border-amber-900/40 dark:bg-amber-950/25">
-                  {{ executiveReadinessBlocking(c) }}
-                </li>
-              }
-            </ul>
-            <p class="mt-3 text-xs text-slate-600 dark:text-slate-400">
-              <span class="font-semibold">Siguiente paso:</span>
-              resuelva el primer punto con el rol correspondiente (brief, control de calidad o firmas según el caso).
-            </p>
-          } @else {
-            <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">
-              Sin trabas registradas aquí. Si algo sigue pendiente, suele ser firmas o acuerdos internos.
-            </p>
-          }
-          @if (rg.missing_roles.length) {
-            <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Quién puede cerrar esto
-            </p>
-            <ul class="mt-2 flex flex-wrap gap-2">
-              @for (role of rg.missing_roles; track role) {
-                <li
-                  class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-100">
-                  {{ executiveStakeholderRole(role) }}
-                </li>
-              }
-            </ul>
-          }
-        </div>
-      } @else {
-        <p class="mt-4 rounded-lg border border-slate-200 bg-white px-4 py-4 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-950/40 dark:text-slate-400">
-          Aún no hay estado compartido para esta versión (puede estar cargando).
-        </p>
-      }
-
-      <div class="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-4 dark:border-slate-600 dark:bg-slate-950/40">
-        <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Acuerdos fuera del guión habitual</p>
-        <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
-          Decisiones explícitas apartadas del estándar. Detalle técnico abajo.
-        </p>
-        @if (detailWaiversLoading()) {
-          <p class="mt-2 text-xs text-slate-500">Cargando…</p>
-        } @else if (detailWaivers().length === 0) {
-          <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">Sin excepciones registradas.</p>
-        } @else {
-          <ul class="mt-3 space-y-3">
-            @for (w of detailWaivers(); track w.id) {
-              <li class="rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/40">
-                <p class="text-sm text-slate-800 dark:text-slate-100">{{ w.rationale }}</p>
-                <p class="mt-1 tabular-nums text-xs text-slate-500 dark:text-slate-400">
-                  {{ w.created_at | date: 'short' }}
-                </p>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-
-      @if (d.status === 'draft') {
-        <div
-          class="mt-5 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-4 dark:border-slate-600 dark:bg-slate-950/25">
-          <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">Registrar acuerdo especial</p>
-          <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
-            Motivo obligatorio. Detalle opcional en «Detalles técnicos» tras guardar.
-          </p>
-          <label class="mt-3 block text-xs font-medium text-slate-800 dark:text-slate-100">
-            Motivo acordado
-            <textarea
-              rows="2"
-              class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-              [(ngModel)]="waiverRationale"></textarea>
-          </label>
-          <details class="mt-3">
-            <summary class="cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-400">
-            Detalle opcional (solo técnicos)
-            </summary>
-            <textarea
-              rows="3"
-              class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
-              [(ngModel)]="waiverSectionsJson"
-              placeholder='Ej. {{ "{}" }} o ["bloque_a"]'></textarea>
-          </details>
-          <button
-            type="button"
-            class="mt-4 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
-            [disabled]="waiverSubmitting()"
-            (click)="submitFrameworkWaiver()">
-            {{ waiverSubmitting() ? 'Enviando…' : 'Registrar excepción' }}
-          </button>
-        </div>
-      }
-    </div>
+    <field-prefield-revision-workspace
+      [revision]="d"
+      [readinessGate]="readinessGate()"
+      [detailWaivers]="detailWaivers()"
+      [detailWaiversLoading]="detailWaiversLoading()"
+      [(waiverRationale)]="waiverRationale"
+      [(waiverSectionsJson)]="waiverSectionsJson"
+      [waiverSubmitting]="waiverSubmitting()"
+      (closed)="closeRevisionDetail()"
+      (waiverSubmitted)="submitFrameworkWaiver()" />
   }
 </ng-template>

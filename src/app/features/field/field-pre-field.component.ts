@@ -5,6 +5,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -32,16 +33,22 @@ import {
 } from './field.service';
 
 import {
-  executiveQaConsistencySummaryGuided,
   executiveReadinessBlocking,
   executiveStakeholderRole,
   fieldOverviewAllowsPrefield,
   fieldProjectAllowsPrefield,
+  readinessAggregateSurfaceLabel,
+  revisionLifecycleLabel,
 } from './field-ui.helpers';
 
 import { FieldParticipantJourneyPreviewComponent } from './components/journey/field-participant-journey-preview.component';
 import {
-  extractBlockTitlesFromSpec,
+  FieldPrefieldContextualInsightsComponent,
+  type PrefieldConsultiveInsightRowUi,
+} from './components/prefield/field-prefield-contextual-insights.component';
+import { FieldPrefieldRevisionWorkspaceComponent } from './components/prefield/field-prefield-revision-workspace.component';
+import { FieldPrefieldTechnicalDetailsComponent } from './components/prefield/field-prefield-technical-details.component';
+import {
   journeyStudyFocusLine,
   minimalNeutralJourneyFallback,
 } from './components/journey/participant-journey-preview.helper';
@@ -65,10 +72,38 @@ type Phase = 'setup' | 'instrument';
 /** Flujo guiado dentro de PRE-FIELD (solo UX; mismas APIs). */
 type PrefieldProductStep = 'brief' | 'methodology' | 'questionnaire' | 'review' | 'ready';
 
+function pickLatestInstrumentRevision(rows: FieldInstrumentRevision[]): FieldInstrumentRevision | null {
+  if (rows.length === 0) {
+    return null;
+  }
+  const sorted = [...rows].sort(
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  );
+  return sorted[0] ?? null;
+}
+
+function olderInstrumentRevisions(rows: FieldInstrumentRevision[]): FieldInstrumentRevision[] {
+  if (rows.length <= 1) {
+    return [];
+  }
+  const sorted = [...rows].sort(
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  );
+  return sorted.slice(1);
+}
+
 @Component({
   selector: 'app-field-pre-field',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgClass, FieldParticipantJourneyPreviewComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgClass,
+    FieldParticipantJourneyPreviewComponent,
+    FieldPrefieldContextualInsightsComponent,
+    FieldPrefieldRevisionWorkspaceComponent,
+    FieldPrefieldTechnicalDetailsComponent,
+  ],
   templateUrl: './field-pre-field.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -82,7 +117,8 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
 
   readonly executiveReadinessBlocking = executiveReadinessBlocking;
   readonly executiveStakeholderRole = executiveStakeholderRole;
-  readonly executiveQaConsistencySummaryGuided = executiveQaConsistencySummaryGuided;
+  readonly revisionLifecycleLabel = revisionLifecycleLabel;
+  readonly readinessAggregateSurfaceLabel = readinessAggregateSurfaceLabel;
 
   private paramSub?: Subscription;
 
@@ -178,6 +214,95 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   /** Insights contextuales descartados localmente (solo UX; sin backend). */
   private readonly dismissedInsightIds = signal<ReadonlySet<string>>(new Set());
 
+  /** Borrador más reciente por fecha de actualización. */
+  readonly currentRevision = computed(() => pickLatestInstrumentRevision(this.revisions()));
+
+  /** Resto de borradores (más antiguos), para historial colapsado. */
+  readonly revisionHistoryOlder = computed(() => olderInstrumentRevisions(this.revisions()));
+
+  /**
+   * Brief / validación de esquema persistida / Readiness — mensajes sólo desde estado persistido
+   * o texto emitido por el servidor (`consultive_hints` en GET brief). Sin umbrales de negocio en el navegador.
+   */
+  readonly contextualInsightRows = computed((): PrefieldConsultiveInsightRowUi[] => {
+    const out: PrefieldConsultiveInsightRowUi[] = [];
+    const skip = this.dismissedInsightIds();
+
+    const b = this.brief();
+    const serverHints = b?.consultive_hints ?? [];
+    for (const h of serverHints) {
+      if (skip.has(h.id)) {
+        continue;
+      }
+      const tone: 'warn' | 'ok' = h.tone === 'ok' ? 'ok' : 'warn';
+      out.push({
+        id: h.id,
+        tone,
+        message: h.message,
+        applyLabel: h.apply_label,
+        showApply: h.show_apply,
+      });
+    }
+
+    const hasThinDensityHint = serverHints.some(h => h.id === 'ins-brief-density-thin');
+
+    if (b?.approval_state === 'draft' && !hasThinDensityHint && !skip.has('ins-brief-draft')) {
+      out.push({
+        id: 'ins-brief-draft',
+        tone: 'warn',
+        message: 'El brief sigue en borrador: conviene alinear a equipo y cliente antes de pulir el cuestionario.',
+        applyLabel: 'Ir al brief',
+        showApply: true,
+      });
+    }
+
+    const cur = this.currentRevision();
+    const d = this.detailRevision();
+    const qaTarget = d?.id === cur?.id ? d : cur;
+
+    if (qaTarget && qaTarget.last_validation_ok === false && !skip.has('ins-qa-fail')) {
+      out.push({
+        id: 'ins-qa-fail',
+        tone: 'warn',
+        message:
+          'La última validación de esquema guardada en esta revisión reportó incidencias en el formato. Es independiente del recorrido del participante, que viene del motor en servidor.',
+        applyLabel: 'Revisar ahora',
+        showApply: true,
+      });
+    }
+
+    if (
+      qaTarget &&
+      qaTarget.last_validation_ok === true &&
+      !skip.has('ins-qa-ok') &&
+      out.length < 5
+    ) {
+      out.push({
+        id: 'ins-qa-ok',
+        tone: 'ok',
+        message:
+          'La última validación guardada sobre la estructura de esta versión no mostró errores graves. Una lectura humana sigue siendo recomendable.',
+        applyLabel: 'Abrir revisión',
+        showApply: true,
+      });
+    }
+
+    const rg = this.readinessGate();
+    if (rg?.blocking_codes?.length && !skip.has('ins-readiness-block')) {
+      const first = rg.blocking_codes[0];
+      const hint = executiveReadinessBlocking(first);
+      out.push({
+        id: 'ins-readiness-block',
+        tone: 'warn',
+        message: `Antes de coordinar campo: ${hint}`,
+        applyLabel: 'Siguiente paso',
+        showApply: true,
+      });
+    }
+
+    return out.slice(0, 5);
+  });
+
   ngOnInit(): void {
     const parent = this.route.parent;
     if (!parent) {
@@ -245,30 +370,6 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  /** Borrador más reciente por fecha de actualización. */
-  currentRevision(): FieldInstrumentRevision | null {
-    const rows = this.revisions();
-    if (rows.length === 0) {
-      return null;
-    }
-    const sorted = [...rows].sort(
-      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    );
-    return sorted[0] ?? null;
-  }
-
-  /** Resto de borradores (más antiguos), para historial colapsado. */
-  revisionHistory(): FieldInstrumentRevision[] {
-    const rows = this.revisions();
-    if (rows.length <= 1) {
-      return [];
-    }
-    const sorted = [...rows].sort(
-      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    );
-    return sorted.slice(1);
-  }
-
   /** Abre el panel de trabajo para la revisión indicada (sin toggle si ya es la activa). */
   openRevisionWorkspace(revisionId: number): void {
     if (this.detailRevision()?.id === revisionId) {
@@ -334,99 +435,6 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     }
     this.productStep.set('review');
     this.cdr.markForCheck();
-  }
-
-  /**
-   * Brief / validación de esquema persistida / Readiness — sin motor journey dinámico.
-   * El recorrido participante usa `GET .../study-intelligence` por separado.
-   */
-  contextualInsights(): readonly {
-    id: string;
-    tone: 'warn' | 'ok';
-    message: string;
-    applyLabel: string;
-    showApply: boolean;
-  }[] {
-    const out: {
-      id: string;
-      tone: 'warn' | 'ok';
-      message: string;
-      applyLabel: string;
-      showApply: boolean;
-    }[] = [];
-    const skip = this.dismissedInsightIds();
-
-    const b = this.brief();
-    if (
-      b?.approval_state === 'draft' &&
-      b.completeness_score != null &&
-      b.completeness_score < 55 &&
-      !skip.has('ins-brief-sparse')
-    ) {
-      out.push({
-        id: 'ins-brief-sparse',
-        tone: 'warn',
-        message: 'El brief aún está muy escueto: un poco más de contexto ahora evita malentendidos después.',
-        applyLabel: 'Ir al brief',
-        showApply: true,
-      });
-    }
-
-    if (b?.approval_state === 'draft' && !skip.has('ins-brief-draft')) {
-      out.push({
-        id: 'ins-brief-draft',
-        tone: 'warn',
-        message: 'El brief sigue en borrador: conviene alinear a equipo y cliente antes de pulir el cuestionario.',
-        applyLabel: 'Ir al brief',
-        showApply: true,
-      });
-    }
-
-    const cur = this.currentRevision();
-    const d = this.detailRevision();
-    const qaTarget = d?.id === cur?.id ? d : cur;
-
-    if (qaTarget && qaTarget.last_validation_ok === false && !skip.has('ins-qa-fail')) {
-      out.push({
-        id: 'ins-qa-fail',
-        tone: 'warn',
-        message:
-          'La última validación de esquema guardada en esta revisión reportó incidencias (JSON / estructura). Es distinta de la «Recomendación actual» del recorrido.',
-        applyLabel: 'Revisar ahora',
-        showApply: true,
-      });
-    }
-
-    if (
-      qaTarget &&
-      qaTarget.last_validation_ok === true &&
-      !skip.has('ins-qa-ok') &&
-      out.length < 5
-    ) {
-      out.push({
-        id: 'ins-qa-ok',
-        tone: 'ok',
-        message:
-          'La última validación de esquema guardada no reportó errores graves de sintaxis/estructura. Una lectura humana sigue ayudando.',
-        applyLabel: 'Abrir revisión',
-        showApply: true,
-      });
-    }
-
-    const rg = this.readinessGate();
-    if (rg?.blocking_codes?.length && !skip.has('ins-readiness-block')) {
-      const first = rg.blocking_codes[0];
-      const hint = executiveReadinessBlocking(first);
-      out.push({
-        id: 'ins-readiness-block',
-        tone: 'warn',
-        message: `Antes de salir a campo: ${hint}`,
-        applyLabel: 'Siguiente paso',
-        showApply: true,
-      });
-    }
-
-    return out.slice(0, 5);
   }
 
   /** Borrador activo + spec en preview; si abrió «Afinar», prioriza ese detalle cuando coincide con la versión actual. */
@@ -535,8 +543,6 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
   }
 
   private buildParticipantJourneyInput(): ParticipantJourneyInput {
-    const row = this.specSourceForCurrentRevision();
-    const titles = extractBlockTitlesFromSpec(row?.spec as Record<string, unknown> | undefined);
     const cur = this.currentRevision();
     const rg = this.readinessGate();
     return {
@@ -546,7 +552,6 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
       guidedAudience: this.briefGuidedAudience,
       guidedMarket: this.briefGuidedMarket,
       guidedExpectedOutcome: this.briefGuidedExpectedOutcome,
-      blockTitles: titles,
       qaLastOk: cur?.last_validation_ok ?? null,
       qaIssueCount: cur?.last_validation_issue_count ?? null,
       readinessBlockingFirstCode: rg?.blocking_codes?.length ? rg.blocking_codes[0] : null,
@@ -695,48 +700,6 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     }
   }
 
-  shortHash(value: string | null | undefined, len = 10): string {
-    const v = (value ?? '').trim();
-    if (!v) {
-      return '—';
-    }
-    return v.length <= len ? v : `${v.slice(0, len)}…`;
-  }
-
-  revisionExecutiveStatus(status: string): string {
-    const u = (status || '').toLowerCase();
-    if (u === 'draft') {
-      return 'Borrador';
-    }
-    if (u === 'active') {
-      return 'Activa';
-    }
-    if (u === 'archived') {
-      return 'Archivada';
-    }
-    return status || '—';
-  }
-
-  readinessAggregateExecutiveLabel(status: string): string {
-    const x = (status || '').toLowerCase();
-    if (x === 'ready') {
-      return 'Listo para salir a campo';
-    }
-    if (x === 'blocked') {
-      return 'Hay algo por cerrar';
-    }
-    if (x === 'pending_signatures') {
-      return 'Faltan firmas';
-    }
-    if (x === 'approved') {
-      return 'Aprobado';
-    }
-    if (x === 'pending') {
-      return 'En revisión';
-    }
-    return status || '—';
-  }
-
   briefWhatsMissingExecutive(br: FieldStudyBriefPublic): string {
     const pol = this.readinessPolicy();
     if (br.approval_state === 'approved') {
@@ -791,22 +754,6 @@ export class FieldPreFieldComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  readinessAggregateBadgeClass(status: string): Record<string, boolean> {
-    const x = (status || '').toLowerCase();
-    return {
-      'bg-emerald-100 text-emerald-900 dark:bg-emerald-950/45 dark:text-emerald-200':
-        x === 'ready' || x === 'approved',
-      'bg-amber-100 text-amber-950 dark:bg-amber-950/35 dark:text-amber-100':
-        x === 'blocked' || x === 'pending_signatures',
-      'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100':
-        x !== 'ready' &&
-        x !== 'approved' &&
-        x !== 'blocked' &&
-        x !== 'pending_signatures',
-    };
-  }
-
-  /** Rellena campos guiados desde `briefPayloadText` (mejor esfuerzo si el JSON es inválido). */
   private syncGuidedFromPayload(): void {
     const raw = this.briefPayloadText.trim();
     let obj: Record<string, unknown> = {};

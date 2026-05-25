@@ -46,6 +46,30 @@
   } @else {
     @let m = model();
     @if (m) {
+      @if (m.narrativeSpine) {
+        <blockquote
+          class="mt-12 max-w-3xl border-l-[3px] border-indigo-500 pl-5 text-lg font-medium leading-snug tracking-tight text-slate-800 dark:border-indigo-400 dark:text-slate-100">
+          {{ m.narrativeSpine }}
+        </blockquote>
+      }
+
+      @if (m.glanceHighlights.length > 0) {
+        <div class="mt-10 max-w-5xl">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">En una mirada</p>
+          <p class="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
+            Prioridades que el motor sube primero — el detalle narrativo viene después en tarjetas.
+          </p>
+          <div class="mt-4 flex flex-wrap gap-2.5">
+            @for (h of m.glanceHighlights; track h) {
+              <span
+                class="max-w-full rounded-2xl border border-indigo-200/85 bg-indigo-50/45 px-3 py-2 text-sm font-medium leading-snug text-indigo-950 shadow-sm dark:border-indigo-800/55 dark:bg-indigo-950/35 dark:text-indigo-50">
+                {{ h }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+
       @if (m.globalInsights.length > 0) {
         <div class="mt-12 grid gap-4 lg:grid-cols-2">
           @for (g of m.globalInsights; track g.text) {
@@ -54,11 +78,48 @@
         </div>
       }
 
-      <div class="mt-14 grid gap-10 xl:grid-cols-2">
-        @for (ph of m.phases; track ph.id) {
-          <field-participant-phase-card [phase]="ph" />
-        }
-      </div>
+      @if (m.journeyMetrics.length > 0) {
+        <div class="mt-12 max-w-4xl">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            Lectura rápida del instrumento
+          </p>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            Indicadores del motor sobre tamaño, carga y Auto QA instantáneo — sin sustituir Readiness ni validaciones guardadas.
+          </p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            @for (chip of m.journeyMetrics; track chip.label) {
+              <span
+                class="rounded-full border px-3 py-1.5 text-xs font-medium"
+                [ngClass]="metricChipClass(chip.tone)">
+                <span class="opacity-80">{{ chip.label }}:</span>
+                {{ chip.value }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+
+      @if (m.phases.length > 0) {
+        <div class="mt-14 max-w-6xl">
+          <field-participant-journey-flow [phases]="m.phases" variant="full" />
+        </div>
+      }
+
+      @if (m.phases.length > 0) {
+        <div class="mt-16 max-w-4xl">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            Relato por etapa
+          </p>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            Una lectura vertical tipo historia — cada tarjeta profundiza en ese momento del recorrido.
+          </p>
+          <div class="mt-8 flex flex-col gap-12">
+            @for (ph of m.phases; track ph.id) {
+              <field-participant-phase-card [phase]="ph" />
+            }
+          </div>
+        </div>
+      }
     }
   }
 </section>

@@ -15,6 +15,7 @@ alwaysApply: true
 
 - `cx-backend/docs/7FIELD_PRODUCT_EXPERIENCE_DIRECTION_V1.md` (§0, §7 frontend, §9 checklist, §9bis Cursor)
 - `cx-backend/docs/SIETE_PLATFORM_MINIMUM_CONTRACT_V1.md`
+- `cx-backend/docs/SIETE_SOLUTIONS_ARCHITECTURE_V1.md`
 - `cx-backend/docs/ECOSYSTEM_SIETE.md`
 - `cx-backend/docs/7FIELD_ARCHITECTURE_SCOPE_AND_TRACTION_V1.md`
 - `cx-backend/docs/7FIELD_CURSOR_EXECUTION_SEQUENCE_V1.md`

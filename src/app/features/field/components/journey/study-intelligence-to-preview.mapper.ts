@@ -6,9 +6,55 @@
 import type { StudyIntelligenceBundlePublic } from '../../field.service';
 import type {
   JourneyInsightTone,
+  JourneyMetricsChip,
   JourneyPhasePreview,
   ParticipantJourneyPreviewModel,
 } from './participant-journey.types';
+
+function mapContextualScoresToMetrics(cs: Record<string, unknown>): JourneyMetricsChip[] {
+  const out: JourneyMetricsChip[] = [];
+  const bc = cs['block_count'];
+  const ic = cs['item_count'];
+  if (typeof bc === 'number' && bc >= 0) {
+    out.push({ label: 'Bloques en borrador', value: String(bc), tone: 'observe' });
+  }
+  if (typeof ic === 'number' && ic >= 0) {
+    out.push({ label: 'Ítems', value: String(ic), tone: 'observe' });
+  }
+  const fo = cs['fatigue_overall'];
+  if (typeof fo === 'string' && fo.trim()) {
+    const human =
+      fo === 'high' ? 'Alta' : fo === 'medium' ? 'Media' : fo === 'low' ? 'Baja' : fo === 'unknown' ? 'Sin datos' : fo;
+    out.push({
+      label: 'Carga estimada',
+      value: human,
+      tone: fo === 'high' ? 'caution' : fo === 'medium' ? 'observe' : 'bright',
+    });
+  }
+  const el = cs['emotional_load_hint'];
+  if (el === 'elevated') {
+    out.push({
+      label: 'Temas sensibles',
+      value: 'Elevada atención emocional',
+      tone: 'caution',
+    });
+  } else if (el === 'typical') {
+    out.push({ label: 'Temas sensibles', value: 'Perfil habitual', tone: 'bright' });
+  }
+  const stops = cs['qa_stop_count'];
+  const fix = cs['qa_fix_now_count'];
+  const mon = cs['qa_monitor_count'];
+  if (typeof stops === 'number' && stops > 0) {
+    out.push({ label: 'Auto QA · STOP', value: String(stops), tone: 'caution' });
+  }
+  if (typeof fix === 'number' && fix > 0) {
+    out.push({ label: 'Auto QA · FIX_NOW', value: String(fix), tone: 'caution' });
+  }
+  if (typeof mon === 'number' && mon > 0) {
+    out.push({ label: 'Auto QA · MONITOR', value: String(mon), tone: 'observe' });
+  }
+  return out;
+}
 
 function toneFromInsightPriority(priority: string): JourneyInsightTone {
   switch (priority) {
@@ -70,6 +116,91 @@ function fatigueFromRank(r: number): 'baja' | 'media' | 'alta' | null {
     return 'baja';
   }
   return null;
+}
+
+function buildNarrativeSpine(phases: readonly Pick<JourneyPhasePreview, 'title'>[]): string | null {
+  const titles = phases.map(p => p.title.trim()).filter(Boolean);
+  if (titles.length < 2) {
+    return null;
+  }
+  if (titles.length <= 5) {
+    return titles.join(' → ');
+  }
+  return `${titles[0]} → … → ${titles[titles.length - 1]} · ${titles.length} etapas`;
+}
+
+function buildGlanceHighlights(bundle: StudyIntelligenceBundlePublic): string[] {
+  const MAX = 5;
+  const MAX_LEN = 88;
+  const seen = new Set<string>();
+  const out: string[] = [];
+
+  const push = (raw: string) => {
+    let s = raw.trim().replace(/\s+/g, ' ');
+    if (!s) {
+      return;
+    }
+    if (s.length > MAX_LEN) {
+      s = `${s.slice(0, MAX_LEN - 1)}…`;
+    }
+    const key = s.toLowerCase();
+    if (seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    out.push(s);
+  };
+
+  const priRank = (p: string) => {
+    const x = (p || '').toLowerCase();
+    if (x === 'must_act' || x === 'high') {
+      return 0;
+    }
+    if (x === 'medium') {
+      return 1;
+    }
+    return 2;
+  };
+
+  const sortedCards = [...bundle.insight_cards].sort((a, b) => priRank(a.priority) - priRank(b.priority));
+  for (const c of sortedCards) {
+    if (c.headline?.trim()) {
+      push(c.headline);
+    }
+    if (out.length >= MAX) {
+      return out;
+    }
+  }
+
+  for (const r of bundle.operational_risks) {
+    push(r.message_human);
+    if (out.length >= MAX) {
+      return out;
+    }
+  }
+  for (const z of bundle.expected_dropout_zones) {
+    push(z.message_human);
+    if (out.length >= MAX) {
+      return out;
+    }
+  }
+  for (const s of bundle.methodological_signals) {
+    if (!s.linked_block_id) {
+      push(s.message_human);
+    }
+    if (out.length >= MAX) {
+      return out;
+    }
+  }
+  for (const f of bundle.fatigue_risks) {
+    if (!f.linked_block_id) {
+      push(f.message_human);
+    }
+    if (out.length >= MAX) {
+      return out;
+    }
+  }
+  return out;
 }
 
 export function mapStudyIntelligenceBundleToPreview(
@@ -230,5 +361,11 @@ export function mapStudyIntelligenceBundleToPreview(
     phases[expIdx] = { ...cur, fatiguePotential: mergedPot };
   }
 
-  return { phases, globalInsights };
+  return {
+    phases,
+    globalInsights,
+    journeyMetrics: mapContextualScoresToMetrics(bundle.contextual_scores ?? {}),
+    narrativeSpine: buildNarrativeSpine(phases),
+    glanceHighlights: buildGlanceHighlights(bundle),
+  };
 }

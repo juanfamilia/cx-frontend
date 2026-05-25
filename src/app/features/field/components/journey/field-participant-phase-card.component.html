@@ -1,6 +1,9 @@
 <article
   class="flex h-full flex-col rounded-3xl border p-8 transition-all duration-300 md:p-9"
-  [ngClass]="cardShell(phase().uiState)">
+  [ngClass]="cardShell(phase().uiState)"
+  [class.border-l-4]="phaseAccentSignals()"
+  [class.border-l-indigo-400]="phaseAccentSignals()"
+  [class.dark:border-l-indigo-500]="phaseAccentSignals()">
   <header class="flex flex-wrap items-start justify-between gap-4">
     <div class="min-w-0 flex-1">
       <h3 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">

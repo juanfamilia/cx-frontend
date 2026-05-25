@@ -9,51 +9,6 @@ import type {
   ParticipantJourneyPreviewModel,
 } from './participant-journey.types';
 
-/** Índice de fase 0..5 según título de bloque (solo lectura técnica / UX puntual). */
-export function phaseIndexForBlockTitle(title: string): number {
-  const t = title.toLowerCase();
-  const tests: { i: number; keys: string[] }[] = [
-    { i: 0, keys: ['intro', 'bienven', 'contexto', 'propósito', 'proposito', 'calibr'] },
-    { i: 1, keys: ['screen', 'filt', 'elegib', 'cuota', 'recruit', 'target'] },
-    { i: 2, keys: ['experien', 'jornada', 'uso', 'touch', 'compra', 'visita', 'interacc', 'onboarding'] },
-    { i: 3, keys: ['satisf', 'nps', 'csat', 'recomen', 'valoración', 'valoracion'] },
-    { i: 4, keys: ['demográf', 'demograf', 'socio', 'edad', 'género', 'genero', 'ingreso', 'perfil'] },
-    { i: 5, keys: ['cierre', 'desped', 'thank', 'gracia', 'final'] },
-  ];
-  for (const { i, keys } of tests) {
-    if (keys.some(k => t.includes(k))) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-/** Títulos de bloques desde `instrument_spec` (solo datos existentes). */
-export function extractBlockTitlesFromSpec(spec: Record<string, unknown> | null | undefined): string[] {
-  if (!spec || typeof spec !== 'object') {
-    return [];
-  }
-  let arr: unknown[] | null = null;
-  for (const k of ['blocks', 'sections', 'pages', 'items']) {
-    const v = spec[k];
-    if (Array.isArray(v) && v.length > 0) {
-      arr = v;
-      break;
-    }
-  }
-  if (!arr) {
-    return [];
-  }
-  return arr.slice(0, 48).map((raw, i) => {
-    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-      const o = raw as Record<string, unknown>;
-      const s = String(o['title'] ?? o['name'] ?? o['label'] ?? o['heading'] ?? '').trim();
-      return s || `Momento ${i + 1}`;
-    }
-    return `Momento ${i + 1}`;
-  });
-}
-
 function trimJoinBrief(input: ParticipantJourneyInput): string {
   const chunks = [
     input.guidedObjective,
@@ -96,6 +51,17 @@ export function journeyStudyFocusLine(input: ParticipantJourneyInput): string {
 
 function neutralPhase(p: Omit<JourneyPhasePreview, 'automaticSignals' | 'contextualInsights'>): JourneyPhasePreview {
   return { ...p, automaticSignals: [], contextualInsights: [] };
+}
+
+function narrativeSpineFromPhaseTitles(phases: readonly { title: string }[]): string | null {
+  const titles = phases.map(p => p.title.trim()).filter(Boolean);
+  if (titles.length < 2) {
+    return null;
+  }
+  if (titles.length <= 5) {
+    return titles.join(' → ');
+  }
+  return `${titles[0]} → … → ${titles[titles.length - 1]} · ${titles.length} etapas`;
 }
 
 /**
@@ -166,6 +132,8 @@ export function minimalNeutralJourneyFallback(): ParticipantJourneyPreviewModel 
     }),
   ];
 
+  const narrativeSpine = narrativeSpineFromPhaseTitles(phases);
+
   return {
     phases,
     globalInsights: [
@@ -175,5 +143,8 @@ export function minimalNeutralJourneyFallback(): ParticipantJourneyPreviewModel 
           'No pudimos cargar el análisis del servidor. Cuando haya conexión, el recorrido reflejará su borrador y brief sin duplicar lógica aquí.',
       },
     ],
+    journeyMetrics: [],
+    narrativeSpine,
+    glanceHighlights: [],
   };
 }
